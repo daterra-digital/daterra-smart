@@ -9,7 +9,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'masked-icon.svg'],
+      includeAssets: ['favicon.ico', 'daterra-favicon.png', 'apple-touch-icon.png', 'pwa-192x192.png', 'pwa-512x512.png', 'favicon.svg'],
       manifest: {
         name: 'DATERRA Smart',
         short_name: 'DATERRA Smart',
@@ -19,6 +19,11 @@ export default defineConfig({
         display: 'standalone',
         orientation: 'portrait-primary',
         icons: [
+          {
+            src: 'daterra-favicon.png',
+            sizes: '205x201',
+            type: 'image/png'
+          },
           {
             src: 'pwa-192x192.png',
             sizes: '192x192',
