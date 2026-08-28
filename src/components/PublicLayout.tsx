@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
-import { LogIn, Award, Menu, X } from 'lucide-react';
+import { LogIn, GraduationCap, ExternalLink, Menu, X } from 'lucide-react';
 import daterraLogo from '../assets/daterra-logo.svg';
 import bannerFinanciamento from '../assets/banner-financiamento.svg';
 
@@ -12,18 +12,24 @@ export const PublicLayout: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-[#F2F2F2]">
-      {/* Banner Subtil de Financiamento PRR */}
+      {/* Barra de Formação Superior: Divulgação da Academia DATERRA */}
       <div className="bg-daterra-primary text-slate-100 text-xs py-2 px-4 border-b border-daterra-secondary/30">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 text-center sm:text-left">
-          <div className="flex items-center gap-2 font-medium">
-            <Award className="w-4 h-4 text-daterra-accent shrink-0" />
-            <span>
-              <strong className="text-white font-semibold">PRR - Projeto N.º 23703</strong> | AgroSmart DATERRA: Inovação e Transição Digital Agrícola
+        <div className="max-w-7xl mx-auto flex items-center justify-center text-center">
+          <a
+            href="https://academia.daterra.com.pt"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 hover:text-[#3CA64C] transition-colors group"
+          >
+            <GraduationCap className="w-4 h-4 text-[#3CA64C] shrink-0 group-hover:scale-110 transition-transform" />
+            <span className="text-[11px] sm:text-xs">
+              Formação e capacitação contínua para profissionais agrícolas: Conheça a{' '}
+              <strong className="text-white font-bold underline decoration-[#3CA64C] decoration-2 underline-offset-2">
+                Academia DATERRA
+              </strong>
             </span>
-          </div>
-          <span className="text-[10px] text-slate-300 bg-white/10 px-2 py-0.5 rounded-full uppercase tracking-wider">
-            Cofinanciado pela União Europeia
-          </span>
+            <ExternalLink className="w-3.5 h-3.5 text-slate-300 group-hover:text-[#3CA64C] shrink-0 ml-0.5" />
+          </a>
         </div>
       </div>
 

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ShieldCheck, KeyRound, ArrowRight } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import iconDaterraMono from '../assets/icon-daterra-mono.png';
 
 export const LoginView: React.FC = () => {
   const [otp, setOtp] = useState<string>('');
@@ -40,11 +41,11 @@ export const LoginView: React.FC = () => {
       <div className="w-full max-w-md bg-white rounded-3xl p-8 shadow-floating border border-slate-200 space-y-6">
         {/* Cabeçalho do Card */}
         <div className="text-center space-y-3">
-          <div className="w-16 h-16 mx-auto flex items-center justify-center shadow-soft rounded-2xl overflow-hidden">
+          <div className="w-16 h-16 mx-auto flex items-center justify-center shadow-soft rounded-2xl overflow-hidden bg-[#114037]/5 p-2">
             <img
-              src="./icon-daterra-mono.png"
+              src={iconDaterraMono}
               alt="DATERRA Smart"
-              className="w-16 h-16 object-contain"
+              className="w-full h-full object-contain"
             />
           </div>
           <h2 className="text-2xl font-black text-daterra-primary">Acesso DATERRA Smart</h2>
