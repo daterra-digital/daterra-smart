@@ -9,7 +9,16 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.ico', 'daterra-favicon.png', 'apple-touch-icon.png', 'pwa-192x192.png', 'pwa-512x512.png', 'favicon.svg'],
+      includeAssets: [
+        'favicon.ico',
+        'icon-daterra-mono.png',
+        'icon-daterra-light.png',
+        'icon-daterra-dark.png',
+        'apple-touch-icon.png',
+        'pwa-192x192.png',
+        'pwa-512x512.png',
+        'favicon.svg'
+      ],
       manifest: {
         name: 'DATERRA Smart',
         short_name: 'DATERRA Smart',
@@ -20,8 +29,19 @@ export default defineConfig({
         orientation: 'portrait-primary',
         icons: [
           {
-            src: 'daterra-favicon.png',
-            sizes: '205x201',
+            src: 'icon-daterra-mono.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'any maskable'
+          },
+          {
+            src: 'icon-daterra-light.png',
+            sizes: '512x512',
+            type: 'image/png'
+          },
+          {
+            src: 'icon-daterra-dark.png',
+            sizes: '512x512',
             type: 'image/png'
           },
           {
@@ -33,12 +53,6 @@ export default defineConfig({
             src: 'pwa-512x512.png',
             sizes: '512x512',
             type: 'image/png'
-          },
-          {
-            src: 'pwa-512x512.png',
-            sizes: '512x512',
-            type: 'image/png',
-            purpose: 'any maskable'
           }
         ]
       },

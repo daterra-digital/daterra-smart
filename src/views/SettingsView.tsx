@@ -45,6 +45,20 @@ export const SettingsView: React.FC = () => {
   // ESTADOS 2: PREFERÊNCIAS & UNIDADES PADRÃO
   // ---------------------------------------------------------------------------
   const [selectedUnitsProfile, setSelectedUnitsProfile] = useState<string>('si');
+  const [appTheme, setAppTheme] = useState<'mono' | 'light' | 'dark'>(() => {
+    return (localStorage.getItem('daterra_theme') as 'mono' | 'light' | 'dark') || 'mono';
+  });
+
+  const handleThemeChange = (newTheme: 'mono' | 'light' | 'dark') => {
+    setAppTheme(newTheme);
+    localStorage.setItem('daterra_theme', newTheme);
+    const favicon = document.getElementById('app-favicon') as HTMLLinkElement | null;
+    if (favicon) {
+      if (newTheme === 'light') favicon.href = './icon-daterra-light.png';
+      else if (newTheme === 'dark') favicon.href = './icon-daterra-dark.png';
+      else favicon.href = './icon-daterra-mono.png';
+    }
+  };
 
   // ---------------------------------------------------------------------------
   // ESTADOS 3: NOTIFICAÇÕES
@@ -411,6 +425,76 @@ export const SettingsView: React.FC = () => {
                 </div>
               </div>
 
+              {/* Tema Visual & Ícone da Aplicação */}
+              <div className="bg-slate-50/80 p-5 rounded-2xl border border-slate-200 space-y-4">
+                <div>
+                  <h3 className="text-xs font-black uppercase tracking-wider text-[#1D734B]">
+                    Tema Visual & Ícone da Aplicação
+                  </h3>
+                  <p className="text-xs text-slate-500 font-medium mt-1">
+                    Selecione a variante de identidade visual e o ícone representativo no navegador e ecrã de início.
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  {/* Opção 1: Monocromático (Padrão) */}
+                  <div
+                    onClick={() => handleThemeChange('mono')}
+                    className={`p-4 rounded-2xl border-2 transition-all cursor-pointer flex flex-col items-center text-center space-y-3 touch-target ${
+                      appTheme === 'mono'
+                        ? 'bg-emerald-50/70 border-[#3CA64C] shadow-soft'
+                        : 'bg-white border-slate-200 hover:border-slate-300'
+                    }`}
+                  >
+                    <img src="./icon-daterra-mono.png" alt="Ícone Monocromático" className="w-12 h-12 rounded-xl shadow-sm object-contain" />
+                    <div>
+                      <div className="flex items-center justify-center gap-1.5">
+                        <span className="font-extrabold text-slate-900 text-xs">Monocromático</span>
+                        <span className="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-1.5 py-0.5 rounded">Padrão</span>
+                      </div>
+                      <p className="text-[11px] text-slate-500 font-medium mt-1">
+                        Ícone neutro monocromático oficial (Ativo por defeito).
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Opção 2: Light Mode */}
+                  <div
+                    onClick={() => handleThemeChange('light')}
+                    className={`p-4 rounded-2xl border-2 transition-all cursor-pointer flex flex-col items-center text-center space-y-3 touch-target ${
+                      appTheme === 'light'
+                        ? 'bg-emerald-50/70 border-[#3CA64C] shadow-soft'
+                        : 'bg-white border-slate-200 hover:border-slate-300'
+                    }`}
+                  >
+                    <img src="./icon-daterra-light.png" alt="Ícone Modo Claro" className="w-12 h-12 rounded-xl shadow-sm object-contain" />
+                    <div>
+                      <span className="font-extrabold text-slate-900 text-xs">Modo Claro (Light)</span>
+                      <p className="text-[11px] text-slate-500 font-medium mt-1">
+                        Alto contraste diurno para leitura no campo sob sol intenso.
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Opção 3: Dark Mode */}
+                  <div
+                    onClick={() => handleThemeChange('dark')}
+                    className={`p-4 rounded-2xl border-2 transition-all cursor-pointer flex flex-col items-center text-center space-y-3 touch-target ${
+                      appTheme === 'dark'
+                        ? 'bg-emerald-50/70 border-[#3CA64C] shadow-soft'
+                        : 'bg-white border-slate-200 hover:border-slate-300'
+                    }`}
+                  >
+                    <img src="./icon-daterra-dark.png" alt="Ícone Modo Escuro" className="w-12 h-12 rounded-xl shadow-sm object-contain" />
+                    <div>
+                      <span className="font-extrabold text-slate-900 text-xs">Modo Escuro (Dark)</span>
+                      <p className="text-[11px] text-slate-500 font-medium mt-1">
+                        Otimizado para operações agronómicas noturnas na cabine.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
 
               {/* OS 4 PERFIS DE UNIDADES PADRÃO (Com Dica de UI de 3-4 unidades em cinzento) */}
               <div className="space-y-4">
