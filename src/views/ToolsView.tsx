@@ -537,7 +537,7 @@ export const ToolsView: React.FC = () => {
                           label: 'Concentração do PF',
                           value: concValue,
                           unit: concUnit,
-                          availableUnits: ['mL/hL', 'g/hL', '%'],
+                          availableUnits: ['mL/hL', 'g/hL', '%', 'L/hL', 'kg/hL'],
                           commonValues: [50, 100, 200, 300, 400, 500, 1000, 1500]
                         })
                       }
