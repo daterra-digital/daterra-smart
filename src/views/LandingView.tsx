@@ -18,7 +18,7 @@ export const LandingView: React.FC = () => {
           <div className="max-w-3xl space-y-6 relative z-10">
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 border border-white/20 text-xs font-semibold text-daterra-accent backdrop-blur-md">
               <Award className="w-4 h-4" />
-              <span>PRR Projeto N.º 23703 | AgroSmart DATERRA</span>
+              <span>Tecnologia agrícola pensada para o terreno.</span>
             </div>
 
             <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-tight">
@@ -27,7 +27,7 @@ export const LandingView: React.FC = () => {
             </h1>
 
             <p className="text-base sm:text-lg text-slate-200 leading-relaxed font-normal">
-              Cálculo exato de doses e concentrações de fitofármacos, agromonitorização de parcelas por NDVI e capacitação técnica integrada — sem depender de cobertura de rede no campo.
+              Ferramentas digitais para o cálculo exato de doses e concentrações de produtos fitofarmacêuticos, mesmo sem cobertura de rede no campo.
             </p>
 
             <div className="pt-4 flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
