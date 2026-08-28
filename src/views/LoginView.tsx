@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Sprout, ShieldCheck, KeyRound, ArrowRight } from 'lucide-react';
+import { ShieldCheck, KeyRound, ArrowRight } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 export const LoginView: React.FC = () => {
@@ -39,9 +39,13 @@ export const LoginView: React.FC = () => {
     <div className="min-h-[80vh] flex items-center justify-center p-4">
       <div className="w-full max-w-md bg-white rounded-3xl p-8 shadow-floating border border-slate-200 space-y-6">
         {/* Cabeçalho do Card */}
-        <div className="text-center space-y-2">
-          <div className="w-14 h-14 rounded-2xl bg-daterra-primary text-white flex items-center justify-center mx-auto shadow-md">
-            <Sprout className="w-8 h-8 text-daterra-accent" />
+        <div className="text-center space-y-3">
+          <div className="w-16 h-16 mx-auto flex items-center justify-center shadow-soft rounded-2xl overflow-hidden">
+            <img
+              src="./icon-daterra-mono.png"
+              alt="DATERRA Smart"
+              className="w-16 h-16 object-contain"
+            />
           </div>
           <h2 className="text-2xl font-black text-daterra-primary">Acesso DATERRA Smart</h2>
           <p className="text-xs text-slate-500">
