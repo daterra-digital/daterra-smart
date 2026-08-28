@@ -3,10 +3,43 @@ import ReactDOM from 'react-dom/client';
 import App from './App';
 import './index.css';
 
-// Verificação e atualização imediata de Service Worker em PWA Mobile
+// Gestão de Ciclo de Vida do Service Worker e Sincronização Imediata (Mobile, Tablet, Desktop)
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.ready.then((registration) => {
-    registration.update();
+  let refreshing = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (!refreshing) {
+      refreshing = true;
+      window.location.reload();
+    }
+  });
+
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.getRegistration().then((registration) => {
+      if (registration) {
+        registration.update();
+
+        if (registration.waiting) {
+          registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+        }
+
+        registration.addEventListener('updatefound', () => {
+          const newWorker = registration.installing;
+          if (newWorker) {
+            newWorker.addEventListener('statechange', () => {
+              if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                newWorker.postMessage({ type: 'SKIP_WAITING' });
+              }
+            });
+          }
+        });
+      }
+    });
+  });
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') {
+      navigator.serviceWorker.getRegistration().then((reg) => reg?.update());
+    }
   });
 }
 
