@@ -97,8 +97,9 @@ daterra-smart-app/
 │           ├── SKILL.md                    # Diretrizes técnicas DGAV/EPPO
 │           └── references/                 # Manuais oficiais (PDFs e MDs de hidráulica, doses, inspeções)
 ├── .github/                                # Configurações de CI/CD para automação de deploy
-│   ├── deploy-cpanel.yml                   # Pipeline de envio FTP para cPanel
-│   └── deploy-pages.yml                    # Pipeline de publicação para GitHub Pages
+│   └── workflows/                          # Diretoria obrigatória de workflows do GitHub Actions
+│       ├── deploy-cpanel.yml               # Pipeline de envio FTP para cPanel
+│       └── deploy-pages.yml                # Pipeline de publicação para GitHub Pages
 ├── docs/                                   # Documentação de Arquitetura e Engenharia
 │   ├── arquitetura/                        # 11 Especificações técnicas aprofundadas
 │   │   ├── 02_cpanel-deployer.md           # Estratégia de deploy em hospedagem partilhada
