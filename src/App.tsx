@@ -12,6 +12,7 @@ import { ToolsView } from './views/ToolsView';
 import { AcademyView } from './views/AcademyView';
 import { SettingsView } from './views/SettingsView';
 import { ExplorationView } from './views/ExplorationView';
+import { AreaParedeFoliarCalculator } from './features/area-parede-foliar/AreaParedeFoliarCalculator';
 import { IosInstallPrompt } from './components/IosInstallPrompt';
 
 // Componente Guardião de Rotas Privadas
@@ -69,6 +70,7 @@ export const AppContent: React.FC = () => {
         >
           <Route path="/dashboard" element={<DashboardView />} />
           <Route path="/ferramentas" element={<ToolsView />} />
+          <Route path="/ferramentas/area-parede-foliar" element={<AreaParedeFoliarCalculator />} />
           <Route path="/academia" element={<AcademyView />} />
           <Route path="/definicoes" element={<SettingsView />} />
           <Route path="/exploracao" element={<ExplorationView />} />

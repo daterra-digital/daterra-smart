@@ -3,12 +3,13 @@ import Dexie, { type Table } from 'dexie';
 export interface CalculationHistoryItem {
   id?: number;
   date: string; // ISO String
-  calculator_type: 'concentracao_jovem' | 'concentracao_adulta' | 'dose';
+  calculator_type: 'concentracao_jovem' | 'concentracao_adulta' | 'dose' | 'area_parede_foliar';
   inputs: Record<string, any>;
   result: {
     quantidade_pf: number;
     unit_pf: string;
     area_tratada_ha?: number;
+    lwa_m2_ha?: number;
   };
   notes?: string;
   profile_id?: number;
@@ -253,7 +254,8 @@ export async function seedMicrolearningIfEmpty() {
   if (installedCount === 0) {
     await db.installed_tools.bulkAdd([
       { tool_id: 'calc_concentracao', installed_at: new Date().toISOString() },
-      { tool_id: 'calc_dose', installed_at: new Date().toISOString() }
+      { tool_id: 'calc_dose', installed_at: new Date().toISOString() },
+      { tool_id: 'calc_area_parede_foliar', installed_at: new Date().toISOString() }
     ]);
   }
 

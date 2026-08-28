@@ -296,5 +296,34 @@
       "formula": "Conversão automática no ecossistema DATERRA Smart",
       "unit_explanation": "SI : L, ha, bar, km/h\nUS : gal, acre, psi, mph"
     }
+  },
+  "calc": {
+    "area_parede_foliar": {
+      "titulo": "Área de Parede Foliar",
+      "descricao": "Calcula a área vertical de folhagem tratada por hectare.",
+      "altura_copa": {
+        "label": "Altura da Copa (m)",
+        "help": "Altura da vegetação desde o solo até ao topo"
+      },
+      "entrelinha": {
+        "label": "Distância Entrelinha (m)",
+        "help": "Distância entre linhas de plantas"
+      },
+      "botao": {
+        "calcular": "Calcular",
+        "limpar": "Limpar",
+        "gravar": "Gravar no histórico"
+      },
+      "resultado": {
+        "titulo": "Resultado:",
+        "descricao": "Área de parede foliar calculada"
+      },
+      "erro": {
+        "valores_obrigatorios": "Por favor, preencha todos os campos.",
+        "entrelinha_invalida": "A entrelinha deve ser maior que zero.",
+        "altura_fora_range": "Altura deve estar entre 0.5 e 6.0 m.",
+        "entrelinha_fora_range": "Entrelinha deve estar entre 1.5 e 10.0 m."
+      }
+    }
   }
 }

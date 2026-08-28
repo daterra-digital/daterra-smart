@@ -2,7 +2,28 @@ import React, { useState, useEffect } from 'react';
 import { Delete, Check, X, Calculator } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 
-interface DaterraKeypadProps {
+export interface DaterraKeypadProps {
+  // Modo Modal (quando controlado externamente por isOpen)
+  isOpen?: boolean;
+  onClose?: () => void;
+  initialValue?: string;
+  initialUnit?: string;
+  availableUnits?: string[];
+  commonValues?: number[];
+  label?: string;
+  onConfirm?: (value: number, unit?: string) => void;
+
+  // Modo Input Embutido com Atalhos/Presets
+  value?: string;
+  onChange?: (value: string) => void;
+  placeholder?: string;
+  unit?: string;
+  presets?: number[];
+  disabled?: boolean;
+  className?: string;
+}
+
+export const DaterraKeypadModal: React.FC<{
   isOpen: boolean;
   onClose: () => void;
   initialValue: string;
@@ -11,9 +32,7 @@ interface DaterraKeypadProps {
   commonValues?: number[];
   label: string;
   onConfirm: (value: number, unit?: string) => void;
-}
-
-export const DaterraKeypad: React.FC<DaterraKeypadProps> = ({
+}> = ({
   isOpen,
   onClose,
   initialValue,
@@ -261,6 +280,107 @@ export const DaterraKeypad: React.FC<DaterraKeypadProps> = ({
           </button>
         </div>
       </div>
+    </div>
+  );
+};
+
+export const DaterraKeypad: React.FC<DaterraKeypadProps> = (props) => {
+  const [modalOpen, setModalOpen] = useState(false);
+
+  // Se for utilizado no modo modal tradicional (controlado por isOpen)
+  if (props.isOpen !== undefined) {
+    return (
+      <DaterraKeypadModal
+        isOpen={props.isOpen}
+        onClose={props.onClose || (() => {})}
+        initialValue={props.initialValue || ''}
+        initialUnit={props.initialUnit}
+        availableUnits={props.availableUnits}
+        commonValues={props.commonValues}
+        label={props.label || ''}
+        onConfirm={props.onConfirm || (() => {})}
+      />
+    );
+  }
+
+  // Modo Input Embutido com Presets táteis (usado em novas calculadoras)
+  const {
+    value = '',
+    onChange,
+    placeholder = '0.0',
+    unit = 'm',
+    presets = [],
+    disabled = false,
+    className = ''
+  } = props;
+
+  return (
+    <div className="space-y-2">
+      <div className="relative flex items-center">
+        <input
+          type="text"
+          inputMode="decimal"
+          value={value}
+          onChange={(e) => onChange?.(e.target.value)}
+          placeholder={placeholder}
+          disabled={disabled}
+          className={`w-full px-4 py-3.5 bg-slate-50 border border-slate-300 rounded-2xl text-base font-bold font-mono-numbers text-slate-800 focus:bg-white focus:border-[#3CA64C] focus:ring-2 focus:ring-[#3CA64C]/20 transition-all outline-none pr-20 ${className}`}
+        />
+        <div className="absolute right-2.5 flex items-center gap-1.5">
+          {unit && (
+            <span className="px-2 py-1 bg-slate-200/80 text-slate-700 text-xs font-extrabold rounded-lg">
+              {unit}
+            </span>
+          )}
+          <button
+            type="button"
+            onClick={() => setModalOpen(true)}
+            className="p-2 text-slate-500 hover:text-[#114037] hover:bg-slate-200/60 rounded-xl transition-colors touch-target"
+            title="Abrir Teclado DATERRA"
+            aria-label="Abrir Teclado DATERRA"
+          >
+            <Calculator className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+
+      {presets && presets.length > 0 && (
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
+          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider shrink-0 mr-1">
+            Atalhos:
+          </span>
+          {presets.map((preset) => (
+            <button
+              key={preset}
+              type="button"
+              onClick={() => onChange?.(String(preset))}
+              className={`px-2.5 py-1 text-xs font-bold rounded-lg border transition-all shrink-0 active:scale-95 touch-target ${
+                value === String(preset)
+                  ? 'bg-[#114037] text-white border-[#114037] shadow-xs'
+                  : 'bg-white text-slate-700 border-slate-200 hover:border-[#3CA64C] hover:bg-[#3CA64C]/10'
+              }`}
+            >
+              {preset}{unit ? ` ${unit}` : ''}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {modalOpen && (
+        <DaterraKeypadModal
+          isOpen={modalOpen}
+          onClose={() => setModalOpen(false)}
+          initialValue={value}
+          initialUnit={unit}
+          availableUnits={unit ? [unit] : []}
+          commonValues={presets}
+          label={placeholder || 'Valor'}
+          onConfirm={(numVal) => {
+            onChange?.(String(numVal));
+            setModalOpen(false);
+          }}
+        />
+      )}
     </div>
   );
 };

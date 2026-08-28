@@ -1,20 +1,18 @@
 import React, { useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { 
   Search, X, CheckCircle2, Download, ArrowRight, Plus, Trash2,
   FlaskConical, Calculator, Gauge, Trees, ClipboardCheck, 
   CloudSun, Layers, Tractor, ChevronLeft, SlidersHorizontal, 
-  Sparkles, Save, Sprout, AlertCircle
+  Sparkles, Save, Sprout, AlertCircle, Leaf
 } from 'lucide-react';
-
-
 
 import { db } from '../db/db';
 import { DaterraKeypad } from '../components/DaterraKeypad';
 import { DidacticHelp } from '../features/concentracao/DidacticHelp';
 import { useLanguage } from '../context/LanguageContext';
-
+import { AreaParedeFoliarCalculator } from '../features/area-parede-foliar';
 
 export interface ToolModule {
   id: string;
@@ -23,6 +21,8 @@ export interface ToolModule {
   description: string;
   icon: React.ComponentType<{ className?: string }>;
   isCore?: boolean;
+  caminho?: string;
+  prioridade?: string;
 }
 
 // Catálogo de Ferramentas e Funcionalidades Agronómicas
@@ -42,6 +42,16 @@ const TOOLS_CATALOG: ToolModule[] = [
     description: 'Converte a dose do rótulo (L/ha ou kg/ha) para a calda do depósito e calcula a área coberta por tanque.',
     icon: Calculator,
     isCore: true
+  },
+  {
+    id: 'calc_area_parede_foliar',
+    name: 'Área de Parede Foliar',
+    category: 'Calibração',
+    description: 'Calcula a área de parede foliar por hectare (LWA - Leaf Wall Area).',
+    icon: Leaf,
+    isCore: true,
+    caminho: '/ferramentas/area-parede-foliar',
+    prioridade: 'alta'
   },
   {
     id: 'calibracao_bicos',
@@ -148,6 +158,7 @@ export const getSmartFormattedResult = (
 
 export const ToolsView: React.FC = () => {
   const { t } = useLanguage();
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const currentViewTool = searchParams.get('tool'); // ferramenta em execução (ex: calc_concentracao, calc_dose)
 
@@ -160,7 +171,7 @@ export const ToolsView: React.FC = () => {
 
   // Leitura do IndexedDB via Dexie das Ferramentas Instaladas
   const installedToolItems = useLiveQuery(() => db.installed_tools.toArray(), []);
-  const installedToolIds = new Set(installedToolItems?.map(t => t.tool_id) || ['calc_concentracao', 'calc_dose']);
+  const installedToolIds = new Set(installedToolItems?.map(t => t.tool_id) || ['calc_concentracao', 'calc_dose', 'calc_area_parede_foliar']);
 
   // --- ESTADOS INTERNOS DAS CALCULADORAS ---
   // Concentração
@@ -217,7 +228,12 @@ export const ToolsView: React.FC = () => {
 
   // Abrir uma Ferramenta / Funcionalidade
   const handleOpenTool = (toolId: string) => {
-    setSearchParams({ tool: toolId });
+    const found = TOOLS_CATALOG.find(t => t.id === toolId);
+    if (found?.caminho) {
+      navigate(found.caminho);
+    } else {
+      setSearchParams({ tool: toolId });
+    }
   };
 
   // Voltar ao catálogo principal de Ferramentas
@@ -352,6 +368,10 @@ export const ToolsView: React.FC = () => {
   const doseOutput = calculateDoseResult();
 
   // --- SE UMA FERRAMENTA ESPECÍFICA ESTIVER EM EXECUÇÃO ---
+  if (currentViewTool === 'calc_area_parede_foliar') {
+    return <AreaParedeFoliarCalculator />;
+  }
+
   if (currentViewTool) {
     const currentToolData = TOOLS_CATALOG.find(t => t.id === currentViewTool);
 

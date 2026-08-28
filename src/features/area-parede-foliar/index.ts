@@ -1,0 +1,1 @@
+export { AreaParedeFoliarCalculator } from './AreaParedeFoliarCalculator';

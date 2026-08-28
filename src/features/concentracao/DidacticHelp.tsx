@@ -12,6 +12,9 @@ import faqDoseVolumePreparar from '../dose/DoseFAQVolumePreparar.md?raw';
 import faqDoseDoseRecomendada from '../dose/DoseFAQDoseRecomendada.md?raw';
 import faqDoseVolumeAplicado from '../dose/DoseFAQVolumeAplicado.md?raw';
 
+import faqAreaParedeFoliar from '../area-parede-foliar/AreaParedeFoliarFAQ.md?raw';
+import faqAreaParedeFoliarMicro from '../area-parede-foliar/AreaParedeFoliarMicrolearning.md?raw';
+
 export type FAQFileType =
   | 'ConcentracaoFAQGeral.md'
   | 'ConcentracaoFAQVolumePreparar.md'
@@ -21,9 +24,11 @@ export type FAQFileType =
   | 'DoseFAQGeral.md'
   | 'DoseFAQVolumePreparar.md'
   | 'DoseFAQDoseRecomendada.md'
-  | 'DoseFAQVolumeAplicado.md';
+  | 'DoseFAQVolumeAplicado.md'
+  | 'AreaParedeFoliarFAQ.md'
+  | 'AreaParedeFoliarMicrolearning.md';
 
-const faqMap: Record<FAQFileType, string> = {
+const faqMap: Record<string, string> = {
   'ConcentracaoFAQGeral.md': faqConcGeral,
   'ConcentracaoFAQVolumePreparar.md': faqConcVolumePreparar,
   'ConcentracaoFAQConcentracao.md': faqConcConcentracao,
@@ -32,12 +37,17 @@ const faqMap: Record<FAQFileType, string> = {
   'DoseFAQGeral.md': faqDoseGeral,
   'DoseFAQVolumePreparar.md': faqDoseVolumePreparar,
   'DoseFAQDoseRecomendada.md': faqDoseDoseRecomendada,
-  'DoseFAQVolumeAplicado.md': faqDoseVolumeAplicado
+  'DoseFAQVolumeAplicado.md': faqDoseVolumeAplicado,
+  'AreaParedeFoliarFAQ.md': faqAreaParedeFoliar,
+  'AreaParedeFoliarMicrolearning.md': faqAreaParedeFoliarMicro,
+  'area-parede-foliar-altura': faqAreaParedeFoliar,
+  'area-parede-foliar-entrelinha': faqAreaParedeFoliar,
+  'area-parede-foliar': faqAreaParedeFoliar
 };
 
-
 export interface DidacticHelpProps {
-  faqFile: FAQFileType;
+  faqFile?: FAQFileType;
+  topic?: string;
   buttonLabel?: string;
   variant?: 'icon' | 'button';
   iconType?: 'help' | 'info';
@@ -84,6 +94,7 @@ function parseMarkdownFAQ(mdText: string): { title: string; sections: ParsedFAQS
 
 export const DidacticHelp: React.FC<DidacticHelpProps> = ({
   faqFile,
+  topic,
   buttonLabel = 'Ajuda',
   variant = 'button',
   iconType = 'info',
@@ -92,7 +103,7 @@ export const DidacticHelp: React.FC<DidacticHelpProps> = ({
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [openAccordionIdxs, setOpenAccordionIdxs] = useState<Record<number, boolean>>({ 0: true });
 
-  const rawContent = faqMap[faqFile] || '';
+  const rawContent = (faqFile ? faqMap[faqFile] : '') || (topic ? faqMap[topic] : '') || '';
   const { title, sections } = parseMarkdownFAQ(rawContent);
 
   const toggleAccordion = (idx: number) => {
