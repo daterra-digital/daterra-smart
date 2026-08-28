@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { LanguageProvider } from './context/LanguageContext';
 import { PublicLayout } from './components/PublicLayout';
@@ -83,13 +83,13 @@ export const AppContent: React.FC = () => {
 
 export function App() {
   return (
-    <BrowserRouter>
+    <HashRouter>
       <LanguageProvider>
         <AuthProvider>
           <AppContent />
         </AuthProvider>
       </LanguageProvider>
-    </BrowserRouter>
+    </HashRouter>
   );
 }
 
