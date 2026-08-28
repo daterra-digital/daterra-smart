@@ -71,5 +71,23 @@ export default defineConfig({
         ]
       }
     })
-  ]
+  ],
+  build: {
+    outDir: 'dist',
+    assetsDir: 'assets',
+    sourcemap: false,
+    minify: true,
+    rollupOptions: {
+      output: {
+        manualChunks(id: string) {
+          if (id.includes('node_modules/react') || id.includes('node_modules/react-dom') || id.includes('node_modules/react-router')) {
+            return 'react-vendor';
+          }
+          if (id.includes('node_modules/dexie')) {
+            return 'dexie-vendor';
+          }
+        }
+      }
+    }
+  }
 });
