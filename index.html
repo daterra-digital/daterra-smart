@@ -2,32 +2,20 @@
 <html lang="pt">
   <head>
     <meta charset="UTF-8" />
-    <link id="app-favicon" rel="icon" type="image/png" href="./icon-daterra-mono.png" />
-    <link rel="shortcut icon" type="image/png" href="./icon-daterra-mono.png" />
+    <!-- Favicon Oficial para Navegadores Web -->
+    <link rel="icon" type="image/png" href="./daterra-favicon.png" />
+    <link rel="shortcut icon" type="image/png" href="./daterra-favicon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>DATERRA Smart</title>
     <meta name="description" content="PWA SaaS Suite Agrícola - DATERRA Smart" />
     
-    <!-- PWA & Mobile Theme -->
+    <!-- PWA & Aplicação Móvel -->
     <meta name="theme-color" content="#114037" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="DATERRA Smart" />
+    <!-- Ícone Padrão para Aplicações Móveis (iOS / Ecrã Principal) -->
     <link rel="apple-touch-icon" href="./icon-daterra-mono.png" />
-    
-    <script>
-      (function() {
-        try {
-          const theme = localStorage.getItem('daterra_theme') || 'mono';
-          const favicon = document.getElementById('app-favicon');
-          if (favicon) {
-            if (theme === 'light') favicon.href = './icon-daterra-light.png';
-            else if (theme === 'dark') favicon.href = './icon-daterra-dark.png';
-            else favicon.href = './icon-daterra-mono.png';
-          }
-        } catch (e) {}
-      })();
-    </script>
     
     <!-- Google Fonts: Plus Jakarta Sans & JetBrains Mono -->
     <link rel="preconnect" href="https://fonts.googleapis.com">

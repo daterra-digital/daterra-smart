@@ -425,14 +425,19 @@ export const SettingsView: React.FC = () => {
                 </div>
               </div>
 
-              {/* Tema Visual & Ícone da Aplicação */}
+              {/* Ícones da Aplicação Móvel & PWA */}
               <div className="bg-slate-50/80 p-5 rounded-2xl border border-slate-200 space-y-4">
                 <div>
-                  <h3 className="text-xs font-black uppercase tracking-wider text-[#1D734B]">
-                    Tema Visual & Ícone da Aplicação
-                  </h3>
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-xs font-black uppercase tracking-wider text-[#1D734B]">
+                      Ícones da Aplicação Móvel (PWA & Ecrã de Início)
+                    </h3>
+                    <span className="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full">
+                      Exclusivo Mobile
+                    </span>
+                  </div>
                   <p className="text-xs text-slate-500 font-medium mt-1">
-                    Selecione a variante de identidade visual e o ícone representativo no navegador e ecrã de início.
+                    Estes ícones são exclusivos para a aplicação instalada em smartphones e tablets. Nos navegadores web, o ícone de separador é fixo através do favicon oficial DATERRA.
                   </p>
                 </div>
 

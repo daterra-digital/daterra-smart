@@ -11,6 +11,7 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: [
         'favicon.ico',
+        'daterra-favicon.png',
         'icon-daterra-mono.png',
         'icon-daterra-light.png',
         'icon-daterra-dark.png',
