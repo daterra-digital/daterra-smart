@@ -1,0 +1,300 @@
+{
+  "nav": {
+    "home": "Accueil",
+    "tools": "Outils",
+    "features": "Fonctionnalités",
+    "exploration": "Exploitation",
+    "weather": "Météorologie",
+    "ndvi": "Cartes NDVI",
+    "academy": "Académie",
+    "settings": "Paramètres"
+  },
+  "dashboard": {
+    "title": "Tableau de Bord de l'Exploitation",
+    "farm": "Exploitation Agricole",
+    "welcome": "Bienvenue",
+    "welcomeUser": "Bienvenue, Ing.",
+    "subscriptionNotice": "Abonnement actif sur le Plan Free. Tous les outils agronomiques sont synchronisés et opérationnels.",
+    "freePlan": "Plan Free",
+    "active": "Actif",
+    "weatherCardTitle": "Météorologie de l'Exploitation",
+    "extendedForecast": "Prévisions Étendues de la Semaine",
+    "driftRisk": "Risque de Dérive",
+    "driftRisks": {
+      "low": "Faible",
+      "veryLow": "Très Faible",
+      "moderate": "Modéré",
+      "high": "Élevé"
+    },
+    "weatherLabels": {
+      "clear": "Ciel Dégagé",
+      "sunny": "Ensoleillé",
+      "partlyCloudy": "Part. Nuageux",
+      "lightRain": "Pluie Légère",
+      "fewClouds": "Rares Nuages"
+    },
+    "ndviCardTitle": "Cartes NDVI et Indice Végétatif",
+    "satelliteSentinel": "Satellite Sentinel-2",
+    "vegetativeVigorIndex": "Indice de Vigueur Végétale (NDVI)",
+    "foliarBiomassAnalysis": "Analyse Spatiale de la Biomass Foliaire",
+    "spatialResolution": "Résolution Spatiale 10m",
+    "lastPassage": "Dernier Passage Satellite",
+    "viewNdviHistory": "Voir l'Historique des Cartes NDVI",
+    "favoriteToolsTitle": "Outils Favoris",
+    "quickAccess": "Accès rapide aux calculatrices de précision et d'étalonnage."
+  },
+  "tools": {
+    "title": "Outils Agronomiques",
+    "searchPlaceholder": "Rechercher un outil ou une fonctionnalité par nom...",
+    "categoryTitle": "Catégories de Fonctionnalités",
+    "allCategories": "Tous",
+    "catCalibration": "Étalonnage",
+    "catSpraying": "Pulvérisation",
+    "catManagement": "Gestion",
+    "catWeather": "Climat",
+    "openTool": "Ouvrir l'Outil",
+    "favorite": "Favori",
+    "install": "Installer",
+    "uninstall": "Désinstaller",
+    "essential": "Essentiel",
+    "showing": "Affichage de",
+    "toolsCountOne": "outil",
+    "toolsCountOther": "outils",
+    "activeCount": "actifs",
+    "filterActive": "Filtre",
+    "noToolsFound": "Aucun outil trouvé",
+    "noToolsFoundDesc": "Aucune fonctionnalité trouvée pour le terme recherché. Essayez un autre nom ou réinitialisez le filtre.",
+    "clearFilter": "Réinitialiser la Recherche et les Filtres",
+    "catalog": {
+      "calc_concentracao": {
+        "name": "Calculatrice de Concentration de la Bouillie",
+        "description": "Calcule la quantité exacte de pesticide à diluer par cuve pour Jeune Plante ou Frondaison Adulte."
+      },
+      "calc_dose": {
+        "name": "Calculatrice de Dose par Hectare",
+        "description": "Convertit la dose homologuée (L/ha ou kg/ha) en volume de cuve et calcule la surface traitée par cuve."
+      },
+      "inspecao_bicos": {
+        "name": "Inspection des Buses ISO 16122",
+        "description": "Mesure le débit réel en éprouvette par buse et détecte les écarts d'usure supérieurs à ±10% (Norme ISO 16122)."
+      },
+      "geometria_trv_copa": {
+        "name": "Volume de Frondaison TRV (Tree Row Volume)",
+        "description": "Détermine le volume foliaire tridimensionnel (m³/ha) en vergers et vignobles pour le calcul de dose proportionnelle."
+      },
+      "gestao_caderno_campo": {
+        "name": "Registre de Phytosanitaires Numérique",
+        "description": "Enregistrement numérique des traitements phytosanitaires avec vérification automatique des normes."
+      },
+      "clima_estacao_agricola": {
+        "name": "Station Climatique & Risque de Dérive",
+        "description": "Surveillance en temps réel de la vitesse du vent, de l'humidité et de la température avec alertes de dérive."
+      },
+      "mistura_compatibilidade": {
+        "name": "Guide d'Ordre de Mélange",
+        "description": "Ordre correct d'incorporation des produits dans la cuve pour éviter la floculation et l'inactivation."
+      },
+      "perfil_exploracao": {
+        "name": "Profil de l'Exploitation & Équipements",
+        "description": "Registre centralisé des parcelles, cultures, pulvérisateurs et buses de l'exploitation agricole."
+      }
+    },
+    "form": {
+      "modeYoung": "Mode Jeune Plante",
+      "modeAdult": "Mode Frondaison Adulte",
+      "volumeToPrepare": "Volume à Préparer (L)",
+      "recommendedConcentration": "Concentration Recommandée (%)",
+      "recommendedVolumeLha": "Volume Recommandé (L/ha)",
+      "appliedVolumeLha": "Volume Appliqué (L/ha)",
+      "labelDose": "Dose Recommandée (L/ha ou kg/ha)",
+      "requiredPesticideQty": "Quantité Nécessaire de Pesticide:",
+      "treatedAreaPerTank": "Surface Traitée par Cuve:",
+      "saveToHistory": "Enregistrer le Calcul dans l'Historique (IndexedDB)"
+    }
+  },
+  "exploration": {
+    "title": "Exploitation & Profils Techniques",
+    "subtitle": "Cartographie des cultures, spécifications ISO des pulvérisateurs, buses et étalonnage hydraulique.",
+    "normativeTag": "Normes ISO 16122 & DGAV",
+    "tabs": {
+      "culture": "Culture",
+      "equipment": "Équipements",
+      "nozzles": "Buses",
+      "calibration": "Étalonnage"
+    },
+    "formattingNote": "Note de Formatage: Lors de la saisie de valeurs numériques décimales dans les formulaires, utilisez la virgule (,) comme séparateur (ex: 2,5 bar ou 4,5 ha).",
+    "saveCulture": "Enregistrer le Profil de Culture dans IndexedDB",
+    "saveEquipment": "Enregistrer le Profil d'Équipement dans IndexedDB",
+    "addNozzle": "Ajouter la Buse dans IndexedDB",
+    "saveCalibration": "Enregistrer la Fiche d'Étalonnage dans IndexedDB",
+    "helpButton": "Aide",
+    "options": {
+      "crops": {
+        "vineyard": "Vigne",
+        "apple": "Pommier",
+        "olive": "Olivier",
+        "citrus": "Agrumes",
+        "pear": "Poirier",
+        "other": "Autres Cultures"
+      },
+      "trainingSystems": {
+        "border": "Cordon",
+        "guyot": "Guyot",
+        "vsp": "VSP (Palissage Vertical)",
+        "centralAxis": "Axe Central",
+        "free": "Libre"
+      },
+      "phenological": {
+        "budburst": "Débourrement",
+        "flowering": "Floraison",
+        "fruitSet": "Nouaison",
+        "veraison": "Véraison / Muration",
+        "postHarvest": "Post-Récolte"
+      },
+      "manufacturers": {
+        "tomix": "Tomix",
+        "rocha": "Rocha",
+        "jacto": "Jacto",
+        "hardi": "Hardi",
+        "berthoud": "Berthoud",
+        "caffini": "Caffini",
+        "kuhn": "Kuhn",
+        "other": "Autre"
+      },
+      "distributionTypes": {
+        "horizontalBoom": "Rampe horizontale",
+        "verticalBoom": "Rampe verticale",
+        "fan": "Ventilateur",
+        "gunLance": "Pistolet/Lance",
+        "pneumatic": "Pneumatique",
+        "cannon": "Canon",
+        "panels": "Panneaux"
+      },
+      "nozzleTypes": {
+        "hollowCone": "Cône Creux",
+        "airInduction": "Injection d'Air",
+        "standardFlat": "Fente Standard",
+        "deflector": "Miroir"
+      }
+    },
+    "accordions": {
+      "ident": "1. Identification Principale",
+      "pump": "2. Pompe et Filtres",
+      "commands": "3. Commandes et Régulation",
+      "manometer": "4. Manomètre",
+      "distribution": "5. Équipement de Distribution",
+      "others": "6. Autres et Remarques"
+    }
+  },
+  "settings": {
+    "title": "Paramètres Globaux",
+    "subtitle": "Gestion du profil utilisateur, unités de mesure, notifications et sécurité des données.",
+    "tabs": {
+      "profile": "Profil Utilisateur",
+      "preferences": "Préférences",
+      "notifications": "Notifications",
+      "dataManagement": "Gestion des Données",
+      "help": "Aide & Support",
+      "about": "À propos"
+    },
+    "languageAndRegion": "Langue et Région",
+    "interfaceLanguage": "Langue de l'Interface",
+    "unitsProfilesTitle": "Profils d'Unités de Mesure Standard",
+    "units": {
+      "si": "Système Métrique International (SI)",
+      "us": "Système Impérial / Américain (US)",
+      "uk": "Système Mixte Anglo-Saxon (UK / CA / AU)",
+      "trad": "Système Régional Traditionnel (Ibérique / LatAm)"
+    },
+    "dangerZone": {
+      "title": "Zone de Danger — Actions Destructives Irreversibles",
+      "subtitle": "Les opérations ci-dessous suppriment définitivement les données du stockage local IndexedDB.",
+      "deleteCultures": "Supprimer les Profils de Culture",
+      "deleteEquipments": "Supprimer les Équipements",
+      "deleteNozzles": "Supprimer les Profils de Buses",
+      "deleteCalibrations": "Supprimer les Étalonnages",
+      "deleteAll": "SUPPRIMER TOUTES LES DONNÉES DE L'EXPLOITATION (RESET TOTAL)"
+    },
+    "saveProfile": "Enregistrer les Modifications du Profil",
+    "savePreferences": "Enregistrer les Préférences et Unités Standard",
+    "saveNotifications": "Enregistrer les Paramètres de Notification"
+  },
+  "academy": {
+    "title": "Académie DATERRA",
+    "subtitle": "Renforcement des compétences techniques, manuels normatifs EPPO/DGAV et formation agronomique continue.",
+    "moodleConnected": "Académie DATERRA (Moodle): Connecté",
+    "visitAcademy": "Visiter l'Académie",
+    "activeCourse": "Cours en Cours",
+    "percentCompleted": "75% Terminé",
+    "courseTitle": "Bonnes Pratiques d'Application des Phytosanitaires et Étalonnage des Équipements",
+    "courseDescription": "Module certifié sur l'homologation des produits, le calcul du volume de bouillie, la sécurité de l'opérateur et la prévention de la pollution des nappes.",
+    "viewProgram": "Voir le Programme sur l'Académie"
+  },
+  "keypad": {
+    "expressionHeader": "Expression & Calcul",
+    "evaluatedResult": "Résultat Évalué:",
+    "invalidExpression": "Expression Invalide",
+    "unitLabel": "Unité:",
+    "commonShortcuts": "Valeurs Courantes (Raccourcis)",
+    "clearButton": "C (Effacer)",
+    "confirmButton": "OK (Confirmer)",
+    "disabledConfirm": "OK (Inactif < 1)"
+  },
+  "microlearning": {
+    "capsuleTitle": "Capsule de Connaissance DATERRA Smart",
+    "defaultTitle": "Information Technique et Réglementaire",
+    "loading": "Chargement de la capsule de connaissance...",
+    "technicalConcept": "Concept Technique",
+    "formula": "Formule",
+    "units": "Unités",
+    "helpButton": "Aide",
+    "moreInfoButton": "En savoir plus",
+    "deepenHeader": "Formation et Renforcement Agronomique",
+    "deepenSub": "Approfondissez vos connaissances techniques dans l'Académie DATERRA.",
+    "understood": "Compris"
+  },
+  "microlearningContent": {
+    "calc_concentracao": {
+      "title": "Calculatrice de Concentration de la Bouillie",
+      "content": "[FAQ: Quelle est la fonction de la Calculatrice de Concentration?]\n- Calcule la quantité exacte de pesticide à diluer par cuve pour Jeune Plante ou Frondaison Adulte selon la dose autorisée sur l'étiquette officielle.\n\n[FAQ: Qu'est-ce que le Mode Jeune Plante?]\n- Prend en compte le volume à préparer et la concentration recommandée sur l'étiquette pour les plantes en phase initiale de développement.\n\n[FAQ: Qu'est-ce que le Mode Frondaison Adulte?]\n- Ajuste le calcul en intégrant le volume de bouillie recommandé par hectare et le volume réellement appliqué par le pulvérisateur.",
+      "formula": "Q_p = Volume à Préparer (L) × Concentration (%) / 100",
+      "unit_explanation": "Q_p : Quantité de Pesticide (mL ou g)\nVolume : Litres (L)\nConcentration : Pourcentage (%)"
+    },
+    "calc_dose": {
+      "title": "Calculatrice de Dose par Hectare",
+      "content": "[FAQ: Quelle est la fonction de cette calculatrice?]\n- Convertit la dose homologuée de l'étiquette (L/ha ou kg/ha) en quantité exacte de produit commercial à ajouter par cuve, selon le volume étalonné.\n\n[FAQ: Comment calculer la surface couverte par cuve pleine?]\n- Divisez la capacité de la cuve par le volume réel appliqué par hectare. Exemple: 1 000 L / 200 L/ha = 5,0 hectares traités par cuve.",
+      "formula": "Q_p = (C_d × D × 1 000) / V_a\nSurface (ha) = C_d / V_a",
+      "unit_explanation": "Q_p : Quantité de Produit dans la Cuve (mL ou g)\nC_d : Volume à Préparer (L)\nD : Dose Homologuée (L/ha ou kg/ha)\nV_a : Volume Appliqué (L/ha)"
+    },
+    "perfil_cultura": {
+      "title": "Profil de la Culture & Géométrie de la Frondaison",
+      "content": "[FAQ: Quelle est l'utilité du profil de culture?]\n- L'enregistrement de la culture avec variété, stade phénologique et écartement entre rangs permet de calculer avec précision la dose de bouillie et d'ajuster le volume foliaire (TRV).\n\n[FAQ: Qu'est-ce que l'Indice de Surface Foliaire (LAI)?]\n- C'est le rapport entre la surface foliaire totale et la surface de sol occupée par la végétation.",
+      "formula": "TRV (m³/ha) = (10 000 × W × H) / W_w",
+      "unit_explanation": "W_w : Écartement entre Rangs (m)\nW : Largeur de Frondaison (m)\nH : Hauteur de Frondaison (m)"
+    },
+    "perfil_equipamento": {
+      "title": "Profil du Pulvérisateur",
+      "content": "[FAQ: Pourquoi enregistrer les données du pulvérisateur?]\n- Permet de gérer les caractéristiques de la pompe, des filtres, du régulateur et de la cuve pour les essais d'étalonnage selon la norme ISO 16122.",
+      "formula": "Débit de la Pompe ≥ Débit Total Q_t + Agitation (≥5%)",
+      "unit_explanation": "Capacité : Litres (L)\nPression : Bar (bar)"
+    },
+    "perfil_bicos": {
+      "title": "Profil des Buses de Pulvérisation",
+      "content": "[FAQ: Comment fonctionne la classification ISO des buses?]\n- La couleur de la buse définit son débit nominal à 3 bar de pression selon le code ISO 10625.\n\n[FAQ: Pourquoi le type de buse est-il important?]\n- Les buses à injection d'air réduisent considérablement la dérive par temps venté.",
+      "formula": "Q_buse (L/min) = (V_a × v × W_w) / (60 000 × N_buses)",
+      "unit_explanation": "Q_buse : Débit de la Buse (L/min)\nAngle : Angle du Jet (60°, 80°, 110°)"
+    },
+    "perfil_calibracao": {
+      "title": "Profil d'Étalonnage & Essai sur le Terrain",
+      "content": "[FAQ: Qu'est-ce qu'un essai d'étalonnage?]\n- C'est la mesure sur le terrain avec de l'eau claire pour déterminer la vitesse réelle, le débit des buses et le volume de bouillie appliqué par hectare.",
+      "formula": "V_a (L/ha) = (600 × Q_t) / (v × W_w)",
+      "unit_explanation": "v : Vitesse (km/h)\nQ_t : Débit Total (L/min)\nW_w : Largeur de Travail (m)"
+    },
+    "preferencias_unidades": {
+      "title": "Unités de Mesure & Profils Standard",
+      "content": "[FAQ: Comment fonctionnent les Profils d'Unités?]\n- Permettent de basculer entre le Système Métrique International (SI), le Système Impérial Américain (US) et le Système Régional sans perte de précision des calculs hydrauliques.",
+      "formula": "Conversion automatique dans l'écosystème DATERRA Smart",
+      "unit_explanation": "SI : L, ha, bar, km/h\nUS : gal, acre, psi, mph"
+    }
+  }
+}

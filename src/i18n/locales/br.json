@@ -1,0 +1,146 @@
+{
+  "nav": {
+    "home": "Início",
+    "tools": "Ferramentas",
+    "features": "Funcionalidades",
+    "exploration": "Exploração",
+    "weather": "Meteorologia",
+    "ndvi": "Mapas NDVI",
+    "academy": "Academia",
+    "settings": "Configurações"
+  },
+  "dashboard": {
+    "title": "Painel Geral da Fazenda",
+    "farm": "Propriedade Agrícola",
+    "welcome": "Bem-vindo, Eng.º",
+    "subscriptionNotice": "Assinatura ativa no Plano Free. Todas as ferramentas agronômicas sincronizadas e operacionais.",
+    "freePlan": "Plano Free",
+    "active": "Ativo",
+    "weatherCardTitle": "Meteorologia da Fazenda",
+    "ndviCardTitle": "Mapas e Índices NDVI",
+    "favoriteToolsTitle": "Ferramentas Favoritas",
+    "quickAccess": "Acesso rápido às calculadoras de precisão e calibração."
+  },
+  "tools": {
+    "title": "Ferramentas Agronômicas",
+    "searchPlaceholder": "Pesquisar ferramentas pelo nome...",
+    "allCategories": "Todas",
+    "catCalibration": "Calibração",
+    "catSpraying": "Pulverização",
+    "catManagement": "Gestão",
+    "catWeather": "Clima",
+    "openTool": "Abrir Ferramenta",
+    "favorite": "Favorita"
+  },
+  "exploration": {
+    "title": "Exploração & Perfis Técnicos",
+    "subtitle": "Mapeamento de culturas, especificações ISO de pulverizadores, bicos e calibração hidráulica.",
+    "normativeTag": "Normas ISO 16122 & Regulamentação Agrícola",
+    "tabs": {
+      "culture": "Cultura",
+      "equipment": "Equipamentos",
+      "nozzles": "Bicos",
+      "calibration": "Calibração"
+    },
+    "formattingNote": "Nota de Formatação: Ao inserir valores numéricos com decimais nos formulários, utilize a vírgula (,) como separador (ex: 2,5 bar ou 4,5 ha).",
+    "saveCulture": "Salvar Perfil de Cultura no IndexedDB",
+    "saveEquipment": "Salvar Perfil de Equipamento no IndexedDB",
+    "addNozzle": "Adicionar Bico ao IndexedDB",
+    "saveCalibration": "Gravar Ficha de Calibração no IndexedDB",
+    "helpButton": "Ajuda"
+  },
+  "settings": {
+    "title": "Configurações Globais",
+    "subtitle": "Gestão do perfil do usuário, unidades de medida, notificações e segurança de dados.",
+    "tabs": {
+      "profile": "Perfil do Usuário",
+      "preferences": "Preferências",
+      "notifications": "Notificações",
+      "dataManagement": "Gestão de Dados",
+      "help": "Ajuda & Suporte",
+      "about": "Sobre"
+    },
+    "languageAndRegion": "Idioma e Região",
+    "interfaceLanguage": "Idioma da Interface",
+    "unitsProfilesTitle": "Perfis de Unidades de Medida Padrão",
+    "units": {
+      "si": "Sistema Métrico Internacional (SI)",
+      "us": "Sistema Imperial / Americano (US)",
+      "uk": "Sistema Misto Anglo-Saxão (UK / CA / AU)",
+      "trad": "Sistema Regional Tradicional (Ibérico / LatAm)"
+    },
+    "dangerZone": {
+      "title": "Zona de Perigo — Ações Destrutivas Irreversíveis",
+      "subtitle": "As operações abaixo excluem dados do armazenamento local IndexedDB sem possibilidade de recuperação.",
+      "deleteCultures": "Excluir Perfis de Cultura",
+      "deleteEquipments": "Excluir Equipamentos",
+      "deleteNozzles": "Excluir Perfis de Bicos",
+      "deleteCalibrations": "Excluir Calibrações",
+      "deleteAll": "EXCLUIR TODOS OS DADOS DA PROPRIEDADE (RESET TOTAL)"
+    },
+    "saveProfile": "Salvar Alterações do Perfil",
+    "savePreferences": "Salvar Preferências e Unidades Padrão",
+    "saveNotifications": "Salvar Configurações de Notificações"
+  },
+  "academy": {
+    "title": "Academia DATERRA",
+    "subtitle": "Capacitação técnica, manuais normativos e formação agronômica contínua."
+  },
+  "microlearning": {
+    "capsuleTitle": "Cápsula de Conhecimento DATERRA Smart",
+    "defaultTitle": "Informação Técnica e Regulamentar",
+    "loading": "Carregando cápsula de conhecimento...",
+    "technicalConcept": "Conceito Técnico",
+    "formula": "Fórmula",
+    "units": "Unidades",
+    "helpButton": "Ajuda",
+    "moreInfoButton": "Quer saber mais",
+    "deepenHeader": "Formação e Capacitação Agronômica",
+    "deepenSub": "Aprofunde seus conhecimentos técnicos na Academia DATERRA.",
+    "understood": "Entendido"
+  },
+  "microlearningContent": {
+    "calc_concentracao": {
+      "title": "Calculadora de Concentração da Calda",
+      "content": "[FAQ: Qual é a função da Calculadora de Concentração?]\n- Calcula a quantidade exata de defensivo agrícola a diluir por tanque para Planta Jovem ou Copa Adulta com base na dosagem autorizada no rótulo oficial.\n\n[FAQ: O que é o Modo Planta Jovem?]\n- Considera o volume a preparar e a concentração recomendada no rótulo para plantas em fase inicial de desenvolvimento.\n\n[FAQ: O que é o Modo Planta Adulta?]\n- Ajusta o cálculo integrando o volume de calda recomendado por hectare e o volume efetivamente aplicado pelo pulverizador.",
+      "formula": "Q_p = Volume a Preparar (L) × Concentração (%) / 100",
+      "unit_explanation": "Q_p : Quantidade de Defensivo (mL ou g)\nVolume : Litros (L)\nConcentração : Porcentagem (%)"
+    },
+    "calc_dose": {
+      "title": "Calculadora de Dose por Hectare",
+      "content": "[FAQ: Qual é a função desta calculadora?]\n- Converte a dose autorizada no rótulo (L/ha ou kg/ha) na quantidade exata de produto comercial a adicionar por tanque, com base no volume de calda calibrado no pulverizador.\n\n[FAQ: Como calcular a área coberta por cada tanque cheio?]\n- Divida a capacidade do tanque pelo volume de calda real aplicado por hectare. Exemplo: 1.000 L / 200 L/ha = 5,0 hectares tratados por tanque.",
+      "formula": "Q_p = (C_d × D × 1.000) / V_a\nÁrea (ha) = C_d / V_a",
+      "unit_explanation": "Q_p : Quantidade de Produto no Tanque (mL ou g)\nC_d : Volume a Preparar (L)\nD : Dose Autorizada (L/ha ou kg/ha)\nV_a : Volume Aplicado (L/ha)"
+    },
+    "perfil_cultura": {
+      "title": "Perfil da Cultura & Geometria da Copa",
+      "content": "[FAQ: Qual a utilidade do registro de cultura?]\n- O registro da cultura com variedade, estágio fenológico e espaçamento entre linhas permite calcular com precisão a dosagem de calda e ajustar o volume de copa (TRV).\n\n[FAQ: O que é o Índice de Área Foliar (LAI)?]\n- É a razão entre a área foliar total e a área de solo ocupada pela copa vegetal.",
+      "formula": "TRV (m³/ha) = (10.000 × W × H) / W_w",
+      "unit_explanation": "W_w : Espaçamento entre linhas (m)\nW : Largura da Copa (m)\nH : Altura da Copa (m)"
+    },
+    "perfil_equipamento": {
+      "title": "Perfil do Pulverizador",
+      "content": "[FAQ: Qual a importância de registrar os dados do pulverizador?]\n- Permite gerenciar as características da bomba, filtros, comando e tanque para os ensaios de calibração segundo a norma ISO 16122.",
+      "formula": "Vazão da Bomba ≥ Vazão Total Q_t + Agitação (≥5%)",
+      "unit_explanation": "Capacidade : Litros (L)\nPressão : Bar (bar)"
+    },
+    "perfil_bicos": {
+      "title": "Perfil dos Bicos de Pulverização",
+      "content": "[FAQ: Como funciona a classificação ISO de pontas/bicos?]\n- A cor do bico define sua vazão nominal a 3 bar de pressão segundo o código ISO 10625.\n\n[FAQ: Qual a importância do tipo de bico?]\n- Bicos com indução de ar reduzem drasticamente a deriva em dias de vento.",
+      "formula": "Q_bico (L/min) = (V_a × v × W_w) / (60.000 × N_bicos)",
+      "unit_explanation": "Q_bico : Vazão do Bico (L/min)\nÂngulo : Ângulo do Jato (60°, 80°, 110°)"
+    },
+    "perfil_calibracao": {
+      "title": "Perfil de Calibração & Ensaio com Água",
+      "content": "[FAQ: O que é o ensaio de calibração?]\n- É a medição em campo com água limpa para determinar a velocidade real, vazão dos bicos e volume de calda aplicado por hectare.",
+      "formula": "V_a (L/ha) = (600 × Q_t) / (v × W_w)",
+      "unit_explanation": "v : Velocidade (km/h)\nQ_t : Vazão Total (L/min)\nW_w : Largura de Trabalho (m)"
+    },
+    "preferencias_unidades": {
+      "title": "Unidades de Medida & Perfis Padrão",
+      "content": "[FAQ: Como funcionam os Perfis de Unidades?]\n- Permitem alternar entre o Sistema Métrico Internacional (SI), o Sistema Imperial Americano (US) e o Sistema Regional Tradicional sem perder a precisão dos cálculos hidráulicos.",
+      "formula": "Conversão automática no ecossistema DATERRA Smart",
+      "unit_explanation": "SI : L, ha, bar, km/h\nUS : gal, acre, psi, mph"
+    }
+  }
+}

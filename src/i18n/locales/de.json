@@ -1,0 +1,300 @@
+{
+  "nav": {
+    "home": "Startseite",
+    "tools": "Werkzeuge",
+    "features": "Funktionen",
+    "exploration": "Betrieb",
+    "weather": "Wetter",
+    "ndvi": "NDVI-Karten",
+    "academy": "Akademie",
+    "settings": "Einstellungen"
+  },
+  "dashboard": {
+    "title": "Gesamtübersicht des Betriebs",
+    "farm": "Landwirtschaftlicher Betrieb",
+    "welcome": "Willkommen",
+    "welcomeUser": "Willkommen, Ing.",
+    "subscriptionNotice": "Aktives Abonnement im Free-Tarif. Alle agronomischen Werkzeuge sind synchronisiert und betriebsbereit.",
+    "freePlan": "Free-Tarif",
+    "active": "Aktiv",
+    "weatherCardTitle": "Betriebswetter",
+    "extendedForecast": "Erweiterte Wochenvorhersage",
+    "driftRisk": "Abdriftrisiko",
+    "driftRisks": {
+      "low": "Niedrig",
+      "veryLow": "Sehr Niedrig",
+      "moderate": "Mäßig",
+      "high": "Hoch"
+    },
+    "weatherLabels": {
+      "clear": "Klarer Himmel",
+      "sunny": "Sonnig",
+      "partlyCloudy": "Teilw. Bewölkt",
+      "lightRain": "Leichter Regen",
+      "fewClouds": "Gering Bewölkt"
+    },
+    "ndviCardTitle": "NDVI-Karten und Vegetationsindex",
+    "satelliteSentinel": "Sentinel-2 Satellit",
+    "vegetativeVigorIndex": "Pflanzenvitalitätsindex (NDVI)",
+    "foliarBiomassAnalysis": "Räumliche Blattbiomasse-Analyse",
+    "spatialResolution": "Räumliche Auflösung 10m",
+    "lastPassage": "Letzter Satellitenüberflug",
+    "viewNdviHistory": "NDVI-Kartenverlauf anzeigen",
+    "favoriteToolsTitle": "Favoritisierte Werkzeuge",
+    "quickAccess": "Schnellzugriff auf Präzisionsrechner und Kalibrierung."
+  },
+  "tools": {
+    "title": "Agronomische Werkzeuge",
+    "searchPlaceholder": "Werkzeug oder Funktion nach Namen suchen...",
+    "categoryTitle": "Funktionskategorien",
+    "allCategories": "Alle",
+    "catCalibration": "Kalibrierung",
+    "catSpraying": "Spritzen",
+    "catManagement": "Verwaltung",
+    "catWeather": "Klima",
+    "openTool": "Werkzeug öffnen",
+    "favorite": "Favorit",
+    "install": "Installieren",
+    "uninstall": "Deinstallieren",
+    "essential": "Essentiell",
+    "showing": "Anzeige von",
+    "toolsCountOne": "Werkzeug",
+    "toolsCountOther": "Werkzeuge",
+    "activeCount": "aktiv",
+    "filterActive": "Filter",
+    "noToolsFound": "Keine Werkzeuge gefunden",
+    "noToolsFoundDesc": "Für den Suchbegriff wurden keine Funktionen gefunden. Versuchen Sie einen anderen Namen oder setzen Sie den Filter zurück.",
+    "clearFilter": "Suche und Filter zurücksetzen",
+    "catalog": {
+      "calc_concentracao": {
+        "name": "Spritzbrühe-Konzentrationsrechner",
+        "description": "Berechnet die exakte Pflanzenschutzmittelmenge pro Tank für Jungpflanzen oder ausgewachsene Kronen."
+      },
+      "calc_dose": {
+        "name": "Aufwandmengenrechner pro Hektar",
+        "description": "Rechnet die Zulassungsdosis (L/ha oder kg/ha) auf den Tank um und berechnet die Fläche pro Tankfüllung."
+      },
+      "inspecao_bicos": {
+        "name": "Düsenprüfung nach ISO 16122",
+        "description": "Misst den Auslassvolumenstrom pro Düse und erkennt Verschleißabweichungen über ±10% (ISO 16122)."
+      },
+      "geometria_trv_copa": {
+        "name": "Kronenvolumen TRV (Tree Row Volume)",
+        "description": "Ermittelt das dreidimensionale Laubvolumen (m³/ha) in Obst- und Weinbau zur dosierungsgenauen Anpassung."
+      },
+      "gestao_caderno_campo": {
+        "name": "Digitales Feldbuch DGAV",
+        "description": "Digitale Dokumentation von Pflanzenschutzmaßnahmen mit automatischer Grenzwertprüfung."
+      },
+      "clima_estacao_agricola": {
+        "name": "Wetterstation & Abdriftrisiko",
+        "description": "Echtzeit-Überwachung von Windgeschwindigkeit, Luftfeuchtigkeit und Temperatur mit Abdriftwarnung."
+      },
+      "mistura_compatibilidade": {
+        "name": "Mischreihenfolge-Leitfaden",
+        "description": "Korrekte Reihenfolge beim Einfüllen von Mitteln in den Tank zur Vermeidung von Ausflockung."
+      },
+      "perfil_exploracao": {
+        "name": "Betriebs- & Geräteprofil",
+        "description": "Zentrale Erfassung von Schlägen, Kulturen, Feldspritzen und Düsen des Betriebes."
+      }
+    },
+    "form": {
+      "modeYoung": "Modus Jungpflanze",
+      "modeAdult": "Modus Ausgewachsene Krone",
+      "volumeToPrepare": "Anzusetzendes Brühevolumen (L)",
+      "recommendedConcentration": "Empfohlene Konzentration (%)",
+      "recommendedVolumeLha": "Empfohlenes Brühevolumen (L/ha)",
+      "appliedVolumeLha": "Ausgebrachtes Brühevolumen (L/ha)",
+      "labelDose": "Empfohlene Aufwandmenge (L/ha oder kg/ha)",
+      "requiredPesticideQty": "Erforderliche Pflanzenschutzmittelmenge:",
+      "treatedAreaPerTank": "Behandelte Fläche pro Tankfüllung:",
+      "saveToHistory": "Berechnung im Verlauf speichern (IndexedDB)"
+    }
+  },
+  "exploration": {
+    "title": "Betrieb & Technische Profile",
+    "subtitle": "Kulturerfassung, ISO-Spezifikationen von Spritzgeräten, Düsen und hydraulischer Kalibrierung.",
+    "normativeTag": "ISO 16122 & DGAV Normen",
+    "tabs": {
+      "culture": "Kultur",
+      "equipment": "Geräte",
+      "nozzles": "Düsen",
+      "calibration": "Kalibrierung"
+    },
+    "formattingNote": "Formatierungshinweis: Verwenden Sie bei der Eingabe von Dezimalwerten in Formularen das Komma (,) als Trennzeichen (z. B. 2,5 bar oder 4,5 ha).",
+    "saveCulture": "Kulturprofil in IndexedDB speichern",
+    "saveEquipment": "Geräteprofil in IndexedDB speichern",
+    "addNozzle": "Düse zu IndexedDB hinzufügen",
+    "saveCalibration": "Kalibrierkarte in IndexedDB speichern",
+    "helpButton": "Hilfe",
+    "options": {
+      "crops": {
+        "vineyard": "Weinbau",
+        "apple": "Apfelbaum",
+        "olive": "Olivenhain",
+        "citrus": "Zitrusfrüchte",
+        "pear": "Birnbaum",
+        "other": "Sonstige Kulturen"
+      },
+      "trainingSystems": {
+        "border": "Kordon",
+        "guyot": "Guyot",
+        "vsp": "VSP (Spaliersystem)",
+        "centralAxis": "Spindel / Zentralachse",
+        "free": "Freiwuchs"
+      },
+      "phenological": {
+        "budburst": "Austrieb",
+        "flowering": "Blüte",
+        "fruitSet": "Fruchtansatz",
+        "veraison": "Farbumschlag / Reife",
+        "postHarvest": "Nachernte"
+      },
+      "manufacturers": {
+        "tomix": "Tomix",
+        "rocha": "Rocha",
+        "jacto": "Jacto",
+        "hardi": "Hardi",
+        "berthoud": "Berthoud",
+        "caffini": "Caffini",
+        "kuhn": "Kuhn",
+        "other": "Sonstige"
+      },
+      "distributionTypes": {
+        "horizontalBoom": "Horizontales Gestänge",
+        "verticalBoom": "Vertikales Gestänge",
+        "fan": "Gebläse",
+        "gunLance": "Spritzpistole / Lanze",
+        "pneumatic": "Pneumatisch",
+        "cannon": "Kanone",
+        "panels": "Recycling-Wände"
+      },
+      "nozzleTypes": {
+        "hollowCone": "Hohlkegel",
+        "airInduction": "Injektordüse (Luftinjektion)",
+        "standardFlat": "Standard-Flachstrahl",
+        "deflector": "Zungen- / Pralldüse"
+      }
+    },
+    "accordions": {
+      "ident": "1. Hauptidentifikation",
+      "pump": "2. Pumpe und Filter",
+      "commands": "3. Armaturen und Regelung",
+      "manometer": "4. Manometer",
+      "distribution": "5. Verteilungsgeräte",
+      "others": "6. Sonstiges und Anmerkungen"
+    }
+  },
+  "settings": {
+    "title": "Globale Einstellungen",
+    "subtitle": "Verwaltung von Benutzerprofil, Maßeinheiten, Benachrichtigungen und Datensicherheit.",
+    "tabs": {
+      "profile": "Benutzerprofil",
+      "preferences": "Einstellungen",
+      "notifications": "Benachrichtigungen",
+      "dataManagement": "Datenverwaltung",
+      "help": "Hilfe & Support",
+      "about": "Über uns"
+    },
+    "languageAndRegion": "Sprache und Region",
+    "interfaceLanguage": "Oberflächensprache",
+    "unitsProfilesTitle": "Standard-Maßeinheitenprofile",
+    "units": {
+      "si": "Internationales Metrisches System (SI)",
+      "us": "Imperiales / US-amerikanisches System (US)",
+      "uk": "Gemischtes angelsächsisches System (UK / CA / AU)",
+      "trad": "Traditionelles regionales System (Iberisch / LatAm)"
+    },
+    "dangerZone": {
+      "title": "Gefahrenzone — Irreversible destruktive Aktionen",
+      "subtitle": "Die folgenden Aktionen löschen Daten dauerhaft aus dem lokalen IndexedDB-Speicher.",
+      "deleteCultures": "Kulturprofile löschen",
+      "deleteEquipments": "Geräte löschen",
+      "deleteNozzles": "Düsenprofile löschen",
+      "deleteCalibrations": "Kalibrierungen löschen",
+      "deleteAll": "ALLE BETRIEBSDATEN LÖSCHEN (TOTAL-RESET)"
+    },
+    "saveProfile": "Profiländerungen speichern",
+    "savePreferences": "Einstellungen und Einheiten speichern",
+    "saveNotifications": "Benachrichtigungseinstellungen speichern"
+  },
+  "academy": {
+    "title": "DATERRA Akademie",
+    "subtitle": "Technische Schulung, EPPO/DGAV-Standardhandbücher und kontinuierliche agronomische Weiterbildung.",
+    "moodleConnected": "DATERRA Akademie (Moodle): Verbunden",
+    "visitAcademy": "Akademie besuchen",
+    "activeCourse": "Laufender Kurs",
+    "percentCompleted": "75% Abgeschlossen",
+    "courseTitle": "Gute fachliche Praxis bei Pflanzenschutzanwendungen und Gerätekalibrierung",
+    "courseDescription": "Zertifiziertes Modul zu Produktzulassungen, Brüheberechnungen, Anwenderschutz und Grundwasserschutz.",
+    "viewProgram": "Programm in der Akademie ansehen"
+  },
+  "keypad": {
+    "expressionHeader": "Ausdruck & Berechnung",
+    "evaluatedResult": "Berechnetes Ergebnis:",
+    "invalidExpression": "Ungültiger Ausdruck",
+    "unitLabel": "Einheit:",
+    "commonShortcuts": "Gängige Werte (Schnellzugriff)",
+    "clearButton": "C (Löschen)",
+    "confirmButton": "OK (Bestätigen)",
+    "disabledConfirm": "OK (Inaktiv < 1)"
+  },
+  "microlearning": {
+    "capsuleTitle": "DATERRA Smart Wissenskapsel",
+    "defaultTitle": "Technische & Rechtliche Informationen",
+    "loading": "Wissenskapsel wird geladen...",
+    "technicalConcept": "Technisches Konzept",
+    "formula": "Formel",
+    "units": "Einheiten",
+    "helpButton": "Hilfe",
+    "moreInfoButton": "Mehr erfahren",
+    "deepenHeader": "Agronomische Weiterbildung",
+    "deepenSub": "Vertiefen Sie Ihr fachliches Wissen in der DATERRA Akademie.",
+    "understood": "Verstanden"
+  },
+  "microlearningContent": {
+    "calc_concentracao": {
+      "title": "Spritzbrühe-Konzentrationsrechner",
+      "content": "[FAQ: Welche Funktion hat der Konzentrationsrechner?]\n- Berechnet die exakte Pflanzenschutzmittelmenge pro Tank für Jungpflanzen oder ausgewachsene Kronen auf Basis der offiziellen Zulassung im Etikett.\n\n[FAQ: Was ist der Modus Jungpflanze?]\n- Berücksichtigt das anzusetzende Brühevolumen und die im Etikett empfohlene Konzentration für Pflanzen in frühem Entwicklungsstadium.\n\n[FAQ: Was ist der Modus Ausgewachsene Krone?]\n- Passt die Berechnung an, indem das empfohlene Brühevolumen pro Hektar und das tatsächlich vom Spritzgerät ausgebrachte Volumen einberechnet werden.",
+      "formula": "Q_p = Brühevolumen (L) × Konzentration (%) / 100",
+      "unit_explanation": "Q_p : Pflanzenschutzmittelmenge (mL oder g)\nVolumen : Liter (L)\nKonzentration : Prozent (%)"
+    },
+    "calc_dose": {
+      "title": "Aufwandmengenrechner pro Hektar",
+      "content": "[FAQ: Welche Funktion hat dieser Rechner?]\n- Rechnet die im Etikett zugelassene Aufwandmenge (L/ha oder kg/ha) in die exakte Handelsmittelmenge pro Tank um, basierend auf dem kalibrierten Brühevolumen.\n\n[FAQ: Wie berechnet man die Fläche pro Tankfüllung?]\n- Teilen Sie das Tankvolumen durch das tatsächlich ausgebrachte Brühevolumen pro Hektar. Beispiel: 1.000 L / 200 L/ha = 5,0 Hektar pro Tankfüllung.",
+      "formula": "Q_p = (C_d × D × 1.000) / V_a\nFläche (ha) = C_d / V_a",
+      "unit_explanation": "Q_p : Produktmenge im Tank (mL oder g)\nC_d : Anzusetzendes Volumen (L)\nD : Zugelassene Aufwandmenge (L/ha oder kg/ha)\nV_a : Ausgebrachtes Volumen (L/ha)"
+    },
+    "perfil_cultura": {
+      "title": "Kulturprofil & Geometrie der Krone",
+      "content": "[FAQ: Wozu dient die Erfassung der Kultur?]\n- Die Erfassung der Kultur mit Sorte, Entwicklungsstadium und Reihenabstand ermöglicht die präzise Berechnung der Brühemenge und Anpassung des Kronenvolumens (TRV).\n\n[FAQ: Was ist der Blattflächenindex (LAI)?]\n- Das Verhältnis von gesamter Oberblattfläche zur von der Pflanzenkrone bedeckten Bodenfläche.",
+      "formula": "TRV (m³/ha) = (10.000 × W × H) / W_w",
+      "unit_explanation": "W_w : Reihenabstand (m)\nW : Kronenbreite (m)\nH : Kronenhöhe (m)"
+    },
+    "perfil_equipamento": {
+      "title": "Geräteprofil des Spritzgerätes",
+      "content": "[FAQ: Warum sind die Gerätedaten wichtig?]\n- Ermöglicht die Verwaltung von Leistungsdaten von Pumpe, Filtern, Regelarmatur und Tank für Kalibrierprüfungen nach ISO 16122.",
+      "formula": "Pumpenförderstrom ≥ Gesamtvolumenstrom Q_t + Rührwerk (≥5%)",
+      "unit_explanation": "Kapazität : Liter (L)\nDruck : Bar (bar)"
+    },
+    "perfil_bicos": {
+      "title": "Düsenprofil des Spritzgerätes",
+      "content": "[FAQ: Wie funktioniert die ISO-Düsencodierung?]\n- Die Düsenfarbe bestimmt den Nennvolumenstrom bei 3 bar Druck nach dem ISO 10625 Farbcode.\n\n[FAQ: Warum ist der Düsentyp wichtig?]\n- Injektordüsen (mit Luftinjektion) reduzieren die Abdrift an windigen Tagen erheblich.",
+      "formula": "Q_düse (L/min) = (V_a × v × W_w) / (60.000 × N_düsen)",
+      "unit_explanation": "Q_düse : Düsenvolumenstrom (L/min)\nWinkel : Spritzwinkel (60°, 80°, 110°)"
+    },
+    "perfil_calibracao": {
+      "title": "Kalibrierprofil & Feldprüfung",
+      "content": "[FAQ: Was ist eine Kalibrierprüfung?]\n- Die Messung im Feld mit reinem Wasser zur Ermittlung der tatsächlichen Fahrgeschwindigkeit, des Düsenvolumenstroms und der Ausbringmenge pro Hektar.",
+      "formula": "V_a (L/ha) = (600 × Q_t) / (v × W_w)",
+      "unit_explanation": "v : Geschwindigkeit (km/h)\nQ_t : Gesamtvolumenstrom (L/min)\nW_w : Arbeitsbreite (m)"
+    },
+    "preferencias_unidades": {
+      "title": "Maßeinheiten & Standardprofile",
+      "content": "[FAQ: Wie funktionieren die Einheitenprofile?]\n- Sie ermöglichen den Wechsel zwischen dem Internationalen Metrischen System (SI), dem US-amerikanischen System und dem regionalen System ohne Verlust der hydraulischen Präzision.",
+      "formula": "Automatische Umrechnung im DATERRA Smart Ökosystem",
+      "unit_explanation": "SI : L, ha, bar, km/h\nUS : gal, acre, psi, mph"
+    }
+  }
+}

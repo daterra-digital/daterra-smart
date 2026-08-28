@@ -1,0 +1,21 @@
+name: Deploy DATERRA to cPanel
+
+manual:
+  workflow_dispatch: # Isto adiciona o botão de envio manual no site do GitHub
+
+jobs:
+  web-deploy:
+    name: Sincronizar com o Servidor cPanel
+    runs-on: ubuntu-latest
+    steps:
+      - name: Obter Código do GitHub
+        uses: actions/checkout@v4
+
+      - name: Enviar Ficheiros via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          server-dir: /public_html/daterra/ # Pasta do seu subdomínio no cPanel
+          local-dir: ./

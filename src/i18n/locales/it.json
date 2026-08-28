@@ -1,0 +1,300 @@
+{
+  "nav": {
+    "home": "Home",
+    "tools": "Strumenti",
+    "features": "Funzionalità",
+    "exploration": "Azienda",
+    "weather": "Meteorologia",
+    "ndvi": "Mappe NDVI",
+    "academy": "Accademia",
+    "settings": "Impostazioni"
+  },
+  "dashboard": {
+    "title": "Pannello Generale dell'Azienda",
+    "farm": "Azienda Agricola",
+    "welcome": "Benvenuto",
+    "welcomeUser": "Benvenuto, Ing.",
+    "subscriptionNotice": "Abbonamento attivo sul Piano Free. Tutti gli strumenti agronomici sono sincronizzati e operativi.",
+    "freePlan": "Piano Free",
+    "active": "Attivo",
+    "weatherCardTitle": "Meteorologia dell'Azienda",
+    "extendedForecast": "Previsioni Estese della Settimana",
+    "driftRisk": "Rischio Deriva",
+    "driftRisks": {
+      "low": "Basso",
+      "veryLow": "Molto Basso",
+      "moderate": "Moderato",
+      "high": "Alto"
+    },
+    "weatherLabels": {
+      "clear": "Cielo Sereno",
+      "sunny": "Soleggiato",
+      "partlyCloudy": "Parz. Nuvoloso",
+      "lightRain": "Pioggia Leggera",
+      "fewClouds": "Poche Nubi"
+    },
+    "ndviCardTitle": "Mappe NDVI e Indice Vegetativo",
+    "satelliteSentinel": "Satellite Sentinel-2",
+    "vegetativeVigorIndex": "Indice di Vigore Vegetativo (NDVI)",
+    "foliarBiomassAnalysis": "Analisi Spaziale della Biomassa Fogliare",
+    "spatialResolution": "Risoluzione Spaziale 10m",
+    "lastPassage": "Ultimo Passaggio Satellite",
+    "viewNdviHistory": "Vedi Cronologia Mappe NDVI",
+    "favoriteToolsTitle": "Strumenti Preferiti",
+    "quickAccess": "Accesso rapido ai calcolatori di precisione e taratura."
+  },
+  "tools": {
+    "title": "Strumenti Agronomici",
+    "searchPlaceholder": "Cerca uno strumento o una funzionalità per nome...",
+    "categoryTitle": "Categorie di Funzionalità",
+    "allCategories": "Tutti",
+    "catCalibration": "Taratura",
+    "catSpraying": "Irrorazione",
+    "catManagement": "Gestione",
+    "catWeather": "Clima",
+    "openTool": "Apri Strumento",
+    "favorite": "Preferito",
+    "install": "Installa",
+    "uninstall": "Disinstalla",
+    "essential": "Essenziale",
+    "showing": "Visualizzazione di",
+    "toolsCountOne": "strumento",
+    "toolsCountOther": "strumenti",
+    "activeCount": "attivi",
+    "filterActive": "Filtro",
+    "noToolsFound": "Nessuno strumento trovato",
+    "noToolsFoundDesc": "Nessuna funzionalità trovata per il termine cercato. Prova a cercare un altro nome o a ripristinare il filtro.",
+    "clearFilter": "Azzera Ricerca e Filtri",
+    "catalog": {
+      "calc_concentracao": {
+        "name": "Calcolatore di Concentrazione della Miscela",
+        "description": "Calcola la quantità esatta di agrofarmaco da diluire per serbatoio per Pianta Giovane o Chioma Adulta."
+      },
+      "calc_dose": {
+        "name": "Calcolatore di Dose per Ettaro",
+        "description": "Converte la dose di etichetta (L/ha o kg/ha) nel serbatoio e calcola l'area coperta per pieno."
+      },
+      "inspecao_bicos": {
+        "name": "Ispezione Ugelli ISO 16122",
+        "description": "Misura la portata reale in provetta per ugello e rileva scostamenti di usura superiori a ±10% (Norma ISO 16122)."
+      },
+      "geometria_trv_copa": {
+        "name": "Volume della Chioma TRV (Tree Row Volume)",
+        "description": "Determina la massa fogliare tridimensionale (m³/ha) in frutteti e vigneti per il calcolo del dosaggio proporzionale."
+      },
+      "gestao_caderno_campo": {
+        "name": "Registro di Campagna Digitale",
+        "description": "Registrazione digitale dei trattamenti fitosanitari con verifica automatica dei limiti normativi."
+      },
+      "clima_estacao_agricola": {
+        "name": "Stazione Climatica & Rischio Deriva",
+        "description": "Monitoraggio in tempo reale della velocità del vento, umidità e temperatura con allarmi deriva."
+      },
+      "mistura_compatibilidade": {
+        "name": "Guida Sequenza di Miscelazione",
+        "description": "Ordine corretto di inserimento dei prodotti nel serbatoio per evitare flocculazione e inattivazione."
+      },
+      "perfil_exploracao": {
+        "name": "Profilo Azienda & Attrezzature",
+        "description": "Registro centralizzato di appezzamenti, colture, atomizzatori e ugelli dell'azienda agricola."
+      }
+    },
+    "form": {
+      "modeYoung": "Modalità Pianta Giovane",
+      "modeAdult": "Modalità Chioma Adulta",
+      "volumeToPrepare": "Volume da Preparare (L)",
+      "recommendedConcentration": "Concentrazione Raccomandata (%)",
+      "recommendedVolumeLha": "Volume Raccomandato (L/ha)",
+      "appliedVolumeLha": "Volume Applicato (L/ha)",
+      "labelDose": "Dose Raccomandata (L/ha o kg/ha)",
+      "requiredPesticideQty": "Quantità Necessaria di Agrofarmaco:",
+      "treatedAreaPerTank": "Area Trattata per Serbatoio:",
+      "saveToHistory": "Salva Calcolo in Cronologia (IndexedDB)"
+    }
+  },
+  "exploration": {
+    "title": "Azienda & Profili Tecnici",
+    "subtitle": "Mappatura delle colture, specifiche ISO degli atomizzatori, ugelli e taratura idraulica.",
+    "normativeTag": "Norme ISO 16122 & DGAV",
+    "tabs": {
+      "culture": "Coltura",
+      "equipment": "Attrezzature",
+      "nozzles": "Ugelli",
+      "calibration": "Taratura"
+    },
+    "formattingNote": "Nota di Formattazione: Quando si inseriscono valori numerici decimali nei moduli, utilizzare la virgola (,) come separatore (es: 2,5 bar o 4,5 ha).",
+    "saveCulture": "Salva Profilo Coltura in IndexedDB",
+    "saveEquipment": "Salva Profilo Attrezzatura in IndexedDB",
+    "addNozzle": "Aggiungi Ugello a IndexedDB",
+    "saveCalibration": "Salva Scheda di Taratura in IndexedDB",
+    "helpButton": "Aiuto",
+    "options": {
+      "crops": {
+        "vineyard": "Vite",
+        "apple": "Melo",
+        "olive": "Olivo",
+        "citrus": "Agrumi",
+        "pear": "Pero",
+        "other": "Altre Colture"
+      },
+      "trainingSystems": {
+        "border": "Cordone Speronato",
+        "guyot": "Guyot",
+        "vsp": "VSP (Spalliera)",
+        "centralAxis": "Asse Centrale",
+        "free": "Libero"
+      },
+      "phenological": {
+        "budburst": "Germogliamento",
+        "flowering": "Fioritura",
+        "fruitSet": "Allegagione",
+        "veraison": "Invaiatura / Maturazione",
+        "postHarvest": "Post-Raccolta"
+      },
+      "manufacturers": {
+        "tomix": "Tomix",
+        "rocha": "Rocha",
+        "jacto": "Jacto",
+        "hardi": "Hardi",
+        "berthoud": "Berthoud",
+        "caffini": "Caffini",
+        "kuhn": "Kuhn",
+        "other": "Altro"
+      },
+      "distributionTypes": {
+        "horizontalBoom": "Barra orizzontale",
+        "verticalBoom": "Barra verticale",
+        "fan": "Ventilatore",
+        "gunLance": "Pistola/Lancia",
+        "pneumatic": "Pneumatico",
+        "cannon": "Cannone",
+        "panels": "Pannelli"
+      },
+      "nozzleTypes": {
+        "hollowCone": "Cono Cavo",
+        "airInduction": "Iniezione d'Aria",
+        "standardFlat": "Ventaglio Standard",
+        "deflector": "Specchio"
+      }
+    },
+    "accordions": {
+      "ident": "1. Identificazione Principale",
+      "pump": "2. Pompa e Filtri",
+      "commands": "3. Comandi e Regolazione",
+      "manometer": "4. Manometro",
+      "distribution": "5. Attrezzatura di Distribuzione",
+      "others": "6. Altro e Note"
+    }
+  },
+  "settings": {
+    "title": "Impostazioni Globali",
+    "subtitle": "Gestione del profilo utente, unità di misura, notifiche e sicurezza dei dati.",
+    "tabs": {
+      "profile": "Profilo Utente",
+      "preferences": "Preferenze",
+      "notifications": "Notifiche",
+      "dataManagement": "Gestione Dati",
+      "help": "Aiuto & Supporto",
+      "about": "Informazioni"
+    },
+    "languageAndRegion": "Lingua e Regione",
+    "interfaceLanguage": "Lingua dell'Interfaccia",
+    "unitsProfilesTitle": "Profili di Unità di Misura Standard",
+    "units": {
+      "si": "Sistema Metrico Internazionale (SI)",
+      "us": "Sistema Imperiale / Americano (US)",
+      "uk": "Sistema Misto Anglo-Sassone (UK / CA / AU)",
+      "trad": "Sistema Regionale Tradizionale (Iberico / LatAm)"
+    },
+    "dangerZone": {
+      "title": "Zona di Pericolo — Azioni Distruttive Irreversibili",
+      "subtitle": "Le operazioni sottostanti eliminano definitivamente i dati dalla memoria locale IndexedDB.",
+      "deleteCultures": "Elimina Profili Coltura",
+      "deleteEquipments": "Elimina Attrezzature",
+      "deleteNozzles": "Elimina Profili Ugelli",
+      "deleteCalibrations": "Elimina Tarature",
+      "deleteAll": "ELIMINA TUTTI I DATI DELL'AZIENDA (RESET TOTALE)"
+    },
+    "saveProfile": "Salva Modifiche Profilo",
+    "savePreferences": "Salva Preferenze e Unità Standard",
+    "saveNotifications": "Salva Impostazioni Notifiche"
+  },
+  "academy": {
+    "title": "Accademia DATERRA",
+    "subtitle": "Formazione tecnica, manuali normativi EPPO/DGAV e aggiornamento agronomico continuo.",
+    "moodleConnected": "Accademia DATERRA (Moodle): Connesso",
+    "visitAcademy": "Visita l'Accademia",
+    "activeCourse": "Corso in Corso",
+    "percentCompleted": "75% Completato",
+    "courseTitle": "Buone Pratiche nell'Applicazione degli Agrofarmaci e Taratura delle Macchine",
+    "courseDescription": "Modulo certificato su omologazione dei prodotti, calcolo del volume di miscela, sicurezza dell'operatore e prevenzione della contaminazione delle falde.",
+    "viewProgram": "Vedi Programma nell'Accademia"
+  },
+  "keypad": {
+    "expressionHeader": "Espressione & Calcolo",
+    "evaluatedResult": "Risultato Valutato:",
+    "invalidExpression": "Espressione Non Valida",
+    "unitLabel": "Unità:",
+    "commonShortcuts": "Valori Comuni (Scorciatoie)",
+    "clearButton": "C (Cancella)",
+    "confirmButton": "OK (Conferma)",
+    "disabledConfirm": "OK (Inattivo < 1)"
+  },
+  "microlearning": {
+    "capsuleTitle": "Capsula di Conoscenza DATERRA Smart",
+    "defaultTitle": "Informazioni Tecniche e Normative",
+    "loading": "Caricamento capsula di conoscenza...",
+    "technicalConcept": "Concetto Tecnico",
+    "formula": "Formula",
+    "units": "Unità",
+    "helpButton": "Aiuto",
+    "moreInfoButton": "Scopri di più",
+    "deepenHeader": "Formazione e Sviluppo Agronomico",
+    "deepenSub": "Approfondisci le tue conoscenze tecniche nell'Accademia DATERRA.",
+    "understood": "Capito"
+  },
+  "microlearningContent": {
+    "calc_concentracao": {
+      "title": "Calcolatore di Concentrazione della Miscela",
+      "content": "[FAQ: Qual è la funzione del Calcolatore di Concentrazione?]\n- Calcola la quantità esatta di agrofarmaco da diluire per serbatoio per Pianta Giovane o Chioma Adulta in base alla dose di etichetta ufficiale.\n\n[FAQ: Che cos'è la Modalità Pianta Giovane?]\n- Considera il volume da preparare e la concentrazione raccomandata in etichetta per piante nella fase iniziale di sviluppo.\n\n[FAQ: Che cos'è la Modalità Chioma Adulta?]\n- Regola il calcolo integrando il volume di miscela raccomandato per ettaro e il volume effettivamente applicato dalla macchina.",
+      "formula": "Q_p = Volume da Preparare (L) × Concentrazione (%) / 100",
+      "unit_explanation": "Q_p : Quantità di Agrofarmaco (mL o g)\nVolume : Litri (L)\nConcentrazione : Percentuale (%)"
+    },
+    "calc_dose": {
+      "title": "Calcolatore di Dose per Ettaro",
+      "content": "[FAQ: Qual è la funzione di questo calcolatore?]\n- Converte la dose di etichetta (L/ha o kg/ha) nella quantità esatta di prodotto commerciale da aggiungere per serbatoio, in base al volume tarato.\n\n[FAQ: Come calcolare l'area coperta per pieno di serbatoio?]\n- Dividere la capacità del serbatoio per il volume reale applicato per ettaro. Esempio: 1.000 L / 200 L/ha = 5,0 ettari trattati per pieno.",
+      "formula": "Q_p = (C_d × D × 1.000) / V_a\nArea (ha) = C_d / V_a",
+      "unit_explanation": "Q_p : Quantità di Prodotto nel Serbatoio (mL o g)\nC_d : Volume da Preparare (L)\nD : Dose Autorizzata (L/ha o kg/ha)\nV_a : Volume Applicato (L/ha)"
+    },
+    "perfil_cultura": {
+      "title": "Profilo della Coltura & Geometria della Chioma",
+      "content": "[FAQ: A cosa serve il registro della coltura?]\n- La registrazione della coltura con varietà, stadio fenologico e sesto d'impianto permette di calcolare con precisione il volume di miscela e regolare il volume della chioma (TRV).\n\n[FAQ: Che cos'è l'Indice di Area Fogliare (LAI)?]\n- È il rapporto tra la superficie fogliare totale e la superficie di suolo occupata dalla vegetazione.",
+      "formula": "TRV (m³/ha) = (10.000 × W × H) / W_w",
+      "unit_explanation": "W_w : Sesto / Larghezza Interfilare (m)\nW : Larghezza Chioma (m)\nH : Altezza Chioma (m)"
+    },
+    "perfil_equipamento": {
+      "title": "Profilo dell'Atomizzatore / Irroratrice",
+      "content": "[FAQ: Perché è importante registrare i dati della macchina?]\n- Permette di gestire le caratteristiche della pompa, dei filtri, del gruppo di comando e del serbatoio per le prove di taratura secondo la norma ISO 16122.",
+      "formula": "Portata Pompa ≥ Portata Totale Q_t + Agitazione (≥5%)",
+      "unit_explanation": "Capacità : Litri (L)\nPressione : Bar (bar)"
+    },
+    "perfil_bicos": {
+      "title": "Profilo degli Ugelli di Irrorazione",
+      "content": "[FAQ: Come funziona la classificazione ISO degli ugelli?]\n- Il colore dell'ugello ne definisce la portata nominale a 3 bar di pressione secondo il codice ISO 10625.\n\n[FAQ: Perché è importante il tipo di ugello?]\n- Gli ugelli ad iniezione d'aria riducono drasticamente la deriva nelle giornate ventose.",
+      "formula": "Q_ugello (L/min) = (V_a × v × W_w) / (60.000 × N_ugelli)",
+      "unit_explanation": "Q_ugello : Portata dell'Ugello (L/min)\nAngolo : Angolo di Spruzzo (60°, 80°, 110°)"
+    },
+    "perfil_calibracao": {
+      "title": "Profilo di Taratura & Prova sul Campo",
+      "content": "[FAQ: Che cos'è una prova di taratura?]\n- È la misurazione in campo con acqua pulita per determinare la velocità reale, la portata degli ugelli e il volume di miscela distribuito per ettaro.",
+      "formula": "V_a (L/ha) = (600 × Q_t) / (v × W_w)",
+      "unit_explanation": "v : Velocità (km/h)\nQ_t : Portata Totale (L/min)\nW_w : Larghezza di Lavoro (m)"
+    },
+    "preferencias_unidades": {
+      "title": "Unità di Misura & Profili Standard",
+      "content": "[FAQ: Come funzionano i Profili di Unità?]\n- Consentono di passare dal Sistema Metrico Internazionale (SI) al Sistema Imperiale Americano (US) e al Sistema Regionale senza perdere la precisione dei calcoli idraulici.",
+      "formula": "Conversione automatica nell'ecosistema DATERRA Smart",
+      "unit_explanation": "SI : L, ha, bar, km/h\nUS : gal, acre, psi, mph"
+    }
+  }
+}

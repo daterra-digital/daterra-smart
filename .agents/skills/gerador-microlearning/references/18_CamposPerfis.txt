@@ -1,0 +1,298 @@
+Campos dos perfis
+
+Perfil - Cultura (localizado em Exploração > Cartão Cultura)
+
+Identificação e Área
+Cultura (dropdown: Macieira; Pereira; Batata; Vinha; Olival; Pessegueiro; Ameixa; Citrinos; Amendoeira; Tomate de Indústria; Outra.)
+Variedade: (texto)
+Área (ha): (texto)
+
+Dados Técnicos
+Sistema de Condução: (texto)
+Compasso: (texto)
+Distância Entrelinha: (texto)
+Estado Fenológico: (dropdown)
+
+Geometria da Copa
+Largura da copa: (texto)
+Altura da copa: (texto)
+LAI (Índice de Área Foliar): (texto)
+
+======
+
+Perfil - Equipamentos (localizado em Exploração > Cartão Equipamento)
+
+Identificação Principal (accordion)
+Nome (Referência): (texto)
+Fabricante: (dropdown)
+Modelo: (dropdown que permite adicionar registo)
+Nº Série: (texto)
+Ano Construção: (texto configurado a data para incluir apenas o ano)
+Capacidade depósito: (texto configurado para campo numérico)
+Depósito lava-mãos: (checkbox)
+Depósito lava-circuitos: (checkbox)
+Depósito incorporador de produto: (checkbox)
+Bicos: (dropdown cumulativa de lista de bicos configurados do perfil Bicos)
+
+Bomba e Filtros (accordion)
+Fabricante Bomba: (dropdown)
+Modelo: (dropdown quer permite adicionar registo)
+Tipo Bomba: (dropdown)
+Crivo enchimento: (checkbox)
+Filtro aspiração: (checkbox)
+Filtro pressão: (checkbox)
+Filtros de linha: (checkbox)
+
+Comandos e Regulação (accordion)
+Fabricante comando: (dropdown)
+Modelo comando: (dropdown que permite adicionar registo)
+Manual: (checkbox)
+Elétrico: (checkbox)
+ISOBUS: (checkbox)
+Automático: (checkbox)
+Computador: (checkbox)
+Nº de Secções: (texto configurado a campo numérico)
+
+Manómetro (accordion)
+Diâmetro manómetro: (texto configurado a campo numérico)
+Divisões escala: (texto configurado a campo numérico)
+Valor máximo escala: (texto configurado a campo numérico)
+Classe de erro: (texto configurado a campo numérico)
+Pressão máxima: (texto configurado a campo numérico)
+
+Equipamento de Distribuição (accordion)
+Tipo de equipamento: (dropdown: Barra horizontal; Barra vertical; Ventilador; Pistola/Lança; Pneumático; Canhão; Painéis)
+Se Barra Horizontal os campos são os seguintes:
+Largura barra: (texto configurado a campo numérico)
+Manga de ar: (checkbox)
+
+Se Barra Horizontal os campos são os seguintes:
+Altura da barra: (texto configurado a campo numérico)
+
+Se Ventilador os campos são os seguintes:
+Transmissão ventilador: (dropdown: correia, cardan)
+Diâmetro ventilador: (texto configurado a campo numérico)
+Tipo ventilador: (dropdown: axial, radial, fluxo cruzado)
+Defletor de ar de aspiração: (checkbox)
+Defletor de ar de compressão: (checkbox)
+Defletor de ar de compressão em altura: (checkbox)
+
+Se Pistola/Lança os campos são os seguintes:
+Número de pistolas/lanças: (texto configurado a campo numérico)
+Enroladores: (checkbox)
+Comprimento de mangueira: (texto configurado a campo numérico)
+
+Se Pneumático os campos são os seguintes:
+Número de bocais pneumáticos: (texto configurado a campo numérico)
+Número de bicos por bocal pneumático: (texto configurado a campo numérico)
+
+Se Canhão os campos são os seguintes:
+Número de agrupamento de bicos: (texto configurado a campo numérico)
+
+Se Painéis os campos são os seguintes:
+Número de painéis: (texto configurado a campo numérico)
+Número de linhas tratadas simultaneamente: (texto configurado a campo numérico)
+
+
+Outros e Observações (accordion)
+Notas: (texto)
+Data da Inspeção: (data da inspeção, para o alerta de validade com base na periodicidade das notificações)
+Data da Calibração: (data da calibração, para o alerta de validade com base na periodicidade das notificações)
+
+======
+
+Perfil - Bicos (localizado em Exploração > Bico)
+
+Equipamento associado: (dropdown: equipamentos criados pelo utilizador)
+Fabricante do bico: (dropdown: Albuz, Lechler, Hardi, ASJ, Teejet, …)
+Modelo: (dropdown: este dropdown depende do fabricante do bico)
+Cor: (dropdown: este dropdown depende do modelo e do fabricante do bico)
+Classificação ISO: (dropdown)
+Tipo de bico: (dropdown)
+Ângulo do jato: (dropdown)
+Pressão de trabalho: (texto)
+Débito tabelado: (resultado de fórmula de ferramenta da DATERRA Smart)
+Débito nominal: (texto)
+
+=====
+
+Perfil - Calibração (localizado em Exploração > Calibração)
+
+Equipamento associado: (dropdown: equipamentos criados pelo utilizador)
+Bico associado: (dropdown de bico criado pelo utilizador)
+Velocidade de trabalho: (texto)
+Pressão de trabalho: (texto)
+Largura de trabalho: (texto)
+Número de bicos ativos: (texto)
+Tamanho da gota: (texto)
+Débito total do pulverizador: (texto)
+
+Resultados calculados
+Volume de calda: (texto)
+Velocidade média do fluxo de ar: (texto)
+Volume médio do fluxo de ar: (texto)
+
+
+========================================
+
+Campos do sub-menus de Definições
+
+Definições - Perfil do utilizador (localizado em Definições > Perfil de Utilizador)
+
+Dados do perfil do utilizador
+Nome Próprio (Primeiro Nome)
+Apelido (Último Nome)
+Endereço de e-mail (email)
+Telemóvel
+Telefone
+
+Informação Profissional e Morada
+Empresa
+Função
+NIF
+Cargo
+Morada
+Código-Postal
+Localidade
+
+Alterar Palavra-Passe
+Palavra-passe atual
+Nova Palavra-passe
+Confirmar Nova Palavra-passe
+
+Contas Associadas
+Facebook
+LinkedIn
+Moodle
+
+Zona de Perigo
+Eliminar Conta
+Ao eliminar a sua conta, todos os seus dados, registos de culturas e equipamentos serão permanentemente removidos. Esta ação não pode ser desfeita.
+
+=====
+
+Preferências
+
+Definições - Preferências (localizado em Definições > Preferências)
+
+Idioma e Região
+Idioma: (dropdown: PT-Português de Portugal, BR-Português do Brasil, ES-Espanhol, FR-Francês, IT-Italiano, DL-Alemão, EL-Grego)
+
+Unidades Padrão
+
+Para o menu de definições da sua plataforma, os nomes devem ser curtos e as indicações (descrições) devem explicar claramente onde o perfil é usado e quais as principais unidades que ele ativa.
+Aqui está a estrutura exata de textos que pode copiar para a sua interface de utilizador (UI):
+1. Sistema Métrico Internacional
+Nome no Menu: Métrico Internacional (SI)
+Indicação/Descrição: "Padrão oficial utilizado na Europa, Brasil e na maior parte do mundo. Ativa unidades como Hectares (ha), Quilogramas (kg), Litros (L) e Bar."
+
+2. Sistema Americano
+Nome no Menu: Imperial / Americano (US)
+Indicação/Descrição: "Ideal para utilizadores nos EUA ou para quem opera maquinaria agrícola americana. Ativa unidades como Acres (ac), Bushels (bu), Galões (gal) e PSI."
+
+3. Sistema Híbrido Anglo-Saxónico
+Nome no Menu: Misto Anglo-Saxónico (UK / CA / AU)
+Indicação/Descrição: "Configuração comum no Reino Unido, Canadá e Austrália. Combina áreas métricas (ha) e volumes (L) com rendimentos comerciais em Bushels ou Libras (lb)."
+
+4. Sistema Regional Tradicional
+Nome no Menu: Regional Tradicional (Ibérico / LatAm)
+Indicação/Descrição: "Indicado para pequenas e médias explorações focadas no comércio local. Permite a introdução de dados em unidades históricas como Alqueires, Arrobas (@) e Quintais."
+
+Dica de Design de Interface (UI)Ao lado ou abaixo de cada nome de perfil, coloque uma pequena lista visual com 3 ou 4 unidades de exemplo (ex: ha, kg, L, bar) em texto cinzento claro. Isso ajuda o agricultor a identificar imediatamente o perfil correto sem precisar de ler toda a descrição.
+
+=====
+
+Definições - Notificações (localizado em Definições > Notificações)
+
+Geral
+Ativar todas as notificações: (checkbox)
+
+Canais
+Notificações Push (Telemóvel): (checkbox)
+Notificações por E-mail: (checkbox)
+
+Não Incomodar
+Horário Silencioso: (checkbox)
+Inicio: (texto)
+Fim: (texto)
+
+Manutenção e Calibração
+Manutenção preventiva: (checkbox)
+Validade de calibração: (checkbox)
+Lembrar-me antes de (meses): (dropdown: 1 mês; 6 meses; 12 meses; 24 meses)
+Inspeção obrigatória: (checkbox)
+Lembrar-me antes de (anos): (dropdown: 1 ano; 2 anos; 3 anos; 4 anos; 5 anos)
+
+Agronomia
+Mudança de estado fenológico: (checkbox)
+Janela de tratamento: (checkbox)
+
+Plataforma
+Novidades e atualizações: (checkbox)
+Dicas de uso: (checkbox)
+
+=====
+
+Definições - Gestão de Dados (localizado em Definições > Gestão de Dados)
+
+Exportar Dados
+Backup completo (JSON): (botão de exportação de ficheiro JSON)
+Tabelas (CSV): (botão de exportação de ficheiro CSV)
+Relatórios (PDF): (botão de exportação de relatório de pré-inspeção; botão de exportação de relatório de inspeção; botão de exportação de fichas de calibração)
+
+Importar Dados
+Baixar Modelo: (botão para descarregar modelo de importação de dados)
+Carregar Ficheiro: (botão para importar ficheiro)
+
+Zona de Perigo - Ações irreversíveis. Tenha cuidado.
+
+Perfil - Culturas: (botão apagar)
+Perfil - Equipamentos: (botão apagar)
+Perfil - Bicos: (botão apagar)
+Perfil - Calibrações: (botão apagar)
+
+Botão Apagar Tudo (botão apagar)
+
+=====
+
+Definições - Ajuda e Suporte (localizado em Definições > Ajuda e Suporte)
+
+Barra de pesquisa das dropdowns com as respostas a questões predefinidas.
+
+Formulário para envio de questões: Contacte-nos.
+
+======
+
+Definições - Sobre (localizado em Definições > Sobre)
+
+A DATERRA Smart é uma suíte de ferramentas digitais desenhada para apoiar agricultores e técnicos na tomada de decisão, cálculo de parâmetros de pulverização e gestão eficiente da exploração agrícola.
+
+Versão: xx.xx.x (Build xxxx.xx)
+
+Legal
+Termos de Serviços: (Link)
+Política de Privacidade: (Link)
+Isenção de Responsabilidade: (Link)
+
+Suporte
+Visitar Site Institucional: (Link)
+Página DATERRA Smart: (Link)
+Enviar E-mail de Suporte: (Link)
+
+Agradecimentos e Fontes
+Esta aplicação utiliza dados e fórmulas baseadas em normas internacionais (ISO 16122, EPPO) diretrizes da DGAV (Código de Conduta 2020) e catálogos de fabricantes de bicos (Lechler, Teejet, Albuz, etc). Os dados meteorológicos são fornecidos pelo IPMA (PT) e OpenMeteo.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

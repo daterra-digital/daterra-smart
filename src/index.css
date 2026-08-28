@@ -1,0 +1,126 @@
+@import "tailwindcss";
+
+@theme {
+  --color-daterra-primary: #114037;
+  --color-daterra-primary-hover: #0d332c;
+  --color-daterra-secondary: #1D734B;
+  --color-daterra-accent: #3CA64C;
+  --color-daterra-accent-hover: #3AAA35;
+  --color-daterra-accent-light: #eef8f0;
+  --color-daterra-bg: #F2F2F2;
+  --color-daterra-card: #FFFFFF;
+  --color-daterra-muted: #64748B;
+  --color-daterra-dark: #0F172A;
+
+  --font-sans: "Plus Jakarta Sans", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+
+  --shadow-soft: 0 4px 20px -2px rgba(17, 64, 55, 0.08);
+  --shadow-floating: 0 12px 32px -4px rgba(17, 64, 55, 0.16);
+}
+
+body {
+  background-color: #F2F2F2;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  color: #1E293B;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Fluid Typography Scale using clamp() */
+.text-fluid-title {
+  font-size: clamp(1.35rem, 2.5vw, 2.15rem);
+  line-height: 1.2;
+}
+
+.text-fluid-subtitle {
+  font-size: clamp(1.05rem, 1.8vw, 1.45rem);
+  line-height: 1.3;
+}
+
+.text-fluid-body {
+  font-size: clamp(0.8125rem, 1.2vw, 0.9375rem);
+  line-height: 1.5;
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #F1F5F9;
+}
+::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94A3B8;
+}
+
+/* Touch Target Ergonomia Mobile-First (Mínimo 44px - 48px) */
+.touch-target {
+  min-height: 48px;
+}
+
+.font-mono-numbers, input[type="number"], .input-mono {
+  font-family: 'JetBrains Mono', monospace !important;
+  font-feature-settings: "tnum" 1;
+}
+
+/* Dynamic Keypad Buttons */
+.keypad-btn {
+  min-height: 52px;
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 1.25rem;
+  border-radius: 0.875rem;
+  transition: all 0.15s ease-in-out;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+.keypad-btn:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+.keypad-btn:active {
+  transform: scale(0.95);
+}
+
+.keypad-operator {
+  min-height: 52px;
+  background-color: #1D734B;
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 1.25rem;
+  border-radius: 0.875rem;
+  transition: all 0.15s ease-in-out;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+.keypad-operator:hover {
+  background-color: rgba(29, 115, 75, 0.9);
+}
+.keypad-operator:active {
+  transform: scale(0.95);
+}
+
+.keypad-action {
+  min-height: 52px;
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 1.125rem;
+  border-radius: 0.875rem;
+  transition: all 0.15s ease-in-out;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+.keypad-action:active {
+  transform: scale(0.95);
+}

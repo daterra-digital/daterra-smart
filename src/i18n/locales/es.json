@@ -1,0 +1,300 @@
+{
+  "nav": {
+    "home": "Inicio",
+    "tools": "Herramientas",
+    "features": "Funcionalidades",
+    "exploration": "Explotación",
+    "weather": "Meteorología",
+    "ndvi": "Mapas NDVI",
+    "academy": "Academia",
+    "settings": "Ajustes"
+  },
+  "dashboard": {
+    "title": "Panel General de la Explotación",
+    "farm": "Explotación Agrícola",
+    "welcome": "Bienvenido",
+    "welcomeUser": "Bienvenido, Ing.",
+    "subscriptionNotice": "Suscripción activa en el Plan Free. Todas las herramientas agronómicas sincronizadas y operativas.",
+    "freePlan": "Plan Free",
+    "active": "Activo",
+    "weatherCardTitle": "Meteorología de la Explotación",
+    "extendedForecast": "Previsión Extendida de la Semana",
+    "driftRisk": "Riesgo de Deriva",
+    "driftRisks": {
+      "low": "Bajo",
+      "veryLow": "Muy Bajo",
+      "moderate": "Moderado",
+      "high": "Alto"
+    },
+    "weatherLabels": {
+      "clear": "Cielo Despejado",
+      "sunny": "Soleado",
+      "partlyCloudy": "Parc. Nublado",
+      "lightRain": "Lluvia Ligera",
+      "fewClouds": "Pocas Nubes"
+    },
+    "ndviCardTitle": "Mapas NDVI e Índice Vegetativo",
+    "satelliteSentinel": "Satélite Sentinel-2",
+    "vegetativeVigorIndex": "Índice de Vigor Vegetal (NDVI)",
+    "foliarBiomassAnalysis": "Análisis Espacial de Biomasa Foliar",
+    "spatialResolution": "Resolución Espacial 10m",
+    "lastPassage": "Última Pasada del Satélite",
+    "viewNdviHistory": "Ver Histórico de Mapas NDVI",
+    "favoriteToolsTitle": "Herramientas Favoritas",
+    "quickAccess": "Acceso rápido a las calculadoras de precisión y calibración."
+  },
+  "tools": {
+    "title": "Herramientas Agronómicas",
+    "searchPlaceholder": "Buscar herramienta o funcionalidad por nombre...",
+    "categoryTitle": "Categorías de Funcionalidades",
+    "allCategories": "Todas",
+    "catCalibration": "Calibración",
+    "catSpraying": "Pulverización",
+    "catManagement": "Gestión",
+    "catWeather": "Clima",
+    "openTool": "Abrir Herramienta",
+    "favorite": "Favorita",
+    "install": "Instalar",
+    "uninstall": "Desinstalar",
+    "essential": "Esencial",
+    "showing": "Mostrando",
+    "toolsCountOne": "herramienta",
+    "toolsCountOther": "herramientas",
+    "activeCount": "activas",
+    "filterActive": "Filtro",
+    "noToolsFound": "No se encontraron herramientas",
+    "noToolsFoundDesc": "No se encontraron funcionalidades para el término buscado. Intente buscar otro nombre o limpiar el filtro.",
+    "clearFilter": "Limpiar Búsqueda y Filtros",
+    "catalog": {
+      "calc_concentracao": {
+        "name": "Calculadora de Concentración del Caldo",
+        "description": "Calcula la cantidad exacta de pesticida a diluir por depósito para Planta Joven o Copa Adulta."
+      },
+      "calc_dose": {
+        "name": "Calculadora de Dosis por Hectárea",
+        "description": "Convierte la dosis de la etiqueta (L/ha o kg/ha) al caldo del depósito y calcula el área cubierta por tanque."
+      },
+      "inspecao_bicos": {
+        "name": "Inspección de Boquillas ISO 16122",
+        "description": "Mide el caudal real en probeta por boquilla y detecta desviaciones de desgaste superiores a ±10% (Norma ISO 16122)."
+      },
+      "geometria_trv_copa": {
+        "name": "Volumen de Copa TRV (Tree Row Volume)",
+        "description": "Determina la masa foliar tridimensional (m³/ha) en frutales y viñedos para el cálculo de dosis proporcional."
+      },
+      "gestao_caderno_campo": {
+        "name": "Cuaderno de Campo Digital DGAV",
+        "description": "Registro digital de tratamientos fitosanitarios con verificación automática de límites normativos."
+      },
+      "clima_estacao_agricola": {
+        "name": "Estación Climática & Riesgo de Deriva",
+        "description": "Monitorización en tiempo real de velocidad del viento, humedad y temperatura con alertas de deriva."
+      },
+      "mistura_compatibilidade": {
+        "name": "Guía de Secuencia de Mezcla",
+        "description": "Orden correcto de adición de productos en el depósito para evitar floculación e inactivación de sustancias."
+      },
+      "perfil_exploracao": {
+        "name": "Perfil de la Explotación & Equipamiento",
+        "description": "Registro centralizado de parcelas, cultivos, pulverizadores y boquillas de la explotación agrícola."
+      }
+    },
+    "form": {
+      "modeYoung": "Modo Planta Joven",
+      "modeAdult": "Modo Copa Adulta",
+      "volumeToPrepare": "Volumen a Preparar (L)",
+      "recommendedConcentration": "Concentración Recomendada (%)",
+      "recommendedVolumeLha": "Volumen Recomendado (L/ha)",
+      "appliedVolumeLha": "Volumen Aplicado (L/ha)",
+      "labelDose": "Dosis Recomendada (L/ha o kg/ha)",
+      "requiredPesticideQty": "Cantidad Necesaria de Pesticida:",
+      "treatedAreaPerTank": "Área Tratada por Depósito:",
+      "saveToHistory": "Guardar Cálculo en Histórico (IndexedDB)"
+    }
+  },
+  "exploration": {
+    "title": "Explotación & Perfiles Técnicos",
+    "subtitle": "Mapeo de cultivos, especificaciones ISO de atomizadores, boquillas y calibración hidráulica.",
+    "normativeTag": "Normativas ISO 16122 & DGAV",
+    "tabs": {
+      "culture": "Cultivo",
+      "equipment": "Equipamiento",
+      "nozzles": "Boquillas",
+      "calibration": "Calibración"
+    },
+    "formattingNote": "Nota de Formato: Al introducir valores numéricos con decimales en los formularios, utilice la coma (,) como separador (ej: 2,5 bar o 4,5 ha).",
+    "saveCulture": "Guardar Perfil de Cultivo en IndexedDB",
+    "saveEquipment": "Guardar Perfil de Equipamiento en IndexedDB",
+    "addNozzle": "Añadir Boquilla a IndexedDB",
+    "saveCalibration": "Guardar Ficha de Calibración en IndexedDB",
+    "helpButton": "Ayuda",
+    "options": {
+      "crops": {
+        "vineyard": "Viñedo",
+        "apple": "Manzano",
+        "olive": "Olivar",
+        "citrus": "Cítricos",
+        "pear": "Peral",
+        "other": "Otros Cultivos"
+      },
+      "trainingSystems": {
+        "border": "Cordón",
+        "guyot": "Guyot",
+        "vsp": "VSP (Posición Vertical)",
+        "centralAxis": "Eje Central",
+        "free": "Libre"
+      },
+      "phenological": {
+        "budburst": "Brotación",
+        "flowering": "Floración",
+        "fruitSet": "Cuajado",
+        "veraison": "Envero / Maduración",
+        "postHarvest": "Post-Cosecha"
+      },
+      "manufacturers": {
+        "tomix": "Tomix",
+        "rocha": "Rocha",
+        "jacto": "Jacto",
+        "hardi": "Hardi",
+        "berthoud": "Berthoud",
+        "caffini": "Caffini",
+        "kuhn": "Kuhn",
+        "other": "Otro"
+      },
+      "distributionTypes": {
+        "horizontalBoom": "Barra horizontal",
+        "verticalBoom": "Barra vertical",
+        "fan": "Ventilador",
+        "gunLance": "Pistola/Lanza",
+        "pneumatic": "Neumático",
+        "cannon": "Cañón",
+        "panels": "Paneles"
+      },
+      "nozzleTypes": {
+        "hollowCone": "Cono Hueco",
+        "airInduction": "Inyección de Aire",
+        "standardFlat": "Abanico Estándar",
+        "deflector": "Espejo"
+      }
+    },
+    "accordions": {
+      "ident": "1. Identificación Principal",
+      "pump": "2. Bomba y Filtros",
+      "commands": "3. Mandos y Regulación",
+      "manometer": "4. Manómetro",
+      "distribution": "5. Equipamiento de Distribución",
+      "others": "6. Otros y Observaciones"
+    }
+  },
+  "settings": {
+    "title": "Ajustes Globales",
+    "subtitle": "Gestión del perfil de usuario, unidades de medida, notificaciones y seguridad de datos.",
+    "tabs": {
+      "profile": "Perfil de Usuario",
+      "preferences": "Preferencias",
+      "notifications": "Notificaciones",
+      "dataManagement": "Gestión de Datos",
+      "help": "Ayuda & Soporte",
+      "about": "Acerca de"
+    },
+    "languageAndRegion": "Idioma y Región",
+    "interfaceLanguage": "Idioma de la Interfaz",
+    "unitsProfilesTitle": "Perfiles de Unidades de Medida Estándar",
+    "units": {
+      "si": "Sistema Métrico Internacional (SI)",
+      "us": "Sistema Imperial / Americano (US)",
+      "uk": "Sistema Mixto Anglosajón (UK / CA / AU)",
+      "trad": "Sistema Regional Tradicional (Ibérico / LatAm)"
+    },
+    "dangerZone": {
+      "title": "Zona de Peligro — Acciones Destructivas Irreversibles",
+      "subtitle": "Las siguientes operaciones eliminan datos del almacenamiento local IndexedDB sin posibilidad de recuperación.",
+      "deleteCultures": "Eliminar Perfiles de Cultivo",
+      "deleteEquipments": "Eliminar Equipamiento",
+      "deleteNozzles": "Eliminar Perfiles de Boquillas",
+      "deleteCalibrations": "Eliminar Calibraciones",
+      "deleteAll": "ELIMINAR TODOS LOS DATOS DE LA EXPLOTACIÓN (RESET TOTAL)"
+    },
+    "saveProfile": "Guardar Cambios del Perfil",
+    "savePreferences": "Guardar Preferencias y Unidades Estándar",
+    "saveNotifications": "Guardar Configuración de Notificaciones"
+  },
+  "academy": {
+    "title": "Academia DATERRA",
+    "subtitle": "Capacitación técnica, manuales normativos EPPO/DGAV y formación agronómica continua.",
+    "moodleConnected": "Academia DATERRA (Moodle): Conectado",
+    "visitAcademy": "Visitar Academia",
+    "activeCourse": "Curso en Progreso",
+    "percentCompleted": "75% Completado",
+    "courseTitle": "Buenas Prácticas en la Aplicación de Fitosanitarios y Calibración de Equipos",
+    "courseDescription": "Módulo certificado sobre homologación de productos, cálculo de volumen de caldo, seguridad del aplicador y prevención de contaminación de acuíferos.",
+    "viewProgram": "Ver Programa en la Academia"
+  },
+  "keypad": {
+    "expressionHeader": "Expresión & Cálculo",
+    "evaluatedResult": "Resultado Evaluado:",
+    "invalidExpression": "Expresión Invalida",
+    "unitLabel": "Unidad:",
+    "commonShortcuts": "Valores Comunes (Accesos Rápidos)",
+    "clearButton": "C (Limpiar)",
+    "confirmButton": "OK (Confirmar)",
+    "disabledConfirm": "OK (Inactivo < 1)"
+  },
+  "microlearning": {
+    "capsuleTitle": "Cápsula de Conocimiento DATERRA Smart",
+    "defaultTitle": "Información Técnica y Reguladora",
+    "loading": "Cargando cápsula de conocimiento...",
+    "technicalConcept": "Concepto Técnico",
+    "formula": "Fórmula",
+    "units": "Unidades",
+    "helpButton": "Ayuda",
+    "moreInfoButton": "Saber más",
+    "deepenHeader": "Formación y Capacitación Agronómica",
+    "deepenSub": "Profundice sus conocimientos técnicos en la Academia DATERRA.",
+    "understood": "Entendido"
+  },
+  "microlearningContent": {
+    "calc_concentracao": {
+      "title": "Calculadora de Concentración del Caldo",
+      "content": "[FAQ: ¿Cuál es la función de la Calculadora de Concentración?]\n- Calcula la cantidad exacta de pesticida a diluir por depósito para Planta Jovem o Copa Adulta según la dosis autorizada en la etiqueta oficial.\n\n[FAQ: ¿Qué es el Modo Planta Joven?]\n- Considera el volumen a preparar y la concentración recomendada en la etiqueta para plantas en fase inicial de desarrollo.\n\n[FAQ: ¿Qué es el Modo Copa Adulta?]\n- Ajusta el cálculo integrando el volumen de caldo recomendado por hectárea y el volumen efectivamente aplicado por el pulverizador.",
+      "formula": "Q_p = Volumen a Preparar (L) × Concentración (%) / 100",
+      "unit_explanation": "Q_p : Cantidad de Pesticida (mL o g)\nVolumen : Litros (L)\nConcentración : Porcentaje (%)"
+    },
+    "calc_dose": {
+      "title": "Calculadora de Dosis por Hectárea",
+      "content": "[FAQ: ¿Cuál es la función de esta calculadora?]\n- Convierte la dosis autorizada de la etiqueta (L/ha o kg/ha) en la cantidad exacta de producto comercial a añadir por depósito, según el volumen de caldo calibrado en el equipo.\n\n[FAQ: ¿Cómo calcular el área cubierta por cada tanque lleno?]\n- Divida la capacidad del depósito entre el volumen de caldo real aplicado por hectárea. Ejemplo: 1.000 L / 200 L/ha = 5,0 hectáreas tratadas por tanque.",
+      "formula": "Q_p = (C_d × D × 1.000) / V_a\nÁrea (ha) = C_d / V_a",
+      "unit_explanation": "Q_p : Cantidad de Producto en el Depósito (mL o g)\nC_d : Volumen a Preparar (L)\nD : Dosis Autorizada (L/ha o kg/ha)\nV_a : Volumen Aplicado (L/ha)"
+    },
+    "perfil_cultura": {
+      "title": "Perfil del Cultivo & Geometría de la Copa",
+      "content": "[FAQ: ¿Para qué sirve el registro de cultivo?]\n- El registro del cultivo con variedad, estado fenológico y marco de plantación permite calcular con precisión la dosis de caldo y ajustar el volumen de copa (TRV).\n\n[FAQ: ¿Qué es el Índice de Área Foliar (LAI)?]\n- Es la proporción entre el área foliar total y el área de suelo ocupada por la masa vegetal.",
+      "formula": "TRV (m³/ha) = (10.000 × W × H) / W_w",
+      "unit_explanation": "W_w : Distancia entre Filas (m)\nW : Anchura de Copa (m)\nH : Altura de Copa (m)"
+    },
+    "perfil_equipamento": {
+      "title": "Perfil del Equipo de Pulverización",
+      "content": "[FAQ: ¿Por qué es importante registrar los datos del pulverizador?]\n- Permite gestionar las características de la bomba, filtros, mandos y depósito para los ensayos de calibración según la norma ISO 16122.",
+      "formula": "Caudal de la Bomba ≥ Caudal Total Q_t + Agitación (≥5%)",
+      "unit_explanation": "Capacidad : Litros (L)\nPresión : Bar (bar)"
+    },
+    "perfil_bicos": {
+      "title": "Perfil de las Boquillas de Pulverización",
+      "content": "[FAQ: ¿Cómo funciona la clasificación ISO de boquillas?]\n- El color de la boquilla define su caudal nominal a 3 bar de presión según el código ISO 10625.\n\n[FAQ: ¿Por qué importa el tipo de boquilla?]\n- Las boquillas con inyección de aire reducen drásticamente la deriva en días de viento.",
+      "formula": "Q_boquilla (L/min) = (V_a × v × W_w) / (60.000 × N_boquillas)",
+      "unit_explanation": "Q_boquilla : Caudal de la Boquilla (L/min)\nÁngulo : Ángulo del Chorro (60°, 80°, 110°)"
+    },
+    "perfil_calibracao": {
+      "title": "Perfil de Calibración & Ensayo de Campo",
+      "content": "[FAQ: ¿Qué es un ensayo de calibración?]\n- Es la medición en campo con agua limpia para determinar la velocidad real, caudal de las boquillas y volumen de caldo aplicado por hectárea.",
+      "formula": "V_a (L/ha) = (600 × Q_t) / (v × W_w)",
+      "unit_explanation": "v : Velocidad (km/h)\nQ_t : Caudal Total (L/min)\nW_w : Anchura de Trabajo (m)"
+    },
+    "preferencias_unidades": {
+      "title": "Unidades de Medida & Perfiles Estándar",
+      "content": "[FAQ: ¿Cómo funcionan los Perfiles de Unidades?]\n- Permiten alternar entre el Sistema Métrico Internacional (SI), el Sistema Imperial Americano (US) y el Sistema Tradicional Regional sin perder la precisión de los cálculos hidráulicos.",
+      "formula": "Conversión automática en el ecosistema DATERRA Smart",
+      "unit_explanation": "SI : L, ha, bar, km/h\nUS : gal, acre, psi, mph"
+    }
+  }
+}

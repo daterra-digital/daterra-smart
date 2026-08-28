@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2" viewBox="0 0 880 400" width="880" height="400">
+  <!-- DATERRA Emblem (viewBox 0 0 400 400) -->
+  <g transform="translate(0, 0)">
+    <!-- Horizontal Large Petal - Right (Outline only) -->
+    <path d="M0-85.222c-10.4 0-20.796 3.966-28.728 11.898l-28.729 28.725 28.729 28.731C-12.861 0 12.861 0 28.728-15.868l28.725-28.731-28.725-28.725C20.793-81.256 10.396-85.222 0-85.222" fill="none" stroke="#FFFFFF" stroke-width="5" stroke-linejoin="round" fill-rule="nonzero" transform="translate(281.55 264.357)scale(1.41542)"/>
+
+    <!-- Horizontal Large Petal - Left (Outline only) -->
+    <path d="m0 53.487 28.725-28.731L0-3.969c-7.932-7.933-18.332-11.898-28.728-11.898s-20.796 3.965-28.728 11.898l-28.725 28.725 28.725 28.731c15.867 15.867 41.589 15.867 57.456 0" fill="none" stroke="#FFFFFF" stroke-width="5" stroke-linejoin="round" fill-rule="nonzero" transform="translate(159.11 166.191)scale(1.41542)"/>
+
+    <!-- Vertical Large Petal - Bottom (Solid White) -->
+    <path d="m0-114.912-28.728 28.729c-15.867 15.867-15.867 41.588 0 57.456L0 0l28.729-28.727c15.867-15.868 15.867-41.589 0-57.456z" fill="#FFFFFF" fill-rule="nonzero" transform="translate(200.225 378.613)scale(1.41542)"/>
+
+    <!-- Vertical Large Petal - Top (Solid White) -->
+    <path d="m0 114.916 28.731-28.729c15.864-15.867 15.864-41.591 0-57.459L0 0l-28.725 28.728c-15.867 15.868-15.867 41.592 0 57.459z" fill="#FFFFFF" fill-rule="nonzero" transform="translate(199.769 21.386)scale(1.41542)"/>
+
+    <!-- Small Corner Petals (Solid White) -->
+    <path d="M0 49.554h24.778V24.779C24.778 11.095 13.684 0 0 0h-24.778v24.779c0 13.683 11.094 24.775 24.778 24.775" fill="#FFFFFF" fill-rule="nonzero" transform="translate(95.209 59.165)scale(1.41542)"/>
+    <path d="M0-49.56h-24.775v24.781C-24.775-11.095-13.683 0 0 0h24.775v-24.779C24.775-38.465 13.684-49.56 0-49.56" fill="#FFFFFF" fill-rule="nonzero" transform="translate(305.792 341.06)scale(1.41542)"/>
+    <path d="M0 .003v-24.778h-24.775c-13.683 0-24.775 11.094-24.775 24.778v24.775h24.775C-11.092 24.778 0 13.687 0 .003" fill="#FFFFFF" fill-rule="nonzero" transform="translate(340.86 94.233)scale(1.41542)"/>
+    <path d="M0 .003v24.778h24.778c13.684 0 24.779-11.094 24.779-24.778v-24.781H24.778C11.095-24.778 0-13.684 0 .003" fill="#FFFFFF" fill-rule="nonzero" transform="translate(60.137 305.984)scale(1.41542)"/>
+  </g>
+
+  <!-- Typography Block on the Right -->
+  <g transform="translate(410, 0)">
+    <text x="0" y="195" font-family="'Plus Jakarta Sans', 'Playfair Display', Georgia, sans-serif" font-weight="800" font-size="78" fill="#FFFFFF" letter-spacing="2">DATERRA</text>
+    <text x="0" y="260" font-family="'Plus Jakarta Sans', 'Playfair Display', Georgia, sans-serif" font-weight="800" font-size="60" fill="#3CA64C" letter-spacing="12">Smart</text>
+  </g>
+</svg>

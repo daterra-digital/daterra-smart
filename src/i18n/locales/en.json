@@ -1,0 +1,146 @@
+{
+  "nav": {
+    "home": "Home",
+    "tools": "Tools",
+    "features": "Features",
+    "exploration": "Farm",
+    "weather": "Weather",
+    "ndvi": "NDVI Maps",
+    "academy": "Academy",
+    "settings": "Settings"
+  },
+  "dashboard": {
+    "title": "Farm Overview Panel",
+    "farm": "Agricultural Farm",
+    "welcome": "Welcome, Eng.",
+    "subscriptionNotice": "Active subscription on the Free Plan. All agronomic tools are synchronized and operational.",
+    "freePlan": "Free Plan",
+    "active": "Active",
+    "weatherCardTitle": "Farm Weather",
+    "ndviCardTitle": "NDVI Maps & Vegetation Indices",
+    "favoriteToolsTitle": "Favorite Tools",
+    "quickAccess": "Quick access to precision calculators and calibration tools."
+  },
+  "tools": {
+    "title": "Agronomic Tools",
+    "searchPlaceholder": "Search tools by name...",
+    "allCategories": "All",
+    "catCalibration": "Calibration",
+    "catSpraying": "Spraying",
+    "catManagement": "Management",
+    "catWeather": "Weather",
+    "openTool": "Open Tool",
+    "favorite": "Favorite"
+  },
+  "exploration": {
+    "title": "Farm & Technical Profiles",
+    "subtitle": "Crop mapping, sprayer ISO specifications, nozzles, and hydraulic calibration.",
+    "normativeTag": "ISO 16122 & DGAV Standards",
+    "tabs": {
+      "culture": "Crop",
+      "equipment": "Equipment",
+      "nozzles": "Nozzles",
+      "calibration": "Calibration"
+    },
+    "formattingNote": "Formatting Note: When entering decimal values in forms, use comma (,) as the separator (e.g. 2,5 bar or 4,5 ha).",
+    "saveCulture": "Save Crop Profile in IndexedDB",
+    "saveEquipment": "Save Equipment Profile in IndexedDB",
+    "addNozzle": "Add Nozzle to IndexedDB",
+    "saveCalibration": "Save Calibration Record in IndexedDB",
+    "helpButton": "Help"
+  },
+  "settings": {
+    "title": "Global Settings",
+    "subtitle": "User profile management, measurement units, notifications, and data security.",
+    "tabs": {
+      "profile": "User Profile",
+      "preferences": "Preferences",
+      "notifications": "Notifications",
+      "dataManagement": "Data Management",
+      "help": "Help & Support",
+      "about": "About"
+    },
+    "languageAndRegion": "Language & Region",
+    "interfaceLanguage": "Interface Language",
+    "unitsProfilesTitle": "Standard Measurement Units Profiles",
+    "units": {
+      "si": "International Metric System (SI)",
+      "us": "Imperial / US Customary System (US)",
+      "uk": "Mixed Anglo-Saxon System (UK / CA / AU)",
+      "trad": "Traditional Regional System (Iberian / LatAm)"
+    },
+    "dangerZone": {
+      "title": "Danger Zone — Irreversible Destructive Actions",
+      "subtitle": "The actions below permanently delete data from local IndexedDB storage.",
+      "deleteCultures": "Delete Crop Profiles",
+      "deleteEquipments": "Delete Equipment",
+      "deleteNozzles": "Delete Nozzle Profiles",
+      "deleteCalibrations": "Delete Calibrations",
+      "deleteAll": "DELETE ALL FARM DATA (TOTAL RESET)"
+    },
+    "saveProfile": "Save Profile Changes",
+    "savePreferences": "Save Preferences and Standard Units",
+    "saveNotifications": "Save Notification Settings"
+  },
+  "academy": {
+    "title": "DATERRA Academy",
+    "subtitle": "Technical training, EPPO/DGAV standard manuals, and continuous agronomic education."
+  },
+  "microlearning": {
+    "capsuleTitle": "DATERRA Smart Knowledge Capsule",
+    "defaultTitle": "Technical & Regulatory Information",
+    "loading": "Loading knowledge capsule...",
+    "technicalConcept": "Technical Concept",
+    "formula": "Formula",
+    "units": "Units",
+    "helpButton": "Help",
+    "moreInfoButton": "Learn more",
+    "deepenHeader": "Agronomic Training & Capacity Building",
+    "deepenSub": "Deepen your technical knowledge at DATERRA Academy.",
+    "understood": "Understood"
+  },
+  "microlearningContent": {
+    "calc_concentracao": {
+      "title": "Spray Mixture Concentration Calculator",
+      "content": "[FAQ: What is the purpose of the Concentration Calculator?]\n- Calculates the exact amount of pesticide to dilute per tank for Young Crop or Adult Canopy based on authorized DGAV label dosage.\n\n[FAQ: What is Young Crop Mode?]\n- Takes into account the target volume to prepare and recommended label concentration for early-stage crops.\n\n[FAQ: What is Adult Canopy Mode?]\n- Adjusts the calculation by integrating the recommended spray volume per hectare and actual volume applied by equipment.",
+      "formula": "Q_p = Volume to Prepare (L) × Concentration (%) / 100",
+      "unit_explanation": "Q_p : Pesticide Quantity (mL or g)\nVolume : Liters (L)\nConcentration : Percentage (%)"
+    },
+    "calc_dose": {
+      "title": "Dose Per Hectare Calculator",
+      "content": "[FAQ: What is the function of this calculator?]\n- Converts label dose (L/ha or kg/ha) into exact product amount per tank based on calibrated spray volume.\n\n[FAQ: How to calculate area covered per full tank?]\n- Divide tank capacity by actual spray volume per hectare. Example: 1,000 L / 200 L/ha = 5.0 hectares per tank.",
+      "formula": "Q_p = (C_d × D × 1,000) / V_a\nArea (ha) = C_d / V_a",
+      "unit_explanation": "Q_p : Product Quantity in Tank (mL or g)\nC_d : Volume to Prepare (L)\nD : Label Dose (L/ha or kg/ha)\nV_a : Applied Volume (L/ha)"
+    },
+    "perfil_cultura": {
+      "title": "Crop Profile & Canopy Geometry",
+      "content": "[FAQ: Why record crop details?]\n- Recording crop variety, phenological stage, and row spacing allows precise spray volume calculation and TRV adjustments.\n\n[FAQ: What is Leaf Area Index (LAI)?]\n- It is the ratio of total upper leaf surface area to ground surface area.",
+      "formula": "TRV (m³/ha) = (10,000 × W × H) / W_w",
+      "unit_explanation": "W_w : Row Spacing (m)\nW : Canopy Width (m)\nH : Canopy Height (m)"
+    },
+    "perfil_equipamento": {
+      "title": "Spraying Equipment Profile",
+      "content": "[FAQ: Why record sprayer details?]\n- Allows management of pump, filter, regulator, and tank specifications for ISO 16122 calibration tests.",
+      "formula": "Pump Flow Rate ≥ Total Flow Q_t + Agitation (≥5%)",
+      "unit_explanation": "Capacity : Liters (L)\nPressure : Bar (bar)"
+    },
+    "perfil_bicos": {
+      "title": "Sprayer Nozzles Profile",
+      "content": "[FAQ: How does ISO nozzle classification work?]\n- Nozzle color defines nominal flow rate at 3 bar pressure according to ISO 10625 standard.\n\n[FAQ: Why does nozzle type matter?]\n- Air-induction nozzles drastically reduce drift on windy days.",
+      "formula": "Q_nozzle (L/min) = (V_a × v × W_w) / (60,000 × N_nozzles)",
+      "unit_explanation": "Q_nozzle : Nozzle Flow Rate (L/min)\nAngle : Spray Angle (60°, 80°, 110°)"
+    },
+    "perfil_calibracao": {
+      "title": "Calibration Profile & Field Test",
+      "content": "[FAQ: What is a calibration test?]\n- A field test using clean water to determine real ground speed, nozzle flow rate, and spray volume applied per hectare.",
+      "formula": "V_a (L/ha) = (600 × Q_t) / (v × W_w)",
+      "unit_explanation": "v : Speed (km/h)\nQ_t : Total Flow Rate (L/min)\nW_w : Working Width (m)"
+    },
+    "preferencias_unidades": {
+      "title": "Measurement Units & Standard Profiles",
+      "content": "[FAQ: How do Unit Profiles work?]\n- Allow switching between Metric (SI), US Customary, Anglo-Saxon, and Traditional Regional systems without losing hydraulic calculation precision.",
+      "formula": "Automatic conversion across DATERRA Smart ecosystem",
+      "unit_explanation": "SI : L, ha, bar, km/h\nUS : gal, acre, psi, mph"
+    }
+  }
+}
