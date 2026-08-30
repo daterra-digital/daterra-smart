@@ -9,13 +9,79 @@ import { useLanguage } from '../context/LanguageContext';
 import daterraLogo from '../assets/daterra-logo.svg';
 
 export const PrivateLayout: React.FC = () => {
-  const { user, logout } = useAuth();
+  const { user, profile, logout } = useAuth();
   const { t } = useLanguage();
   const location = useLocation();
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
 
+  const userFullName = profile
+    ? `${profile.first_name ?? ''} ${profile.last_name ?? ''}`.trim() ||
+      user?.user_metadata?.full_name ||
+      user?.email?.split('@')[0] ||
+      'Utilizador'
+    : user?.email?.split('@')[0] || 'Utilizador';
+
+
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const handleRefresh = () => {
+    setIsRefreshing(true);
+    window.location.reload();
+  };
+
+  useEffect(() => {
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    if (!isMobile) return;
+
+    let startY = 0;
+    let currentY = 0;
+    let isPulling = false;
+    const threshold = 100; // Distância em pixels para ativar refresh
+
+    const handleTouchStart = (e: TouchEvent) => {
+      if (window.scrollY === 0) {
+        startY = e.touches[0].clientY;
+        isPulling = true;
+      }
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      if (!isPulling) return;
+      currentY = e.touches[0].clientY;
+      const diff = currentY - startY;
+      if (diff > 0 && window.scrollY === 0) {
+        // Apenas previne o scroll elástico excessivo quando puxa para baixo no topo
+        if (diff > 30 && e.cancelable) {
+          e.preventDefault();
+        }
+      } else {
+        isPulling = false;
+      }
+    };
+
+    const handleTouchEnd = () => {
+      if (!isPulling) return;
+      const diff = currentY - startY;
+      if (diff > threshold) {
+        handleRefresh();
+      }
+      isPulling = false;
+      startY = 0;
+      currentY = 0;
+    };
+
+    document.addEventListener('touchstart', handleTouchStart, { passive: true });
+    document.addEventListener('touchmove', handleTouchMove, { passive: false });
+    document.addEventListener('touchend', handleTouchEnd, { passive: true });
+
+    return () => {
+      document.removeEventListener('touchstart', handleTouchStart);
+      document.removeEventListener('touchmove', handleTouchMove);
+      document.removeEventListener('touchend', handleTouchEnd);
+    };
+  }, []);
 
   useEffect(() => {
     const handleOnline = () => setIsOnline(true);
@@ -39,6 +105,14 @@ export const PrivateLayout: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-[#F2F2F2]">
+      {/* Indicador visual de Pull-to-Refresh no topo */}
+      {isRefreshing && (
+        <div className="fixed top-0 left-0 right-0 bg-[#114037] text-[#3CA64C] text-xs font-black py-2.5 text-center z-50 shadow-md flex items-center justify-center gap-2 animate-pulse">
+          <div className="w-3.5 h-3.5 border-2 border-[#3CA64C] border-t-transparent rounded-full animate-spin" />
+          <span>A atualizar a plataforma…</span>
+        </div>
+      )}
+
       {/* Header SaaS Privado */}
       <header className="sticky top-0 z-40 bg-daterra-primary text-white border-b border-daterra-secondary/40 shadow-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
@@ -140,13 +214,15 @@ export const PrivateLayout: React.FC = () => {
             {/* Utilizador */}
             <div className="flex items-center gap-2 pl-3 border-l border-white/15">
               <div className="w-8 h-8 rounded-full bg-daterra-accent text-white flex items-center justify-center font-bold text-xs">
-                {user?.email ? user.email.charAt(0).toUpperCase() : 'U'}
+                {userFullName ? userFullName.charAt(0).toUpperCase() : (user?.email?.charAt(0).toUpperCase() || 'U')}
               </div>
               <div className="text-left leading-tight">
-                <span className="text-xs font-bold block text-white truncate max-w-[150px]" title={user?.email || ''}>
-                  {user?.email || 'Utilizador'}
+                <span className="text-xs font-bold block text-white truncate max-w-[150px]" title={userFullName}>
+                  {userFullName}
                 </span>
-                <span className="text-[10px] text-slate-300 block">Sessão Ativa</span>
+                <span className="text-[10px] text-slate-300 block truncate max-w-[150px]" title={user?.email || ''}>
+                  {user?.email || 'Sessão Ativa'}
+                </span>
               </div>
             </div>
 
@@ -232,9 +308,14 @@ export const PrivateLayout: React.FC = () => {
             <div className="pt-3 border-t border-white/10 flex items-center justify-between px-2">
               <div className="flex items-center gap-2 truncate max-w-[200px]">
                 <User className="w-5 h-5 text-daterra-accent shrink-0" />
-                <span className="text-xs font-bold text-white truncate" title={user?.email || ''}>
-                  {user?.email || 'Utilizador'}
-                </span>
+                <div className="leading-tight truncate">
+                  <span className="text-xs font-bold text-white block truncate" title={userFullName}>
+                    {userFullName}
+                  </span>
+                  <span className="text-[10px] text-slate-300 block truncate" title={user?.email || ''}>
+                    {user?.email || ''}
+                  </span>
+                </div>
               </div>
               <button
                 onClick={handleLogout}
