@@ -14,7 +14,7 @@ import type { Profile } from '../types/profile';
 type SettingsSubmenu = 'perfil' | 'preferencias' | 'notificacoes' | 'gestao_dados' | 'ajuda' | 'sobre';
 
 export const SettingsView: React.FC = () => {
-  const { user, refreshProfile } = useAuth();
+  const { user, session, refreshProfile } = useAuth();
   const { language, setLanguage, t } = useLanguage();
   const [activeSubmenu, setActiveSubmenu] = useState<SettingsSubmenu>('perfil');
   const [feedbackMsg, setFeedbackMsg] = useState('');
@@ -61,10 +61,13 @@ export const SettingsView: React.FC = () => {
 
     async function loadProfile() {
       if (!user?.id) {
-        // Ainda não há utilizador resolvido
+        console.log('[SettingsView] user.id não disponível, aguardar…');
         setIsLoadingProfile(false);
         return;
       }
+
+      console.log('[SettingsView] A carregar perfil para user.id:', user.id);
+      console.log('[SettingsView] Session:', session);
 
       try {
         setIsLoadingProfile(true);
@@ -76,20 +79,40 @@ export const SettingsView: React.FC = () => {
           .eq('id', user.id)
           .maybeSingle();
 
+        console.log('[SettingsView] Resultado do loadProfile:', { data, error });
+
         if (error) {
+          console.error('[SettingsView] Erro ao carregar perfil:', error);
+          console.error('[SettingsView] Detalhes do erro:', {
+            message: error.message,
+            details: error.details,
+            hint: error.hint,
+            code: error.code,
+          });
           if (!cancelled) {
-            setErrorMessage('Não foi possível carregar o perfil. Tente novamente.');
+            setErrorMessage('Não foi possível carregar o perfil. Tente novamente. Detalhes: ' + error.message);
+            setIsLoadingProfile(false);
+          }
+          return;
+        }
+
+        if (!data) {
+          console.warn('[SettingsView] Perfil não encontrado para user.id:', user.id);
+          if (!cancelled) {
+            setErrorMessage('Perfil não encontrado. Contacte o suporte.');
             setIsLoadingProfile(false);
           }
           return;
         }
 
         if (!cancelled) {
+          console.log('[SettingsView] Perfil carregado com sucesso:', data);
           setProfile(data);
           setOriginalProfile(data);
           setIsLoadingProfile(false);
         }
-      } catch {
+      } catch (err) {
+        console.error('[SettingsView] Exceção ao carregar perfil:', err);
         if (!cancelled) {
           setErrorMessage('Erro de ligação ao carregar o perfil.');
           setIsLoadingProfile(false);
@@ -152,15 +175,17 @@ export const SettingsView: React.FC = () => {
     e.preventDefault();
 
     if (!user?.id) {
+      console.error('[SettingsView] Utilizador não autenticado.');
       setErrorMessage('Utilizador não autenticado.');
       return;
     }
+
+    console.log('[SettingsView] A guardar perfil para user.id:', user.id);
 
     try {
       setIsSaving(true);
       setErrorMessage(null);
 
-      // Payload apenas com campos permitidos (sem email, sem plan)
       const payload = {
         first_name: firstName.trim() || null,
         last_name: lastName.trim() || null,
@@ -174,18 +199,28 @@ export const SettingsView: React.FC = () => {
         city: city.trim() || null,
       };
 
-      const { error } = await supabase
+      console.log('[SettingsView] Payload a enviar:', payload);
+
+      const { data, error } = await supabase
         .from('profiles')
         .update(payload)
         .eq('id', user.id);
 
+      console.log('[SettingsView] Resultado do update:', { data, error });
+
       if (error) {
-        setErrorMessage('Não foi possível guardar o perfil. Tente novamente.');
+        console.error('[SettingsView] Erro ao guardar perfil:', error);
+        console.error('[SettingsView] Detalhes do erro:', {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code,
+        });
+        setErrorMessage('Não foi possível guardar o perfil. Detalhes: ' + error.message);
         setIsSaving(false);
         return;
       }
 
-      // Atualizar snapshot original
       const updatedProfile = originalProfile
         ? { ...originalProfile, ...payload }
         : null;
@@ -199,7 +234,10 @@ export const SettingsView: React.FC = () => {
       setTimeout(() => setFeedbackMsg(''), 3500);
       setIsSaving(false);
 
-    } catch {
+      console.log('[SettingsView] Perfil guardado com sucesso.');
+
+    } catch (err) {
+      console.error('[SettingsView] Exceção ao guardar perfil:', err);
       setErrorMessage('Erro de ligação ao guardar o perfil.');
       setIsSaving(false);
     }
