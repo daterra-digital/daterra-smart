@@ -1,4 +1,5 @@
 import React, { useState, useEffect, type FormEvent } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { 
   User, Bell, Database, HelpCircle, Info, 
   Download, Upload, CheckCircle2, 
@@ -9,15 +10,35 @@ import { supabase } from '../lib/supabaseClient';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage, LANGUAGE_OPTIONS, type SupportedLanguage } from '../context/LanguageContext';
 import { MicrolearningModal } from '../components/MicrolearningModal';
+import { HelpView } from './HelpView';
+import { AboutView } from './AboutView';
 import type { Profile } from '../types/profile';
 
 type SettingsSubmenu = 'perfil' | 'preferencias' | 'notificacoes' | 'gestao_dados' | 'ajuda' | 'sobre';
 
 export const SettingsView: React.FC = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
   const { user, refreshProfile } = useAuth();
   const { language, setLanguage, t } = useLanguage();
-  const [activeSubmenu, setActiveSubmenu] = useState<SettingsSubmenu>('perfil');
+
+  const getSubmenuFromPath = (pathname: string): SettingsSubmenu => {
+    if (pathname.includes('/ajuda')) return 'ajuda';
+    if (pathname.includes('/sobre')) return 'sobre';
+    return 'perfil';
+  };
+
+  const [activeSubmenu, setActiveSubmenu] = useState<SettingsSubmenu>(() => 
+    getSubmenuFromPath(location.pathname)
+  );
   const [feedbackMsg, setFeedbackMsg] = useState('');
+
+  useEffect(() => {
+    const matched = getSubmenuFromPath(location.pathname);
+    if (location.pathname === '/ajuda' || location.pathname === '/sobre') {
+      setActiveSubmenu(matched);
+    }
+  }, [location.pathname]);
 
   // Microlearning Modal State
   const [microModalOpen, setMicroModalOpen] = useState(false);
@@ -348,7 +369,12 @@ export const SettingsView: React.FC = () => {
         </button>
 
         <button
-          onClick={() => setActiveSubmenu('ajuda')}
+          onClick={() => {
+            setActiveSubmenu('ajuda');
+            if (location.pathname !== '/definicoes') {
+              navigate('/definicoes');
+            }
+          }}
           className={`px-4 min-h-[48px] rounded-2xl font-extrabold text-xs transition-all flex items-center gap-2 shrink-0 touch-target ${
             activeSubmenu === 'ajuda'
               ? 'bg-[#114037] text-white shadow-md'
@@ -360,7 +386,12 @@ export const SettingsView: React.FC = () => {
         </button>
 
         <button
-          onClick={() => setActiveSubmenu('sobre')}
+          onClick={() => {
+            setActiveSubmenu('sobre');
+            if (location.pathname !== '/definicoes') {
+              navigate('/definicoes');
+            }
+          }}
           className={`px-4 min-h-[48px] rounded-2xl font-extrabold text-xs transition-all flex items-center gap-2 shrink-0 touch-target ${
             activeSubmenu === 'sobre'
               ? 'bg-[#114037] text-white shadow-md'
@@ -954,27 +985,14 @@ export const SettingsView: React.FC = () => {
       )}
 
       {activeSubmenu === 'ajuda' && (
-        <div className="bg-white p-6 sm:p-8 rounded-3xl shadow-soft border border-slate-200 space-y-6 animate-fade-in">
-          <h2 className="text-fluid-subtitle font-black text-[#114037] border-b border-slate-100 pb-4">
-            Ajuda & Suporte Técnico DATERRA Smart
-          </h2>
-          <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-2xl text-xs text-emerald-900 font-medium">
-            Aceda aos tutoriais completos, documentação oficial EPPO/DGAV e cursos de capacitação na Academia DATERRA.
-          </div>
+        <div className="space-y-6 animate-fade-in">
+          <HelpView />
         </div>
       )}
 
       {activeSubmenu === 'sobre' && (
-        <div className="bg-white p-6 sm:p-8 rounded-3xl shadow-soft border border-slate-200 space-y-6 animate-fade-in">
-          <h2 className="text-fluid-subtitle font-black text-[#114037] border-b border-slate-100 pb-4">
-            Sobre a DATERRA Smart
-          </h2>
-          <p className="text-xs text-slate-600 leading-relaxed">
-            Plataforma SaaS agrícola desenvolvida para o cálculo de precisão de caldas fitossanitárias, calibração de atomizadores segundo as normas ISO 16122 e apoio à decisão na gestão de explorações.
-          </p>
-          <div className="text-xs text-slate-500 font-mono-numbers pt-4 border-t border-slate-100">
-            DATERRA Smart v1.3.0 (Build 2026.08) • Normas ISO 16122 / EPPO / DGAV
-          </div>
+        <div className="space-y-6 animate-fade-in">
+          <AboutView />
         </div>
       )}
 

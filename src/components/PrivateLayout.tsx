@@ -7,6 +7,7 @@ import {
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import daterraLogo from '../assets/daterra-logo.svg';
+import { Footer } from './Footer';
 
 export const PrivateLayout: React.FC = () => {
   const { user, profile, logout } = useAuth();
@@ -360,6 +361,9 @@ export const PrivateLayout: React.FC = () => {
       <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full">
         <Outlet />
       </main>
+
+      {/* Rodapé Global Sempre Visível na Área Privada */}
+      <Footer />
     </div>
   );
 };

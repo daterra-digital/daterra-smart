@@ -1,13 +1,13 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import { 
-  Users, CheckCircle2, ArrowRight, GraduationCap, 
-  ExternalLink, Sparkles, Target, Lightbulb, ShieldCheck 
+  Users, CheckCircle2, GraduationCap, 
+  ExternalLink, Sparkles, Target, ShieldCheck,
+  FileText, Shield, Globe
 } from 'lucide-react';
 
 export const AboutView: React.FC = () => {
   return (
-    <div className="space-y-12 py-8 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="space-y-12 py-8 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 animate-fade-in">
       {/* Secção 1 — Título Principal */}
       <section className="bg-gradient-to-br from-daterra-primary via-[#175348] to-daterra-secondary text-white rounded-3xl p-8 sm:p-12 shadow-floating relative overflow-hidden">
         <div className="max-w-3xl space-y-4 relative z-10">
@@ -25,7 +25,7 @@ export const AboutView: React.FC = () => {
           </p>
 
           <p className="text-base sm:text-lg text-slate-200 leading-relaxed font-normal pt-2">
-            A DATERRA Smart foi concebida para apoiar os profissionais agrícolas na preparação de operações, na realização de cálculos técnicos e na consulta de informação útil para o trabalho no campo.
+            A DATERRA Smart é uma plataforma SaaS agrícola desenvolvida para apoiar profissionais do setor agrícola com ferramentas digitais de precisão, incluindo calculadoras, gestão de perfis e integração com sistemas externos.
           </p>
         </div>
       </section>
@@ -164,100 +164,87 @@ export const AboutView: React.FC = () => {
         </div>
       </section>
 
-      {/* Secção 4 — Como apoia o trabalho */}
+      {/* Secção 4 — Informações Legais e Links Úteis */}
       <section className="bg-white p-8 sm:p-10 rounded-3xl border border-slate-200 shadow-soft space-y-6">
         <div className="flex items-center gap-3 text-daterra-secondary">
-          <Lightbulb className="w-6 h-6 shrink-0" />
+          <Shield className="w-6 h-6 shrink-0" />
           <h2 className="text-2xl font-extrabold text-daterra-primary">
-            Ferramentas pensadas para o terreno
+            Informações Legais & Transparência
           </h2>
         </div>
 
-        <p className="text-sm sm:text-base text-slate-700 leading-relaxed">
-          A plataforma integra e evolui para disponibilizar um ecossistema completo de utilidades de campo:
-        </p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="p-5 rounded-2xl bg-slate-50 border border-slate-100 space-y-2">
+            <div className="flex items-center gap-2 text-slate-900 font-bold text-sm">
+              <FileText className="w-4 h-4 text-[#1D734B]" />
+              <span>Termos de Utilização</span>
+            </div>
+            <p className="text-xs text-slate-600 leading-relaxed font-medium">
+              Conheça as condições gerais de acesso e utilização dos serviços digitais DATERRA Smart.
+            </p>
+            <a 
+              href="#/sobre"
+              className="inline-flex items-center gap-1.5 text-xs font-bold text-[#1D734B] hover:underline pt-2"
+            >
+              <span>Consultar Termos</span>
+              <ExternalLink className="w-3.5 h-3.5" />
+            </a>
+          </div>
 
-        <ul className="space-y-3 text-sm text-slate-700">
-          <li className="flex items-start gap-3">
-            <span className="w-2 h-2 rounded-full bg-daterra-accent shrink-0 mt-2" />
-            <span><strong>Cálculos agrícolas simples, rápidos e orientados para a prática:</strong> Velocidade real, dose por hectare, área de parede foliar, volume de copa, volume de calda e débito do pulverizador.</span>
-          </li>
-          <li className="flex items-start gap-3">
-            <span className="w-2 h-2 rounded-full bg-daterra-accent shrink-0 mt-2" />
-            <span><strong>Informação técnica apresentada de forma clara:</strong> Menus intuitivos e linguagem acessível a agricultores e técnicos.</span>
-          </li>
-          <li className="flex items-start gap-3">
-            <span className="w-2 h-2 rounded-full bg-daterra-accent shrink-0 mt-2" />
-            <span><strong>Apoio à preparação de operações:</strong> Adequação dos volumes de calda à vegetação real para redução de perdas e escorrimento.</span>
-          </li>
-          <li className="flex items-start gap-3">
-            <span className="w-2 h-2 rounded-full bg-daterra-accent shrink-0 mt-2" />
-            <span><strong>Consulta útil durante o trabalho no campo:</strong> Disponível mesmo em locais com ligação à Internet limitada.</span>
-          </li>
-          <li className="flex items-start gap-3">
-            <span className="w-2 h-2 rounded-full bg-daterra-accent shrink-0 mt-2" />
-            <span><strong>Ligação ao ecossistema de formação da DATERRA:</strong> Articulação contínua com conteúdos didáticos e capacitação profissional.</span>
-          </li>
-        </ul>
+          <div className="p-5 rounded-2xl bg-slate-50 border border-slate-100 space-y-2">
+            <div className="flex items-center gap-2 text-slate-900 font-bold text-sm">
+              <ShieldCheck className="w-4 h-4 text-[#1D734B]" />
+              <span>Política de Privacidade</span>
+            </div>
+            <p className="text-xs text-slate-600 leading-relaxed font-medium">
+              Proteção de dados de acordo com o RGPD e integridade da sua informação agrícola.
+            </p>
+            <a 
+              href="#/sobre"
+              className="inline-flex items-center gap-1.5 text-xs font-bold text-[#1D734B] hover:underline pt-2"
+            >
+              <span>Consultar Política</span>
+              <ExternalLink className="w-3.5 h-3.5" />
+            </a>
+          </div>
+        </div>
       </section>
 
-      {/* Secção 5 — Evolução contínua */}
-      <section className="bg-white p-8 sm:p-10 rounded-3xl border border-slate-200 shadow-soft space-y-4">
+      {/* Secção 5 — Links Úteis e Créditos */}
+      <section className="bg-white p-8 sm:p-10 rounded-3xl border border-slate-200 shadow-soft space-y-6">
         <div className="flex items-center gap-3 text-daterra-secondary">
-          <Sparkles className="w-6 h-6 shrink-0" />
+          <Globe className="w-6 h-6 shrink-0" />
           <h2 className="text-2xl font-extrabold text-daterra-primary">
-            Uma plataforma em evolução contínua
+            Canais Oficiais DATERRA
           </h2>
         </div>
-        <p className="text-sm sm:text-base text-slate-700 leading-relaxed">
-          A DATERRA Smart é desenvolvida de forma progressiva, com novas ferramentas e melhorias orientadas pelas necessidades reais dos profissionais agrícolas.
-        </p>
-        <p className="text-sm sm:text-base text-slate-700 leading-relaxed">
-          O objetivo é criar uma plataforma útil, clara e robusta, capaz de acompanhar o trabalho no terreno e a evolução das práticas agrícolas.
-        </p>
-      </section>
 
-      {/* Secção 6 — Acesso */}
-      <section className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white p-8 sm:p-12 rounded-3xl border border-slate-800 shadow-floating flex flex-col md:flex-row items-center justify-between gap-6">
-        <div className="space-y-2 max-w-xl">
-          <h2 className="text-2xl sm:text-3xl font-bold">
-            Comece pela DATERRA Smart
-          </h2>
-          <p className="text-sm text-slate-300 leading-relaxed">
-            O acesso às ferramentas da DATERRA Smart é feito através de uma conta de utilizador.
-          </p>
-        </div>
-
-        <Link
-          to="/login"
-          className="px-8 py-4 bg-daterra-accent hover:bg-daterra-accent/90 text-white font-extrabold text-base rounded-2xl transition-all shadow-xl shadow-daterra-accent/30 flex items-center justify-center gap-3 touch-target active:scale-95 shrink-0"
-        >
-          <span>Entrar na DATERRA Smart</span>
-          <ArrowRight className="w-5 h-5" />
-        </Link>
-      </section>
-
-      {/* Secção 7 — Ligação à Academia DATERRA */}
-      <section className="bg-white p-8 sm:p-10 rounded-3xl border border-slate-200 shadow-soft space-y-4">
-        <div className="flex items-center gap-3 text-daterra-secondary">
-          <GraduationCap className="w-6 h-6 shrink-0" />
-          <h2 className="text-2xl font-extrabold text-daterra-primary">
-            Conhecimento e formação
-          </h2>
-        </div>
-        <p className="text-sm sm:text-base text-slate-700 leading-relaxed">
-          Explore também os recursos e a formação disponibilizados pela Academia DATERRA.
-        </p>
-        <div>
+        <div className="flex flex-wrap gap-4">
           <a
-            href="https://academia.daterra.com.pt"
+            href="https://daterra.com.pt"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 px-6 py-3 bg-slate-100 hover:bg-slate-200 text-daterra-primary font-bold text-sm rounded-xl transition-colors"
           >
-            <span>Aceder à Academia DATERRA</span>
+            <span>Website DATERRA</span>
             <ExternalLink className="w-4 h-4" />
           </a>
+
+          <a
+            href="https://academia.daterra.com.pt"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-emerald-50 hover:bg-emerald-100 text-[#1D734B] font-bold text-sm rounded-xl transition-colors border border-emerald-200"
+          >
+            <GraduationCap className="w-4 h-4" />
+            <span>Academia DATERRA</span>
+            <ExternalLink className="w-4 h-4" />
+          </a>
+        </div>
+
+        <div className="pt-6 border-t border-slate-100 text-xs text-slate-500 font-medium space-y-1">
+          <p className="font-bold text-slate-700">Desenvolvido por DATERRA</p>
+          <p>© 2026 DATERRA. Todos os direitos reservados.</p>
         </div>
       </section>
 

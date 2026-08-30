@@ -18,6 +18,7 @@ import { VolumeCaldaTrvCalculator } from './features/volume-calda-trv/VolumeCald
 import { DebitoTotalCalculator } from './features/debito-total/DebitoTotalCalculator';
 import { ProjetoAgrosmartView } from './views/ProjetoAgrosmartView';
 import { AboutView } from './views/AboutView';
+import { HelpView } from './views/HelpView';
 import { IosInstallPrompt } from './components/IosInstallPrompt';
 
 // Componente Guardião de Rotas Privadas
@@ -87,9 +88,8 @@ export const AppContent: React.FC = () => {
               </PublicRoute>
             }
           />
-          {/* Páginas Públicas Acessíveis a Todos (Visitantes e Autenticados) */}
+          {/* Páginas Públicas Acessíveis a Visitantes */}
           <Route path="/projeto-agrosmart" element={<ProjetoAgrosmartView />} />
-          <Route path="/sobre" element={<AboutView />} />
         </Route>
 
         {/* Layout Privado (SaaS Suite) */}
@@ -109,6 +109,8 @@ export const AppContent: React.FC = () => {
           <Route path="/academia" element={<AcademyView />} />
           <Route path="/definicoes" element={<SettingsView />} />
           <Route path="/exploracao" element={<ExplorationView />} />
+          <Route path="/ajuda" element={<HelpView />} />
+          <Route path="/sobre" element={<AboutView />} />
         </Route>
 
         {/* Rota Fallback */}
