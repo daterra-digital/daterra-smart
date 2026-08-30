@@ -9,11 +9,22 @@ import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 
 export const DashboardView: React.FC = () => {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const { t } = useLanguage();
-  const farmName = user?.farmName || 'Quinta do Vale';
-  const userFullName = user?.name || 'Pedro Silva';
-  const userFirstName = userFullName.split(' ')[0] || 'Pedro';
+
+  const userFullName = profile
+    ? `${profile.first_name ?? ''} ${profile.last_name ?? ''}`.trim() ||
+      user?.user_metadata?.full_name ||
+      'Utilizador'
+    : user?.user_metadata?.full_name || 'Utilizador';
+
+  const farmName =
+    profile?.company_name ??
+    user?.user_metadata?.farm_name ??
+    'Exploração Agrícola';
+
+  const userFirstName = userFullName.split(' ')[0] || 'Utilizador';
+
   const agromonitoringApiKey = import.meta.env.VITE_AGROMONITORING_KEY || 'NÃO_CONFIGURADA';
 
   // Previsão Estendida da Semana para o Cartão de Meteorologia (2 Colunas)

@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import type { Session, User as SupabaseUser } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabaseClient';
+import type { Profile } from '../types/profile';
 
 export type AuthUser = SupabaseUser & {
   name?: string;
@@ -11,11 +12,13 @@ export type AuthUser = SupabaseUser & {
 export interface AuthContextType {
   session: Session | null;
   user: AuthUser | null;
+  profile: Profile | null;
   isAuthenticated: boolean;
   isAuthLoading: boolean;
   sendOtp: (email: string) => Promise<{ error: string | null }>;
   verifyOtp: (email: string, token: string) => Promise<{ error: string | null }>;
   logout: () => Promise<void>;
+  refreshProfile?: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -38,7 +41,27 @@ const mapSupabaseUser = (sbUser: SupabaseUser | null): AuthUser | null => {
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<AuthUser | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
   const [isAuthLoading, setIsAuthLoading] = useState<boolean>(true);
+
+  async function loadProfile(userId: string) {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .maybeSingle();
+
+      if (error || !data) {
+        setProfile(null);
+        return;
+      }
+
+      setProfile(data);
+    } catch {
+      setProfile(null);
+    }
+  }
 
   useEffect(() => {
     let isMounted = true;
@@ -46,13 +69,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // 1. Obter sessão inicial persistida no cliente Supabase
     supabase.auth
       .getSession()
-      .then(({ data: { session }, error }) => {
+      .then(async ({ data: { session }, error }) => {
         if (error) {
           console.error('Erro ao recuperar a sessão Supabase:', error.message);
         }
         if (isMounted) {
           setSession(session);
           setUser(mapSupabaseUser(session?.user ?? null));
+          if (session?.user?.id) {
+            await loadProfile(session.user.id);
+          } else {
+            setProfile(null);
+          }
           setIsAuthLoading(false);
         }
       })
@@ -66,10 +94,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // 2. Ouvir alterações reais de autenticação (SIGNED_IN, SIGNED_OUT, TOKEN_REFRESHED)
     const {
       data: { subscription }
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    } = supabase.auth.onAuthStateChange(async (_event, session) => {
       if (isMounted) {
         setSession(session);
         setUser(mapSupabaseUser(session?.user ?? null));
+        if (session?.user?.id) {
+          await loadProfile(session.user.id);
+        } else {
+          setProfile(null);
+        }
         setIsAuthLoading(false);
       }
     });
@@ -140,6 +173,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const refreshProfile = async (): Promise<void> => {
+    if (session?.user?.id) {
+      await loadProfile(session.user.id);
+    }
+  };
+
   const logout = async (): Promise<void> => {
     try {
       await supabase.auth.signOut();
@@ -150,6 +189,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       localStorage.removeItem('daterra_auth');
       setSession(null);
       setUser(null);
+      setProfile(null);
     }
   };
 
@@ -160,11 +200,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       value={{
         session,
         user,
+        profile,
         isAuthenticated,
         isAuthLoading,
         sendOtp,
         verifyOtp,
-        logout
+        logout,
+        refreshProfile
       }}
     >
       {children}

@@ -1,18 +1,20 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, type FormEvent } from 'react';
 import { 
   User, Bell, Database, HelpCircle, Info, 
   Download, Upload, CheckCircle2, 
   AlertTriangle, Globe, ShieldAlert
 } from 'lucide-react';
 import { db } from '../db/db';
+import { supabase } from '../lib/supabaseClient';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage, LANGUAGE_OPTIONS, type SupportedLanguage } from '../context/LanguageContext';
 import { MicrolearningModal } from '../components/MicrolearningModal';
+import type { Profile } from '../types/profile';
 
 type SettingsSubmenu = 'perfil' | 'preferencias' | 'notificacoes' | 'gestao_dados' | 'ajuda' | 'sobre';
 
 export const SettingsView: React.FC = () => {
-  const { user } = useAuth();
+  const { user, refreshProfile } = useAuth();
   const { language, setLanguage, t } = useLanguage();
   const [activeSubmenu, setActiveSubmenu] = useState<SettingsSubmenu>('perfil');
   const [feedbackMsg, setFeedbackMsg] = useState('');
@@ -27,19 +29,97 @@ export const SettingsView: React.FC = () => {
   };
 
   // ---------------------------------------------------------------------------
-  // ESTADOS 1: PERFIL DO UTILIZADOR
+  // ESTADOS 1: PERFIL DO UTILIZADOR (SUPABASE public.profiles)
   // ---------------------------------------------------------------------------
-  const [firstName, setFirstName] = useState(user?.name?.split(' ')[0] || 'Pedro');
-  const [lastName, setLastName] = useState(user?.name?.split(' ').slice(1).join(' ') || 'Silva');
-  const [email, setEmail] = useState(user?.email || 'pedro.silva@daterra.pt');
-  const [mobile, setMobile] = useState('+351 912 345 678');
-  const [company, setCompany] = useState(user?.farmName || 'Sociedade Agrícola Quinta do Vale');
-  const [role, setRole] = useState('Engenheiro Agrónomo / Diretor Técnico');
-  const [jobTitle, setJobTitle] = useState('Diretor de Exploração');
-  const [nif, setNif] = useState('509123456');
-  const [address, setAddress] = useState('Quinta do Vale, E.N. 18');
-  const [postalCode, setPostalCode] = useState('6000-101');
-  const [city, setCity] = useState('Castelo Branco');
+  // Estado para o perfil carregado da BD
+  const [profile, setProfile] = useState<Profile | null>(null);
+
+  // Estado para o snapshot original (usado no Cancelar)
+  const [originalProfile, setOriginalProfile] = useState<Profile | null>(null);
+
+  // Estados de UI
+  const [isLoadingProfile, setIsLoadingProfile] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  // Estados locais dos campos do formulário
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [email, setEmail] = useState('');
+  const [mobile, setMobile] = useState('');
+  const [company, setCompany] = useState('');
+  const [role, setRole] = useState('');
+  const [jobTitle, setJobTitle] = useState('');
+  const [nif, setNif] = useState('');
+  const [address, setAddress] = useState('');
+  const [postalCode, setPostalCode] = useState('');
+  const [city, setCity] = useState('');
+
+  // Carregar perfil ao montar ou quando user.id alterar
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadProfile() {
+      if (!user?.id) {
+        // Ainda não há utilizador resolvido
+        setIsLoadingProfile(false);
+        return;
+      }
+
+      try {
+        setIsLoadingProfile(true);
+        setErrorMessage(null);
+
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', user.id)
+          .maybeSingle();
+
+        if (error) {
+          if (!cancelled) {
+            setErrorMessage('Não foi possível carregar o perfil. Tente novamente.');
+            setIsLoadingProfile(false);
+          }
+          return;
+        }
+
+        if (!cancelled) {
+          setProfile(data);
+          setOriginalProfile(data);
+          setIsLoadingProfile(false);
+        }
+      } catch {
+        if (!cancelled) {
+          setErrorMessage('Erro de ligação ao carregar o perfil.');
+          setIsLoadingProfile(false);
+        }
+      }
+    }
+
+    loadProfile();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [user?.id]);
+
+  // Sincronizar estados locais quando o perfil carregar
+  useEffect(() => {
+    if (!profile) return;
+
+    setFirstName(profile.first_name ?? '');
+    setLastName(profile.last_name ?? '');
+    setEmail(profile.email ?? '');
+    setMobile(profile.phone ?? '');
+    setCompany(profile.company_name ?? '');
+    setRole(profile.role ?? '');
+    setJobTitle(profile.job_title ?? '');
+    setNif(profile.nif ?? '');
+    setAddress(profile.address ?? '');
+    setPostalCode(profile.postal_code ?? '');
+    setCity(profile.city ?? '');
+  }, [profile]);
 
   // ---------------------------------------------------------------------------
   // ESTADOS 2: PREFERÊNCIAS & UNIDADES PADRÃO
@@ -68,10 +148,61 @@ export const SettingsView: React.FC = () => {
   // ---------------------------------------------------------------------------
   // HANDLERS DE AÇÕES
   // ---------------------------------------------------------------------------
-  const handleSaveProfile = (e: React.FormEvent) => {
+  const handleSaveProfile = async (e: FormEvent) => {
     e.preventDefault();
-    setFeedbackMsg('Perfil de Utilizador atualizado com sucesso!');
-    setTimeout(() => setFeedbackMsg(''), 3500);
+
+    if (!user?.id) {
+      setErrorMessage('Utilizador não autenticado.');
+      return;
+    }
+
+    try {
+      setIsSaving(true);
+      setErrorMessage(null);
+
+      // Payload apenas com campos permitidos (sem email, sem plan)
+      const payload = {
+        first_name: firstName.trim() || null,
+        last_name: lastName.trim() || null,
+        phone: mobile.trim() || null,
+        company_name: company.trim() || null,
+        role: role.trim() || null,
+        job_title: jobTitle.trim() || null,
+        nif: nif.trim() || null,
+        address: address.trim() || null,
+        postal_code: postalCode.trim() || null,
+        city: city.trim() || null,
+      };
+
+      const { error } = await supabase
+        .from('profiles')
+        .update(payload)
+        .eq('id', user.id);
+
+      if (error) {
+        setErrorMessage('Não foi possível guardar o perfil. Tente novamente.');
+        setIsSaving(false);
+        return;
+      }
+
+      // Atualizar snapshot original
+      const updatedProfile = originalProfile
+        ? { ...originalProfile, ...payload }
+        : null;
+      setOriginalProfile(updatedProfile);
+
+      if (refreshProfile) {
+        await refreshProfile();
+      }
+
+      setFeedbackMsg('Perfil de Utilizador atualizado com sucesso!');
+      setTimeout(() => setFeedbackMsg(''), 3500);
+      setIsSaving(false);
+
+    } catch {
+      setErrorMessage('Erro de ligação ao guardar o perfil.');
+      setIsSaving(false);
+    }
   };
 
   const handleSavePreferences = (e: React.FormEvent) => {
@@ -149,7 +280,7 @@ export const SettingsView: React.FC = () => {
 
         <div className="flex items-center gap-2.5 bg-slate-100 px-4 py-2.5 rounded-2xl border border-slate-200 text-slate-700 text-xs font-extrabold font-mono-numbers">
           <User className="w-4 h-4 text-[#1D734B]" />
-          <span>ID: {user?.id || 'USR-2026-88'}</span>
+          <span>ID: {user?.id || 'A carregar...'}</span>
         </div>
       </div>
 
@@ -247,6 +378,19 @@ export const SettingsView: React.FC = () => {
               Definições — Perfil do Utilizador
             </h2>
 
+            {/* Indicadores de Loading / Erro */}
+            {isLoadingProfile && (
+              <div className="p-4 bg-blue-50 border border-blue-200 rounded-2xl text-xs font-bold text-blue-800 animate-pulse">
+                A carregar perfil…
+              </div>
+            )}
+
+            {errorMessage && (
+              <div className="p-4 bg-red-50 border border-red-200 rounded-2xl text-xs font-bold text-red-800 animate-fade-in">
+                {errorMessage}
+              </div>
+            )}
+
             <form onSubmit={handleSaveProfile} className="space-y-8">
               {/* CARTÃO 1: Dados Pessoais */}
               <div className="bg-slate-50/80 p-5 rounded-2xl border border-slate-200 space-y-4">
@@ -260,7 +404,8 @@ export const SettingsView: React.FC = () => {
                       type="text"
                       value={firstName}
                       onChange={(e) => setFirstName(e.target.value)}
-                      className="w-full min-h-[48px] px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-semibold outline-none focus:border-[#3CA64C]"
+                      disabled={isLoadingProfile || isSaving}
+                      className="w-full min-h-[48px] px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-semibold outline-none focus:border-[#3CA64C] disabled:opacity-50"
                     />
                   </div>
                   <div>
@@ -269,7 +414,8 @@ export const SettingsView: React.FC = () => {
                       type="text"
                       value={lastName}
                       onChange={(e) => setLastName(e.target.value)}
-                      className="w-full min-h-[48px] px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-semibold outline-none focus:border-[#3CA64C]"
+                      disabled={isLoadingProfile || isSaving}
+                      className="w-full min-h-[48px] px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-semibold outline-none focus:border-[#3CA64C] disabled:opacity-50"
                     />
                   </div>
                   <div>
@@ -277,9 +423,13 @@ export const SettingsView: React.FC = () => {
                     <input
                       type="email"
                       value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="w-full min-h-[48px] px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-semibold outline-none focus:border-[#3CA64C]"
+                      readOnly
+                      disabled
+                      className="w-full min-h-[48px] px-4 py-2.5 bg-slate-100 border border-slate-300 rounded-xl text-xs font-semibold text-slate-500 cursor-not-allowed outline-none"
                     />
+                    <p className="text-[11px] text-slate-500 font-medium mt-1 leading-snug">
+                      O endereço de email está associado à sua autenticação segura e não pode ser alterado diretamente aqui.
+                    </p>
                   </div>
                   <div>
                     <label className="block text-xs font-bold text-slate-700 mb-1.5">Telemóvel</label>
@@ -287,7 +437,8 @@ export const SettingsView: React.FC = () => {
                       type="text"
                       value={mobile}
                       onChange={(e) => setMobile(e.target.value)}
-                      className="w-full min-h-[48px] px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-semibold input-mono outline-none focus:border-[#3CA64C]"
+                      disabled={isLoadingProfile || isSaving}
+                      className="w-full min-h-[48px] px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-semibold input-mono outline-none focus:border-[#3CA64C] disabled:opacity-50"
                     />
                   </div>
                 </div>
@@ -305,7 +456,8 @@ export const SettingsView: React.FC = () => {
                       type="text"
                       value={company}
                       onChange={(e) => setCompany(e.target.value)}
-                      className="w-full min-h-[48px] px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-semibold outline-none focus:border-[#3CA64C]"
+                      disabled={isLoadingProfile || isSaving}
+                      className="w-full min-h-[48px] px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-semibold outline-none focus:border-[#3CA64C] disabled:opacity-50"
                     />
                   </div>
                   <div>
@@ -314,7 +466,8 @@ export const SettingsView: React.FC = () => {
                       type="text"
                       value={role}
                       onChange={(e) => setRole(e.target.value)}
-                      className="w-full min-h-[48px] px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-semibold outline-none focus:border-[#3CA64C]"
+                      disabled={isLoadingProfile || isSaving}
+                      className="w-full min-h-[48px] px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-semibold outline-none focus:border-[#3CA64C] disabled:opacity-50"
                     />
                   </div>
                   <div>
@@ -323,7 +476,8 @@ export const SettingsView: React.FC = () => {
                       type="text"
                       value={jobTitle}
                       onChange={(e) => setJobTitle(e.target.value)}
-                      className="w-full min-h-[48px] px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-semibold outline-none focus:border-[#3CA64C]"
+                      disabled={isLoadingProfile || isSaving}
+                      className="w-full min-h-[48px] px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-semibold outline-none focus:border-[#3CA64C] disabled:opacity-50"
                     />
                   </div>
                   <div>
@@ -332,7 +486,8 @@ export const SettingsView: React.FC = () => {
                       type="text"
                       value={nif}
                       onChange={(e) => setNif(e.target.value)}
-                      className="w-full min-h-[48px] px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-semibold input-mono outline-none focus:border-[#3CA64C]"
+                      disabled={isLoadingProfile || isSaving}
+                      className="w-full min-h-[48px] px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-semibold input-mono outline-none focus:border-[#3CA64C] disabled:opacity-50"
                     />
                   </div>
                 </div>
@@ -344,7 +499,8 @@ export const SettingsView: React.FC = () => {
                       type="text"
                       value={address}
                       onChange={(e) => setAddress(e.target.value)}
-                      className="w-full min-h-[48px] px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-semibold outline-none focus:border-[#3CA64C]"
+                      disabled={isLoadingProfile || isSaving}
+                      className="w-full min-h-[48px] px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-semibold outline-none focus:border-[#3CA64C] disabled:opacity-50"
                     />
                   </div>
                   <div>
@@ -353,7 +509,8 @@ export const SettingsView: React.FC = () => {
                       type="text"
                       value={postalCode}
                       onChange={(e) => setPostalCode(e.target.value)}
-                      className="w-full min-h-[48px] px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-semibold input-mono outline-none focus:border-[#3CA64C]"
+                      disabled={isLoadingProfile || isSaving}
+                      className="w-full min-h-[48px] px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-semibold input-mono outline-none focus:border-[#3CA64C] disabled:opacity-50"
                     />
                   </div>
                   <div>
@@ -362,19 +519,45 @@ export const SettingsView: React.FC = () => {
                       type="text"
                       value={city}
                       onChange={(e) => setCity(e.target.value)}
-                      className="w-full min-h-[48px] px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-semibold outline-none focus:border-[#3CA64C]"
+                      disabled={isLoadingProfile || isSaving}
+                      className="w-full min-h-[48px] px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-semibold outline-none focus:border-[#3CA64C] disabled:opacity-50"
                     />
                   </div>
                 </div>
               </div>
 
-              {/* Botão de Ação Principal (Verde Destaque #3CA64C) */}
-              <button
-                type="submit"
-                className="w-full min-h-[48px] bg-[#3CA64C] hover:bg-[#3AAA35] text-white font-black text-xs rounded-2xl shadow-md flex items-center justify-center gap-2 transition-all active:scale-95 touch-target"
-              >
-                <span>Guardar Alterações do Perfil</span>
-              </button>
+              {/* Botões de Ação: Cancelar e Guardar */}
+              <div className="flex flex-col-reverse sm:flex-row items-center justify-end gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (!originalProfile) return;
+                    setFirstName(originalProfile.first_name ?? '');
+                    setLastName(originalProfile.last_name ?? '');
+                    setMobile(originalProfile.phone ?? '');
+                    setCompany(originalProfile.company_name ?? '');
+                    setRole(originalProfile.role ?? '');
+                    setJobTitle(originalProfile.job_title ?? '');
+                    setNif(originalProfile.nif ?? '');
+                    setAddress(originalProfile.address ?? '');
+                    setPostalCode(originalProfile.postal_code ?? '');
+                    setCity(originalProfile.city ?? '');
+                    setErrorMessage(null);
+                  }}
+                  disabled={isSaving || isLoadingProfile}
+                  className="w-full sm:w-auto px-6 min-h-[48px] border border-slate-300 rounded-2xl font-bold text-xs text-slate-700 hover:bg-slate-100 disabled:opacity-50 transition-all touch-target"
+                >
+                  Cancelar
+                </button>
+
+                <button
+                  type="submit"
+                  disabled={isSaving || isLoadingProfile}
+                  className="w-full sm:w-auto px-8 min-h-[48px] bg-[#3CA64C] hover:bg-[#359445] text-white font-black text-xs rounded-2xl shadow-md flex items-center justify-center gap-2 transition-all active:scale-95 disabled:opacity-50 touch-target"
+                >
+                  <span>{isSaving ? 'A guardar…' : 'Guardar Alterações do Perfil'}</span>
+                </button>
+              </div>
             </form>
           </div>
         </div>
