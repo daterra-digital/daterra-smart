@@ -13,11 +13,28 @@ import { AcademyView } from './views/AcademyView';
 import { SettingsView } from './views/SettingsView';
 import { ExplorationView } from './views/ExplorationView';
 import { AreaParedeFoliarCalculator } from './features/area-parede-foliar/AreaParedeFoliarCalculator';
+import { VolumeCopaCalculator } from './features/volume-copa/VolumeCopaCalculator';
+import { VolumeCaldaTrvCalculator } from './features/volume-calda-trv/VolumeCaldaTrvCalculator';
+import { DebitoTotalCalculator } from './features/debito-total/DebitoTotalCalculator';
+import { ProjetoAgrosmartView } from './views/ProjetoAgrosmartView';
+import { AboutView } from './views/AboutView';
 import { IosInstallPrompt } from './components/IosInstallPrompt';
 
 // Componente Guardião de Rotas Privadas
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isAuthLoading } = useAuth();
+
+  if (isAuthLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#F2F2F2]">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-8 h-8 border-4 border-daterra-accent border-t-transparent rounded-full animate-spin" />
+          <span className="text-xs font-semibold text-slate-500">A validar sessão...</span>
+        </div>
+      </div>
+    );
+  }
+
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
@@ -26,7 +43,19 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
 
 // Componente Guardião de Rotas Públicas (redireciona para dashboard se já autenticado)
 const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isAuthLoading } = useAuth();
+
+  if (isAuthLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#F2F2F2]">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-8 h-8 border-4 border-daterra-accent border-t-transparent rounded-full animate-spin" />
+          <span className="text-xs font-semibold text-slate-500">A carregar...</span>
+        </div>
+      </div>
+    );
+  }
+
   if (isAuthenticated) {
     return <Navigate to="/dashboard" replace />;
   }
@@ -58,6 +87,9 @@ export const AppContent: React.FC = () => {
               </PublicRoute>
             }
           />
+          {/* Páginas Públicas Acessíveis a Todos (Visitantes e Autenticados) */}
+          <Route path="/projeto-agrosmart" element={<ProjetoAgrosmartView />} />
+          <Route path="/sobre" element={<AboutView />} />
         </Route>
 
         {/* Layout Privado (SaaS Suite) */}
@@ -71,6 +103,9 @@ export const AppContent: React.FC = () => {
           <Route path="/dashboard" element={<DashboardView />} />
           <Route path="/ferramentas" element={<ToolsView />} />
           <Route path="/ferramentas/area-parede-foliar" element={<AreaParedeFoliarCalculator />} />
+          <Route path="/ferramentas/volume-copa" element={<VolumeCopaCalculator />} />
+          <Route path="/ferramentas/volume-calda-trv" element={<VolumeCaldaTrvCalculator />} />
+          <Route path="/ferramentas/debito-total" element={<DebitoTotalCalculator />} />
           <Route path="/academia" element={<AcademyView />} />
           <Route path="/definicoes" element={<SettingsView />} />
           <Route path="/exploracao" element={<ExplorationView />} />

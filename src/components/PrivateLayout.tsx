@@ -30,8 +30,8 @@ export const PrivateLayout: React.FC = () => {
     };
   }, []);
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
     navigate('/');
   };
 
@@ -140,11 +140,13 @@ export const PrivateLayout: React.FC = () => {
             {/* Utilizador */}
             <div className="flex items-center gap-2 pl-3 border-l border-white/15">
               <div className="w-8 h-8 rounded-full bg-daterra-accent text-white flex items-center justify-center font-bold text-xs">
-                {user?.name ? user.name.charAt(0) : 'U'}
+                {user?.email ? user.email.charAt(0).toUpperCase() : 'U'}
               </div>
               <div className="text-left leading-tight">
-                <span className="text-xs font-bold block text-white">{user?.name || 'Agricultor'}</span>
-                <span className="text-[10px] text-slate-300 block">{user?.farmName || 'Exploração'}</span>
+                <span className="text-xs font-bold block text-white truncate max-w-[150px]" title={user?.email || ''}>
+                  {user?.email || 'Utilizador'}
+                </span>
+                <span className="text-[10px] text-slate-300 block">Sessão Ativa</span>
               </div>
             </div>
 
@@ -228,9 +230,11 @@ export const PrivateLayout: React.FC = () => {
 
 
             <div className="pt-3 border-t border-white/10 flex items-center justify-between px-2">
-              <div className="flex items-center gap-2">
-                <User className="w-5 h-5 text-daterra-accent" />
-                <span className="text-xs font-bold text-white">{user?.name}</span>
+              <div className="flex items-center gap-2 truncate max-w-[200px]">
+                <User className="w-5 h-5 text-daterra-accent shrink-0" />
+                <span className="text-xs font-bold text-white truncate" title={user?.email || ''}>
+                  {user?.email || 'Utilizador'}
+                </span>
               </div>
               <button
                 onClick={handleLogout}
