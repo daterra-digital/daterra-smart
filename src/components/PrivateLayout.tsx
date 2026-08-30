@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { 
   LayoutDashboard, Calculator, GraduationCap, 
@@ -25,35 +25,48 @@ export const PrivateLayout: React.FC = () => {
 
 
   const [isRefreshing, setIsRefreshing] = useState(false);
-
-  const handleRefresh = () => {
-    setIsRefreshing(true);
-    window.location.reload();
-  };
+  const refreshTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
     if (!isMobile) return;
 
+    let startX = 0;
     let startY = 0;
     let currentY = 0;
     let isPulling = false;
-    const threshold = 100; // Distância em pixels para ativar refresh
+    const threshold = 150; // Threshold aumentado para evitar disparos acidentais
 
     const handleTouchStart = (e: TouchEvent) => {
+      // Não acionar se o menu mobile estiver aberto
+      if (mobileMenuOpen) return;
+
+      // Só ativar se estiver estritamente no topo da página
       if (window.scrollY === 0) {
+        startX = e.touches[0].clientX;
         startY = e.touches[0].clientY;
+        currentY = startY;
         isPulling = true;
       }
     };
 
     const handleTouchMove = (e: TouchEvent) => {
       if (!isPulling) return;
+      const moveX = e.touches[0].clientX;
       currentY = e.touches[0].clientY;
-      const diff = currentY - startY;
-      if (diff > 0 && window.scrollY === 0) {
-        // Apenas previne o scroll elástico excessivo quando puxa para baixo no topo
-        if (diff > 30 && e.cancelable) {
+
+      const diffX = Math.abs(moveX - startX);
+      const diffY = currentY - startY;
+
+      // Se o movimento for predominantemente horizontal (gesto lateral do browser de 'Back' ou 'Forward'), cancela
+      if (diffX > 40 && diffX > diffY) {
+        isPulling = false;
+        return;
+      }
+
+      // Se for pull para baixo no topo, previne scroll elástico excessivo
+      if (diffY > 0 && window.scrollY === 0) {
+        if (diffY > 30 && e.cancelable) {
           e.preventDefault();
         }
       } else {
@@ -63,11 +76,22 @@ export const PrivateLayout: React.FC = () => {
 
     const handleTouchEnd = () => {
       if (!isPulling) return;
-      const diff = currentY - startY;
-      if (diff > threshold) {
-        handleRefresh();
+      const diffY = currentY - startY;
+
+      if (diffY > threshold) {
+        if (refreshTimeoutRef.current) {
+          clearTimeout(refreshTimeoutRef.current);
+        }
+
+        // Delay para evitar conflito com animações de toque e navegação
+        refreshTimeoutRef.current = setTimeout(() => {
+          setIsRefreshing(true);
+          window.location.reload();
+        }, 150);
       }
+
       isPulling = false;
+      startX = 0;
       startY = 0;
       currentY = 0;
     };
@@ -80,8 +104,11 @@ export const PrivateLayout: React.FC = () => {
       document.removeEventListener('touchstart', handleTouchStart);
       document.removeEventListener('touchmove', handleTouchMove);
       document.removeEventListener('touchend', handleTouchEnd);
+      if (refreshTimeoutRef.current) {
+        clearTimeout(refreshTimeoutRef.current);
+      }
     };
-  }, []);
+  }, [mobileMenuOpen]);
 
   useEffect(() => {
     const handleOnline = () => setIsOnline(true);
