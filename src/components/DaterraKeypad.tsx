@@ -2,6 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Delete, Check, X, Calculator } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 
+export type { KeypadValidationRules } from './keypadValidation.ts';
+export { validateKeypadValue } from './keypadValidation.ts';
+import { validateKeypadValue, type KeypadValidationRules } from './keypadValidation.ts';
+
 export interface DaterraKeypadProps {
   // Modo Modal (quando controlado externamente por isOpen)
   isOpen?: boolean;
@@ -11,6 +15,7 @@ export interface DaterraKeypadProps {
   availableUnits?: string[];
   commonValues?: number[];
   label?: string;
+  validationRules?: KeypadValidationRules;
   onConfirm?: (value: number, unit?: string) => void;
 
   // Modo Input Embutido com Atalhos/Presets
@@ -31,6 +36,7 @@ export const DaterraKeypadModal: React.FC<{
   availableUnits?: string[];
   commonValues?: number[];
   label: string;
+  validationRules?: KeypadValidationRules;
   onConfirm: (value: number, unit?: string) => void;
 }> = ({
   isOpen,
@@ -40,6 +46,7 @@ export const DaterraKeypadModal: React.FC<{
   availableUnits = [],
   commonValues = [50, 100, 200, 300, 400, 500, 1000, 1500],
   label,
+  validationRules,
   onConfirm
 }) => {
   const { t } = useLanguage();
@@ -51,7 +58,7 @@ export const DaterraKeypadModal: React.FC<{
   const formatNumberPt = (num: number): string => {
     if (isNaN(num)) return '0';
     return new Intl.NumberFormat('pt-PT', {
-      maximumFractionDigits: 2,
+      maximumFractionDigits: 3,
       useGrouping: false
     }).format(num);
   };
@@ -136,8 +143,9 @@ export const DaterraKeypadModal: React.FC<{
     setExpression(String(val).replace('.', ','));
   };
 
-  // Regra Crítica: Botão OK desativado se o resultado final < 1 ou se houver erro
-  const isOkDisabled = evalError || evaluatedResult < 1;
+  // Validação declarativa por campo: botão OK ativo apenas quando as regras são cumpridas
+  const keypadValidation = validateKeypadValue(evaluatedResult, expression, evalError, validationRules);
+  const isOkDisabled = !keypadValidation.isValid;
 
   const handleConfirm = () => {
     if (!isOkDisabled) {
@@ -257,6 +265,18 @@ export const DaterraKeypadModal: React.FC<{
           <button onClick={() => handleKeyPress('+')} className="keypad-operator">+</button>
         </div>
 
+        {/* Mensagem curta auxiliar fora do rótulo do botão */}
+        {isOkDisabled && keypadValidation.reason && (keypadValidation.reason === 'below_min' || keypadValidation.reason === 'above_max') && (
+          <div className="px-4 pb-2 text-center text-xs font-sans text-amber-300 font-medium" aria-live="polite">
+            {keypadValidation.reason === 'below_min' && validationRules?.min !== undefined && (
+              <span>Valor mínimo: {formatNumberPt(validationRules.min)}{selectedUnit ? ` ${selectedUnit}` : ''}</span>
+            )}
+            {keypadValidation.reason === 'above_max' && validationRules?.max !== undefined && (
+              <span>Valor máximo: {formatNumberPt(validationRules.max)}{selectedUnit ? ` ${selectedUnit}` : ''}</span>
+            )}
+          </div>
+        )}
+
         {/* Botões Finais de Ação: C e OK */}
         <div className="p-4 pt-0 grid grid-cols-3 gap-3 bg-daterra-primary">
           <button
@@ -269,6 +289,7 @@ export const DaterraKeypadModal: React.FC<{
           <button
             onClick={handleConfirm}
             disabled={isOkDisabled}
+            aria-disabled={isOkDisabled}
             className={`col-span-2 py-3 font-sans font-bold text-base rounded-xl transition-all shadow-lg flex items-center justify-center gap-2 active:scale-95 ${
               isOkDisabled
                 ? 'bg-slate-700 text-slate-400 cursor-not-allowed opacity-60 shadow-none'
@@ -276,7 +297,7 @@ export const DaterraKeypadModal: React.FC<{
             }`}
           >
             <Check className="w-5 h-5" />
-            {isOkDisabled ? t('keypad.disabledConfirm') : t('keypad.confirmButton')}
+            <span>{t('keypad.confirmButton') || 'OK (Confirmar)'}</span>
           </button>
         </div>
       </div>
@@ -298,6 +319,7 @@ export const DaterraKeypad: React.FC<DaterraKeypadProps> = (props) => {
         availableUnits={props.availableUnits}
         commonValues={props.commonValues}
         label={props.label || ''}
+        validationRules={props.validationRules}
         onConfirm={props.onConfirm || (() => {})}
       />
     );
@@ -375,6 +397,7 @@ export const DaterraKeypad: React.FC<DaterraKeypadProps> = (props) => {
           availableUnits={unit ? [unit] : []}
           commonValues={presets}
           label={placeholder || 'Valor'}
+          validationRules={props.validationRules}
           onConfirm={(numVal) => {
             onChange?.(String(numVal));
             setModalOpen(false);

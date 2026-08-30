@@ -1,4 +1,5 @@
 import Dexie, { type Table } from 'dexie';
+import type { CalculationHistoryRecord, CalibrationProfile } from '../types/calculator';
 
 export interface CalculationHistoryItem {
   id?: number;
@@ -160,9 +161,14 @@ export class DaterraDatabase extends Dexie {
   microlearning_content!: Table<MicrolearningContent>;
   installed_tools!: Table<InstalledToolItem>;
 
+  // Tabelas do Motor Universal de Calculadoras (Fase 1 - Preservação Total de Dados)
+  calculation_history_v2!: Table<CalculationHistoryRecord>;
+  calibration_profiles!: Table<CalibrationProfile>;
+
   constructor() {
     super('DaterraSmartDB');
 
+    // Versão 3 legada mantida para integridade da cadeia de migração
     this.version(3).stores({
       calculation_history: '++id, date, calculator_type, profile_id',
       profiles_cultures: '++id, name, crop_type',
@@ -171,6 +177,19 @@ export class DaterraDatabase extends Dexie {
       profiles_calibrations: '++id, equipment_id, nozzle_id',
       microlearning_content: '++id, &field_key',
       installed_tools: '++id, &tool_id'
+    });
+
+    // Versão 4: Suporte a UUID v4, quota de 20 cálculos ativos e calibrações
+    this.version(4).stores({
+      calculation_history: '++id, date, calculator_type, profile_id',
+      profiles_cultures: '++id, name, crop_type',
+      profiles_equipment: '++id, name',
+      profiles_nozzles: '++id, manufacturer, model, equipment_id',
+      profiles_calibrations: '++id, equipment_id, nozzle_id',
+      microlearning_content: '++id, &field_key',
+      installed_tools: '++id, &tool_id',
+      calculation_history_v2: '&id, userId, calculatorId, createdAt, syncStatus, isDeleted, [calculatorId+userId+isDeleted]',
+      calibration_profiles: '&id, userId, equipmentProfileId, status, syncStatus, isDeleted'
     });
   }
 }

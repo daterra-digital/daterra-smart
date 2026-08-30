@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useSearchParams, useNavigate, Navigate } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { 
   Search, X, CheckCircle2, Download, ArrowRight, Plus, Trash2,
@@ -13,6 +13,10 @@ import { DaterraKeypad } from '../components/DaterraKeypad';
 import { DidacticHelp } from '../features/concentracao/DidacticHelp';
 import { useLanguage } from '../context/LanguageContext';
 import { AreaParedeFoliarCalculator } from '../features/area-parede-foliar';
+import { UniversalCalculatorTemplate } from '../features/calculators/core/index.ts';
+import { doseCalculatorConfig } from '../features/calculators/definitions/doseCalculatorConfig.ts';
+import { concentracaoCalculatorConfig } from '../features/calculators/definitions/concentracaoCalculatorConfig.ts';
+import { velocidadeRealCalculatorConfig } from '../features/calculators/definitions/velocidadeRealCalculatorConfig.ts';
 
 export interface ToolModule {
   id: string;
@@ -44,6 +48,15 @@ const TOOLS_CATALOG: ToolModule[] = [
     isCore: true
   },
   {
+    id: 'calc_velocidade_real',
+    name: 'Velocidade Real de Trabalho',
+    category: 'Calibração',
+    description: 'Calcule a velocidade real do equipamento no campo para apoiar a calibração.',
+    icon: Gauge,
+    isCore: true,
+    prioridade: 'alta'
+  },
+  {
     id: 'calc_area_parede_foliar',
     name: 'Área de Parede Foliar',
     category: 'Calibração',
@@ -61,11 +74,34 @@ const TOOLS_CATALOG: ToolModule[] = [
     icon: Gauge
   },
   {
-    id: 'geometria_trv_copa',
-    name: 'Volume de Copa TRV (Tree Row Volume)',
+    id: 'calc_volume_copa',
+    name: 'Volume de Copa (TRV)',
     category: 'Calibração',
     description: 'Determina a massa foliar tridimensional (m³/ha) em pomares e vinhas para cálculo de dosagem proporcional.',
-    icon: Trees
+    icon: Trees,
+    isCore: true,
+    caminho: '/ferramentas/volume-copa',
+    prioridade: 'alta'
+  },
+  {
+    id: 'calc_volume_calda_trv',
+    name: 'Volume de Calda Adequado por TRV',
+    category: 'Calibração',
+    description: 'Estima o volume de calda por hectare com base no Volume de Copa (TRV) e num coeficiente técnico de calibração.',
+    icon: FlaskConical,
+    isCore: true,
+    caminho: '/ferramentas/volume-calda-trv',
+    prioridade: 'alta'
+  },
+  {
+    id: 'calc_debito_total',
+    name: 'Débito Total do Pulverizador',
+    category: 'Calibração',
+    description: 'Calcula o débito global do pulverizador a partir do volume de calda, velocidade de trabalho e largura efetiva tratada.',
+    icon: Gauge,
+    isCore: true,
+    caminho: '/ferramentas/debito-total',
+    prioridade: 'alta'
   },
   {
     id: 'gestao_caderno_campo',
@@ -228,6 +264,18 @@ export const ToolsView: React.FC = () => {
 
   // Abrir uma Ferramenta / Funcionalidade
   const handleOpenTool = (toolId: string) => {
+    if (toolId === 'geometria_trv_copa' || toolId === 'calc_volume_copa') {
+      navigate('/ferramentas/volume-copa');
+      return;
+    }
+    if (toolId === 'calc_volume_calda_trv') {
+      navigate('/ferramentas/volume-calda-trv');
+      return;
+    }
+    if (toolId === 'calc_debito_total') {
+      navigate('/ferramentas/debito-total');
+      return;
+    }
     const found = TOOLS_CATALOG.find(t => t.id === toolId);
     if (found?.caminho) {
       navigate(found.caminho);
@@ -365,11 +413,50 @@ export const ToolsView: React.FC = () => {
   };
 
   const concOutput = calculateConcentrationResult();
-  const doseOutput = calculateDoseResult();
 
   // --- SE UMA FERRAMENTA ESPECÍFICA ESTIVER EM EXECUÇÃO ---
+  if (currentViewTool === 'calc_volume_copa' || currentViewTool === 'geometria_trv_copa') {
+    return <Navigate to="/ferramentas/volume-copa" replace />;
+  }
+
+  if (currentViewTool === 'calc_volume_calda_trv') {
+    return <Navigate to="/ferramentas/volume-calda-trv" replace />;
+  }
+
+  if (currentViewTool === 'calc_debito_total') {
+    return <Navigate to="/ferramentas/debito-total" replace />;
+  }
+
   if (currentViewTool === 'calc_area_parede_foliar') {
     return <AreaParedeFoliarCalculator />;
+  }
+
+  if (currentViewTool === 'calc_dose') {
+    return (
+      <UniversalCalculatorTemplate
+        definition={doseCalculatorConfig}
+        onBack={handleBackToCatalog}
+        onExecuteTransfer={(targetToolId) => handleOpenTool(targetToolId)}
+      />
+    );
+  }
+
+  if (currentViewTool === 'calc_concentracao') {
+    return (
+      <UniversalCalculatorTemplate
+        definition={concentracaoCalculatorConfig}
+        onBack={handleBackToCatalog}
+      />
+    );
+  }
+
+  if (currentViewTool === 'calc_velocidade_real') {
+    return (
+      <UniversalCalculatorTemplate
+        definition={velocidadeRealCalculatorConfig}
+        onBack={handleBackToCatalog}
+      />
+    );
   }
 
   if (currentViewTool) {
@@ -655,148 +742,8 @@ export const ToolsView: React.FC = () => {
           </div>
         )}
 
-        {/* MÓDULO 2: CALCULADORA DE DOSE */}
-        {currentViewTool === 'calc_dose' && (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-            <div className="lg:col-span-5 bg-white p-6 sm:p-8 rounded-3xl shadow-soft border border-slate-200 space-y-6">
-              <div>
-                <div className="flex items-center gap-2 mb-1">
-                  <h2 className="text-xl font-extrabold text-daterra-primary">
-                    Calculadora de Dose
-                  </h2>
-                  <DidacticHelp faqFile="DoseFAQGeral.md" buttonLabel="Ajuda" />
-                </div>
-                <p className="text-xs text-slate-500">
-                  Calcule a quantidade total de produto comercial e a área coberta por cada tanque de calda.
-                </p>
-              </div>
-
-              <div className="space-y-4">
-                <div>
-                  <div className="flex items-center justify-between mb-1.5">
-                    <label className="text-xs font-bold text-slate-700">Volume a Preparar (L)</label>
-                    <DidacticHelp faqFile="DoseFAQVolumePreparar.md" buttonLabel="Ajuda" />
-                  </div>
-                  <input
-                    type="text"
-                    readOnly
-                    inputMode="none"
-                    onClick={() =>
-                      openKeypad({
-                        key: 'volPrepararDose',
-                        label: 'Volume a Preparar (L)',
-                        value: volPrepararDose,
-                        unit: 'L',
-                        availableUnits: ['L'],
-                        commonValues: [50, 100, 200, 300, 400, 500, 1000, 1500]
-                      })
-                    }
-                    value={`${formatNumberPt(volPrepararDose)} L`}
-                    className="w-full px-4 py-3.5 bg-slate-50 border border-slate-300 rounded-2xl text-base font-bold font-mono-numbers text-daterra-primary cursor-pointer hover:border-daterra-accent outline-none"
-                  />
-                </div>
-
-                <div>
-                  <div className="flex items-center justify-between mb-1.5">
-                    <label className="text-xs font-bold text-slate-700">Dose Recomendada por ha</label>
-                    <DidacticHelp faqFile="DoseFAQDoseRecomendada.md" buttonLabel="Ajuda" />
-                  </div>
-                  <input
-                    type="text"
-                    readOnly
-                    inputMode="none"
-                    onClick={() =>
-                      openKeypad({
-                        key: 'doseValue',
-                        label: 'Dose Recomendada',
-                        value: doseValue,
-                        unit: doseUnit,
-                        availableUnits: ['L/ha', 'kg/ha'],
-                        commonValues: [1, 2, 3, 5, 50, 100, 200, 500]
-                      })
-                    }
-                    value={`${formatNumberPt(doseValue)} ${doseUnit}`}
-                    className="w-full px-4 py-3.5 bg-slate-50 border border-slate-300 rounded-2xl text-base font-bold font-mono-numbers text-daterra-primary cursor-pointer"
-                  />
-                </div>
-
-                <div>
-                  <div className="flex items-center justify-between mb-1.5">
-                    <label className="text-xs font-bold text-slate-700">Volume Aplicado (L/ha)</label>
-                    <DidacticHelp faqFile="DoseFAQVolumeAplicado.md" buttonLabel="Ajuda" />
-                  </div>
-                  <input
-                    type="text"
-                    readOnly
-                    inputMode="none"
-                    onClick={() =>
-                      openKeypad({
-                        key: 'volCalda',
-                        label: 'Volume Aplicado (L/ha)',
-                        value: volCalda,
-                        unit: 'L/ha',
-                        availableUnits: ['L/ha'],
-                        commonValues: [50, 100, 200, 300, 400, 500, 1000, 1500]
-                      })
-                    }
-                    value={`${formatNumberPt(volCalda)} L/ha`}
-                    className="w-full px-4 py-3.5 bg-slate-50 border border-slate-300 rounded-2xl text-base font-bold font-mono-numbers text-daterra-primary cursor-pointer"
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Painel de Resultados */}
-            <div className="lg:col-span-7 space-y-6">
-              <div className="bg-gradient-to-br from-daterra-primary via-[#175348] to-daterra-secondary text-white p-6 sm:p-8 rounded-3xl shadow-floating border border-white/10 space-y-6">
-                <div className="border-b border-white/15 pb-4">
-                  <span className="text-xs font-bold uppercase tracking-wider text-daterra-accent">
-                    Resultado do Cálculo de Dose
-                  </span>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                  <div className="bg-black/20 p-5 rounded-2xl border border-white/10 flex flex-col justify-between">
-                    <span className="text-xs text-slate-300 block mb-1 font-semibold uppercase tracking-wider">
-                      Quantidade necessária de pesticida:
-                    </span>
-                    <div>
-                      <div className="text-3xl sm:text-4xl font-black font-mono-numbers text-white tracking-tight">
-                        {doseOutput.smart.mainText}
-                      </div>
-                      <div className="text-xs font-semibold font-mono-numbers text-daterra-accent mt-1">
-                        {doseOutput.smart.subText}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="bg-black/20 p-5 rounded-2xl border border-white/10 flex flex-col justify-between">
-                    <span className="text-xs text-slate-300 block mb-1 font-semibold uppercase tracking-wider">
-                      Área Tratada por Depósito:
-                    </span>
-                    <div>
-                      <div className="text-3xl sm:text-4xl font-black font-mono-numbers text-white tracking-tight flex items-baseline gap-2">
-                        <span>{formatNumberPt(doseOutput.area_tratada_ha, 2, 2)}</span>
-                        <span className="text-xl font-bold text-daterra-accent">ha</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <button
-                  onClick={() => handleSaveToHistory('dose')}
-                  className="w-full py-4 bg-daterra-accent hover:bg-daterra-accent/90 text-white font-extrabold text-sm rounded-2xl transition-all shadow-xl shadow-daterra-accent/30 flex items-center justify-center gap-2 active:scale-95 touch-target"
-                >
-                  <Save className="w-5 h-5" />
-                  <span>Guardar Cálculo no Histórico (IndexedDB)</span>
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
         {/* OUTROS MÓDULOS DE FERRAMENTAS (VISUALIZAÇÃO INTERATIVA) */}
-        {!['calc_concentracao', 'calc_dose'].includes(currentViewTool) && (
+        {!['calc_concentracao'].includes(currentViewTool) && (
           <div className="bg-white p-8 rounded-3xl border border-slate-200 shadow-soft text-center space-y-4 max-w-2xl mx-auto my-8">
             <div className="w-16 h-16 rounded-3xl bg-[#114037]/10 text-[#114037] flex items-center justify-center mx-auto">
               {currentToolData ? <currentToolData.icon className="w-8 h-8" /> : <Sparkles className="w-8 h-8" />}

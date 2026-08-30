@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
 import { LogIn, GraduationCap, ExternalLink, Menu, X } from 'lucide-react';
 import daterraLogo from '../assets/daterra-logo.svg';
-import bannerFinanciamento from '../assets/banner-financiamento.svg';
 
 export const PublicLayout: React.FC = () => {
   const location = useLocation();
@@ -53,18 +52,20 @@ export const PublicLayout: React.FC = () => {
             >
               Início
             </Link>
-            <a
-              href="#sobre"
-              className="text-slate-700 hover:text-daterra-primary transition-colors"
+            <Link
+              to="/sobre"
+              className={`transition-colors ${isActive('/sobre') ? 'text-daterra-accent font-bold' : 'text-slate-700 hover:text-daterra-primary'}`}
             >
               Sobre
-            </a>
-            <Link
-              to="/login"
+            </Link>
+            <a
+              href="https://academia.daterra.com.pt"
+              target="_blank"
+              rel="noopener noreferrer"
               className="text-slate-700 hover:text-daterra-primary transition-colors"
             >
               Academia
-            </Link>
+            </a>
             <Link
               to="/login"
               className="px-5 py-2.5 bg-daterra-primary hover:bg-daterra-primary-hover text-white rounded-xl font-bold flex items-center gap-2 transition-all shadow-md active:scale-95 touch-target"
@@ -94,20 +95,22 @@ export const PublicLayout: React.FC = () => {
             >
               Início
             </Link>
-            <a
-              href="#sobre"
+            <Link
+              to="/sobre"
               onClick={() => setMobileMenuOpen(false)}
               className="block py-2.5 px-4 rounded-xl text-base font-semibold text-slate-700 hover:bg-slate-100"
             >
               Sobre
-            </a>
-            <Link
-              to="/login"
+            </Link>
+            <a
+              href="https://academia.daterra.com.pt"
+              target="_blank"
+              rel="noopener noreferrer"
               onClick={() => setMobileMenuOpen(false)}
               className="block py-2.5 px-4 rounded-xl text-base font-semibold text-slate-700 hover:bg-slate-100"
             >
               Academia DATERRA
-            </Link>
+            </a>
             <Link
               to="/login"
               onClick={() => setMobileMenuOpen(false)}
@@ -125,16 +128,6 @@ export const PublicLayout: React.FC = () => {
         <Outlet />
       </main>
 
-      {/* Banner de Financiamento PRR — sem fundo CSS, transparência nativa respeitada */}
-      <div className="w-full">
-        <img
-          src={bannerFinanciamento}
-          alt="Banner de Financiamento PRR - AgroSmart DATERRA"
-          className="w-full h-auto object-contain"
-          style={{ display: 'block' }}
-        />
-      </div>
-
       {/* Rodapé Institucional com daterra-logo.svg */}
       <footer className="bg-daterra-primary text-white border-t border-daterra-secondary/30 py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
@@ -148,25 +141,42 @@ export const PublicLayout: React.FC = () => {
               />
             </div>
             <p className="text-xs text-slate-300 leading-relaxed">
-              Tecnologia de precisão e capacitação Offline-First para o setor agroalimentar e proteção de culturas.
+              Ferramentas digitais práticas e capacitação técnica para o setor agroalimentar e proteção das culturas.
             </p>
           </div>
 
           <div>
             <h4 className="font-bold text-xs uppercase tracking-wider text-daterra-accent mb-3">Financiamento</h4>
             <p className="text-xs text-slate-300 leading-relaxed">
-              PRR - Plano de Recuperação e Resiliência<br />
-              Projeto N.º 23703 - AgroSmart DATERRA
+              Projeto AgroSmart DATERRA<br />
+              Projeto n.º 23703<br />
+              Apoiado pelo PRR — Plano de Recuperação e Resiliência
             </p>
+            <Link
+              to="/projeto-agrosmart"
+              className="inline-flex items-center gap-1.5 text-xs text-daterra-accent hover:text-white font-bold mt-2.5 transition-colors group"
+            >
+              <span>Ver detalhes do projeto</span>
+              <span className="group-hover:translate-x-0.5 transition-transform">→</span>
+            </Link>
           </div>
 
           <div>
-            <h4 className="font-bold text-xs uppercase tracking-wider text-daterra-accent mb-3">Módulos SaaS</h4>
+            <h4 className="font-bold text-xs uppercase tracking-wider text-daterra-accent mb-3">Ferramentas & Recursos</h4>
             <ul className="text-xs text-slate-300 space-y-1.5">
-              <li>Calculadoras de Precisão</li>
-              <li>Agromonitoring Weather & NDVI</li>
-              <li>Academia Moodle DATERRA</li>
-              <li>Gestão de Equipamento & Caldas</li>
+              <li>Calculadoras Agrícolas de Precisão</li>
+              <li>Informação e Acompanhamento Técnico</li>
+              <li>
+                <a
+                  href="https://academia.daterra.com.pt"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-daterra-accent transition-colors"
+                >
+                  Academia DATERRA
+                </a>
+              </li>
+              <li>Preparação e Calibração de Caldas</li>
             </ul>
           </div>
 

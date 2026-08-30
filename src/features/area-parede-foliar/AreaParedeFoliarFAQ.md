@@ -45,7 +45,7 @@ LWA = (2,5 × 2 × 10.000) / 3,0 = 16.667 m² LWA/ha
 ## Limites válidos
 
 - Altura da copa: 0,5 < h < 6,0 m
-- Entrelinha: 1,5 < r < 10,0 m
+- Entrelinha: 1,0 ≤ r ≤ 10,0 m
 - Resultado: número inteiro (arredondado)
 
 ## Ligações úteis

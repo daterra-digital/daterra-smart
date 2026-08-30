@@ -6,14 +6,44 @@ import faqConcVolumePreparar from './ConcentracaoFAQVolumePreparar.md?raw';
 import faqConcConcentracao from './ConcentracaoFAQConcentracao.md?raw';
 import faqConcVolumeRecomendado from './ConcentracaoFAQVolumeRecomendado.md?raw';
 import faqConcVolumeAplicado from './ConcentracaoFAQVolumeAplicado.md?raw';
+import faqConcQuantidadeProdutoJovem from './ConcentracaoFAQQuantidadeProdutoJovem.md?raw';
+import faqConcQuantidadeProdutoAdulta from './ConcentracaoFAQQuantidadeProdutoAdulta.md?raw';
 
 import faqDoseGeral from '../dose/DoseFAQGeral.md?raw';
 import faqDoseVolumePreparar from '../dose/DoseFAQVolumePreparar.md?raw';
 import faqDoseDoseRecomendada from '../dose/DoseFAQDoseRecomendada.md?raw';
 import faqDoseVolumeAplicado from '../dose/DoseFAQVolumeAplicado.md?raw';
+import faqDoseQuantidadeProduto from '../dose/DoseFAQQuantidadeProduto.md?raw';
+import faqDoseAreaTratada from '../dose/DoseFAQAreaTratada.md?raw';
 
 import faqAreaParedeFoliar from '../area-parede-foliar/AreaParedeFoliarFAQ.md?raw';
 import faqAreaParedeFoliarMicro from '../area-parede-foliar/AreaParedeFoliarMicrolearning.md?raw';
+import faqAreaParedeFoliarGeral from '../area-parede-foliar/AreaParedeFoliarFAQGeral.md?raw';
+import faqAreaParedeFoliarAltura from '../area-parede-foliar/AreaParedeFoliarFAQAltura.md?raw';
+import faqAreaParedeFoliarEntrelinha from '../area-parede-foliar/AreaParedeFoliarFAQEntrelinha.md?raw';
+import faqAreaParedeFoliarResultado from '../area-parede-foliar/AreaParedeFoliarFAQResultado.md?raw';
+
+import faqVelGeral from '../velocidade-real/VelocidadeRealFAQGeral.md?raw';
+import faqVelDistancia from '../velocidade-real/VelocidadeRealFAQDistancia.md?raw';
+import faqVelTempo from '../velocidade-real/VelocidadeRealFAQTempo.md?raw';
+import faqVelResultado from '../velocidade-real/VelocidadeRealFAQResultado.md?raw';
+
+import faqTrvGeral from '../volume-copa/TRVFAQGeral.md?raw';
+import faqTrvAltura from '../volume-copa/TRVFAQAltura.md?raw';
+import faqTrvLargura from '../volume-copa/TRVFAQLargura.md?raw';
+import faqTrvEntrelinha from '../volume-copa/TRVFAQEntrelinha.md?raw';
+import faqTrvResultado from '../volume-copa/TRVFAQResultado.md?raw';
+
+import faqCaldaTrvGeral from '../volume-calda-trv/VolumeCaldaTrvFAQGeral.md?raw';
+import faqCaldaTrvTRV from '../volume-calda-trv/VolumeCaldaTrvFAQTRV.md?raw';
+import faqCaldaTrvCoeficiente from '../volume-calda-trv/VolumeCaldaTrvFAQCoeficiente.md?raw';
+import faqCaldaTrvResultado from '../volume-calda-trv/VolumeCaldaTrvFAQResultado.md?raw';
+
+import faqDebitoGeral from '../debito-total/DebitoTotalFAQGeral.md?raw';
+import faqDebitoVolume from '../debito-total/DebitoTotalFAQVolume.md?raw';
+import faqDebitoVelocidade from '../debito-total/DebitoTotalFAQVelocidade.md?raw';
+import faqDebitoLargura from '../debito-total/DebitoTotalFAQLargura.md?raw';
+import faqDebitoResultado from '../debito-total/DebitoTotalFAQResultado.md?raw';
 
 export type FAQFileType =
   | 'ConcentracaoFAQGeral.md'
@@ -21,12 +51,38 @@ export type FAQFileType =
   | 'ConcentracaoFAQConcentracao.md'
   | 'ConcentracaoFAQVolumeRecomendado.md'
   | 'ConcentracaoFAQVolumeAplicado.md'
+  | 'ConcentracaoFAQQuantidadeProdutoJovem.md'
+  | 'ConcentracaoFAQQuantidadeProdutoAdulta.md'
   | 'DoseFAQGeral.md'
   | 'DoseFAQVolumePreparar.md'
   | 'DoseFAQDoseRecomendada.md'
   | 'DoseFAQVolumeAplicado.md'
+  | 'DoseFAQQuantidadeProduto.md'
+  | 'DoseFAQAreaTratada.md'
   | 'AreaParedeFoliarFAQ.md'
-  | 'AreaParedeFoliarMicrolearning.md';
+  | 'AreaParedeFoliarMicrolearning.md'
+  | 'AreaParedeFoliarFAQGeral.md'
+  | 'AreaParedeFoliarFAQAltura.md'
+  | 'AreaParedeFoliarFAQEntrelinha.md'
+  | 'AreaParedeFoliarFAQResultado.md'
+  | 'VelocidadeRealFAQGeral.md'
+  | 'VelocidadeRealFAQDistancia.md'
+  | 'VelocidadeRealFAQTempo.md'
+  | 'VelocidadeRealFAQResultado.md'
+  | 'TRVFAQGeral.md'
+  | 'TRVFAQAltura.md'
+  | 'TRVFAQLargura.md'
+  | 'TRVFAQEntrelinha.md'
+  | 'TRVFAQResultado.md'
+  | 'VolumeCaldaTrvFAQGeral.md'
+  | 'VolumeCaldaTrvFAQTRV.md'
+  | 'VolumeCaldaTrvFAQCoeficiente.md'
+  | 'VolumeCaldaTrvFAQResultado.md'
+  | 'DebitoTotalFAQGeral.md'
+  | 'DebitoTotalFAQVolume.md'
+  | 'DebitoTotalFAQVelocidade.md'
+  | 'DebitoTotalFAQLargura.md'
+  | 'DebitoTotalFAQResultado.md';
 
 const faqMap: Record<string, string> = {
   'ConcentracaoFAQGeral.md': faqConcGeral,
@@ -34,15 +90,43 @@ const faqMap: Record<string, string> = {
   'ConcentracaoFAQConcentracao.md': faqConcConcentracao,
   'ConcentracaoFAQVolumeRecomendado.md': faqConcVolumeRecomendado,
   'ConcentracaoFAQVolumeAplicado.md': faqConcVolumeAplicado,
+  'ConcentracaoFAQQuantidadeProdutoJovem.md': faqConcQuantidadeProdutoJovem,
+  'ConcentracaoFAQQuantidadeProdutoAdulta.md': faqConcQuantidadeProdutoAdulta,
   'DoseFAQGeral.md': faqDoseGeral,
   'DoseFAQVolumePreparar.md': faqDoseVolumePreparar,
   'DoseFAQDoseRecomendada.md': faqDoseDoseRecomendada,
   'DoseFAQVolumeAplicado.md': faqDoseVolumeAplicado,
+  'DoseFAQQuantidadeProduto.md': faqDoseQuantidadeProduto,
+  'DoseFAQAreaTratada.md': faqDoseAreaTratada,
+  'dose-quantidade-produto': faqDoseQuantidadeProduto,
+  'dose-area-tratada': faqDoseAreaTratada,
   'AreaParedeFoliarFAQ.md': faqAreaParedeFoliar,
   'AreaParedeFoliarMicrolearning.md': faqAreaParedeFoliarMicro,
-  'area-parede-foliar-altura': faqAreaParedeFoliar,
-  'area-parede-foliar-entrelinha': faqAreaParedeFoliar,
-  'area-parede-foliar': faqAreaParedeFoliar
+  'AreaParedeFoliarFAQGeral.md': faqAreaParedeFoliarGeral,
+  'AreaParedeFoliarFAQAltura.md': faqAreaParedeFoliarAltura,
+  'AreaParedeFoliarFAQEntrelinha.md': faqAreaParedeFoliarEntrelinha,
+  'AreaParedeFoliarFAQResultado.md': faqAreaParedeFoliarResultado,
+  'area-parede-foliar-altura': faqAreaParedeFoliarAltura,
+  'area-parede-foliar-entrelinha': faqAreaParedeFoliarEntrelinha,
+  'area-parede-foliar': faqAreaParedeFoliarGeral,
+  'VelocidadeRealFAQGeral.md': faqVelGeral,
+  'VelocidadeRealFAQDistancia.md': faqVelDistancia,
+  'VelocidadeRealFAQTempo.md': faqVelTempo,
+  'VelocidadeRealFAQResultado.md': faqVelResultado,
+  'TRVFAQGeral.md': faqTrvGeral,
+  'TRVFAQAltura.md': faqTrvAltura,
+  'TRVFAQLargura.md': faqTrvLargura,
+  'TRVFAQEntrelinha.md': faqTrvEntrelinha,
+  'TRVFAQResultado.md': faqTrvResultado,
+  'VolumeCaldaTrvFAQGeral.md': faqCaldaTrvGeral,
+  'VolumeCaldaTrvFAQTRV.md': faqCaldaTrvTRV,
+  'VolumeCaldaTrvFAQCoeficiente.md': faqCaldaTrvCoeficiente,
+  'VolumeCaldaTrvFAQResultado.md': faqCaldaTrvResultado,
+  'DebitoTotalFAQGeral.md': faqDebitoGeral,
+  'DebitoTotalFAQVolume.md': faqDebitoVolume,
+  'DebitoTotalFAQVelocidade.md': faqDebitoVelocidade,
+  'DebitoTotalFAQLargura.md': faqDebitoLargura,
+  'DebitoTotalFAQResultado.md': faqDebitoResultado
 };
 
 export interface DidacticHelpProps {
@@ -51,6 +135,7 @@ export interface DidacticHelpProps {
   buttonLabel?: string;
   variant?: 'icon' | 'button';
   iconType?: 'help' | 'info';
+  iconClassName?: string;
   className?: string;
 }
 
@@ -98,10 +183,14 @@ export const DidacticHelp: React.FC<DidacticHelpProps> = ({
   buttonLabel = 'Ajuda',
   variant = 'button',
   iconType = 'info',
+  iconClassName,
   className = ''
 }) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [openAccordionIdxs, setOpenAccordionIdxs] = useState<Record<number, boolean>>({ 0: true });
+
+  const triggerRef = React.useRef<HTMLButtonElement>(null);
+  const closeButtonRef = React.useRef<HTMLButtonElement>(null);
 
   const rawContent = (faqFile ? faqMap[faqFile] : '') || (topic ? faqMap[topic] : '') || '';
   const { title, sections } = parseMarkdownFAQ(rawContent);
@@ -110,37 +199,66 @@ export const DidacticHelp: React.FC<DidacticHelpProps> = ({
     setOpenAccordionIdxs(prev => ({ ...prev, [idx]: !prev[idx] }));
   };
 
+  const handleClose = () => {
+    setIsOpen(false);
+    setTimeout(() => {
+      triggerRef.current?.focus();
+    }, 50);
+  };
+
+  React.useEffect(() => {
+    if (isOpen) {
+      setTimeout(() => {
+        closeButtonRef.current?.focus();
+      }, 50);
+    }
+  }, [isOpen]);
+
+  React.useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') handleClose();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen]);
+
   const IconComp = iconType === 'help' ? HelpCircle : Info;
 
   return (
     <>
       {variant === 'icon' ? (
         <button
+          ref={triggerRef}
           type="button"
           onClick={() => setIsOpen(true)}
-          className={`min-w-[44px] min-h-[44px] p-2.5 text-[#1D734B] hover:text-[#114037] bg-[#F2F2F2] hover:bg-[#3CA64C]/20 rounded-xl transition-all flex items-center justify-center touch-target ${className}`}
+          className={`min-w-[48px] min-h-[48px] p-2.5 text-[#1D734B] hover:text-[#114037] bg-[#F2F2F2] hover:bg-[#3CA64C]/20 rounded-xl transition-all flex items-center justify-center touch-target ${className}`}
           title={title}
           aria-label={buttonLabel || title}
         >
-          <IconComp className="w-5 h-5 text-[#1D734B]" />
+          <IconComp className={iconClassName || "w-5 h-5 text-[#1D734B]"} />
         </button>
       ) : (
         <button
+          ref={triggerRef}
           type="button"
           onClick={() => setIsOpen(true)}
-          className={`min-h-[44px] px-3.5 py-2 text-[#1D734B] hover:text-[#114037] bg-[#F2F2F2] hover:bg-[#3CA64C]/20 rounded-xl transition-all flex items-center gap-1.5 text-xs font-bold touch-target ${className}`}
+          className={`min-h-[48px] px-3.5 py-2 text-[#1D734B] hover:text-[#114037] bg-[#F2F2F2] hover:bg-[#3CA64C]/20 rounded-xl transition-all flex items-center gap-1.5 text-xs font-bold touch-target ${className}`}
           title={title}
           aria-label={buttonLabel || title}
         >
-          <IconComp className="w-4 h-4 text-[#1D734B] shrink-0" />
+          <IconComp className={iconClassName || "w-4 h-4 text-[#1D734B] shrink-0"} />
           <span>{buttonLabel}</span>
         </button>
       )}
 
       {isOpen && (
         <div 
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="microlearning-modal-title"
           className="fixed inset-0 z-50 flex items-center justify-center bg-[#0D0D0D]/70 backdrop-blur-xs p-3 sm:p-4 animate-fade-in"
-          onClick={() => setIsOpen(false)}
+          onClick={handleClose}
         >
           <div 
             className="w-full max-w-2xl bg-white rounded-3xl shadow-2xl overflow-hidden border border-[#F2F2F2] flex flex-col max-h-[92vh]"
@@ -156,13 +274,14 @@ export const DidacticHelp: React.FC<DidacticHelpProps> = ({
                   <span className="text-[10px] uppercase font-extrabold tracking-widest text-[#3AAA35]">
                     Microlearning DATERRA Smart
                   </span>
-                  <h3 className="text-base sm:text-lg font-black leading-tight text-white mt-0.5">
+                  <h3 id="microlearning-modal-title" className="text-base sm:text-lg font-black leading-tight text-white mt-0.5">
                     {title}
                   </h3>
                 </div>
               </div>
               <button
-                onClick={() => setIsOpen(false)}
+                ref={closeButtonRef}
+                onClick={handleClose}
                 className="p-2.5 min-w-[44px] min-h-[44px] rounded-full hover:bg-white/10 text-slate-300 hover:text-white transition-colors touch-target flex items-center justify-center shrink-0"
                 aria-label="Fechar modal"
               >
@@ -179,6 +298,7 @@ export const DidacticHelp: React.FC<DidacticHelpProps> = ({
                     <div key={idx} className="border border-[#F2F2F2] rounded-2xl overflow-hidden bg-white shadow-xs">
                       <button
                         type="button"
+                        aria-expanded={isExpanded}
                         onClick={() => toggleAccordion(idx)}
                         className="w-full p-4 bg-[#F2F2F2]/80 hover:bg-[#F2F2F2] flex items-center justify-between font-bold text-xs sm:text-sm text-[#0D0D0D] transition-all text-left"
                       >
@@ -245,7 +365,7 @@ export const DidacticHelp: React.FC<DidacticHelpProps> = ({
             <div className="p-4 bg-[#F2F2F2] border-t border-slate-200 flex justify-end shrink-0">
               <button
                 type="button"
-                onClick={() => setIsOpen(false)}
+                onClick={handleClose}
                 className="min-h-[44px] px-6 py-2.5 bg-[#114037] hover:bg-[#1D734B] text-white font-bold text-xs rounded-xl transition-colors shadow-md touch-target"
               >
                 Compreendido
