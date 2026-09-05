@@ -15,7 +15,7 @@ export interface AuthContextType {
   profile: Profile | null;
   isAuthenticated: boolean;
   isAuthLoading: boolean;
-  sendOtp: (email: string) => Promise<{ error: string | null }>;
+  sendOtp: (email: string, captchaToken?: string) => Promise<{ error: string | null }>;
   verifyOtp: (email: string, token: string) => Promise<{ error: string | null }>;
   logout: () => Promise<void>;
   refreshProfile?: () => Promise<void>;
@@ -113,7 +113,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
   }, []);
 
-  const sendOtp = async (email: string): Promise<{ error: string | null }> => {
+  const sendOtp = async (email: string, captchaToken?: string): Promise<{ error: string | null }> => {
     try {
       const cleanEmail = email.trim().toLowerCase();
       if (!cleanEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
@@ -123,13 +123,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const { error } = await supabase.auth.signInWithOtp({
         email: cleanEmail,
         options: {
-          shouldCreateUser: true
+          shouldCreateUser: true,
+          ...(captchaToken ? { captchaToken } : {})
         }
       });
 
       if (error) {
         if (error.status === 429) {
           return { error: 'Demasiadas tentativas de envio. Por favor aguarde um momento antes de tentar novamente.' };
+        }
+        if (error.message?.toLowerCase().includes('captcha')) {
+          return { error: 'Falha na validação do CAPTCHA. Por favor tente novamente.' };
         }
         return { error: 'Não foi possível enviar o código de acesso. Verifique o email e tente novamente.' };
       }

@@ -61,6 +61,7 @@ export default defineConfig({
         skipWaiting: true,
         clientsClaim: true,
         cleanupOutdatedCaches: true,
+        maximumFileSizeToCacheInBytes: 4 * 1024 * 1024,
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
         runtimeCaching: [
           {
@@ -108,6 +109,9 @@ export default defineConfig({
           }
           if (id.includes('node_modules/dexie')) {
             return 'dexie-vendor';
+          }
+          if (id.includes('nozzleComparison.data')) {
+            return 'nozzle-data';
           }
         }
       }

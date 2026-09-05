@@ -3,7 +3,7 @@ import { useSearchParams, useNavigate, Navigate } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { 
   Search, X, CheckCircle2, Download, ArrowRight, Plus, Trash2,
-  FlaskConical, Calculator, Gauge, Trees, ClipboardCheck, 
+  FlaskConical, Calculator, Gauge, Trees, Scale, ClipboardCheck, 
   CloudSun, Layers, Tractor, ChevronLeft, SlidersHorizontal, 
   Sparkles, Save, Sprout, AlertCircle, Leaf
 } from 'lucide-react';
@@ -31,6 +31,16 @@ export interface ToolModule {
 
 // Catálogo de Ferramentas e Funcionalidades Agronómicas
 const TOOLS_CATALOG: ToolModule[] = [
+  {
+    id: 'comparador_bicos',
+    name: 'Comparador de Bicos de Pulverização',
+    category: 'Calibração',
+    description: 'Compare débitos técnicos reais, curvas de pressão e espectro de gotas de dois bicos em simultâneo.',
+    icon: Scale,
+    isCore: true,
+    caminho: '/ferramentas/comparador-bicos',
+    prioridade: 'alta'
+  },
   {
     id: 'calc_concentracao',
     name: 'Calculadora de Concentração da Calda',
@@ -270,6 +280,10 @@ export const ToolsView: React.FC = () => {
     }
     if (toolId === 'calc_volume_calda_trv') {
       navigate('/ferramentas/volume-calda-trv');
+      return;
+    }
+    if (toolId === 'comparador_bicos') {
+      navigate('/ferramentas/comparador-bicos');
       return;
     }
     if (toolId === 'calc_debito_total') {

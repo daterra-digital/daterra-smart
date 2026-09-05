@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ShieldCheck, Mail, KeyRound, ArrowRight, RefreshCw, Edit2 } from 'lucide-react';
+import { Turnstile, type TurnstileInstance } from '@marsidev/react-turnstile';
 import { useAuth } from '../context/AuthContext';
 import iconDaterraMono from '../assets/icon-daterra-mono.png';
 
@@ -22,6 +23,10 @@ export const LoginView: React.FC = () => {
   const [successMsg, setSuccessMsg] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
   const [resendCooldown, setResendCooldown] = useState<number>(0);
+  const [captchaToken, setCaptchaToken] = useState<string>('');
+
+  const turnstileRef = useRef<TurnstileInstance | null>(null);
+  const siteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY;
 
   const { sendOtp, verifyOtp } = useAuth();
   const navigate = useNavigate();
@@ -47,12 +52,19 @@ export const LoginView: React.FC = () => {
       return;
     }
 
+    if (siteKey && !captchaToken) {
+      setError('Por favor complete a verificação de segurança.');
+      return;
+    }
+
     setLoading(true);
-    const result = await sendOtp(cleanEmail);
+    const result = await sendOtp(cleanEmail, captchaToken);
     setLoading(false);
 
     if (result.error) {
       setError(result.error);
+      turnstileRef.current?.reset();
+      setCaptchaToken('');
     } else {
       setStep('otp');
       setResendCooldown(60);
@@ -107,6 +119,8 @@ export const LoginView: React.FC = () => {
     setOtp('');
     setError('');
     setSuccessMsg('');
+    setCaptchaToken('');
+    turnstileRef.current?.reset();
   };
 
   return (
@@ -170,11 +184,32 @@ export const LoginView: React.FC = () => {
               </div>
             </div>
 
+            {siteKey && (
+              <Turnstile
+                ref={turnstileRef}
+                siteKey={siteKey}
+                onSuccess={(token) => {
+                  setCaptchaToken(token);
+                  setError('');
+                }}
+                onError={() => {
+                  setError('Falha na validação de segurança. Por favor tente novamente.');
+                  setCaptchaToken('');
+                }}
+                onExpire={() => {
+                  setCaptchaToken('');
+                }}
+                options={{
+                  size: 'invisible'
+                }}
+              />
+            )}
+
             <button
               type="submit"
-              disabled={loading || !email.trim()}
+              disabled={loading || !email.trim() || (!!siteKey && !captchaToken)}
               className={`w-full py-4 font-bold text-sm rounded-2xl transition-all shadow-lg flex items-center justify-center gap-2 touch-target ${
-                email.trim() && !loading
+                email.trim() && !loading && (!siteKey || !!captchaToken)
                   ? 'bg-daterra-accent hover:bg-daterra-accent/90 text-white shadow-daterra-accent/30 active:scale-95'
                   : 'bg-slate-200 text-slate-400 cursor-not-allowed shadow-none'
               }`}

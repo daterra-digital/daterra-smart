@@ -66,6 +66,10 @@
     "noToolsFoundDesc": "Não foram encontradas funcionalidades para o termo pesquisado. Tente pesquisar por outro nome ou limpar o filtro.",
     "clearFilter": "Limpar Pesquisa e Filtros",
     "catalog": {
+      "comparador_bicos": {
+        "name": "Comparador de Bicos de Pulverização",
+        "description": "Compare débitos técnicos reais, curvas de pressão e espectro de gotas de dois bicos em simultâneo."
+      },
       "calc_concentracao": {
         "name": "Calculadora de Concentração da Calda",
         "description": "Calcula a quantidade exata de pesticida a diluir por depósito para Planta Jovem ou Copa Adulta."
