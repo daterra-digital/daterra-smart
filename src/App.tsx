@@ -1,5 +1,5 @@
-import React from 'react';
-import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { HashRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { LanguageProvider } from './context/LanguageContext';
 import { PublicLayout } from './components/PublicLayout';
@@ -21,6 +21,13 @@ import { ProjetoAgrosmartView } from './views/ProjetoAgrosmartView';
 import { AboutView } from './views/AboutView';
 import { HelpView } from './views/HelpView';
 import { IosInstallPrompt } from './components/IosInstallPrompt';
+import { initGA, trackPageView } from './lib/analytics';
+
+// Inicialização única do Google Analytics 4
+const gaMeasurementId = import.meta.env.VITE_GA_MEASUREMENT_ID;
+if (gaMeasurementId) {
+  initGA(gaMeasurementId);
+}
 
 // Componente Guardião de Rotas Privadas
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -65,6 +72,12 @@ const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 };
 
 export const AppContent: React.FC = () => {
+  const location = useLocation();
+
+  useEffect(() => {
+    trackPageView(location.pathname + location.search);
+  }, [location]);
+
   return (
     <>
       {/* Pop-up inteligente de aviso de instalação PWA exclusivo para dispositivos iOS */}
@@ -90,6 +103,8 @@ export const AppContent: React.FC = () => {
             }
           />
           {/* Páginas Públicas Acessíveis a Visitantes */}
+          <Route path="/sobre" element={<AboutView />} />
+          <Route path="/ajuda" element={<HelpView />} />
           <Route path="/projeto-agrosmart" element={<ProjetoAgrosmartView />} />
         </Route>
 
@@ -111,8 +126,6 @@ export const AppContent: React.FC = () => {
           <Route path="/academia" element={<AcademyView />} />
           <Route path="/definicoes" element={<SettingsView />} />
           <Route path="/exploracao" element={<ExplorationView />} />
-          <Route path="/ajuda" element={<HelpView />} />
-          <Route path="/sobre" element={<AboutView />} />
         </Route>
 
         {/* Rota Fallback */}
