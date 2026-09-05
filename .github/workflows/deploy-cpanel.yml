@@ -1,21 +1,42 @@
-name: Deploy DATERRA to cPanel
+name: Deploy DATERRA Smart to cPanel
 
-manual:
-  workflow_dispatch: # Isto adiciona o botão de envio manual no site do GitHub
+on:
+  workflow_dispatch: # Apenas acionamento manual no GitHub Actions
+
+concurrency:
+  group: "cpanel-deploy"
+  cancel-in-progress: true
 
 jobs:
   web-deploy:
-    name: Sincronizar com o Servidor cPanel
+    name: Compilar e Sincronizar com o Servidor cPanel
     runs-on: ubuntu-latest
     steps:
       - name: Obter Código do GitHub
         uses: actions/checkout@v4
 
-      - name: Enviar Ficheiros via FTP
+      - name: Instalar Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Instalar Dependências
+        run: npm ci
+
+      - name: Compilar Aplicação (Vite Build)
+        run: npm run build
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+          VITE_TURNSTILE_SITE_KEY: ${{ secrets.VITE_TURNSTILE_SITE_KEY || vars.VITE_TURNSTILE_SITE_KEY || '0x4AAAAAAEoCu91rh6Qlrb0K' }}
+          VITE_GA_MEASUREMENT_ID: ${{ secrets.VITE_GA_MEASUREMENT_ID || vars.VITE_GA_MEASUREMENT_ID || 'G-8XT304Y480' }}
+
+      - name: Enviar Ficheiros Compilados via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
-          server: ${{ secrets.FTP_SERVER }}
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          server-dir: /public_html/daterra/ # Pasta do seu subdomínio no cPanel
-          local-dir: ./
+          server: ${{ secrets.FTP_SERVER }} # Marcador configurado em GitHub Secrets (ex.: ftp.daterra.com.pt)
+          username: ${{ secrets.FTP_USERNAME }} # Marcador configurado em GitHub Secrets (ex.: smartftp@daterra.com.pt)
+          password: ${{ secrets.FTP_PASSWORD }} # Marcador configurado em GitHub Secrets
+          server-dir: ${{ secrets.FTP_SERVER_DIR || '/public_html/daterra/' }} # Marcador da pasta do subdomínio (ex.: /public_html/smart/ ou /home/daterracom/smart.daterra.com.pt/)
+          local-dir: ./dist/
