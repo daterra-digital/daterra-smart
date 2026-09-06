@@ -7,6 +7,7 @@
     "weather": "Meteorologia",
     "ndvi": "Mappe NDVI",
     "academy": "Accademia",
+    "parcels": "Parcelle",
     "settings": "Impostazioni"
   },
   "dashboard": {
@@ -97,6 +98,10 @@
       "perfil_exploracao": {
         "name": "Profilo Azienda & Attrezzature",
         "description": "Registro centralizzato di appezzamenti, colture, atomizzatori e ugelli dell'azienda agricola."
+      },
+      "calc_eppo": {
+        "name": "Calcolatore EPPO (LWA / TRV)",
+        "description": "Calcola il volume di miscela e il dosaggio del prodotto per serbatoio e per ettaro secondo la metodologia EPPO PP 1/239."
       }
     },
     "form": {
@@ -295,6 +300,160 @@
       "content": "[FAQ: Come funzionano i Profili di Unità?]\n- Consentono di passare dal Sistema Metrico Internazionale (SI) al Sistema Imperiale Americano (US) e al Sistema Regionale senza perdere la precisione dei calcoli idraulici.",
       "formula": "Conversione automatica nell'ecosistema DATERRA Smart",
       "unit_explanation": "SI : L, ha, bar, km/h\nUS : gal, acre, psi, mph"
+    },
+    "calc_eppo": {
+      "title": "Calcolatore EPPO (LWA / TRV)",
+      "content": "[FAQ: Qual è la funzione del Calcolatore EPPO?]\n- Calcola il volume di miscela di riferimento e la quantità di prodotto fitosanitario per serbatoio e per ettaro in base alla geometria della parete (LWA) o della chioma (TRV), secondo lo standard EPPO PP 1/239.\n\n[FAQ: Che cos'è il Metodo LWA (Leaf Wall Area)?]\n- Misura la superficie della parete fogliare verticale (m²/ha) nei vigneti e nelle colture a spalliera.\n\n[FAQ: Che cos'è il Metodo TRV (Tree Row Volume)?]\n- Misura il volume apparente della chioma (m³/ha) nei frutteti di frutta a guscio, pomacee e agrumi.",
+      "formula": "LWA (m²/ha) = (2 × H × 10.000) / W_w\nTRV (m³/ha) = (H × W × 10.000) / W_w\nVolume Miscela = LWA × (k_LWA / 10.000) o TRV × k_TRV",
+      "unit_explanation": "H : Altezza della Chioma (m)\nW : Larghezza della Chioma (m)\nW_w : Interfilare (m)\nk_LWA : L/10.000m² LWA\nk_TRV : L/m³ TRV"
     }
+  },
+  "unifiedKeypad": {
+    "title": "Calcolatore Tecnico DATERRA",
+    "editing": "In modifica",
+    "unit": "Unità",
+    "presets": "Scorciatoie",
+    "cancel": "Annulla",
+    "confirm": "Concludi e Vedi Riepilogo",
+    "enterData": "Inserisci / Modifica Dati",
+    "enterDataPrompt": "Inserisci i dati per visualizzare il risultato",
+    "completingValue": "Completamento valore...",
+    "technicalDetails": "Vedi Dettagli Tecnici e Norme",
+    "technicalDetailsHide": "Nascondi Dettagli Tecnici",
+    "srCloseModal": "Chiudi e annulla modifiche",
+    "srActiveField": "Modifica della variabile attiva",
+    "unitChangedValueReset": "L'unità è stata modificata. Inserisci nuovamente il valore per questa unità.",
+    "unitChangedValueConverted": "Valore convertito automaticamente nella nuova unità.",
+    "tankSubMetric": "Serbatoio",
+    "inputSummaryTitle": "Valori Inseriti",
+    "inputSummarySubtitle": "Tocca un valore per inserirlo o modificarlo.",
+    "openUnified": "Apri Calcolatrice Unificata",
+    "edit": "Modifica",
+    "errors": {
+      "emptyExpression": "L'espressione non può essere vuota",
+      "divisionByZero": "Divisione per zero non consentita",
+      "invalidSyntax": "Espressione matematica incompleta o non valida",
+      "expressionTooLong": "Espressione troppo lunga (massimo 50 caratteri)",
+      "excessiveNesting": "Troppi livelli di parentesi (massimo 5 livelli)",
+      "outOfRange": "Valore al di fuori dei limiti accettabili per questa variabile",
+      "min": "Valore inferiore al minimo raccomandato",
+      "max": "Valore superiore al massimo raccomandato"
+    },
+    "enterValues": "Inserisci Valori"
+  },
+  "velocidadeReal": {
+    "enterDataPrompt": "Inserisci distanza e tempo per calcolare la velocità reale di avanzamento."
+  },
+  "areaParedeFoliar": {
+    "enterDataPrompt": "Inserisci l'altezza della vegetazione e l'interfila per calcolare l'area di parete fogliare.",
+    "submetric": "2 pareti di vegetazione trattata"
+  },
+  "volumeCopa": {
+    "enterDataPrompt": "Inserisci altezza, larghezza e interfila per calcolare il volume della chioma (TRV).",
+    "submetric": "Geometria tridimensionnelle della chioma"
+  },
+  "volumeCaldaTrv": {
+    "enterDataPrompt": "Inserisci il volume della chioma (TRV) e il coefficiente k per calcolare il volume della miscela.",
+    "submetric": "TRV · Coefficiente di volume della miscela",
+    "assistance": {
+      "profiles": {
+        "title": "Profilo Colturale Indicativo",
+        "noProfile": "Senza profilo",
+        "orchardProfile": "Frutteto Stretto / Medio",
+        "oliveProfile": "Uliveto — interpretazione in validazione",
+        "citrusProfile": "Agrumi",
+        "oliveValidation": "Interpretazione in validazione",
+        "citrusValidation": "Valori orientativi in validazione. Confermare il coefficiente e la taratura in base alla coltura, alla geometria della chioma e alle condizioni di applicazione.",
+        "citrusValidationNotice": "Valori orientativi interni. Verificare il coefficiente e la calibrazione nelle reali condizioni di applicazione."
+      },
+      "density": {
+        "title": "Densità della Chioma",
+        "verySparse": "Molto poco densa",
+        "sparse": "Poco densa",
+        "dense": "Densa",
+        "veryDense": "Molto densa",
+        "guidanceValue": "Valore orientativo",
+        "manualValue": "Valore manuale"
+      },
+      "warnings": {
+        "lowCoefficient": "Coefficiente molto basso. Verificare che il valore sia corretto.",
+        "highCoefficient": "Coefficiente elevato. Verificare che il valore sia corretto."
+      },
+      "interpretation": {
+        "noProfileMessage": "Selezionare un profilo colturale per ricevere un'interpretazione orientativa del volume calcolato.",
+        "orchardVeryLow": "Volume basso per il profilo selezionato. Verificare la copertura del bersaglio, la geometria e la calibrazione dell'attrezzatura.",
+        "orchardLowModerate": "Volume da basso a moderato per il profilo selezionato. Verificare che corrisponda alla geometria e alle condizioni di applicazione.",
+        "orchardTypical": "Volume all'interno della fascia orientativa interna per il profilo selezionato.",
+        "orchardHighPlausible": "Volume elevato per il profilo selezionato. Verificare geometria, densità, polverizzatore, distribuzione e sgocciolamento.",
+        "orchardHighDeveloped": "Volume elevato per il profilo selezionato. Verificare la dimensione della chioma, la calibrazione, la distribuzione e lo sgocciolamento.",
+        "orchardVeryHigh": "Volume molto elevato per il profilo selezionato. Rivedere i valori inseriti e verificare la calibrazione prima dell'applicazione.",
+        "citrusLow": "Volume basso per il profilo selezionato. Verificare la copertura del bersaglio e la calibrazione dell'attrezzatura.",
+        "citrusTypical": "Volume all'interno della fascia orientativa interna per il profilo selezionato.",
+        "citrusHigh": "Volume elevato per il profilo selezionato. Verificare geometria, densità, polverizzatore, distribuzione e sgocciolamento.",
+        "citrusVeryHigh": "Volume molto elevato per il profilo selezionato. Verificare la geometria, il coefficiente, la calibrazione e le condizioni di applicazione.",
+        "oliveValidationMessage": "L'interpretazione per l'uliveto è in corso di validazione. Verificare la geometria, il coefficiente immesso, la taratura e le condizioni di applicazione."
+      },
+      "a11y": {
+        "selectProfile": "Selezionare il profilo colturale indicativo",
+        "selectDensity": "Selezionare il livello di densità",
+        "selectedDensity": "selezionato",
+        "profileChanged": "Profilo colturale modificato",
+        "manualValueNotice": "Valore di k in modalità di modifica manuale"
+      }
+    }
+  },
+  "debitoTotal": {
+    "enterDataPrompt": "Inserire volume della miscela, velocità e larghezza per calcolare la portata totale.",
+    "submetric": "Portata totale dell'irroratrice",
+    "assistance": {
+      "widthCriteria": {
+        "title": "Criterio di Larghezza di Lavoro",
+        "boom": "Barra Orizzontale",
+        "band": "Irrorazione a Fascia",
+        "rowSpacing": "Interfila",
+        "boomDescription": "Colture basse ed estensive a pieno campo",
+        "bandDescription": "Applicazione localizzata sulla fila o fascia trattata",
+        "rowSpacingDescription": "Colture a filare, frutteti, vigneti e oliveti"
+      },
+      "nozzleCalculation": {
+        "show": "Calcola portata per ugello (opzionale)",
+        "hide": "Nascondi calcolo per ugello",
+        "fieldLabel": "Numero di ugelli attivi in simultanea (opzionale)",
+        "fieldDescription": "Indicare solo gli ugelli che contribuiscono alla portata totale calcolata in questo passaggio.",
+        "averageFlowNotice": "La portata media viene calcolata in base al numero di ugelli attivi in simultanea. Verificare che tutti gli ugelli considerati abbiano una portata simile.",
+        "rowSpacingDifferentiatedDistributionNotice": "Gli atomizzatori con distribuzione verticale differenziata, ugelli di calibro diverso o sezioni con funzionamento distinto devono essere valutati con uno strumento dedicato.",
+        "optional": "Opzionale",
+        "enterPrompt": "Inserire il numero di ugelli attivi in simultanea",
+        "averageFlow": "Portata media:",
+        "nozzlesUnit": "ugelli",
+        "perNozzle": "L/min per ugello"
+      },
+      "a11y": {
+        "selectWidthCriteria": "Seleziona criterio di larghezza di lavoro",
+        "selectedWidthCriteria": "selezionato",
+        "enableNozzleCalculation": "Attiva calcolo portata per ugello",
+        "disableNozzleCalculation": "Disattiva calcolo portata per ugello"
+      }
+    }
+  },
+  "calculatorActionBar": {
+    "save": "Salva nella cronologia",
+    "saveCalculation": "Salva calcolo",
+    "history": "Cronologia",
+    "openHistory": "Apri cronologia",
+    "technicalGuide": "Guida",
+    "openTechnicalGuide": "Consulta guida tecnica",
+    "saveDisabled": "Inserisci tutti i valori per salvare",
+    "noTechnicalGuideAvailable": "Guida tecnica non disponibile",
+    "guide": "Guida"
+  },
+  "validationNotes": {
+    "title": "Note di Convalida",
+    "defaultMessage": "Controlla gli avvisi contestuali per i valori inseriti."
+  },
+  "eppo": {
+    "enterDataPrompt": "Inserire le dimensioni dell'appezzamento e della chioma per calcolare il volume della miscela e del prodotto secondo la norma EPPO.",
+    "submetricLwa": "Metodologia EPPO LWA · Parete Fogliare",
+    "submetricTrv": "Metodologia EPPO TRV · Volume della Chioma"
   }
 }

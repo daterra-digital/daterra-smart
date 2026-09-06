@@ -32,20 +32,32 @@ export const NO_COMPATIBLE_FIELDS_NOTICE =
  * Se o resultado for zero campos transferíveis (compatibleFields.length === 0), a ferramenta não é elegível.
  */
 export function evaluateCalculationTransfer(record: CalculationHistoryRecord): ToolTransferPreview[] {
-  // Apenas registos válidos da Calculadora de Dose são processados
-  if (!record || record.calculatorId !== 'calc_dose' || record.isDeleted) {
+  // Apenas registos válidos não eliminados são processados
+  if (!record || record.isDeleted) {
     return [];
   }
 
   const previews: ToolTransferPreview[] = [];
 
   // ==========================================
-  // ALVO: CALCULADORA DE CONCENTRAÇÃO
+  // 1. ORIGEM: CALCULADORA DE DOSE
   // ==========================================
-  const concPreview = evaluateDoseToConcentracao(record);
-  // Regra de elegibilidade estrita: só adiciona se tiver pelo menos 1 campo compatível efetivo
-  if (concPreview && concPreview.compatibleFields.length > 0) {
-    previews.push(concPreview);
+  if (record.calculatorId === 'calc_dose') {
+    const concPreview = evaluateDoseToConcentracao(record);
+    // Regra de elegibilidade estrita: só adiciona se tiver pelo menos 1 campo compatível efetivo
+    if (concPreview && concPreview.compatibleFields.length > 0) {
+      previews.push(concPreview);
+    }
+  }
+
+  // ==========================================
+  // 2. ORIGEM: CALCULADORA DE VOLUME DE COPA (TRV)
+  // ==========================================
+  if (record.calculatorId === 'calc_volume_copa') {
+    const caldaPreview = evaluateVolumeCopaToCaldaTrv(record);
+    if (caldaPreview && caldaPreview.compatibleFields.length > 0) {
+      previews.push(caldaPreview);
+    }
   }
 
   return previews;
@@ -152,7 +164,7 @@ export function evaluateDoseToConcentracao(record: CalculationHistoryRecord): To
     targetFieldId: 'concValue',
     targetCanonicalKey: 'concentration',
     targetDimension: 'concentration',
-    targetLabel: 'Concentração Recomendada do PF',
+    targetLabel: 'Concentração Recomendada do Produto',
     targetUnit: 'mL/hL, g/hL ou %',
     reasonPt: 'Definida exclusivamente no rótulo oficial autorizado do produto.'
   });
@@ -168,3 +180,109 @@ export function evaluateDoseToConcentracao(record: CalculationHistoryRecord): To
     operationalNoticePt: NO_COMPATIBLE_FIELDS_NOTICE
   };
 }
+
+/**
+ * Avalia transferência canónica de Volume de Copa (TRV) para Volume de Calda por TRV.
+ * 
+ * REGRAS CANÓNICAS ESTRITAS:
+ * 1. O resultado consolidado 'volumeCopa' (tree_row_volume | m³ TRV/ha) é transferido
+ *    diretamente para o campo 'volumeCopaTrv' da Calculadora de Volume de Calda por TRV.
+ * 2. O campo 'coeficienteVolumeCalda' (k) NÃO é transferido automaticamente, devendo
+ *    ser fornecido pelo técnico ou equipamento (unfilledTargetFields).
+ * 3. As medições elementares de copa (altura, largura, entrelinha) são incompatíveis como
+ *    entradas diretas da calda, pois a calda consome o TRV consolidado.
+ */
+export function evaluateVolumeCopaToCaldaTrv(record: CalculationHistoryRecord): ToolTransferPreview {
+  const compatibleFields: FieldTransferCandidate[] = [];
+  const unfilledTargetFields: UnfilledTargetField[] = [];
+  const incompatibleSourceValues: IncompatibleSourceValue[] = [];
+
+  const trvOutput = record.outputs['volumeCopa'];
+  if (
+    trvOutput &&
+    trvOutput.rawValue !== undefined &&
+    trvOutput.rawValue !== null &&
+    Number(trvOutput.rawValue) > 0
+  ) {
+    compatibleFields.push({
+      sourceFieldId: 'volumeCopa',
+      sourceCanonicalKey: 'tree_row_volume',
+      sourceDimension: 'tree_row_volume',
+      sourceLabel: 'Volume de Copa (TRV)',
+      sourceValue: trvOutput,
+
+      targetFieldId: 'volumeCopaTrv',
+      targetCanonicalKey: 'tree_row_volume',
+      targetDimension: 'tree_row_volume',
+      targetLabel: 'Volume de Copa (TRV)',
+      targetUnit: 'm³ TRV/ha',
+
+      status: 'direct_match',
+      reasonPt:
+        'O volume de copa calculado (m³ TRV/ha) é a grandeza canónica direta de entrada para a estimativa de volume de calda por TRV.',
+      previewValue: trvOutput.rawValue,
+      previewUnit: 'm³ TRV/ha'
+    });
+  }
+
+  // Campo k da Calculadora de Calda TRV
+  unfilledTargetFields.push({
+    targetFieldId: 'coeficienteVolumeCalda',
+    targetCanonicalKey: 'spray_volume_coefficient',
+    targetDimension: 'volume_per_volume',
+    targetLabel: 'Coeficiente de Volume de Calda (k)',
+    targetUnit: 'L/m³',
+    reasonPt:
+      'O coeficiente k deve ser definido com base na calibração do equipamento ou recomendação técnica.'
+  });
+
+  // Parâmetros elementares de medição de copa
+  if (record.inputs['alturaCopa']) {
+    incompatibleSourceValues.push({
+      sourceFieldId: 'alturaCopa',
+      sourceCanonicalKey: 'canopy_height',
+      sourceDimension: 'length',
+      sourceLabel: 'Altura da copa',
+      sourceValue: record.inputs['alturaCopa'],
+      reasonPt:
+        'Parâmetro geométrico elementar de medição. A ferramenta de destino recebe diretamente o resultado consolidado do Volume de Copa (TRV).'
+    });
+  }
+
+  if (record.inputs['larguraCopa']) {
+    incompatibleSourceValues.push({
+      sourceFieldId: 'larguraCopa',
+      sourceCanonicalKey: 'canopy_width',
+      sourceDimension: 'length',
+      sourceLabel: 'Largura média da copa',
+      sourceValue: record.inputs['larguraCopa'],
+      reasonPt:
+        'Parâmetro geométrico elementar de medição. A ferramenta de destino recebe diretamente o resultado consolidado do Volume de Copa (TRV).'
+    });
+  }
+
+  if (record.inputs['distanciaEntrelinhas']) {
+    incompatibleSourceValues.push({
+      sourceFieldId: 'distanciaEntrelinhas',
+      sourceCanonicalKey: 'row_spacing',
+      sourceDimension: 'length',
+      sourceLabel: 'Distância entrelinhas',
+      sourceValue: record.inputs['distanciaEntrelinhas'],
+      reasonPt:
+        'Parâmetro geométrico elementar de medição. A ferramenta de destino recebe diretamente o resultado consolidado do Volume de Copa (TRV).'
+    });
+  }
+
+  return {
+    targetCalculatorId: 'calc_volume_calda_trv',
+    targetCalculatorTitle: 'Volume de Calda Adequado por TRV',
+    targetCalculatorCategory: 'CALIBRAÇÃO',
+    isTransferReady: compatibleFields.length > 0,
+    compatibleFields,
+    unfilledTargetFields,
+    incompatibleSourceValues,
+    operationalNoticePt:
+      'Apenas o Volume de Copa (TRV) consolidado será transferido. O coeficiente k deve ser definido manualmente.'
+  };
+}
+

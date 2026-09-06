@@ -67,7 +67,7 @@ export const velocidadeRealCalculatorConfig: CalculatorDefinition = {
   fields: [
     {
       id: 'distanciaPercurso',
-      label: 'Distância do percurso (m)',
+      label: 'Distância do percurso',
       canonicalKey: 'route_distance',
       dimension: 'length',
       defaultUnit: 'm',
@@ -86,7 +86,7 @@ export const velocidadeRealCalculatorConfig: CalculatorDefinition = {
     },
     {
       id: 'tempoPercurso',
-      label: 'Tempo do percurso (s)',
+      label: 'Tempo do percurso',
       canonicalKey: 'route_time',
       dimension: 'time',
       defaultUnit: 's',
@@ -109,7 +109,7 @@ export const velocidadeRealCalculatorConfig: CalculatorDefinition = {
     {
       id: 'velocidadeReal',
       canonicalKey: 'work_speed',
-      label: 'Velocidade real de trabalho:',
+      label: 'Velocidade real',
       dimension: 'speed',
       defaultUnit: 'km/h',
       subUnit: 'm/s',
@@ -158,10 +158,14 @@ export const velocidadeRealCalculatorConfig: CalculatorDefinition = {
     const distRaw = inputs['distanciaPercurso']?.rawValue;
     const tempoRaw = inputs['tempoPercurso']?.rawValue;
 
-    const d = Number(distRaw) || 0;
-    const t = Number(tempoRaw) || 0;
+    const d = distRaw !== undefined && distRaw !== null && distRaw !== '' ? Number(distRaw) : 0;
+    const t = tempoRaw !== undefined && tempoRaw !== null && tempoRaw !== '' ? Number(tempoRaw) : 0;
 
     const pure = calculateWorkSpeedPure(d, t);
+
+    if (!pure.isValid) {
+      return {};
+    }
 
     return {
       velocidadeReal: {
@@ -171,7 +175,7 @@ export const velocidadeRealCalculatorConfig: CalculatorDefinition = {
         subUnit: 'm/s',
         dimension: 'speed',
         canonicalKey: 'work_speed',
-        label: 'Velocidade real de trabalho:',
+        label: 'Velocidade real',
         source: 'calculated_output',
         localId: 'velocidadeReal',
         calculatorId: 'calc_velocidade_real',

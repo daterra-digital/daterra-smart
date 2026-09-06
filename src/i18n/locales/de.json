@@ -7,6 +7,7 @@
     "weather": "Wetter",
     "ndvi": "NDVI-Karten",
     "academy": "Akademie",
+    "parcels": "Flurstücke",
     "settings": "Einstellungen"
   },
   "dashboard": {
@@ -97,6 +98,10 @@
       "perfil_exploracao": {
         "name": "Betriebs- & Geräteprofil",
         "description": "Zentrale Erfassung von Schlägen, Kulturen, Feldspritzen und Düsen des Betriebes."
+      },
+      "calc_eppo": {
+        "name": "EPPO-Rechner (LWA / TRV)",
+        "description": "Berechnet das Spritzvolumen und die Produktdosierung pro Tank und pro Hektar nach EPPO PP 1/239-Methodik."
       }
     },
     "form": {
@@ -295,6 +300,160 @@
       "content": "[FAQ: Wie funktionieren die Einheitenprofile?]\n- Sie ermöglichen den Wechsel zwischen dem Internationalen Metrischen System (SI), dem US-amerikanischen System und dem regionalen System ohne Verlust der hydraulischen Präzision.",
       "formula": "Automatische Umrechnung im DATERRA Smart Ökosystem",
       "unit_explanation": "SI : L, ha, bar, km/h\nUS : gal, acre, psi, mph"
+    },
+    "calc_eppo": {
+      "title": "EPPO-Rechner (LWA / TRV)",
+      "content": "[FAQ: Was ist die Funktion des EPPO-Rechners?]\n- Berechnet das Referenz-Spritzvolumen und die Pflanzenschutzmittelmenge pro Tank und pro Hektar basierend auf der Laubwandfläche (LWA) oder dem Kronenvolumen (TRV) nach EPPO PP 1/239.\n\n[FAQ: Was ist die LWA-Methode (Leaf Wall Area)?]\n- Misst die vertikale Laubwandfläche (m²/ha) in Weinbergen und Heckenkulturen.\n\n[FAQ: Was ist die TRV-Methode (Tree Row Volume)?]\n- Misst das scheinbare Kronenvolumen (m³/ha) in Schalenobst-, Kernobst- und Zitrusanlagen.",
+      "formula": "LWA (m²/ha) = (2 × H × 10.000) / W_w\nTRV (m³/ha) = (H × W × 10.000) / W_w\nSpritzvolumen = LWA × (k_LWA / 10.000) oder TRV × k_TRV",
+      "unit_explanation": "H : Vegetations-/Kronenhöhe (m)\nW : Kronenbreite (m)\nW_w : Reihenabstand (m)\nk_LWA : L/10.000m² LWA\nk_TRV : L/m³ TRV"
     }
+  },
+  "unifiedKeypad": {
+    "title": "Technischer Rechner DATERRA",
+    "editing": "Bearbeiten",
+    "unit": "Einheit",
+    "presets": "Schnellwahl",
+    "cancel": "Abbrechen",
+    "confirm": "Abschließen und Zusammenfassung anzeigen",
+    "enterData": "Daten eingeben / bearbeiten",
+    "enterDataPrompt": "Geben Sie Daten ein, um das Ergebnis zu sehen",
+    "completingValue": "Wert wird vervollständigt...",
+    "technicalDetails": "Technische Details und Normen anzeigen",
+    "technicalDetailsHide": "Technische Details ausblenden",
+    "srCloseModal": "Schließen und Änderungen verwerfen",
+    "srActiveField": "Aktive Variable wird bearbeitet",
+    "unitChangedValueReset": "Die Einheit wurde geändert. Bitte geben Sie den Wert für diese Einheit erneut ein.",
+    "unitChangedValueConverted": "Wert wurde automatisch in die neue Einheit umgerechnet.",
+    "tankSubMetric": "Behälter",
+    "inputSummaryTitle": "Eingegebene Werte",
+    "inputSummarySubtitle": "Tippen Sie auf einen Wert, um ihn einzugeben oder zu bearbeiten.",
+    "openUnified": "Einheitlichen Rechner Öffnen",
+    "edit": "Bearbeiten",
+    "errors": {
+      "emptyExpression": "Ausdruck darf nicht leer sein",
+      "divisionByZero": "Division durch Null nicht erlaubt",
+      "invalidSyntax": "Unvollständiger oder ungültiger mathematischer Ausdruck",
+      "expressionTooLong": "Ausdruck zu lang (maximal 50 Zeichen)",
+      "excessiveNesting": "Zu viele Klammerebenen (maximal 5 Ebenen)",
+      "outOfRange": "Wert außerhalb der zulässigen Grenzen für diese Variable",
+      "min": "Wert unter dem empfohlenen Mindestwert",
+      "max": "Wert über dem empfohlenen Höchstwert"
+    },
+    "enterValues": "Werte Eingeben"
+  },
+  "velocidadeReal": {
+    "enterDataPrompt": "Geben Sie Strecke und Zeit ein, um die tatsächliche Arbeitsgeschwindigkeit zu berechnen."
+  },
+  "areaParedeFoliar": {
+    "enterDataPrompt": "Geben Sie Laubwandhöhe und Reihenabstand ein, um die Laubwandfläche zu berechnen.",
+    "submetric": "2 behandelte Laubwandseiten"
+  },
+  "volumeCopa": {
+    "enterDataPrompt": "Geben Sie Höhe, Breite und Reihenabstand ein, um das Baumkronenvolumen (TRV) zu berechnen.",
+    "submetric": "Dreidimensionale Kronengeometrie"
+  },
+  "volumeCaldaTrv": {
+    "enterDataPrompt": "Geben Sie das Baumkronenvolumen (TRV) und den Koeffizienten k ein, um die Spritzbrühaufwandmenge zu berechnen.",
+    "submetric": "TRV · Spritzbrühkoeffizient",
+    "assistance": {
+      "profiles": {
+        "title": "Orientierendes Bestandsprofil",
+        "noProfile": "Ohne Profil",
+        "orchardProfile": "Schmale / Mittlere Obstanlage",
+        "oliveProfile": "Olivenhain — Interpretation in Validierung",
+        "citrusProfile": "Zitrusfrüchte",
+        "oliveValidation": "Interpretation in Validierung",
+        "citrusValidation": "Orientierende Werte in Validierung. Überprüfen Sie den Koeffizienten und die Kalibrierung anhand der Kultur, der Kronengeometrie und der Anwendungsbedingungen.",
+        "citrusValidationNotice": "Interne Richtwerte. Überprüfen Sie den Koeffizienten und die Kalibrierung unter realen Anwendungsbedingungen."
+      },
+      "density": {
+        "title": "Kronendichte",
+        "verySparse": "Sehr wenig dicht",
+        "sparse": "Wenig dicht",
+        "dense": "Dicht",
+        "veryDense": "Sehr dicht",
+        "guidanceValue": "Orientierungswert",
+        "manualValue": "Manueller Wert"
+      },
+      "warnings": {
+        "lowCoefficient": "Sehr niedriger Koeffizient. Überprüfen Sie, ob der Wert korrekt ist.",
+        "highCoefficient": "Hoher Koeffizient. Überprüfen Sie, ob der Wert korrekt ist."
+      },
+      "interpretation": {
+        "noProfileMessage": "Wählen Sie ein Bestandsprofil aus, um eine Orientierungshilfe für die berechnete Aufwandmenge zu erhalten.",
+        "orchardVeryLow": "Niedriges Volumen für das ausgewählte Profil. Überprüfen Sie die Zielflächenabdeckung, die Geometrie und die Gerätekalibrierung.",
+        "orchardLowModerate": "Niedriges bis mäßiges Volumen für das ausgewählte Profil. Überprüfen Sie, ob es der Geometrie und den Anwendungsbedingungen entspricht.",
+        "orchardTypical": "Volumen innerhalb des internen Richtbereichs für das ausgewählte Profil.",
+        "orchardHighPlausible": "Hohes Volumen für das ausgewählte Profil. Überprüfen Sie Geometrie, Dichte, Spritzgerät, Verteilung und Ablauf.",
+        "orchardHighDeveloped": "Hohes Volumen für das ausgewählte Profil. Überprüfen Sie Kronengröße, Kalibrierung, Verteilung und Ablauf.",
+        "orchardVeryHigh": "Sehr hohes Volumen für das ausgewählte Profil. Überprüfen Sie die eingegebenen Werte und bestätigen Sie die Kalibrierung vor der Anwendung.",
+        "citrusLow": "Niedriges Volumen für das ausgewählte Profil. Überprüfen Sie die Zielflächenabdeckung und die Gerätekalibrierung.",
+        "citrusTypical": "Volumen innerhalb des internen Richtbereichs für das ausgewählte Profil.",
+        "citrusHigh": "Hohes Volumen für das ausgewählte Profil. Überprüfen Sie Geometrie, Dichte, Spritzgerät, Verteilung und Ablauf.",
+        "citrusVeryHigh": "Sehr hohes Volumen für das ausgewählte Profil. Überprüfen Sie Geometrie, Koeffizienten, Kalibrierung und Anwendungsbedingungen.",
+        "oliveValidationMessage": "Die Interpretation für Olivenhaine befindet sich in der Validierung. Überprüfen Sie Geometrie, eingegebenen Koeffizienten, Kalibrierung und Anwendungsbedingungen."
+      },
+      "a11y": {
+        "selectProfile": "Orientierendes Bestandsprofil auswählen",
+        "selectDensity": "Kronendichtestufe auswählen",
+        "selectedDensity": "ausgewählt",
+        "profileChanged": "Bestandsprofil geändert",
+        "manualValueNotice": "k-Wert im manuellen Bearbeitungsmodus"
+      }
+    }
+  },
+  "debitoTotal": {
+    "enterDataPrompt": "Geben Sie Spritzbrühmenge, Fahrgeschwindigkeit und Arbeitsbreite ein, um den Gesamtausstoß zu berechnen.",
+    "submetric": "Gesamtausstoß des Spritzgeräts",
+    "assistance": {
+      "widthCriteria": {
+        "title": "Kriterium für Arbeitsbreite",
+        "boom": "Horizontales Gestänge",
+        "band": "Bandspritzung",
+        "rowSpacing": "Reihenabstand",
+        "boomDescription": "Acker- und Flachkulturen im Flächenspritzverfahren",
+        "bandDescription": "Gezielte Ausbringung in der Reihe oder im Band",
+        "rowSpacingDescription": "Reihenkulturen, Obstbau, Weinbau und Olivenhaine"
+      },
+      "nozzleCalculation": {
+        "show": "Ausstoß pro Düse berechnen (optional)",
+        "hide": "Berechnung pro Düse ausblenden",
+        "fieldLabel": "Anzahl der gleichzeitig aktiven Düsen (optional)",
+        "fieldDescription": "Geben Sie nur die Düsen an, die zum berechneten Gesamtausstoß dieses Durchgangs beitragen.",
+        "averageFlowNotice": "Der durchschnittliche Ausstoß wird anhand der Anzahl der gleichzeitig aktiven Düsen berechnet. Stellen Sie sicher, dass alle berücksichtigten Düsen einen ähnlichen Ausstoß aufweisen.",
+        "rowSpacingDifferentiatedDistributionNotice": "Spritzen mit differenzierter vertikaler Verteilung, unterschiedlichen Düsengrößen oder separat betriebenen Teilbreiten sollten mit einem eigenen Werkzeug bewertet werden.",
+        "optional": "Optional",
+        "enterPrompt": "Geben Sie die Anzahl der gleichzeitig aktiven Düsen ein",
+        "averageFlow": "Durchschnittlicher Ausstoß:",
+        "nozzlesUnit": "Düsen",
+        "perNozzle": "L/min pro Düse"
+      },
+      "a11y": {
+        "selectWidthCriteria": "Kriterium für Arbeitsbreite auswählen",
+        "selectedWidthCriteria": "ausgewählt",
+        "enableNozzleCalculation": "Düsenausstoßberechnung aktivieren",
+        "disableNozzleCalculation": "Düsenausstoßberechnung deaktivieren"
+      }
+    }
+  },
+  "calculatorActionBar": {
+    "save": "In Verlauf speichern",
+    "saveCalculation": "Berechnung speichern",
+    "history": "Verlauf",
+    "openHistory": "Verlauf öffnen",
+    "technicalGuide": "Leitfaden",
+    "openTechnicalGuide": "Technischen Leitfaden öffnen",
+    "saveDisabled": "Geben Sie alle Werte ein, um zu speichern",
+    "noTechnicalGuideAvailable": "Technischer Leitfaden nicht verfügbar",
+    "guide": "Leitfaden"
+  },
+  "validationNotes": {
+    "title": "Validierungshinweise",
+    "defaultMessage": "Überprüfen Sie kontextuelle Warnungen für eingegebene Werte."
+  },
+  "eppo": {
+    "enterDataPrompt": "Geben Sie die Parzellen- und Kronenmaße ein, um das Spritzvolumen und das Produkt nach EPPO-Standard zu berechnen.",
+    "submetricLwa": "EPPO LWA-Methodik · Laubwandfläche",
+    "submetricTrv": "EPPO TRV-Methodik · Kronenvolumen"
   }
 }

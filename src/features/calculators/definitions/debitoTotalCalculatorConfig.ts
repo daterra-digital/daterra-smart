@@ -1,4 +1,4 @@
-﻿/**
+/**
  * DATERRA Smart - Motor Universal de Calculadoras
  * Configuração Declarativa Oficial: Calculadora de Débito Total do Pulverizador
  * Fase 12 - Ferramenta calc_debito_total
@@ -26,9 +26,11 @@ export function calculateTotalFlowRatePure(
   volumeCalda: number,
   larguraTrabalho: number,
   velocidadeTrabalho: number,
-  baseLargura?: string
+  baseLargura?: string,
+  numeroBicos?: number
 ): {
   debito_total_l_min: number;
+  debito_por_bico_l_min?: number;
   isValid: boolean;
 } {
   const allowedBases = [
@@ -70,8 +72,24 @@ export function calculateTotalFlowRatePure(
     };
   }
 
+  const debitoTotal = Math.round(rawQt * 10) / 10;
+
+  let debitoPorBico: number | undefined = undefined;
+  if (
+    typeof numeroBicos === 'number' &&
+    !isNaN(numeroBicos) &&
+    isFinite(numeroBicos) &&
+    numeroBicos > 0
+  ) {
+    const rawQBico = rawQt / numeroBicos;
+    if (isFinite(rawQBico) && !isNaN(rawQBico) && rawQBico > 0) {
+      debitoPorBico = Math.round(rawQBico * 100) / 100;
+    }
+  }
+
   return {
-    debito_total_l_min: Math.round(rawQt * 10) / 10,
+    debito_total_l_min: debitoTotal,
+    ...(debitoPorBico !== undefined ? { debito_por_bico_l_min: debitoPorBico } : {}),
     isValid: true
   };
 }
@@ -200,6 +218,28 @@ export const debitoTotalCalculatorConfig: CalculatorDefinition = {
         }
       ],
       description: 'Critério agronómico de definição da largura de trabalho.'
+    },
+
+    // Campo 5 — Número de bicos ativos em simultâneo (Opcional, acedido via divulgação progressiva)
+    {
+      id: 'numeroBicos',
+      label: 'Número de bicos ativos em simultâneo (opcional)',
+      canonicalKey: 'active_nozzles_count',
+      dimension: 'count',
+      defaultUnit: '',
+      defaultValue: undefined,
+      allowedUnits: [''],
+      presets: [8, 12, 16, 20, 24, 32],
+      required: false,
+      min: 1,
+      minInclusive: true,
+      max: 200,
+      maxInclusive: true,
+      allowDecimal: false,
+      allowNegative: false,
+      allowExpressions: true,
+      description: 'Indique apenas os bicos que contribuem para o débito total calculado nesta passagem.',
+      helpFile: 'DebitoTotalFAQResultado.md'
     }
   ],
 
@@ -224,11 +264,28 @@ export const debitoTotalCalculatorConfig: CalculatorDefinition = {
     const rawV = inputs['velocidadeTrabalho']?.rawValue;
     const rawW = inputs['larguraTrabalho']?.rawValue;
     const rawBase = inputs['baseLargura']?.rawValue;
+    const rawN = inputs['numeroBicos']?.rawValue;
 
     const Q = typeof rawQ === 'string' ? parseFloat(rawQ.replace(',', '.')) : Number(rawQ);
     const v = typeof rawV === 'string' ? parseFloat(rawV.replace(',', '.')) : Number(rawV);
     const W = typeof rawW === 'string' ? parseFloat(rawW.replace(',', '.')) : Number(rawW);
     const base = rawBase !== undefined && rawBase !== null ? String(rawBase).trim() : '';
+
+    let N: number | undefined = undefined;
+    if (rawN !== undefined && rawN !== null && rawN !== '') {
+      const parsedN = typeof rawN === 'string' ? parseFloat(rawN.replace(',', '.')) : Number(rawN);
+      if (isNaN(parsedN)) {
+        errors['numeroBicos'] = 'Introduza um número inteiro válido.';
+      } else if (!Number.isInteger(parsedN)) {
+        errors['numeroBicos'] = 'O número de bicos deve ser um número inteiro.';
+      } else if (parsedN < 1) {
+        errors['numeroBicos'] = 'O número de bicos deve ser no mínimo 1.';
+      } else if (parsedN > 200) {
+        errors['numeroBicos'] = 'O número de bicos não pode exceder 200.';
+      } else {
+        N = parsedN;
+      }
+    }
 
     // Validação Campo 1: Volume de Calda
     if (rawQ === undefined || rawQ === '' || rawQ === null) {
@@ -290,8 +347,9 @@ export const debitoTotalCalculatorConfig: CalculatorDefinition = {
     }
 
     // Avisos Plausibilidade do Resultado (quando todas as entradas forem válidas)
-    if (Object.keys(errors).length === 0) {
-      const res = calculateTotalFlowRatePure(Q, W, v, base);
+    const essentialErrors = Object.keys(errors).filter((k) => k !== 'numeroBicos');
+    if (essentialErrors.length === 0) {
+      const res = calculateTotalFlowRatePure(Q, W, v, base, N);
       if (res.isValid) {
         if (res.debito_total_l_min < 10) {
           warnings['debitoTotal'] = 'Débito baixo. Verifique os valores introduzidos e confirme a adequação ao equipamento.';
@@ -313,13 +371,22 @@ export const debitoTotalCalculatorConfig: CalculatorDefinition = {
     const rawV = inputs['velocidadeTrabalho']?.rawValue;
     const rawW = inputs['larguraTrabalho']?.rawValue;
     const rawBase = inputs['baseLargura']?.rawValue;
+    const rawN = inputs['numeroBicos']?.rawValue;
 
     const Q = typeof rawQ === 'string' ? parseFloat(rawQ.replace(',', '.')) : Number(rawQ);
     const v = typeof rawV === 'string' ? parseFloat(rawV.replace(',', '.')) : Number(rawV);
     const W = typeof rawW === 'string' ? parseFloat(rawW.replace(',', '.')) : Number(rawW);
     const base = rawBase !== undefined && rawBase !== null ? String(rawBase).trim() : '';
 
-    const res = calculateTotalFlowRatePure(Q, W, v, base);
+    let N: number | undefined = undefined;
+    if (rawN !== undefined && rawN !== null && rawN !== '') {
+      const parsedN = typeof rawN === 'string' ? parseFloat(rawN.replace(',', '.')) : Number(rawN);
+      if (!isNaN(parsedN) && Number.isInteger(parsedN) && parsedN >= 1 && parsedN <= 200) {
+        N = parsedN;
+      }
+    }
+
+    const res = calculateTotalFlowRatePure(Q, W, v, base, N);
     if (!res.isValid) {
       return {};
     }
@@ -335,7 +402,11 @@ export const debitoTotalCalculatorConfig: CalculatorDefinition = {
         source: 'calculated_output',
         localId: 'debitoTotal',
         calculatorId: 'calc_debito_total',
-        calculatorVersion: '1.0.0'
+        calculatorVersion: '1.0.0',
+        ...(res.debito_por_bico_l_min !== undefined ? {
+          subValue: res.debito_por_bico_l_min,
+          subUnit: 'L/min por bico'
+        } : {})
       }
     };
   }

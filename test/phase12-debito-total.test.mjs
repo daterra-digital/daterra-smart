@@ -398,4 +398,160 @@ describe('Fase 12 — Calculadora de Débito Total do Pulverizador (calc_debito_
     });
   });
 
+  // ==========================================
+  // GRUPO 8: SUBFASE 1B.5 — BICOS, PRECISÃO E UX
+  // ==========================================
+  describe('8. Subfase 1B.5 — Débito Médio por Bico, Divulgação Progressiva e Seletor de Largura', () => {
+
+    test('8.1 Caso de validação oficial: Q=600 L/ha, W=4,0 m, v=6,0 km/h, N=20 -> Qt=24,0 L/min, q_bico=1,20 L/min/bico', () => {
+      const res = calculateTotalFlowRatePure(600, 4.0, 6.0, 'row_spacing', 20);
+      assert.equal(res.isValid, true);
+      assert.equal(res.debito_total_l_min, 24.0);
+      assert.equal(res.debito_por_bico_l_min, 1.20);
+
+      const inputs = {
+        volumeCalda: { rawValue: 600, unit: 'L/ha', canonicalKey: 'spray_volume_rate', dimension: 'application_rate' },
+        velocidadeTrabalho: { rawValue: 6.0, unit: 'km/h', canonicalKey: 'work_speed', dimension: 'speed' },
+        larguraTrabalho: { rawValue: 4.0, unit: 'm', canonicalKey: 'working_width', dimension: 'length' },
+        baseLargura: { rawValue: 'row_spacing', unit: '', canonicalKey: 'working_width_interpretation', dimension: 'text' },
+        numeroBicos: { rawValue: 20, unit: '', canonicalKey: 'active_nozzles_count', dimension: 'count' }
+      };
+
+      const out = debitoTotalCalculatorConfig.calculate(inputs);
+      assert.equal(out.debitoTotal.rawValue, 24.0);
+      assert.equal(out.debitoTotal.unit, 'L/min');
+      assert.equal(out.debitoTotal.subValue, 1.20);
+      assert.equal(out.debitoTotal.subUnit, 'L/min por bico');
+    });
+
+    test('8.2 Sem N fornecido: calcula Qt normalmente e não gera q_bico', () => {
+      const res = calculateTotalFlowRatePure(600, 4.0, 6.0, 'row_spacing');
+      assert.equal(res.isValid, true);
+      assert.equal(res.debito_total_l_min, 24.0);
+      assert.equal(res.debito_por_bico_l_min, undefined);
+
+      const inputs = {
+        volumeCalda: { rawValue: 600 },
+        velocidadeTrabalho: { rawValue: 6.0 },
+        larguraTrabalho: { rawValue: 4.0 },
+        baseLargura: { rawValue: 'row_spacing' }
+      };
+
+      const valRes = debitoTotalCalculatorConfig.validate(inputs);
+      assert.equal(valRes.isValid, true);
+      assert.equal(valRes.errors.numeroBicos, undefined);
+
+      const out = debitoTotalCalculatorConfig.calculate(inputs);
+      assert.equal(out.debitoTotal.rawValue, 24.0);
+      assert.equal(out.debitoTotal.subValue, undefined);
+    });
+
+    test('8.3 Validação estrita de N: bloqueia decimais, N < 1 e N > 200 sem invalidar Qt', () => {
+      const baseInputs = {
+        volumeCalda: { rawValue: 600 },
+        velocidadeTrabalho: { rawValue: 6.0 },
+        larguraTrabalho: { rawValue: 4.0 },
+        baseLargura: { rawValue: 'boom_total_width' }
+      };
+
+      // Decimal
+      const valDec = debitoTotalCalculatorConfig.validate({ ...baseInputs, numeroBicos: { rawValue: 20.5 } });
+      assert.equal(valDec.isValid, false);
+      assert.ok(valDec.errors.numeroBicos.includes('inteiro'));
+      assert.equal(valDec.errors.volumeCalda, undefined);
+
+      // Menor que 1
+      const valZero = debitoTotalCalculatorConfig.validate({ ...baseInputs, numeroBicos: { rawValue: 0 } });
+      assert.equal(valZero.isValid, false);
+      assert.ok(valZero.errors.numeroBicos.includes('mínimo 1'));
+
+      // Maior que 200
+      const valHigh = debitoTotalCalculatorConfig.validate({ ...baseInputs, numeroBicos: { rawValue: 201 } });
+      assert.equal(valHigh.isValid, false);
+      assert.ok(valHigh.errors.numeroBicos.includes('200'));
+    });
+
+    test('8.4 Campo numeroBicos está declarado no config como opcional, inteiro e com presets', () => {
+      const nField = debitoTotalCalculatorConfig.fields.find(f => f.id === 'numeroBicos');
+      assert.ok(nField);
+      assert.equal(nField.required, false);
+      assert.equal(nField.allowDecimal, false);
+      assert.equal(nField.min, 1);
+      assert.equal(nField.max, 200);
+      assert.deepEqual(nField.presets, [8, 12, 16, 20, 24, 32]);
+    });
+
+    test('8.5 WorkingWidthCriteriaSelector existe e exporta componente nativo com 3 opções', () => {
+      assert.ok(fs.existsSync('src/features/debito-total/components/WorkingWidthCriteriaSelector.tsx'));
+      const compCode = fs.readFileSync('src/features/debito-total/components/WorkingWidthCriteriaSelector.tsx', 'utf8');
+      assert.ok(compCode.includes('boom_total_width'));
+      assert.ok(compCode.includes('effective_treated_band'));
+      assert.ok(compCode.includes('row_spacing'));
+      assert.ok(compCode.includes('aria-pressed'));
+      assert.ok(!compCode.includes('manual_width')); // manual_width NÃO é uma opção selecionável
+    });
+
+    test('8.6 UniversalCalculatorTemplate integra calc_debito_total no grupo isPilotCalculator', () => {
+      const templateCode = fs.readFileSync('src/features/calculators/core/UniversalCalculatorTemplate.tsx', 'utf8');
+      assert.ok(templateCode.includes("definition.id === 'calc_debito_total'"));
+      assert.ok(templateCode.includes('WorkingWidthCriteriaSelector'));
+      assert.ok(templateCode.includes('showNozzleCalculation'));
+    });
+
+    test('8.7 Todos os 8 ficheiros de tradução contêm o namespace debitoTotal.assistance', () => {
+      const locales = ['pt', 'br', 'en', 'es', 'fr', 'it', 'de', 'el'];
+      for (const lang of locales) {
+        const filePath = `src/i18n/locales/${lang}.json`;
+        assert.ok(fs.existsSync(filePath), `Ficheiro ${filePath} deve existir`);
+        const json = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+        assert.ok(json.debitoTotal, `${lang}.json deve ter chave debitoTotal`);
+        assert.ok(json.debitoTotal.assistance, `${lang}.json deve ter chave debitoTotal.assistance`);
+        assert.ok(json.debitoTotal.assistance.widthCriteria, `${lang}.json deve ter widthCriteria`);
+        assert.ok(json.debitoTotal.assistance.nozzleCalculation, `${lang}.json deve ter nozzleCalculation`);
+      }
+    });
+
+    test('8.8 Termos proibidos em PT/BR: não usar "cuba" nas traduções de assistência de débito total', () => {
+      const ptJson = fs.readFileSync('src/i18n/locales/pt.json', 'utf8');
+      const brJson = fs.readFileSync('src/i18n/locales/br.json', 'utf8');
+      const ptObj = JSON.parse(ptJson).debitoTotal;
+      const brObj = JSON.parse(brJson).debitoTotal;
+      assert.equal(JSON.stringify(ptObj).toLowerCase().includes('cuba'), false);
+      assert.equal(JSON.stringify(brObj).toLowerCase().includes('cuba'), false);
+    });
+
+    test('8.9 Rótulo e descrição de N refletem bicos ativos em simultâneo e omitem "ambos os lados da copa"', () => {
+      const nField = debitoTotalCalculatorConfig.fields.find(f => f.id === 'numeroBicos');
+      assert.ok(nField);
+      assert.equal(nField.label, 'Número de bicos ativos em simultâneo (opcional)');
+      assert.equal(nField.description, 'Indique apenas os bicos que contribuem para o débito total calculado nesta passagem.');
+
+      const ptJson = JSON.parse(fs.readFileSync('src/i18n/locales/pt.json', 'utf8'));
+      const nozzleI18n = ptJson.debitoTotal.assistance.nozzleCalculation;
+      assert.equal(nozzleI18n.fieldLabel, 'Número de bicos ativos em simultâneo (opcional)');
+      assert.equal(nozzleI18n.fieldDescription, 'Indique apenas os bicos que contribuem para o débito total calculado nesta passagem.');
+      assert.ok(nozzleI18n.averageFlowNotice.includes('bicos ativos em simultâneo'));
+      assert.ok(nozzleI18n.rowSpacingDifferentiatedDistributionNotice.includes('distribuição vertical diferenciada'));
+
+      // Verificar que não existe menção a "ambos os lados da copa"
+      const allLocales = ['pt', 'br', 'en', 'es', 'fr', 'it', 'de', 'el'];
+      for (const lang of allLocales) {
+        const json = JSON.parse(fs.readFileSync(`src/i18n/locales/${lang}.json`, 'utf8'));
+        const debitoStr = JSON.stringify(json.debitoTotal || {}).toLowerCase();
+        assert.equal(debitoStr.includes('ambos os lados'), false);
+        assert.equal(debitoStr.includes('both sides'), false);
+      }
+    });
+
+    test('8.10 Invariância rigorosa de fórmulas e arredondamentos: Qt com 1 decimal e q_bico com 2 decimais', () => {
+      // Teste com valores decimais arbitrários
+      const res = calculateTotalFlowRatePure(433.333, 3.75, 5.25, 'row_spacing', 15);
+      assert.equal(res.isValid, true);
+      // Qt = (433.333 * 3.75 * 5.25) / 600 = 8531.2466 / 600 = 14.2187 -> 14.2 L/min
+      assert.equal(res.debito_total_l_min, 14.2);
+      // q_bico = 14.2187 / 15 = 0.9479 -> 0.95 L/min por bico
+      assert.equal(res.debito_por_bico_l_min, 0.95);
+    });
+  });
+
 });

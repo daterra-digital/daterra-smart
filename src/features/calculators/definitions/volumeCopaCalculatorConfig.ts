@@ -80,7 +80,7 @@ export const volumeCopaCalculatorConfig: CalculatorDefinition = {
     // Campo 1 — Altura da copa
     {
       id: 'alturaCopa',
-      label: 'Altura da copa (m)',
+      label: 'Altura da copa',
       canonicalKey: 'canopy_height',
       dimension: 'length',
       defaultUnit: 'm',
@@ -103,7 +103,7 @@ export const volumeCopaCalculatorConfig: CalculatorDefinition = {
     // Campo 2 — Largura média da copa
     {
       id: 'larguraCopa',
-      label: 'Largura média da copa (m)',
+      label: 'Largura média da copa',
       canonicalKey: 'canopy_width',
       dimension: 'length',
       defaultUnit: 'm',
@@ -126,7 +126,7 @@ export const volumeCopaCalculatorConfig: CalculatorDefinition = {
     // Campo 3 — Distância entrelinhas
     {
       id: 'distanciaEntrelinhas',
-      label: 'Distância entrelinhas (m)',
+      label: 'Distância entrelinhas',
       canonicalKey: 'row_spacing',
       dimension: 'length',
       defaultUnit: 'm',
@@ -150,7 +150,7 @@ export const volumeCopaCalculatorConfig: CalculatorDefinition = {
   results: [
     {
       id: 'volumeCopa',
-      label: 'VOLUME DE COPA (TRV):',
+      label: 'Volume de copa',
       canonicalKey: 'tree_row_volume',
       dimension: 'tree_row_volume',
       defaultUnit: 'm³ TRV/ha',
@@ -261,7 +261,7 @@ export const volumeCopaCalculatorConfig: CalculatorDefinition = {
         normalizedValue: res.volume_copa,
         dimension: 'tree_row_volume',
         canonicalKey: 'tree_row_volume',
-        label: 'VOLUME DE COPA (TRV):',
+        label: 'Volume de copa',
         source: 'calculated_output',
         localId: 'volumeCopa',
         calculatorId: 'calc_volume_copa',

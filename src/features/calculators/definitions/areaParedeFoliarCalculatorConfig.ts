@@ -73,7 +73,7 @@ export const areaParedeFoliarCalculatorConfig: CalculatorDefinition = {
   fields: [
     {
       id: 'alturaVegetacao',
-      label: 'Altura da vegetação tratada (m)',
+      label: 'Altura da vegetação tratada',
       canonicalKey: 'canopy_height',
       dimension: 'length',
       defaultUnit: 'm',
@@ -93,7 +93,7 @@ export const areaParedeFoliarCalculatorConfig: CalculatorDefinition = {
     },
     {
       id: 'distanciaEntrelinhas',
-      label: 'Distância entrelinhas (m)',
+      label: 'Distância entrelinhas',
       canonicalKey: 'row_spacing',
       dimension: 'length',
       defaultUnit: 'm',
@@ -201,6 +201,10 @@ export const areaParedeFoliarCalculatorConfig: CalculatorDefinition = {
       : Number(rawEnt);
 
     const res = calculateLwaPure(alt, ent);
+
+    if (!res.isValid) {
+      return {};
+    }
 
     return {
       areaParedeFoliar: {

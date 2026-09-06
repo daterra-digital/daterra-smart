@@ -16,7 +16,9 @@ import { AreaParedeFoliarCalculator } from './features/area-parede-foliar/AreaPa
 import { VolumeCopaCalculator } from './features/volume-copa/VolumeCopaCalculator';
 import { VolumeCaldaTrvCalculator } from './features/volume-calda-trv/VolumeCaldaTrvCalculator';
 import { DebitoTotalCalculator } from './features/debito-total/DebitoTotalCalculator';
+import { EppoCalculator } from './features/eppo/EppoCalculator';
 import { NozzleComparisonView } from './features/nozzle-comparison/NozzleComparisonView';
+import { MisturaView } from './views/MisturaView';
 import { ProjetoAgrosmartView } from './views/ProjetoAgrosmartView';
 import { AboutView } from './views/AboutView';
 import { HelpView } from './views/HelpView';
@@ -126,7 +128,9 @@ export const AppContent: React.FC = () => {
           <Route path="/ferramentas/volume-copa" element={<VolumeCopaCalculator />} />
           <Route path="/ferramentas/volume-calda-trv" element={<VolumeCaldaTrvCalculator />} />
           <Route path="/ferramentas/debito-total" element={<DebitoTotalCalculator />} />
+          <Route path="/ferramentas/eppo" element={<EppoCalculator />} />
           <Route path="/ferramentas/comparador-bicos" element={<NozzleComparisonView />} />
+          <Route path="/ferramentas/mistura" element={<MisturaView />} />
           <Route path="/academia" element={<AcademyView />} />
           <Route path="/definicoes" element={<SettingsView />} />
           <Route path="/exploracao" element={<ExplorationView />} />

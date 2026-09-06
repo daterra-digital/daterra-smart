@@ -1,4 +1,4 @@
-﻿import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { UniversalCalculatorTemplate } from '../calculators/core/UniversalCalculatorTemplate';
 import { volumeCopaCalculatorConfig } from '../calculators/definitions/volumeCopaCalculatorConfig';
 
@@ -10,10 +10,19 @@ import { volumeCopaCalculatorConfig } from '../calculators/definitions/volumeCop
 export function VolumeCopaCalculator() {
   const navigate = useNavigate();
 
+  const handleExecuteTransfer = (targetToolId: string) => {
+    if (targetToolId === 'calc_volume_calda_trv') {
+      navigate('/ferramentas/volume-calda-trv');
+    } else {
+      navigate(`/ferramentas?tool=${targetToolId}`);
+    }
+  };
+
   return (
     <UniversalCalculatorTemplate
       definition={volumeCopaCalculatorConfig}
       onBack={() => navigate('/ferramentas')}
+      onExecuteTransfer={handleExecuteTransfer}
     />
   );
 }

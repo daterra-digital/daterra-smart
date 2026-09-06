@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { 
   LayoutDashboard, Calculator, GraduationCap, 
@@ -8,6 +8,7 @@ import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import daterraLogo from '../assets/daterra-logo.svg';
 import { Footer } from './Footer';
+import { BottomNavigationBar } from './BottomNavigationBar';
 
 export const PrivateLayout: React.FC = () => {
   const { user, profile, logout } = useAuth();
@@ -24,92 +25,6 @@ export const PrivateLayout: React.FC = () => {
       'Utilizador'
     : user?.email?.split('@')[0] || 'Utilizador';
 
-
-  const [isRefreshing, setIsRefreshing] = useState(false);
-  const refreshTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  useEffect(() => {
-    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-    if (!isMobile) return;
-
-    let startX = 0;
-    let startY = 0;
-    let currentY = 0;
-    let isPulling = false;
-    const threshold = 150; // Threshold aumentado para evitar disparos acidentais
-
-    const handleTouchStart = (e: TouchEvent) => {
-      // Não acionar se o menu mobile estiver aberto
-      if (mobileMenuOpen) return;
-
-      // Só ativar se estiver estritamente no topo da página
-      if (window.scrollY === 0) {
-        startX = e.touches[0].clientX;
-        startY = e.touches[0].clientY;
-        currentY = startY;
-        isPulling = true;
-      }
-    };
-
-    const handleTouchMove = (e: TouchEvent) => {
-      if (!isPulling) return;
-      const moveX = e.touches[0].clientX;
-      currentY = e.touches[0].clientY;
-
-      const diffX = Math.abs(moveX - startX);
-      const diffY = currentY - startY;
-
-      // Se o movimento for predominantemente horizontal (gesto lateral do browser de 'Back' ou 'Forward'), cancela
-      if (diffX > 40 && diffX > diffY) {
-        isPulling = false;
-        return;
-      }
-
-      // Se for pull para baixo no topo, previne scroll elástico excessivo
-      if (diffY > 0 && window.scrollY === 0) {
-        if (diffY > 30 && e.cancelable) {
-          e.preventDefault();
-        }
-      } else {
-        isPulling = false;
-      }
-    };
-
-    const handleTouchEnd = () => {
-      if (!isPulling) return;
-      const diffY = currentY - startY;
-
-      if (diffY > threshold) {
-        if (refreshTimeoutRef.current) {
-          clearTimeout(refreshTimeoutRef.current);
-        }
-
-        // Delay para evitar conflito com animações de toque e navegação
-        refreshTimeoutRef.current = setTimeout(() => {
-          setIsRefreshing(true);
-          window.location.reload();
-        }, 150);
-      }
-
-      isPulling = false;
-      startX = 0;
-      startY = 0;
-      currentY = 0;
-    };
-
-    document.addEventListener('touchstart', handleTouchStart, { passive: true });
-    document.addEventListener('touchmove', handleTouchMove, { passive: false });
-    document.addEventListener('touchend', handleTouchEnd, { passive: true });
-
-    return () => {
-      document.removeEventListener('touchstart', handleTouchStart);
-      document.removeEventListener('touchmove', handleTouchMove);
-      document.removeEventListener('touchend', handleTouchEnd);
-      if (refreshTimeoutRef.current) {
-        clearTimeout(refreshTimeoutRef.current);
-      }
-    };
-  }, [mobileMenuOpen]);
 
   useEffect(() => {
     const handleOnline = () => setIsOnline(true);
@@ -133,14 +48,6 @@ export const PrivateLayout: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-[#F2F2F2]">
-      {/* Indicador visual de Pull-to-Refresh no topo */}
-      {isRefreshing && (
-        <div className="fixed top-0 left-0 right-0 bg-[#114037] text-[#3CA64C] text-xs font-black py-2.5 text-center z-50 shadow-md flex items-center justify-center gap-2 animate-pulse">
-          <div className="w-3.5 h-3.5 border-2 border-[#3CA64C] border-t-transparent rounded-full animate-spin" />
-          <span>A atualizar a plataforma…</span>
-        </div>
-      )}
-
       {/* Header SaaS Privado */}
       <header className="sticky top-0 z-40 bg-daterra-primary text-white border-b border-daterra-secondary/40 shadow-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
@@ -358,12 +265,17 @@ export const PrivateLayout: React.FC = () => {
       </header>
 
       {/* Conteúdo Principal */}
-      <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full">
+      <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full mobile-content-spacing md:pb-8">
         <Outlet />
       </main>
 
-      {/* Rodapé Global Sempre Visível na Área Privada */}
-      <Footer />
+      {/* Rodapé Global com margem compensatória para não sobrepor a barra móvel */}
+      <div className="mobile-content-spacing md:pb-0">
+        <Footer />
+      </div>
+
+      {/* Barra de Navegação Inferior Móvel Fixa */}
+      <BottomNavigationBar />
     </div>
   );
 };

@@ -7,6 +7,7 @@
     "weather": "Weather",
     "ndvi": "NDVI Maps",
     "academy": "Academy",
+    "parcels": "Parcels",
     "settings": "Settings"
   },
   "dashboard": {
@@ -30,7 +31,13 @@
     "catManagement": "Management",
     "catWeather": "Weather",
     "openTool": "Open Tool",
-    "favorite": "Favorite"
+    "favorite": "Favorite",
+    "catalog": {
+      "calc_eppo": {
+        "name": "EPPO Calculator (LWA / TRV)",
+        "description": "Calculates spray volume and product dosage per tank and per hectare according to EPPO PP 1/239 standard."
+      }
+    }
   },
   "exploration": {
     "title": "Farm & Technical Profiles",
@@ -141,6 +148,166 @@
       "content": "[FAQ: How do Unit Profiles work?]\n- Allow switching between Metric (SI), US Customary, Anglo-Saxon, and Traditional Regional systems without losing hydraulic calculation precision.",
       "formula": "Automatic conversion across DATERRA Smart ecosystem",
       "unit_explanation": "SI : L, ha, bar, km/h\nUS : gal, acre, psi, mph"
+    },
+    "calc_eppo": {
+      "title": "EPPO Calculator (LWA / TRV)",
+      "content": "[FAQ: What is the function of the EPPO Calculator?]\n- Calculates reference spray volume and plant protection product quantity per tank and per hectare based on vertical canopy area (LWA) or 3D canopy volume (TRV), adhering to the EPPO PP 1/239 standard.\n\n[FAQ: What is the LWA (Leaf Wall Area) Method?]\n- Measures vertical leaf wall area (m²/ha) in vineyards and hedge-grown crops.\n\n[FAQ: What is the TRV (Tree Row Volume) Method?]\n- Measures apparent tree canopy volume (m³/ha) in nut orchards, pome fruit, and citrus.",
+      "formula": "LWA (m²/ha) = (2 × H × 10,000) / W_w\nTRV (m³/ha) = (H × W × 10,000) / W_w\nSpray Volume = LWA × (k_LWA / 10,000) or TRV × k_TRV",
+      "unit_explanation": "H : Canopy/Foliage Height (m)\nW : Canopy Width (m)\nW_w : Row Spacing (m)\nk_LWA : L/10,000m² LWA\nk_TRV : L/m³ TRV"
     }
+  },
+  "unifiedKeypad": {
+    "title": "DATERRA Technical Calculator",
+    "editing": "Editing",
+    "unit": "Unit",
+    "presets": "Shortcuts",
+    "cancel": "Cancel",
+    "confirm": "Complete and View Summary",
+    "enterData": "Enter / Edit Data",
+    "enterDataPrompt": "Enter data to view results",
+    "completingValue": "Completing value...",
+    "technicalDetails": "View Technical Details and Standards",
+    "technicalDetailsHide": "Hide Technical Details",
+    "srCloseModal": "Close and discard changes",
+    "srActiveField": "Editing active variable",
+    "unitChangedValueReset": "Unit changed. Please enter the value again for this unit.",
+    "unitChangedValueConverted": "Value automatically converted to the new unit.",
+    "tankSubMetric": "Tank",
+    "productEquivalence": "Equivalent to",
+    "ofProduct": "of product",
+    "tankToPrepare": "Tank to prepare",
+    "coveredArea": "Covered area",
+    "perTank": "per tank",
+    "srKeypadInstructions": "Input via DATERRA numeric keypad",
+    "inputSummaryTitle": "Entered Values",
+    "inputSummarySubtitle": "Tap a value to enter or edit.",
+    "openUnified": "Open Unified Calculator",
+    "edit": "Edit",
+    "errors": {
+      "emptyExpression": "Expression cannot be empty",
+      "divisionByZero": "Division by zero not allowed",
+      "invalidSyntax": "Incomplete or invalid mathematical expression",
+      "expressionTooLong": "Expression too long (maximum 50 characters)",
+      "excessiveNesting": "Too many nested parentheses (maximum 5 levels)",
+      "outOfRange": "Value out of acceptable bounds for this variable",
+      "min": "Value below recommended minimum",
+      "max": "Value above recommended maximum"
+    },
+    "enterValues": "Enter Values"
+  },
+  "velocidadeReal": {
+    "enterDataPrompt": "Enter distance and time to calculate actual working speed."
+  },
+  "areaParedeFoliar": {
+    "enterDataPrompt": "Enter canopy height and row spacing to calculate leaf wall area.",
+    "submetric": "2 treated canopy faces"
+  },
+  "volumeCopa": {
+    "enterDataPrompt": "Enter height, width, and row spacing to calculate tree row volume.",
+    "submetric": "Three-dimensional canopy geometry"
+  },
+  "volumeCaldaTrv": {
+    "enterDataPrompt": "Enter tree row volume and coefficient k to calculate spray volume rate.",
+    "submetric": "TRV · Spray volume coefficient",
+    "assistance": {
+      "profiles": {
+        "title": "Guiding Crop Profile",
+        "noProfile": "No profile",
+        "orchardProfile": "Narrow / Medium Orchard",
+        "oliveProfile": "Olive Grove — interpretation in validation",
+        "citrusProfile": "Citrus",
+        "oliveValidation": "Interpretation in validation",
+        "citrusValidation": "Guiding values in validation. Confirm the coefficient and calibration according to the crop, canopy geometry and application conditions.",
+        "citrusValidationNotice": "Internal guiding values. Confirm coefficient and calibration under actual application conditions."
+      },
+      "density": {
+        "title": "Canopy Density",
+        "verySparse": "Very sparse",
+        "sparse": "Sparse",
+        "dense": "Dense",
+        "veryDense": "Very dense",
+        "guidanceValue": "Guiding value",
+        "manualValue": "Manual value"
+      },
+      "warnings": {
+        "lowCoefficient": "Very low coefficient. Verify that the value is correct.",
+        "highCoefficient": "High coefficient. Verify that the value is correct."
+      },
+      "interpretation": {
+        "noProfileMessage": "Select a crop profile to receive a guiding interpretation of the calculated volume.",
+        "orchardVeryLow": "Low volume for the selected profile. Confirm target coverage, geometry and equipment calibration.",
+        "orchardLowModerate": "Low to moderate volume for the selected profile. Confirm that it matches geometry and application conditions.",
+        "orchardTypical": "Volume within the internal guiding range for the selected profile.",
+        "orchardHighPlausible": "High volume for the selected profile. Confirm geometry, density, sprayer, distribution and runoff.",
+        "orchardHighDeveloped": "High volume for the selected profile. Confirm canopy dimensions, calibration, distribution and runoff.",
+        "orchardVeryHigh": "Very high volume for the selected profile. Review the entered values and confirm calibration before application.",
+        "citrusLow": "Low volume for the selected profile. Confirm target coverage and equipment calibration.",
+        "citrusTypical": "Volume within the internal guiding range for the selected profile.",
+        "citrusHigh": "High volume for the selected profile. Confirm geometry, density, sprayer, distribution and runoff.",
+        "citrusVeryHigh": "Very high volume for the selected profile. Confirm geometry, coefficient, calibration and application conditions.",
+        "oliveValidationMessage": "The interpretation for olive groves is in validation. Confirm geometry, entered coefficient, calibration and application conditions."
+      },
+      "a11y": {
+        "selectProfile": "Select guiding crop profile",
+        "selectDensity": "Select canopy density tier",
+        "selectedDensity": "selected",
+        "profileChanged": "Crop profile changed",
+        "manualValueNotice": "k value in manual edit mode"
+      }
+    }
+  },
+  "debitoTotal": {
+    "enterDataPrompt": "Enter spray volume, speed, and working width to calculate total flow rate.",
+    "submetric": "Total sprayer flow rate",
+    "assistance": {
+      "widthCriteria": {
+        "title": "Working Width Criterion",
+        "boom": "Horizontal Boom",
+        "band": "Band Spraying",
+        "rowSpacing": "Row Spacing",
+        "boomDescription": "Arable and low crops in broadcast spraying",
+        "bandDescription": "Targeted application in row or treated band",
+        "rowSpacingDescription": "Row crops, orchards, vineyards, and olive groves"
+      },
+      "nozzleCalculation": {
+        "show": "Calculate flow rate per nozzle (optional)",
+        "hide": "Hide nozzle calculation",
+        "fieldLabel": "Number of simultaneously active nozzles (optional)",
+        "fieldDescription": "Indicate only the nozzles that contribute to the total flow rate calculated in this pass.",
+        "averageFlowNotice": "The average flow rate is calculated based on the number of simultaneously active nozzles. Ensure all considered nozzles have similar flow rates.",
+        "rowSpacingDifferentiatedDistributionNotice": "Sprayers with differentiated vertical distribution, nozzles of different sizes, or distinct operating sections should be evaluated with a dedicated tool.",
+        "optional": "Optional",
+        "enterPrompt": "Enter the number of simultaneously active nozzles",
+        "averageFlow": "Average flow rate:",
+        "nozzlesUnit": "nozzles",
+        "perNozzle": "L/min per nozzle"
+      },
+      "a11y": {
+        "selectWidthCriteria": "Select working width criterion",
+        "selectedWidthCriteria": "selected",
+        "enableNozzleCalculation": "Enable nozzle flow calculation",
+        "disableNozzleCalculation": "Disable nozzle flow calculation"
+      }
+    }
+  },
+  "calculatorActionBar": {
+    "save": "Save to History",
+    "saveCalculation": "Save Calculation",
+    "history": "History",
+    "openHistory": "Open History",
+    "technicalGuide": "Guide",
+    "openTechnicalGuide": "Open Technical Guide",
+    "saveDisabled": "Enter all values to save",
+    "noTechnicalGuideAvailable": "Technical guide not available",
+    "guide": "Guide"
+  },
+  "validationNotes": {
+    "title": "Validation Notes",
+    "defaultMessage": "Check contextual warnings for entered values."
+  },
+  "eppo": {
+    "enterDataPrompt": "Enter plot and canopy dimensions to calculate spray volume and product dosage under EPPO standard.",
+    "submetricLwa": "EPPO LWA Methodology · Leaf Wall Area",
+    "submetricTrv": "EPPO TRV Methodology · Tree Row Volume"
   }
 }

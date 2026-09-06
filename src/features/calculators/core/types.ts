@@ -5,6 +5,9 @@
  */
 
 import type { PhysicalDimension, StructuredValue } from '../../../types/calculator.ts';
+import type { UnitChangeResolution } from './unifiedKeypadTypes.ts';
+
+export * from './unifiedKeypadTypes.ts';
 
 export interface CalculatorFieldDefinition {
   /** Identificador local no âmbito da calculadora (ex: 'volPreparar') */
@@ -50,6 +53,8 @@ export interface CalculatorFieldDefinition {
   getDynamicPresets?: (values: Record<string, number | string>) => number[];
   /** Metadados agronómicos de unidades (ex: distinção líquido/sólido) */
   unitMetadata?: Record<string, UnitMetadataItem>;
+  /** Callback opcional de domínio para conversão/reset seguro de unidade */
+  onUnitChange?: (oldUnit: string, newUnit: string, currentVal: number | '') => UnitChangeResolution;
 }
 
 export interface CalculatorFieldOption {

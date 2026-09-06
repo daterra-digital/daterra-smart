@@ -144,14 +144,14 @@ export const concentracaoCalculatorConfig: CalculatorDefinition = {
       step: 10,
       helpFile: 'ConcentracaoFAQVolumePreparar.md',
       required: true,
-      description: 'Capacidade útil ou volume de calda que deseja preparar na cuba do pulverizador.'
+      description: 'Capacidade útil ou volume de calda que deseja preparar no depósito do pulverizador.'
     },
 
-    // 2. Concentração do PF
+    // 2. Concentração do Produto
     {
       id: 'concValue',
       canonicalKey: 'concentration',
-      label: 'Concentração do PF',
+      label: 'Concentração do Produto',
       dimension: 'concentration',
       defaultUnit: 'mL/hL',
       allowedUnits: ['mL/hL', 'g/hL', '%', 'L/hL', 'kg/hL'],
@@ -169,7 +169,48 @@ export const concentracaoCalculatorConfig: CalculatorDefinition = {
       helpFile: 'ConcentracaoFAQConcentracao.md',
       required: true,
       description: 'Concentração homologada indicada no rótulo do produto fitossanitário para a cultura-alvo.',
-      unitMetadata: CONCENTRACAO_UNIT_METADATA
+      unitMetadata: CONCENTRACAO_UNIT_METADATA,
+      /**
+       * Regras de Domínio para Mudança de Unidade:
+       * - Intra-líquido (mL/hL <-> L/hL): conversão canónica com fator 1000.
+       * - Intra-sólido (g/hL <-> kg/hL): conversão canónica com fator 1000.
+       * - Inter-estados (líquido <-> sólido) ou para %: RESET obrigatório por envolver densidade desconhecida.
+       */
+      onUnitChange: (oldUnit, newUnit, currentVal) => {
+        const val = typeof currentVal === 'number' ? currentVal : 0;
+        if (oldUnit === 'mL/hL' && newUnit === 'L/hL') {
+          return {
+            action: 'convert',
+            convertedValue: Number((val / 1000).toFixed(4)),
+            noticeKey: 'unifiedKeypad.unitChangedValueConverted'
+          };
+        }
+        if (oldUnit === 'L/hL' && newUnit === 'mL/hL') {
+          return {
+            action: 'convert',
+            convertedValue: Number((val * 1000).toFixed(2)),
+            noticeKey: 'unifiedKeypad.unitChangedValueConverted'
+          };
+        }
+        if (oldUnit === 'g/hL' && newUnit === 'kg/hL') {
+          return {
+            action: 'convert',
+            convertedValue: Number((val / 1000).toFixed(4)),
+            noticeKey: 'unifiedKeypad.unitChangedValueConverted'
+          };
+        }
+        if (oldUnit === 'kg/hL' && newUnit === 'g/hL') {
+          return {
+            action: 'convert',
+            convertedValue: Number((val * 1000).toFixed(2)),
+            noticeKey: 'unifiedKeypad.unitChangedValueConverted'
+          };
+        }
+        return {
+          action: 'reset',
+          noticeKey: 'unifiedKeypad.unitChangedValueReset'
+        };
+      }
     },
 
     // 3. Volume Recomendado (Modo Adulta)

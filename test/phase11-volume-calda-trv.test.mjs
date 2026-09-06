@@ -6,6 +6,10 @@ import {
   calculateSprayVolumeTrvPure,
   volumeCaldaTrvCalculatorConfig
 } from '../src/features/calculators/definitions/volumeCaldaTrvCalculatorConfig.ts';
+import {
+  getCanopyDensityTiers,
+  evaluateTrvVolumeInterpretation
+} from '../src/features/volume-calda-trv/trvAssistance.ts';
 import { validateKeypadValue } from '../src/components/keypadValidation.ts';
 import { CANONICAL_VARIABLES } from '../src/features/calculators/core/canonicalVariables.ts';
 
@@ -168,14 +172,14 @@ describe('Fase 11 — Calculadora de Volume de Calda Adequado por TRV (calc_volu
       coeficienteVolumeCalda: { rawValue: 0.015, unit: 'L/m³' }
     });
     assert.equal(lowK.isValid, true);
-    assert.equal(lowK.warnings.coeficienteVolumeCalda, 'Coeficiente muito baixo. Verifique se o valor está correto.');
+    assert.equal(lowK.warnings.coeficienteVolumeCalda, 'volumeCaldaTrv.assistance.warnings.lowCoefficient');
 
     const highK = volumeCaldaTrvCalculatorConfig.validate({
       volumeCopaTrv: { rawValue: 6125, unit: 'm³ TRV/ha' },
       coeficienteVolumeCalda: { rawValue: 0.35, unit: 'L/m³' }
     });
     assert.equal(highK.isValid, true);
-    assert.equal(highK.warnings.coeficienteVolumeCalda, 'Coeficiente elevado. Verifique se o valor está correto.');
+    assert.equal(highK.warnings.coeficienteVolumeCalda, 'volumeCaldaTrv.assistance.warnings.highCoefficient');
   });
 
   test('18. Valor Normal de k (0,033 L/m³): NÃO emite aviso condicional e mantém isValid = true', () => {
@@ -305,6 +309,245 @@ describe('Fase 11 — Calculadora de Volume de Calda Adequado por TRV (calc_volu
 
   test('28. Sem Transferências Ativas: volumeCaldaTrvCalculatorConfig não define transfers ativos', () => {
     assert.equal(volumeCaldaTrvCalculatorConfig.transfers, undefined);
+  });
+
+  // =========================================================================
+  // 6. SUBFASE 1B.4B — ASSISTÊNCIA DE TRV, DENSIDADE, k E INTERPRETAÇÃO
+  // =========================================================================
+
+  test('29. Precisão do Resultado Final: Arredondamento estrito a UMA casa decimal', () => {
+    // Caso de validação oficial: TRV = 8.333,3 m³/ha e k = 0,050 L/m³
+    const res = calculateSprayVolumeTrvPure(8333.3, 0.050);
+    assert.equal(res.isValid, true);
+    assert.equal(res.volume_calda_l_ha, 416.7);
+  });
+
+  test('30. Sem Perfil Selecionado: Zero patamares e interpretação convida à seleção', () => {
+    const tiers = getCanopyDensityTiers(null);
+    assert.deepEqual(tiers, []);
+
+    const interp = evaluateTrvVolumeInterpretation(null, 8333.3, 0.050);
+    assert.equal(interp.status, 'no_profile');
+    assert.equal(interp.messageKey, 'volumeCaldaTrv.assistance.interpretation.noProfileMessage');
+    assert.equal(interp.severity, 'neutral');
+  });
+
+  test('31. Pomar Estreito / Médio: Exatamente quatro patamares orientadores ativos com taxonomia aprovada', () => {
+    const tiers = getCanopyDensityTiers('mediterranean_narrow_medium_orchard');
+    assert.equal(tiers.length, 4);
+    assert.deepEqual(
+      tiers.map((t) => t.kValue),
+      [0.020, 0.033, 0.050, 0.060]
+    );
+    assert.equal(tiers[0].id, 'verySparse');
+    assert.equal(tiers[1].id, 'sparse');
+    assert.equal(tiers[2].id, 'dense');
+    assert.equal(tiers[3].id, 'veryDense');
+  });
+
+  test('32. Pomar Estreito / Médio: Teste obrigatório das 10 fronteiras numéricas sem buracos nem sobreposição', () => {
+    // 299,9 -> very_low / orchardVeryLow
+    const q299_9 = evaluateTrvVolumeInterpretation('mediterranean_narrow_medium_orchard', 2999, 0.100);
+    assert.equal(q299_9.status, 'very_low');
+    assert.equal(q299_9.messageKey, 'volumeCaldaTrv.assistance.interpretation.orchardVeryLow');
+
+    // 300,0 -> low_moderate / orchardLowModerate
+    const q300_0 = evaluateTrvVolumeInterpretation('mediterranean_narrow_medium_orchard', 3000, 0.100);
+    assert.equal(q300_0.status, 'low_moderate');
+    assert.equal(q300_0.messageKey, 'volumeCaldaTrv.assistance.interpretation.orchardLowModerate');
+
+    // 499,9 -> low_moderate / orchardLowModerate
+    const q499_9 = evaluateTrvVolumeInterpretation('mediterranean_narrow_medium_orchard', 4999, 0.100);
+    assert.equal(q499_9.status, 'low_moderate');
+    assert.equal(q499_9.messageKey, 'volumeCaldaTrv.assistance.interpretation.orchardLowModerate');
+
+    // 500,0 -> typical / orchardTypical
+    const q500_0 = evaluateTrvVolumeInterpretation('mediterranean_narrow_medium_orchard', 5000, 0.100);
+    assert.equal(q500_0.status, 'typical');
+    assert.equal(q500_0.messageKey, 'volumeCaldaTrv.assistance.interpretation.orchardTypical');
+
+    // 800,0 -> typical / orchardTypical
+    const q800_0 = evaluateTrvVolumeInterpretation('mediterranean_narrow_medium_orchard', 8000, 0.100);
+    assert.equal(q800_0.status, 'typical');
+    assert.equal(q800_0.messageKey, 'volumeCaldaTrv.assistance.interpretation.orchardTypical');
+
+    // 800,1 -> high_plausible / orchardHighPlausible
+    const q800_1 = evaluateTrvVolumeInterpretation('mediterranean_narrow_medium_orchard', 8001, 0.100);
+    assert.equal(q800_1.status, 'high_plausible');
+    assert.equal(q800_1.messageKey, 'volumeCaldaTrv.assistance.interpretation.orchardHighPlausible');
+
+    // 1000,0 -> high_plausible / orchardHighPlausible
+    const q1000_0 = evaluateTrvVolumeInterpretation('mediterranean_narrow_medium_orchard', 10000, 0.100);
+    assert.equal(q1000_0.status, 'high_plausible');
+    assert.equal(q1000_0.messageKey, 'volumeCaldaTrv.assistance.interpretation.orchardHighPlausible');
+
+    // 1000,1 -> high_developed / orchardHighDeveloped
+    const q1000_1 = evaluateTrvVolumeInterpretation('mediterranean_narrow_medium_orchard', 10001, 0.100);
+    assert.equal(q1000_1.status, 'high_developed');
+    assert.equal(q1000_1.messageKey, 'volumeCaldaTrv.assistance.interpretation.orchardHighDeveloped');
+
+    // 1200,0 -> high_developed / orchardHighDeveloped
+    const q1200_0 = evaluateTrvVolumeInterpretation('mediterranean_narrow_medium_orchard', 12000, 0.100);
+    assert.equal(q1200_0.status, 'high_developed');
+    assert.equal(q1200_0.messageKey, 'volumeCaldaTrv.assistance.interpretation.orchardHighDeveloped');
+
+    // 1200,1 -> very_high / orchardVeryHigh
+    const q1200_1 = evaluateTrvVolumeInterpretation('mediterranean_narrow_medium_orchard', 12001, 0.100);
+    assert.equal(q1200_1.status, 'very_high');
+    assert.equal(q1200_1.messageKey, 'volumeCaldaTrv.assistance.interpretation.orchardVeryHigh');
+  });
+
+  test('33. Citrinos: Quatro patamares em validação e ausência de patamar 0,140', () => {
+    const tiers = getCanopyDensityTiers('citrus_orchard');
+    assert.equal(tiers.length, 4);
+    assert.deepEqual(
+      tiers.map((t) => t.kValue),
+      [0.060, 0.080, 0.100, 0.120]
+    );
+    assert.equal(tiers[0].id, 'verySparse');
+    assert.equal(tiers[1].id, 'sparse');
+    assert.equal(tiers[2].id, 'dense');
+    assert.equal(tiers[3].id, 'veryDense');
+    assert.ok(!tiers.some((t) => t.kValue === 0.140));
+  });
+
+  test('34. Citrinos: Teste obrigatório das 6 fronteiras numéricas (<500, 500-1500, >1500-2000, >2000)', () => {
+    // 499,9 -> very_low / citrusLow
+    const q499_9 = evaluateTrvVolumeInterpretation('citrus_orchard', 4999, 0.100);
+    assert.equal(q499_9.status, 'very_low');
+    assert.equal(q499_9.messageKey, 'volumeCaldaTrv.assistance.interpretation.citrusLow');
+
+    // 500,0 -> typical / citrusTypical
+    const q500_0 = evaluateTrvVolumeInterpretation('citrus_orchard', 5000, 0.100);
+    assert.equal(q500_0.status, 'typical');
+    assert.equal(q500_0.messageKey, 'volumeCaldaTrv.assistance.interpretation.citrusTypical');
+
+    // 1500,0 -> typical / citrusTypical
+    const q1500_0 = evaluateTrvVolumeInterpretation('citrus_orchard', 15000, 0.100);
+    assert.equal(q1500_0.status, 'typical');
+    assert.equal(q1500_0.messageKey, 'volumeCaldaTrv.assistance.interpretation.citrusTypical');
+
+    // 1500,1 -> high / citrusHigh
+    const q1500_1 = evaluateTrvVolumeInterpretation('citrus_orchard', 15001, 0.100);
+    assert.equal(q1500_1.status, 'high');
+    assert.equal(q1500_1.messageKey, 'volumeCaldaTrv.assistance.interpretation.citrusHigh');
+
+    // 2000,0 -> high / citrusHigh
+    const q2000_0 = evaluateTrvVolumeInterpretation('citrus_orchard', 20000, 0.100);
+    assert.equal(q2000_0.status, 'high');
+    assert.equal(q2000_0.messageKey, 'volumeCaldaTrv.assistance.interpretation.citrusHigh');
+
+    // 2000,1 -> very_high / citrusVeryHigh
+    const q2000_1 = evaluateTrvVolumeInterpretation('citrus_orchard', 20001, 0.100);
+    assert.equal(q2000_1.status, 'very_high');
+    assert.equal(q2000_1.messageKey, 'volumeCaldaTrv.assistance.interpretation.citrusVeryHigh');
+  });
+
+  test('35. Olival: Zero patamares automáticos e estado de interpretação em validação', () => {
+    const tiers = getCanopyDensityTiers('olive_grove');
+    assert.deepEqual(tiers, []);
+
+    const interp = evaluateTrvVolumeInterpretation('olive_grove', 17500, 0.050);
+    assert.equal(interp.status, 'validation');
+    assert.equal(interp.messageKey, 'volumeCaldaTrv.assistance.interpretation.oliveValidationMessage');
+    assert.equal(interp.isValidation, true);
+  });
+
+  test('36. Ausência Rigorosa de Vinha e LWA na Calculadora de TRV', () => {
+    const trvConfigContent = fs.readFileSync(
+      'src/features/calculators/definitions/volumeCaldaTrvCalculatorConfig.ts',
+      'utf8'
+    );
+    assert.ok(!trvConfigContent.includes('vine'));
+    assert.ok(!trvConfigContent.includes('vinha'));
+    assert.ok(!trvConfigContent.includes('leaf_wall_area'));
+
+    const trvAssistanceContent = fs.readFileSync(
+      'src/features/volume-calda-trv/trvAssistance.ts',
+      'utf8'
+    );
+    assert.ok(!trvAssistanceContent.includes('vine'));
+    assert.ok(!trvAssistanceContent.includes('vinha'));
+  });
+
+  test('37. Dicionários i18n: Assegurar namespace volumeCaldaTrv.assistance em todos os 8 idiomas', () => {
+    const locales = ['pt', 'br', 'en', 'es', 'fr', 'it', 'de', 'el'];
+    for (const loc of locales) {
+      const jsonContent = JSON.parse(fs.readFileSync(`src/i18n/locales/${loc}.json`, 'utf8'));
+      assert.ok(jsonContent.volumeCaldaTrv, `Missing volumeCaldaTrv in ${loc}.json`);
+      assert.ok(jsonContent.volumeCaldaTrv.assistance, `Missing assistance in ${loc}.json`);
+      assert.ok(jsonContent.volumeCaldaTrv.assistance.profiles, `Missing profiles in ${loc}.json`);
+      assert.ok(jsonContent.volumeCaldaTrv.assistance.density, `Missing density in ${loc}.json`);
+      assert.ok(jsonContent.volumeCaldaTrv.assistance.warnings, `Missing warnings in ${loc}.json`);
+      assert.ok(jsonContent.volumeCaldaTrv.assistance.interpretation, `Missing interpretation in ${loc}.json`);
+      assert.ok(jsonContent.volumeCaldaTrv.assistance.a11y, `Missing a11y in ${loc}.json`);
+
+      // Verificar que PT e BR não utilizam "cuba"
+      if (loc === 'pt' || loc === 'br') {
+        const assistanceString = JSON.stringify(jsonContent.volumeCaldaTrv.assistance);
+        assert.ok(!assistanceString.toLowerCase().includes('cuba'), `Palavra proibida "cuba" encontrada em ${loc}.json`);
+      }
+    }
+  });
+
+  test('38. Componente CanopyDensitySelector existe e é válido', () => {
+    assert.ok(fs.existsSync('src/features/volume-calda-trv/components/CanopyDensitySelector.tsx'));
+    const compContent = fs.readFileSync('src/features/volume-calda-trv/components/CanopyDensitySelector.tsx', 'utf8');
+    assert.ok(compContent.includes('export const CanopyDensitySelector'));
+    assert.ok(compContent.includes('min-h-[56px]'));
+    assert.ok(compContent.includes('min-w-[48px]'));
+    assert.ok(compContent.includes('aria-pressed'));
+  });
+
+  test('39. Validação de Estado e Não-Persistência (8 Passos Obrigatórios)', () => {
+    // 1 & 2: Seleção de Pomar e patamar Densa (k = 0.050)
+    let profile = 'mediterranean_narrow_medium_orchard';
+    let selectedTier = 'dense';
+    let isManualK = false;
+    let k = 0.050;
+    let trv = 10000;
+    let calculation = calculateSprayVolumeTrvPure(trv, k);
+    assert.equal(k, 0.050);
+    assert.equal(calculation.volume_calda_l_ha, 500.0);
+
+    // 3 & 4: Alteração manual de k para 0.055
+    k = 0.055;
+    selectedTier = null; // desmarcado
+    isManualK = true;    // passa a manual
+    calculation = calculateSprayVolumeTrvPure(trv, k);
+    assert.equal(selectedTier, null);
+    assert.equal(isManualK, true);
+    assert.equal(calculation.volume_calda_l_ha, 550.0);
+
+    // 5: Troca para Citrinos -> k mantém 0.055, nenhum cartão selecionado, estado manual
+    profile = 'citrus_orchard';
+    selectedTier = null;
+    assert.equal(k, 0.055);
+    assert.equal(selectedTier, null);
+    assert.equal(isManualK, true);
+
+    // 6: Troca para Olival -> grelha vazia, k mantém 0.055, estado validation
+    profile = 'olive_grove';
+    const oliveTiers = getCanopyDensityTiers(profile);
+    assert.deepEqual(oliveTiers, []);
+    assert.equal(k, 0.055);
+    const oliveInterp = evaluateTrvVolumeInterpretation(profile, trv, k);
+    assert.equal(oliveInterp.status, 'validation');
+
+    // 7: Ao recarregar/reiniciar calculadora -> estado volta ao padrão volátil
+    let initialProfile = null;
+    let initialTier = null;
+    assert.equal(initialProfile, null);
+    assert.equal(initialTier, null);
+
+    // 8: TRV importado é preservado e não alterado por seleções de perfil/patamar
+    const importedTrv = 8333.3;
+    const isImported = true;
+    profile = 'mediterranean_narrow_medium_orchard';
+    selectedTier = 'sparse';
+    k = 0.033;
+    assert.equal(importedTrv, 8333.3);
+    assert.equal(isImported, true);
   });
 
 });

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { HelpCircle, Info, X, ExternalLink, ChevronDown, BookOpen } from 'lucide-react';
 
 import faqConcGeral from './ConcentracaoFAQGeral.md?raw';
@@ -45,6 +45,14 @@ import faqDebitoVelocidade from '../debito-total/DebitoTotalFAQVelocidade.md?raw
 import faqDebitoLargura from '../debito-total/DebitoTotalFAQLargura.md?raw';
 import faqDebitoResultado from '../debito-total/DebitoTotalFAQResultado.md?raw';
 
+import faqMisturaGeral from '../mistura/MisturaFAQGeral.md?raw';
+import faqMisturaAgua from '../mistura/MisturaFAQAgua.md?raw';
+import faqMisturaPH from '../mistura/MisturaFAQpH.md?raw';
+import faqMisturaDureza from '../mistura/MisturaFAQDureza.md?raw';
+import faqMisturaSolidos from '../mistura/MisturaFAQSolidos.md?raw';
+import faqMisturaLiquidos from '../mistura/MisturaFAQLiquidos.md?raw';
+import faqMisturaAdjuvantes from '../mistura/MisturaFAQAdjuvantes.md?raw';
+
 export type FAQFileType =
   | 'ConcentracaoFAQGeral.md'
   | 'ConcentracaoFAQVolumePreparar.md'
@@ -82,7 +90,14 @@ export type FAQFileType =
   | 'DebitoTotalFAQVolume.md'
   | 'DebitoTotalFAQVelocidade.md'
   | 'DebitoTotalFAQLargura.md'
-  | 'DebitoTotalFAQResultado.md';
+  | 'DebitoTotalFAQResultado.md'
+  | 'MisturaFAQGeral.md'
+  | 'MisturaFAQAgua.md'
+  | 'MisturaFAQpH.md'
+  | 'MisturaFAQDureza.md'
+  | 'MisturaFAQSolidos.md'
+  | 'MisturaFAQLiquidos.md'
+  | 'MisturaFAQAdjuvantes.md';
 
 const faqMap: Record<string, string> = {
   'ConcentracaoFAQGeral.md': faqConcGeral,
@@ -126,17 +141,33 @@ const faqMap: Record<string, string> = {
   'DebitoTotalFAQVolume.md': faqDebitoVolume,
   'DebitoTotalFAQVelocidade.md': faqDebitoVelocidade,
   'DebitoTotalFAQLargura.md': faqDebitoLargura,
-  'DebitoTotalFAQResultado.md': faqDebitoResultado
+  'DebitoTotalFAQResultado.md': faqDebitoResultado,
+  'MisturaFAQGeral.md': faqMisturaGeral,
+  'MisturaFAQAgua.md': faqMisturaAgua,
+  'MisturaFAQpH.md': faqMisturaPH,
+  'MisturaFAQDureza.md': faqMisturaDureza,
+  'MisturaFAQSolidos.md': faqMisturaSolidos,
+  'MisturaFAQLiquidos.md': faqMisturaLiquidos,
+  'MisturaFAQAdjuvantes.md': faqMisturaAdjuvantes,
+  'mistura-geral': faqMisturaGeral,
+  'mistura-agua': faqMisturaAgua,
+  'mistura-ph': faqMisturaPH,
+  'mistura-dureza': faqMisturaDureza,
+  'mistura-solidos': faqMisturaSolidos,
+  'mistura-liquidos': faqMisturaLiquidos,
+  'mistura-adjuvantes': faqMisturaAdjuvantes
 };
 
 export interface DidacticHelpProps {
   faqFile?: FAQFileType;
   topic?: string;
   buttonLabel?: string;
-  variant?: 'icon' | 'button';
+  variant?: 'icon' | 'button' | 'modal-only';
   iconType?: 'help' | 'info';
   iconClassName?: string;
   className?: string;
+  isOpen?: boolean;
+  onClose?: () => void;
 }
 
 interface ParsedFAQSection {
@@ -184,9 +215,14 @@ export const DidacticHelp: React.FC<DidacticHelpProps> = ({
   variant = 'button',
   iconType = 'info',
   iconClassName,
-  className = ''
+  className = '',
+  isOpen: controlledIsOpen,
+  onClose: controlledOnClose
 }) => {
-  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [internalIsOpen, setInternalIsOpen] = useState<boolean>(false);
+  const isControlled = controlledIsOpen !== undefined;
+  const isModalOpen = isControlled ? controlledIsOpen : internalIsOpen;
+
   const [openAccordionIdxs, setOpenAccordionIdxs] = useState<Record<number, boolean>>({ 0: true });
 
   const triggerRef = React.useRef<HTMLButtonElement>(null);
@@ -199,29 +235,33 @@ export const DidacticHelp: React.FC<DidacticHelpProps> = ({
     setOpenAccordionIdxs(prev => ({ ...prev, [idx]: !prev[idx] }));
   };
 
-  const handleClose = () => {
-    setIsOpen(false);
+  const handleClose = useCallback(() => {
+    if (isControlled) {
+      controlledOnClose?.();
+    } else {
+      setInternalIsOpen(false);
+    }
     setTimeout(() => {
       triggerRef.current?.focus();
     }, 50);
-  };
+  }, [isControlled, controlledOnClose]);
 
   React.useEffect(() => {
-    if (isOpen) {
+    if (isModalOpen) {
       setTimeout(() => {
         closeButtonRef.current?.focus();
       }, 50);
     }
-  }, [isOpen]);
+  }, [isModalOpen]);
 
   React.useEffect(() => {
-    if (!isOpen) return;
+    if (!isModalOpen) return;
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') handleClose();
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen]);
+  }, [isModalOpen, handleClose]);
 
   const IconComp = iconType === 'help' ? HelpCircle : Info;
 
@@ -231,18 +271,18 @@ export const DidacticHelp: React.FC<DidacticHelpProps> = ({
         <button
           ref={triggerRef}
           type="button"
-          onClick={() => setIsOpen(true)}
+          onClick={() => (isControlled ? controlledOnClose?.() : setInternalIsOpen(true))}
           className={`min-w-[48px] min-h-[48px] p-2.5 text-[#1D734B] hover:text-[#114037] bg-[#F2F2F2] hover:bg-[#3CA64C]/20 rounded-xl transition-all flex items-center justify-center touch-target ${className}`}
           title={title}
           aria-label={buttonLabel || title}
         >
           <IconComp className={iconClassName || "w-5 h-5 text-[#1D734B]"} />
         </button>
-      ) : (
+      ) : variant === 'button' ? (
         <button
           ref={triggerRef}
           type="button"
-          onClick={() => setIsOpen(true)}
+          onClick={() => (isControlled ? controlledOnClose?.() : setInternalIsOpen(true))}
           className={`min-h-[48px] px-3.5 py-2 text-[#1D734B] hover:text-[#114037] bg-[#F2F2F2] hover:bg-[#3CA64C]/20 rounded-xl transition-all flex items-center gap-1.5 text-xs font-bold touch-target ${className}`}
           title={title}
           aria-label={buttonLabel || title}
@@ -250,9 +290,9 @@ export const DidacticHelp: React.FC<DidacticHelpProps> = ({
           <IconComp className={iconClassName || "w-4 h-4 text-[#1D734B] shrink-0"} />
           <span>{buttonLabel}</span>
         </button>
-      )}
+      ) : null}
 
-      {isOpen && (
+      {isModalOpen && (
         <div 
           role="dialog"
           aria-modal="true"

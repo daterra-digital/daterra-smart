@@ -44,3 +44,12 @@ coverage
 # Outros
 *.local
 .cache
+
+# Artefactos locais de IA e validação temporária
+.gemini/
+scratch/
+
+# Chaves privadas e certificados locais
+*.pem
+*.key
+

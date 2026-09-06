@@ -152,6 +152,17 @@ export interface InstalledToolItem {
   installed_at: string;
 }
 
+export interface MixHistoryRecord {
+  id?: number;
+  date: string; // ISO String
+  title?: string;
+  selected_formulation_ids: string[];
+  tank_capacity_l?: number;
+  water_initial_l?: number;
+  water_final_l?: number;
+  notes?: string;
+}
+
 export class DaterraDatabase extends Dexie {
   calculation_history!: Table<CalculationHistoryItem>;
   profiles_cultures!: Table<ProfileCulture>;
@@ -164,6 +175,9 @@ export class DaterraDatabase extends Dexie {
   // Tabelas do Motor Universal de Calculadoras (Fase 1 - Preservação Total de Dados)
   calculation_history_v2!: Table<CalculationHistoryRecord>;
   calibration_profiles!: Table<CalibrationProfile>;
+
+  // Tabela da Ferramenta de Sequência de Mistura de Caldas
+  mix_history!: Table<MixHistoryRecord>;
 
   constructor() {
     super('DaterraSmartDB');
@@ -190,6 +204,20 @@ export class DaterraDatabase extends Dexie {
       installed_tools: '++id, &tool_id',
       calculation_history_v2: '&id, userId, calculatorId, createdAt, syncStatus, isDeleted, [calculatorId+userId+isDeleted]',
       calibration_profiles: '&id, userId, equipmentProfileId, status, syncStatus, isDeleted'
+    });
+
+    // Versão 5: Adição de histórico de misturas (mix_history)
+    this.version(5).stores({
+      calculation_history: '++id, date, calculator_type, profile_id',
+      profiles_cultures: '++id, name, crop_type',
+      profiles_equipment: '++id, name',
+      profiles_nozzles: '++id, manufacturer, model, equipment_id',
+      profiles_calibrations: '++id, equipment_id, nozzle_id',
+      microlearning_content: '++id, &field_key',
+      installed_tools: '++id, &tool_id',
+      calculation_history_v2: '&id, userId, calculatorId, createdAt, syncStatus, isDeleted, [calculatorId+userId+isDeleted]',
+      calibration_profiles: '&id, userId, equipmentProfileId, status, syncStatus, isDeleted',
+      mix_history: '++id, date'
     });
   }
 }

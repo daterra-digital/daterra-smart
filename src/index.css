@@ -124,3 +124,79 @@ body {
 .keypad-action:active {
   transform: scale(0.95);
 }
+
+/* Layout Tokens & Ergonomia Mobile-First / Safe Area */
+:root {
+  --bottom-nav-content-height: 4rem; /* 64px */
+  --bottom-safe-area: env(safe-area-inset-bottom, 0px);
+  --bottom-nav-total-height: calc(var(--bottom-nav-content-height) + var(--bottom-safe-area));
+  --calculator-action-bar-height: 4.25rem; /* ~68px */
+  --calculator-mobile-bottom-offset: calc(var(--bottom-nav-total-height) + var(--calculator-action-bar-height) + 1rem);
+  --calculator-tablet-bottom-offset: calc(var(--calculator-action-bar-height) + var(--bottom-safe-area) + 1rem);
+  --mobile-content-bottom-offset: calc(var(--bottom-nav-total-height) + 1rem);
+}
+
+.pb-safe {
+  padding-bottom: max(0.75rem, env(safe-area-inset-bottom, 0px));
+}
+
+.pt-safe {
+  padding-top: max(0.75rem, env(safe-area-inset-top, 0px));
+}
+
+.mobile-content-spacing {
+  padding-bottom: var(--mobile-content-bottom-offset);
+}
+
+/* Posicionamento Contextual da CalculatorActionBar */
+.calculator-action-bar-position {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: var(--bottom-nav-total-height);
+  z-index: 25;
+}
+
+@media (min-width: 768px) {
+  .calculator-action-bar-position {
+    bottom: var(--bottom-safe-area, 0px);
+  }
+}
+
+@media (min-width: 1024px) {
+  .calculator-action-bar-position {
+    display: none !important;
+  }
+}
+
+/* Espaçamento Inferior do Conteúdo das Calculadoras */
+.calculator-content-spacing {
+  padding-bottom: var(--calculator-mobile-bottom-offset);
+}
+
+@media (min-width: 768px) {
+  .calculator-content-spacing {
+    padding-bottom: var(--calculator-tablet-bottom-offset);
+  }
+}
+
+@media (min-width: 1024px) {
+  .calculator-content-spacing {
+    padding-bottom: 2rem;
+  }
+}
+
+/* Scoped Motion-Reduce para os componentes da Fase 1 (sem afetar componentes externos) */
+@media (prefers-reduced-motion: reduce) {
+  .keypad-btn,
+  .keypad-operator,
+  .keypad-action,
+  .keypad-modal-container,
+  .sticky-result-container,
+  .calculator-action-bar-position {
+    transition: none !important;
+    transform: none !important;
+    animation: none !important;
+  }
+}
+

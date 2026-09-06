@@ -7,6 +7,7 @@
     "weather": "Météorologie",
     "ndvi": "Cartes NDVI",
     "academy": "Académie",
+    "parcels": "Parcelles",
     "settings": "Paramètres"
   },
   "dashboard": {
@@ -97,6 +98,10 @@
       "perfil_exploracao": {
         "name": "Profil de l'Exploitation & Équipements",
         "description": "Registre centralisé des parcelles, cultures, pulvérisateurs et buses de l'exploitation agricole."
+      },
+      "calc_eppo": {
+        "name": "Calculateur EPPO (LWA / TRV)",
+        "description": "Calcule le volume de bouillie et le dosage de produit par cuve et par hectare selon la méthodologie EPPO PP 1/239."
       }
     },
     "form": {
@@ -295,6 +300,160 @@
       "content": "[FAQ: Comment fonctionnent les Profils d'Unités?]\n- Permettent de basculer entre le Système Métrique International (SI), le Système Impérial Américain (US) et le Système Régional sans perte de précision des calculs hydrauliques.",
       "formula": "Conversion automatique dans l'écosystème DATERRA Smart",
       "unit_explanation": "SI : L, ha, bar, km/h\nUS : gal, acre, psi, mph"
+    },
+    "calc_eppo": {
+      "title": "Calculateur EPPO (LWA / TRV)",
+      "content": "[FAQ: Quelle est la fonction du Calculateur EPPO ?]\n- Calcule le volume de bouillie de référence et la quantité de produit phytosanitaire par cuve et par hectare en fonction de la géométrie de la haie (LWA) ou de la frondaison (TRV), selon la norme EPPO PP 1/239.\n\n[FAQ: Qu'est-ce que la méthode LWA (Leaf Wall Area) ?]\n- Mesure la surface de paroi foliaire verticale (m²/ha) en viticulture et cultures palissées.\n\n[FAQ: Qu'est-ce que la méthode TRV (Tree Row Volume) ?]\n- Mesure le volume de frondaison (m³/ha) dans les vergers de fruits à coque, pépins et agrumes.",
+      "formula": "LWA (m²/ha) = (2 × H × 10 000) / W_w\nTRV (m³/ha) = (H × W × 10 000) / W_w\nVolume Bouillie = LWA × (k_LWA / 10 000) ou TRV × k_TRV",
+      "unit_explanation": "H : Hauteur de Végétation (m)\nW : Largeur de Frondaison (m)\nW_w : Écartement des Rangs (m)\nk_LWA : L/10 000m² LWA\nk_TRV : L/m³ TRV"
     }
+  },
+  "unifiedKeypad": {
+    "title": "Calculateur Technique DATERRA",
+    "editing": "En cours de modification",
+    "unit": "Unité",
+    "presets": "Raccourcis",
+    "cancel": "Annuler",
+    "confirm": "Terminer et Voir le Résumé",
+    "enterData": "Saisir / Modifier les Données",
+    "enterDataPrompt": "Saisissez les données pour afficher le résultat",
+    "completingValue": "Complétion de la valeur...",
+    "technicalDetails": "Voir Détails Techniques et Normes",
+    "technicalDetailsHide": "Masquer Détails Techniques",
+    "srCloseModal": "Fermer et annuler les modifications",
+    "srActiveField": "Modification de la variable active",
+    "unitChangedValueReset": "L'unité a été modifiée. Veuillez saisir à nouveau la valeur pour cette unité.",
+    "unitChangedValueConverted": "Valeur automatiquement convertie vers la nouvelle unité.",
+    "tankSubMetric": "Cuve",
+    "inputSummaryTitle": "Valeurs Saisies",
+    "inputSummarySubtitle": "Appuyez sur une valeur pour la saisir ou la modifier.",
+    "openUnified": "Ouvrir Calculateur Unifié",
+    "edit": "Modifier",
+    "errors": {
+      "emptyExpression": "L'expression ne peut pas être vide",
+      "divisionByZero": "Division par zéro non autorisée",
+      "invalidSyntax": "Expression mathématique incomplète ou invalide",
+      "expressionTooLong": "Expression trop longue (maximum 50 caractères)",
+      "excessiveNesting": "Trop de niveaux de parenthèses (maximum 5 niveaux)",
+      "outOfRange": "Valeur hors des limites acceptables pour cette variable",
+      "min": "Valeur inférieure au minimum recommandé",
+      "max": "Valeur supérieure au maximum recommandé"
+    },
+    "enterValues": "Saisir les Valeurs"
+  },
+  "velocidadeReal": {
+    "enterDataPrompt": "Saisissez la distance et le temps pour calculer la vitesse réelle d'avancement."
+  },
+  "areaParedeFoliar": {
+    "enterDataPrompt": "Saisissez la hauteur de végétation et l'écartement des rangs pour calculer la surface de paroi foliaire.",
+    "submetric": "2 faces de végétation traitées"
+  },
+  "volumeCopa": {
+    "enterDataPrompt": "Saisissez la hauteur, la largeur et l'écartement des rangs pour calculer le volume de houppier (TRV).",
+    "submetric": "Géométrie tridimensionnelle du houppier"
+  },
+  "volumeCaldaTrv": {
+    "enterDataPrompt": "Saisissez le volume de houppier (TRV) et le coefficient k pour calculer le volume de bouillie.",
+    "submetric": "TRV · Coefficient de volume de bouillie",
+    "assistance": {
+      "profiles": {
+        "title": "Profil Cultural Indicatif",
+        "noProfile": "Sans profil",
+        "orchardProfile": "Verger Étroit / Moyen",
+        "oliveProfile": "Oliveraie — interprétation en validation",
+        "citrusProfile": "Agrumes",
+        "oliveValidation": "Interprétation en validation",
+        "citrusValidation": "Valeurs indicatives en validation. Confirmez le coefficient et le calibrage selon la culture, la géométrie du houppier et les conditions d'application.",
+        "citrusValidationNotice": "Valeurs indicatives internes. Confirmez le coefficient et l'étalonnage dans les conditions réelles d'application."
+      },
+      "density": {
+        "title": "Densité du Houppier",
+        "verySparse": "Très peu dense",
+        "sparse": "Peu dense",
+        "dense": "Dense",
+        "veryDense": "Très dense",
+        "guidanceValue": "Valeur indicative",
+        "manualValue": "Valeur manuelle"
+      },
+      "warnings": {
+        "lowCoefficient": "Coefficient très bas. Vérifiez que la valeur est correcte.",
+        "highCoefficient": "Coefficient élevé. Vérifiez que la valeur est correcte."
+      },
+      "interpretation": {
+        "noProfileMessage": "Sélectionnez un profil cultural pour recevoir une interprétation indicative du volume calculé.",
+        "orchardVeryLow": "Volume faible pour le profil sélectionné. Confirmez la couverture de la cible, la géométrie et l'étalonnage de l'équipement.",
+        "orchardLowModerate": "Volume faible à modéré pour le profil sélectionné. Confirmez qu'il correspond à la géométrie et aux conditions d'application.",
+        "orchardTypical": "Volume dans la plage indicative interne pour le profil sélectionné.",
+        "orchardHighPlausible": "Volume élevé pour le profil sélectionné. Confirmez la géométrie, la densité, le pulvérisateur, la distribution et le ruissellement.",
+        "orchardHighDeveloped": "Volume élevé pour le profil sélectionné. Confirmez la taille du houppier, l'étalonnage, la distribution et le ruissellement.",
+        "orchardVeryHigh": "Volume très élevé pour le profil sélectionné. Vérifiez les valeurs saisies et confirmez l'étalonnage avant l'application.",
+        "citrusLow": "Volume faible pour le profil sélectionné. Confirmez la couverture de la cible et l'étalonnage de l'équipement.",
+        "citrusTypical": "Volume dans la plage indicative interne pour le profil sélectionné.",
+        "citrusHigh": "Volume élevé pour le profil sélectionné. Confirmez la géométrie, la densité, le pulvérisateur, la distribution et le ruissellement.",
+        "citrusVeryHigh": "Volume très élevé pour le profil sélectionné. Confirmez la géométrie, le coefficient, l'étalonnage et les conditions d'application.",
+        "oliveValidationMessage": "L'interprétation pour l'oliveraie est en cours de validation. Confirmez la géométrie, le coefficient saisi, l'étalonnage et les conditions d'application."
+      },
+      "a11y": {
+        "selectProfile": "Sélectionner le profil cultural indicatif",
+        "selectDensity": "Sélectionner le palier de densité",
+        "selectedDensity": "sélectionné",
+        "profileChanged": "Profil cultural modifié",
+        "manualValueNotice": "Valeur de k en mode d'édition manuelle"
+      }
+    }
+  },
+  "debitoTotal": {
+    "enterDataPrompt": "Saisissez le volume de bouillie, la vitesse et la largeur pour calculer le débit total.",
+    "submetric": "Débit total du pulvérisateur",
+    "assistance": {
+      "widthCriteria": {
+        "title": "Critère de Largeur de Travail",
+        "boom": "Rampe Horizontale",
+        "band": "Pulvérisation en Bande",
+        "rowSpacing": "Écartement Entre Rangs",
+        "boomDescription": "Grandes cultures et cultures basses en plein",
+        "bandDescription": "Application localisée sur le rang ou bande traitée",
+        "rowSpacingDescription": "Cultures en ligne, vergers, vignes et oliviers"
+      },
+      "nozzleCalculation": {
+        "show": "Calculer le débit par buse (optionnel)",
+        "hide": "Masquer le calcul par buse",
+        "fieldLabel": "Nombre de buses actives en simultané (optionnel)",
+        "fieldDescription": "Indiquez uniquement les buses qui contribuent au débit total calculé lors de ce passage.",
+        "averageFlowNotice": "Le débit moyen est calculé sur la base du nombre de buses actives en simultané. Vérifiez que toutes les buses prises en compte ont un débit similaire.",
+        "rowSpacingDifferentiatedDistributionNotice": "Les pulvérisateurs avec distribution verticale différenciée, buses de calibres différents ou tronçons au fonctionnement distinct doivent être évalués avec un outil dédié.",
+        "optional": "Optionnel",
+        "enterPrompt": "Saisissez le nombre de buses actives en simultané",
+        "averageFlow": "Débit moyen :",
+        "nozzlesUnit": "buses",
+        "perNozzle": "L/min par buse"
+      },
+      "a11y": {
+        "selectWidthCriteria": "Sélectionner le critère de largeur de travail",
+        "selectedWidthCriteria": "sélectionné",
+        "enableNozzleCalculation": "Activer le calcul du débit par buse",
+        "disableNozzleCalculation": "Désactiver le calcul du débit par buse"
+      }
+    }
+  },
+  "calculatorActionBar": {
+    "save": "Enregistrer dans l'historique",
+    "saveCalculation": "Enregistrer le calcul",
+    "history": "Historique",
+    "openHistory": "Ouvrir l'historique",
+    "technicalGuide": "Guide",
+    "openTechnicalGuide": "Consulter le guide technique",
+    "saveDisabled": "Entrez toutes les valeurs pour enregistrer",
+    "noTechnicalGuideAvailable": "Guide technique non disponible",
+    "guide": "Guide"
+  },
+  "validationNotes": {
+    "title": "Notes de Validation",
+    "defaultMessage": "Vérifiez les avertissements contextuels pour les valeurs saisies."
+  },
+  "eppo": {
+    "enterDataPrompt": "Saisissez les dimensions de la parcelle et de la végétation pour calculer le volume de bouillie et de produit selon la norme EPPO.",
+    "submetricLwa": "Méthodologie EPPO LWA · Paroi Foliaire",
+    "submetricTrv": "Méthodologie EPPO TRV · Volume de Frondaison"
   }
 }

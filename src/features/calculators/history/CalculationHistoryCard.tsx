@@ -45,6 +45,7 @@ export const CalculationHistoryCard: React.FC<CalculationHistoryCardProps> = ({
   const isVolumeCopa = record.calculatorId === 'calc_volume_copa';
   const isVolumeCaldaTrv = record.calculatorId === 'calc_volume_calda_trv';
   const isDebitoTotal = record.calculatorId === 'calc_debito_total';
+  const isEppo = record.calculatorId === 'calc_eppo';
 
   // --- CAMPOS DA DOSE ---
   const volPrepDose = record.inputs['volPrepararDose']?.rawValue ?? '-';
@@ -152,6 +153,43 @@ export const CalculationHistoryCard: React.FC<CalculationHistoryCardProps> = ({
     : '-';
   const debitoTotalUnit = debitoTotalOut?.unit ?? 'L/min';
 
+  // --- CAMPOS DA CALCULADORA EPPO (LWA / TRV) ---
+  const eppoMode = String(record.inputs['mode']?.rawValue || 'lwa');
+  const isEppoLwa = eppoMode === 'lwa';
+
+  const eppoVolCaldaOut = record.outputs['volCaldaRecomendado'];
+  const eppoVolCaldaVal = eppoVolCaldaOut?.rawValue !== undefined
+    ? Number(eppoVolCaldaOut.rawValue).toLocaleString('pt-PT', { minimumFractionDigits: 1, maximumFractionDigits: 1 })
+    : '-';
+  const eppoVolCaldaUnit = eppoVolCaldaOut?.unit ?? 'L/ha';
+  const eppoVolCaldaTotalVal = eppoVolCaldaOut?.subValue !== undefined
+    ? Number(eppoVolCaldaOut.subValue).toLocaleString('pt-PT', { maximumFractionDigits: 0 })
+    : null;
+  const eppoVolCaldaTotalUnit = eppoVolCaldaOut?.subUnit ?? 'L na Parcela';
+
+  const eppoProdDepOut = record.outputs['produtoPorDeposito'];
+  const eppoProdDepVal = eppoProdDepOut?.rawValue !== undefined
+    ? Number(eppoProdDepOut.rawValue).toLocaleString('pt-PT', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+    : '-';
+  const eppoProdDepUnit = eppoProdDepOut?.unit ?? 'L';
+  const eppoProdDepSubVal = eppoProdDepOut?.subValue !== undefined
+    ? Number(eppoProdDepOut.subValue).toLocaleString('pt-PT', { maximumFractionDigits: 1 })
+    : null;
+  const eppoProdDepSubUnit = eppoProdDepOut?.subUnit ?? 'mL';
+
+  const eppoGeomOut = record.outputs['indiceGeometria'];
+  const eppoGeomVal = eppoGeomOut?.rawValue !== undefined
+    ? Number(eppoGeomOut.rawValue).toLocaleString('pt-PT', { maximumFractionDigits: 0 })
+    : '-';
+  const eppoGeomUnit = eppoGeomOut?.unit ?? (isEppoLwa ? 'm² LWA/ha' : 'm³ TRV/ha');
+
+  const eppoEntrelinhaVal = record.inputs['distanciaEntrelinhas']?.rawValue ?? '-';
+  const eppoEntrelinhaUnit = record.inputs['distanciaEntrelinhas']?.unit ?? 'm';
+  const eppoCapDepVal = record.inputs['capacidadeDeposito']?.rawValue ?? '-';
+  const eppoCapDepUnit = record.inputs['capacidadeDeposito']?.unit ?? 'L';
+  const eppoConcVal = record.inputs['concProduto']?.rawValue ?? '-';
+  const eppoConcUnit = record.inputs['concProduto']?.unit ?? 'mL/hL';
+
   // --- RESULTADO PRINCIPAL DE PESTICIDA (COMUM A DOSE E CONCENTRAÇÃO) ---
   const pfValue = isConcentracao
     ? (record.outputs['quantidade_pf_ml']?.rawValue !== undefined
@@ -191,6 +229,8 @@ export const CalculationHistoryCard: React.FC<CalculationHistoryCardProps> = ({
     ? 'Volume de Calda Adequado por TRV'
     : isDebitoTotal
     ? 'Débito Total do Pulverizador'
+    : isEppo
+    ? 'Calculadora EPPO (LWA / TRV)'
     : 'Cálculo de Dose por Hectare';
 
   return (
@@ -211,7 +251,7 @@ export const CalculationHistoryCard: React.FC<CalculationHistoryCardProps> = ({
         </div>
 
         <div className="flex items-center gap-1.5 shrink-0">
-          {/* Badge de Modo na Concentração */}
+          {/* Badge de Modo na Concentração ou EPPO */}
           {isConcentracao && (
             <span
               className={`text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-full ${
@@ -221,6 +261,12 @@ export const CalculationHistoryCard: React.FC<CalculationHistoryCardProps> = ({
               }`}
             >
               {modeLabel}
+            </span>
+          )}
+
+          {isEppo && (
+            <span className="text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-900 border border-emerald-300/80">
+              {isEppoLwa ? 'LWA' : 'TRV'}
             </span>
           )}
 
@@ -295,6 +341,35 @@ export const CalculationHistoryCard: React.FC<CalculationHistoryCardProps> = ({
             </div>
           </div>
         </div>
+      ) : isEppo ? (
+        <div className="bg-slate-50 p-3 rounded-xl border border-slate-100 flex items-center justify-between gap-4">
+          <div>
+            <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-500 block">
+              Volume de Calda EPPO
+            </span>
+            <div className="text-base sm:text-lg font-black font-mono-numbers text-daterra-primary">
+              {eppoVolCaldaVal} <span className="text-xs font-bold text-daterra-accent">{eppoVolCaldaUnit}</span>
+              {eppoVolCaldaTotalVal && (
+                <span className="text-xs font-medium text-slate-500 ml-1.5">
+                  ({eppoVolCaldaTotalVal} {eppoVolCaldaTotalUnit})
+                </span>
+              )}
+            </div>
+          </div>
+          <div className="text-right">
+            <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-500 block">
+              Produto / Depósito
+            </span>
+            <div className="text-base sm:text-lg font-black font-mono-numbers text-daterra-primary">
+              {eppoProdDepVal} <span className="text-xs font-bold text-daterra-accent">{eppoProdDepUnit}</span>
+              {eppoProdDepSubVal && (
+                <span className="text-xs font-medium text-slate-500 ml-1.5">
+                  ({eppoProdDepSubVal} {eppoProdDepSubUnit})
+                </span>
+              )}
+            </div>
+          </div>
+        </div>
       ) : (
         <div className="bg-slate-50 p-3 rounded-xl border border-slate-100 flex items-center justify-between gap-4">
           <div>
@@ -336,6 +411,17 @@ export const CalculationHistoryCard: React.FC<CalculationHistoryCardProps> = ({
       )}
 
       {/* 3. Resumo dos Campos de Entrada */}
+      {isEppo && (
+        <div className="text-xs font-mono-numbers text-slate-600 bg-slate-100/70 px-2.5 py-1.5 rounded-lg flex items-center justify-between flex-wrap gap-2">
+          <span>{isEppoLwa ? 'LWA' : 'TRV'}: <strong className="font-bold text-slate-800">{eppoGeomVal} {eppoGeomUnit}</strong></span>
+          <span>·</span>
+          <span>Entrelinha: <strong className="font-bold text-slate-800">{eppoEntrelinhaVal} {eppoEntrelinhaUnit}</strong></span>
+          <span>·</span>
+          <span>Depósito: <strong className="font-bold text-slate-800">{eppoCapDepVal} {eppoCapDepUnit}</strong></span>
+          <span>·</span>
+          <span>Conc: <strong className="font-bold text-slate-800">{eppoConcVal} {eppoConcUnit}</strong></span>
+        </div>
+      )}
       {isDebitoTotal && (
         <div className="text-xs font-mono-numbers text-slate-600 bg-slate-100/70 px-2.5 py-1.5 rounded-lg flex items-center justify-between flex-wrap gap-2">
           <span>Q: <strong className="font-bold text-slate-800">{caldaDebitoVal} {caldaDebitoUnit}</strong></span>

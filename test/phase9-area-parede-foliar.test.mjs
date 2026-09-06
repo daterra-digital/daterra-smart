@@ -236,8 +236,8 @@ describe('Fase 9: Migração da Calculadora de Área de Parede Foliar (calc_area
     const entField = areaParedeFoliarCalculatorConfig.fields.find(f => f.id === 'distanciaEntrelinhas');
     assert.equal(altField?.defaultValue, 2.5);
     assert.equal(entField?.defaultValue, 3.0);
-    assert.equal(altField?.label, 'Altura da vegetação tratada (m)');
-    assert.equal(entField?.label, 'Distância entrelinhas (m)');
+    assert.equal(altField?.label, 'Altura da vegetação tratada');
+    assert.equal(entField?.label, 'Distância entrelinhas');
   });
 
   test('22. canopy_height está associado ao campo de altura', () => {

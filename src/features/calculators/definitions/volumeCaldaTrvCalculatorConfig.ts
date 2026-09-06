@@ -125,7 +125,7 @@ export const volumeCaldaTrvCalculatorConfig: CalculatorDefinition = {
   results: [
     {
       id: 'volumeCaldaEstimado',
-      label: 'VOLUME DE CALDA ESTIMADO:',
+      label: 'Volume de calda estimado',
       canonicalKey: 'spray_volume_rate',
       dimension: 'application_rate',
       defaultUnit: 'L/ha',
@@ -177,9 +177,9 @@ export const volumeCaldaTrvCalculatorConfig: CalculatorDefinition = {
     } else {
       // Avisos condicionais não bloqueantes para k (apenas se atípico)
       if (k >= 0.01 && k < 0.02) {
-        warnings['coeficienteVolumeCalda'] = 'Coeficiente muito baixo. Verifique se o valor está correto.';
+        warnings['coeficienteVolumeCalda'] = 'volumeCaldaTrv.assistance.warnings.lowCoefficient';
       } else if (k > 0.20 && k <= 0.50) {
-        warnings['coeficienteVolumeCalda'] = 'Coeficiente elevado. Verifique se o valor está correto.';
+        warnings['coeficienteVolumeCalda'] = 'volumeCaldaTrv.assistance.warnings.highCoefficient';
       }
     }
 
@@ -210,7 +210,7 @@ export const volumeCaldaTrvCalculatorConfig: CalculatorDefinition = {
         normalizedValue: res.volume_calda_l_ha,
         dimension: 'application_rate',
         canonicalKey: 'spray_volume_rate',
-        label: 'VOLUME DE CALDA ESTIMADO:',
+        label: 'Volume de calda estimado',
         source: 'calculated_output',
         localId: 'volumeCaldaEstimado',
         calculatorId: 'calc_volume_calda_trv',

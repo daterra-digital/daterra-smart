@@ -187,6 +187,14 @@ export const doseCalculatorConfig: CalculatorDefinition = {
       defaultUnit: 'L/ha',
       allowedUnits: ['L/ha', 'kg/ha'],
       unitMetadata: DOSE_UNIT_METADATA,
+      /**
+       * Mudança entre L/ha e kg/ha representa alteração de formulação líquida para sólida.
+       * Sem dados de densidade do produto, a conversão é fisicamente inválida e requer RESET obrigatório.
+       */
+      onUnitChange: (_oldUnit, _newUnit) => ({
+        action: 'reset',
+        noticeKey: 'unifiedKeypad.unitChangedValueReset'
+      }),
       defaultValue: 2,
       presets: [1, 2, 3, 5], // Exatamente 4 atalhos
       helpFile: 'DoseFAQDoseRecomendada.md',

@@ -7,6 +7,7 @@
     "weather": "Meteorología",
     "ndvi": "Mapas NDVI",
     "academy": "Academia",
+    "parcels": "Parcelas",
     "settings": "Ajustes"
   },
   "dashboard": {
@@ -97,6 +98,10 @@
       "perfil_exploracao": {
         "name": "Perfil de la Explotación & Equipamiento",
         "description": "Registro centralizado de parcelas, cultivos, pulverizadores y boquillas de la explotación agrícola."
+      },
+      "calc_eppo": {
+        "name": "Calculadora EPPO (LWA / TRV)",
+        "description": "Calcula el volumen de caldo y dosificación de producto por tanque y por hectárea según la metodología EPPO PP 1/239."
       }
     },
     "form": {
@@ -295,6 +300,160 @@
       "content": "[FAQ: ¿Cómo funcionan los Perfiles de Unidades?]\n- Permiten alternar entre el Sistema Métrico Internacional (SI), el Sistema Imperial Americano (US) y el Sistema Tradicional Regional sin perder la precisión de los cálculos hidráulicos.",
       "formula": "Conversión automática en el ecosistema DATERRA Smart",
       "unit_explanation": "SI : L, ha, bar, km/h\nUS : gal, acre, psi, mph"
+    },
+    "calc_eppo": {
+      "title": "Calculadora EPPO (LWA / TRV)",
+      "content": "[FAQ: ¿Cuál es la función de la Calculadora EPPO?]\n- Calcula el volumen de caldo de referencia y la cantidad de producto fitosanitario por tanque y por hectárea según la geometría del seto (LWA) o copa (TRV), cumpliendo la norma EPPO PP 1/239.\n\n[FAQ: ¿Qué es el Método LWA (Leaf Wall Area)?]\n- Mide la superficie de pared foliar vertical (m²/ha) en viñedo y cultivos en seto.\n\n[FAQ: ¿Qué es el Método TRV (Tree Row Volume)?]\n- Mide el volumen aparente de copa (m³/ha) en frutales de cáscara, pomáceas y cítricos.",
+      "formula": "LWA (m²/ha) = (2 × H × 10.000) / W_w\nTRV (m³/ha) = (H × W × 10.000) / W_w\nVolumen Caldo = LWA × (k_LWA / 10.000) o TRV × k_TRV",
+      "unit_explanation": "H : Altura de la Vegetación/Copa (m)\nW : Anchura de Copa (m)\nW_w : Distancia Entre Líneas (m)\nk_LWA : L/10.000m² LWA\nk_TRV : L/m³ TRV"
     }
+  },
+  "unifiedKeypad": {
+    "title": "Calculadora Técnica DATERRA",
+    "editing": "Editando",
+    "unit": "Unidad",
+    "presets": "Atajos",
+    "cancel": "Cancelar",
+    "confirm": "Finalizar y Ver Resumen",
+    "enterData": "Introducir / Editar Datos",
+    "enterDataPrompt": "Introduzca los datos para ver el resultado",
+    "completingValue": "Completando valor...",
+    "technicalDetails": "Ver Detalles Técnicos e Normas",
+    "technicalDetailsHide": "Ocultar Detalles Técnicos",
+    "srCloseModal": "Cerrar y cancelar cambios",
+    "srActiveField": "Editando variable activa",
+    "unitChangedValueReset": "La unidad ha cambiado. Introduzca de nuevo el valor para esta unidad.",
+    "unitChangedValueConverted": "Valor convertido automáticamente a la nueva unidad.",
+    "tankSubMetric": "Depósito",
+    "inputSummaryTitle": "Valores Introducidos",
+    "inputSummarySubtitle": "Toca un valor para introducirlo o modificarlo.",
+    "openUnified": "Abrir Calculadora Unificada",
+    "edit": "Editar",
+    "errors": {
+      "emptyExpression": "La expresión no puede estar vacía",
+      "divisionByZero": "No se permite la división por cero",
+      "invalidSyntax": "Expresión matemática incompleta o inválida",
+      "expressionTooLong": "Expresión demasiado larga (máximo 50 caracteres)",
+      "excessiveNesting": "Demasiados niveles de paréntesis (máximo 5 niveles)",
+      "outOfRange": "Valor fuera de los límites aceptables para esta variable",
+      "min": "Valor inferior al mínimo recomendado",
+      "max": "Valor superior al máximo recomendado"
+    },
+    "enterValues": "Introducir Valores"
+  },
+  "velocidadeReal": {
+    "enterDataPrompt": "Introduzca distancia y tiempo para calcular la velocidad real."
+  },
+  "areaParedeFoliar": {
+    "enterDataPrompt": "Introduzca la altura de la vegetación y la distancia entre hileras para calcular el área de pared foliar.",
+    "submetric": "2 caras de la vegetación tratada"
+  },
+  "volumeCopa": {
+    "enterDataPrompt": "Introduzca la altura, anchura y distancia entre hileras para calcular el volumen de copa.",
+    "submetric": "Geometría tridimensional de copa"
+  },
+  "volumeCaldaTrv": {
+    "enterDataPrompt": "Introduzca el volumen de copa y el coeficiente k para calcular el volumen de caldo.",
+    "submetric": "TRV · Coeficiente de volumen de caldo",
+    "assistance": {
+      "profiles": {
+        "title": "Perfil de Cultivo Orientativo",
+        "noProfile": "Sin perfil",
+        "orchardProfile": "Frutal Estrecho / Medio",
+        "oliveProfile": "Olivar — interpretación en validación",
+        "citrusProfile": "Cítricos",
+        "oliveValidation": "Interpretación en validación",
+        "citrusValidation": "Valores orientativos en validación. Confirme el coeficiente y la calibración según el cultivo, la geometría de la copa y las condiciones de aplicación.",
+        "citrusValidationNotice": "Valores orientadores internos. Confirme el coeficiente y la calibración en las condiciones reales de aplicación."
+      },
+      "density": {
+        "title": "Densidad de la Copa",
+        "verySparse": "Muy poco densa",
+        "sparse": "Poco densa",
+        "dense": "Densa",
+        "veryDense": "Muy densa",
+        "guidanceValue": "Valor orientativo",
+        "manualValue": "Valor manual"
+      },
+      "warnings": {
+        "lowCoefficient": "Coeficiente muy bajo. Compruebe que el valor sea correcto.",
+        "highCoefficient": "Coeficiente elevado. Compruebe que el valor sea correcto."
+      },
+      "interpretation": {
+        "noProfileMessage": "Seleccione un perfil de cultivo para recibir una interpretación orientativa del volumen calculado.",
+        "orchardVeryLow": "Volumen bajo para el perfil seleccionado. Confirme la cobertura del objetivo, la geometría y la calibración del equipo.",
+        "orchardLowModerate": "Volumen bajo a moderado para el perfil seleccionado. Confirme si corresponde a la geometría y condiciones de aplicación.",
+        "orchardTypical": "Volumen dentro del rango orientativo interno para el perfil seleccionado.",
+        "orchardHighPlausible": "Volumen elevado para el perfil seleccionado. Confirme geometría, densidad, pulverizador, distribución y escurrimiento.",
+        "orchardHighDeveloped": "Volumen elevado para el perfil seleccionado. Confirme la dimensión de la copa, la calibración, la distribución y el escurrimiento.",
+        "orchardVeryHigh": "Volumen muy elevado para el perfil seleccionado. Revise los valores introducidos y confirme la calibración antes de la aplicación.",
+        "citrusLow": "Volumen bajo para el perfil seleccionado. Confirme la cobertura del objetivo y la calibración del equipo.",
+        "citrusTypical": "Volumen dentro del rango orientativo interno para el perfil seleccionado.",
+        "citrusHigh": "Volumen elevado para el perfil seleccionado. Confirme geometría, densidad, pulverizador, distribución y escurrimiento.",
+        "citrusVeryHigh": "Volumen muy elevado para el perfil seleccionado. Confirme la geometría, el coeficiente, la calibración y las condiciones de aplicación.",
+        "oliveValidationMessage": "La interpretación para olivar está en validación. Confirme la geometría, el coeficiente introducido, la calibración y las condiciones de aplicación."
+      },
+      "a11y": {
+        "selectProfile": "Seleccionar perfil de cultivo orientativo",
+        "selectDensity": "Seleccionar nivel de densidad",
+        "selectedDensity": "seleccionado",
+        "profileChanged": "Perfil de cultivo modificado",
+        "manualValueNotice": "Valor de k en modo de edición manual"
+      }
+    }
+  },
+  "debitoTotal": {
+    "enterDataPrompt": "Introduzca el volumen de caldo, velocidad y ancho para calcular el caudal total.",
+    "submetric": "Caudal total del pulverizador",
+    "assistance": {
+      "widthCriteria": {
+        "title": "Criterio de Ancho de Trabajo",
+        "boom": "Barra Horizontal",
+        "band": "Pulverización en Banda",
+        "rowSpacing": "Distancia Entre Líneas",
+        "boomDescription": "Cultivos bajos y extensivos en superficie total",
+        "bandDescription": "Aplicación localizada en línea o banda tratada",
+        "rowSpacingDescription": "Cultivos en hilera, frutales, viñedos y olivares"
+      },
+      "nozzleCalculation": {
+        "show": "Calcular caudal por boquilla (opcional)",
+        "hide": "Ocultar cálculo por boquilla",
+        "fieldLabel": "Número de boquillas activas en simultáneo (opcional)",
+        "fieldDescription": "Indique únicamente las boquillas que contribuyen al caudal total calculado en este pase.",
+        "averageFlowNotice": "El caudal medio se calcula en función del número de boquillas activas en simultáneo. Confirme que todas las boquillas consideradas tengan un caudal similar.",
+        "rowSpacingDifferentiatedDistributionNotice": "Los pulverizadores con distribución vertical diferenciada, boquillas de diferente calibre o secciones con funcionamiento distinto deben evaluarse con una herramienta específica.",
+        "optional": "Opcional",
+        "enterPrompt": "Introduzca el número de boquillas activas en simultáneo",
+        "averageFlow": "Caudal medio:",
+        "nozzlesUnit": "boquillas",
+        "perNozzle": "L/min por boquilla"
+      },
+      "a11y": {
+        "selectWidthCriteria": "Seleccionar criterio de ancho de trabajo",
+        "selectedWidthCriteria": "seleccionado",
+        "enableNozzleCalculation": "Activar cálculo de caudal por boquilla",
+        "disableNozzleCalculation": "Desactivar cálculo de caudal por boquilla"
+      }
+    }
+  },
+  "calculatorActionBar": {
+    "save": "Guardar en Historial",
+    "saveCalculation": "Guardar Cálculo",
+    "history": "Historial",
+    "openHistory": "Abrir Historial",
+    "technicalGuide": "Guía",
+    "openTechnicalGuide": "Consultar Guía Técnica",
+    "saveDisabled": "Introduzca todos los valores para guardar",
+    "noTechnicalGuideAvailable": "Guía técnica no disponible",
+    "guide": "Guía"
+  },
+  "validationNotes": {
+    "title": "Notas de Validación",
+    "defaultMessage": "Compruebe los avisos contextuales de los valores introducidos."
+  },
+  "eppo": {
+    "enterDataPrompt": "Introduzca las dimensiones de la parcela y de la vegetación para calcular el volumen de caldo y producto según la norma EPPO.",
+    "submetricLwa": "Metodología EPPO LWA · Pared Foliar",
+    "submetricTrv": "Metodología EPPO TRV · Volumen de Copa"
   }
 }

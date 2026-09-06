@@ -114,6 +114,16 @@ const TOOLS_CATALOG: ToolModule[] = [
     prioridade: 'alta'
   },
   {
+    id: 'calc_eppo',
+    name: 'Calculadora EPPO (LWA / TRV)',
+    category: 'Pulverização',
+    description: 'Calcula o volume de calda e dosagem de produto por depósito e por hectare pela metodologia EPPO PP 1/239.',
+    icon: FlaskConical,
+    isCore: true,
+    caminho: '/ferramentas/eppo',
+    prioridade: 'alta'
+  },
+  {
     id: 'gestao_caderno_campo',
     name: 'Caderno de Campo Digital DGAV',
     category: 'Gestão',
@@ -132,7 +142,10 @@ const TOOLS_CATALOG: ToolModule[] = [
     name: 'Guia de Sequência de Mistura',
     category: 'Pulverização',
     description: 'Ordem correta de adição de produtos no depósito para evitar floculação e inativação de substâncias.',
-    icon: Layers
+    icon: Layers,
+    isCore: true,
+    caminho: '/ferramentas/mistura',
+    prioridade: 'alta'
   },
   {
     id: 'gestao_exploracoes',
@@ -217,7 +230,7 @@ export const ToolsView: React.FC = () => {
 
   // Leitura do IndexedDB via Dexie das Ferramentas Instaladas
   const installedToolItems = useLiveQuery(() => db.installed_tools.toArray(), []);
-  const installedToolIds = new Set(installedToolItems?.map(t => t.tool_id) || ['calc_concentracao', 'calc_dose', 'calc_area_parede_foliar']);
+  const installedToolIds = new Set(installedToolItems?.map(t => t.tool_id) || ['calc_concentracao', 'calc_dose', 'calc_area_parede_foliar', 'mistura_compatibilidade']);
 
   // --- ESTADOS INTERNOS DAS CALCULADORAS ---
   // Concentração
@@ -288,6 +301,10 @@ export const ToolsView: React.FC = () => {
     }
     if (toolId === 'calc_debito_total') {
       navigate('/ferramentas/debito-total');
+      return;
+    }
+    if (toolId === 'mistura_compatibilidade') {
+      navigate('/ferramentas/mistura');
       return;
     }
     const found = TOOLS_CATALOG.find(t => t.id === toolId);
@@ -443,6 +460,10 @@ export const ToolsView: React.FC = () => {
     return <Navigate to="/ferramentas/debito-total" replace />;
   }
 
+  if (currentViewTool === 'calc_eppo') {
+    return <Navigate to="/ferramentas/eppo" replace />;
+  }
+
   if (currentViewTool === 'calc_area_parede_foliar') {
     return <AreaParedeFoliarCalculator />;
   }
@@ -570,7 +591,7 @@ export const ToolsView: React.FC = () => {
                 <div className="space-y-4">
                   <div>
                     <div className="flex items-center justify-between mb-1.5">
-                      <label className="text-xs font-bold text-slate-700">Concentração do PF</label>
+                      <label className="text-xs font-bold text-slate-700">Concentração do Produto</label>
                       <DidacticHelp faqFile="ConcentracaoFAQConcentracao.md" buttonLabel="Ajuda" />
                     </div>
                     <input
@@ -580,7 +601,7 @@ export const ToolsView: React.FC = () => {
                       onClick={() =>
                         openKeypad({
                           key: 'concValue',
-                          label: 'Concentração do Produto Fitossanitário',
+                          label: 'Concentração do Produto',
                           value: concValue,
                           unit: concUnit,
                           availableUnits: ['mL/hL', 'g/hL', '%', 'L/hL', 'kg/hL'],
@@ -647,7 +668,7 @@ export const ToolsView: React.FC = () => {
 
                   <div>
                     <div className="flex items-center justify-between mb-1.5">
-                      <label className="text-xs font-bold text-slate-700">Concentração do PF</label>
+                      <label className="text-xs font-bold text-slate-700">Concentração do Produto</label>
                       <DidacticHelp faqFile="ConcentracaoFAQConcentracao.md" buttonLabel="Ajuda" />
                     </div>
                     <input
@@ -657,7 +678,7 @@ export const ToolsView: React.FC = () => {
                       onClick={() =>
                         openKeypad({
                           key: 'concValue',
-                          label: 'Concentração do PF',
+                          label: 'Concentração do Produto',
                           value: concValue,
                           unit: concUnit,
                           availableUnits: ['mL/hL', 'g/hL', '%', 'L/hL', 'kg/hL'],

@@ -14,6 +14,7 @@
 
 import React from 'react';
 import { AlertCircle, AlertTriangle } from 'lucide-react';
+import { useLanguage } from '../../../context/LanguageContext.tsx';
 import type { CalculatorFieldDefinition } from './types.ts';
 import { DidacticHelp, type FAQFileType } from '../../concentracao/DidacticHelp.tsx';
 
@@ -43,6 +44,8 @@ export const CalculatorInputField: React.FC<CalculatorInputFieldProps> = ({
   error,
   warning
 }) => {
+  const { t } = useLanguage();
+
   // Formatação amigável para exibição pt-PT
   const formatDisplayValue = (val: number | string) => {
     if (typeof val === 'number') {
@@ -223,7 +226,7 @@ export const CalculatorInputField: React.FC<CalculatorInputFieldProps> = ({
       {!error && warning && (
         <p id={`${field.id}-warning`} className="text-xs font-semibold text-amber-600 flex items-center gap-1 mt-1 animate-fade-in">
           <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
-          <span>{warning}</span>
+          <span>{t(warning, warning)}</span>
         </p>
       )}
     </div>
