@@ -295,12 +295,14 @@ export const ToolsView: React.FC = () => {
       navigate(found.caminho);
     } else {
       setSearchParams({ tool: toolId });
+      window.scrollTo(0, 0);
     }
   };
 
   // Voltar ao catálogo principal de Ferramentas
   const handleBackToCatalog = () => {
     setSearchParams({});
+    window.scrollTo(0, 0);
   };
 
   // Filtro Dinâmico do Catálogo de Ferramentas

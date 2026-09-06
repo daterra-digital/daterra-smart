@@ -21,6 +21,7 @@ import { ProjetoAgrosmartView } from './views/ProjetoAgrosmartView';
 import { AboutView } from './views/AboutView';
 import { HelpView } from './views/HelpView';
 import { IosInstallPrompt } from './components/IosInstallPrompt';
+import { ScrollToTop } from './components/ScrollToTop';
 import { initGA, trackPageView } from './lib/analytics';
 
 // Inicialização única do Google Analytics 4
@@ -80,6 +81,9 @@ export const AppContent: React.FC = () => {
 
   return (
     <>
+      {/* Reposiciona o scroll no topo em qualquer transição de rota ou parâmetros */}
+      <ScrollToTop />
+
       {/* Pop-up inteligente de aviso de instalação PWA exclusivo para dispositivos iOS */}
       <IosInstallPrompt />
 

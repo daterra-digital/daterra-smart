@@ -2,17 +2,18 @@ name: Deploy DATERRA Smart to GitHub Pages
 
 on:
   push:
-    branches:
-      - main
+    branches: ['main']
   workflow_dispatch:
 
+# Permissões necessárias para autenticação OIDC e publicação no GitHub Pages
 permissions:
   contents: read
   pages: write
   id-token: write
 
+# Permite apenas um deploy simultâneo, ignorando execuções em fila
 concurrency:
-  group: "pages"
+  group: 'pages'
   cancel-in-progress: true
 
 jobs:
@@ -21,31 +22,27 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout Código
+      - name: Checkout do Repositório
         uses: actions/checkout@v4
 
-      - name: Instalar Node.js 20
+      - name: Configurar Ambiente Node.js (v20)
         uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: 'npm'
 
-      - name: Instalar Dependências
+      - name: Configurar GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Instalar Dependências Limpas
         run: npm ci
 
       - name: Compilar Aplicação (Vite Build)
         run: npm run build
-        env:
-          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
-          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
-          VITE_TURNSTILE_SITE_KEY: ${{ secrets.VITE_TURNSTILE_SITE_KEY || vars.VITE_TURNSTILE_SITE_KEY || '0x4AAAAAAEoCu91rh6Qlrb0K' }}
-          VITE_GA_MEASUREMENT_ID: ${{ secrets.VITE_GA_MEASUREMENT_ID || vars.VITE_GA_MEASUREMENT_ID || 'G-8XT304Y480' }}
 
-      - name: Configurar GitHub Pages
-        uses: actions/configure-pages@v5
-
-      - name: Enviar Artefacto (Pasta dist)
+      - name: Upload do Artefato de Build (dist)
         uses: actions/upload-pages-artifact@v3
         with:
           path: './dist'

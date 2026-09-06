@@ -43,6 +43,11 @@ if ('serviceWorker' in navigator) {
   });
 }
 
+// Desativar a restauração automática de scroll nativa do browser em SPAs/PWAs
+if ('scrollRestoration' in window.history) {
+  window.history.scrollRestoration = 'manual';
+}
+
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <App />
