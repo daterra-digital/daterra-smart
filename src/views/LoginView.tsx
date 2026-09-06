@@ -190,7 +190,6 @@ export const LoginView: React.FC = () => {
                 siteKey={siteKey}
                 onSuccess={(token) => {
                   setCaptchaToken(token);
-                  setError('');
                 }}
                 onError={() => {
                   setError('Falha na validação de segurança. Por favor tente novamente.');

@@ -120,27 +120,57 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return { error: 'Por favor introduza um endereço de email válido.' };
       }
 
-      const { error } = await supabase.auth.signInWithOtp({
-        email: cleanEmail,
-        options: {
-          shouldCreateUser: true,
+      const { data, error } = await supabase.functions.invoke('send-otp', {
+        body: {
+          email: cleanEmail,
+          action: 'magiclink',
           ...(captchaToken ? { captchaToken } : {})
         }
       });
 
       if (error) {
-        if (error.status === 429) {
-          return { error: 'Demasiadas tentativas de envio. Por favor aguarde um momento antes de tentar novamente.' };
+        console.error('❌ [sendOtp] Erro ao invocar Edge Function send-otp:', error);
+
+        let detailedMessage = '';
+
+        // Tenta extrair a mensagem de erro retornada no corpo da resposta HTTP da Edge Function
+        if ('context' in error && error.context) {
+          try {
+            const ctx = error.context as Response;
+            const cloned = ctx.clone ? ctx.clone() : ctx;
+            const body = await cloned.json();
+            detailedMessage = body?.error || body?.message || body?.details || '';
+          } catch {
+            try {
+              const text = await (error.context as Response).text();
+              if (text) detailedMessage = text;
+            } catch {
+              // fallback silencioso
+            }
+          }
         }
-        if (error.message?.toLowerCase().includes('captcha')) {
-          return { error: 'Falha na validação do CAPTCHA. Por favor tente novamente.' };
+
+        if (detailedMessage) {
+          return { error: detailedMessage };
         }
-        return { error: 'Não foi possível enviar o código de acesso. Verifique o email e tente novamente.' };
+
+        if (error.name === 'FunctionsFetchError' || error.message?.includes('Failed to send')) {
+          return {
+            error: 'Não foi possível conectar à Edge Function "send-otp". Verifique se a função está deployada no Supabase com CORS e --no-verify-jwt.'
+          };
+        }
+
+        return { error: error.message || 'Não foi possível enviar o código de acesso. Tente novamente.' };
+      }
+
+      if (data?.error) {
+        return { error: data.error };
       }
 
       return { error: null };
-    } catch {
-      return { error: 'Ocorreu um erro inesperado ao solicitar o código. Tente novamente.' };
+    } catch (err: any) {
+      console.error('❌ [sendOtp] Exceção inesperada:', err);
+      return { error: err?.message || 'Ocorreu um erro inesperado ao solicitar o código. Tente novamente.' };
     }
   };
 
