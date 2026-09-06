@@ -437,7 +437,7 @@
     }
   },
   "calculatorActionBar": {
-    "save": "Salva nella cronologia",
+    "save": "Salva cronologia",
     "saveCalculation": "Salva calcolo",
     "history": "Cronologia",
     "openHistory": "Apri cronologia",

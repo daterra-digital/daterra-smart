@@ -14,7 +14,7 @@
  */
 
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
-import { CheckCircle2, AlertCircle, Calculator, Pencil, Info } from 'lucide-react';
+import { CheckCircle2, AlertCircle, Pencil, Info } from 'lucide-react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../../../db/db.ts';
 import { useAuth } from '../../../context/AuthContext.tsx';
@@ -121,7 +121,7 @@ export const UniversalCalculatorTemplate: React.FC<UniversalCalculatorTemplatePr
   initialInputs,
   importedNotice,
   badgeMode,
-  saveButtonLabel = 'Guardar Cálculo no Histórico',
+  saveButtonLabel,
   onSaveCalculation,
   onOpenResultHelp,
   onExecuteTransfer
@@ -1149,7 +1149,7 @@ export const UniversalCalculatorTemplate: React.FC<UniversalCalculatorTemplatePr
       {isPilotCalculator ? (
         !isDesktop ? (
           /* Mobile View: Estritamente ZERO inputs no DOM e ZERO duplicação de resultados */
-          <div className="space-y-4">
+          <div className="space-y-2.5 sm:space-y-3">
             {/* Assistência Agronómica de Densidade de Copa (calc_volume_calda_trv) em Mobile */}
             {isVolumeCaldaTrv && (
               <CanopyDensitySelector
@@ -1180,7 +1180,7 @@ export const UniversalCalculatorTemplate: React.FC<UniversalCalculatorTemplatePr
             )}
             {/* Seletor de Modo Mobile (se existirem modos declarados) */}
             {definition.modes && definition.modes.length > 1 && (
-              <div className="bg-white rounded-2xl p-3 border border-slate-200/80 shadow-xs flex items-center justify-between gap-2">
+              <div className="bg-white rounded-2xl p-2 sm:p-2.5 border border-slate-200/80 shadow-xs flex items-center justify-between gap-2">
                 <span className="text-xs font-bold text-slate-600 shrink-0">Modo:</span>
                 <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none">
                   {definition.modes.map((m) => {
@@ -1206,100 +1206,76 @@ export const UniversalCalculatorTemplate: React.FC<UniversalCalculatorTemplatePr
 
             {/* Faixa de Notificação de Transferência Importada em Mobile */}
             {activeImportedNotice && (
-              <div className="p-3.5 bg-emerald-50 border border-emerald-200 rounded-2xl flex items-start gap-2.5 text-xs text-emerald-900 animate-fade-in">
+              <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-2xl flex items-start gap-2.5 text-xs text-emerald-900 animate-fade-in">
                 <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
                 <span className="font-semibold leading-relaxed">{activeImportedNotice}</span>
               </div>
             )}
 
-            {/* Cartão de Resumo de Valores Atribuídos (Apenas Leitura com Botão Introduzir Valores) */}
-            {(() => {
-              const hasMissingRequired = currentActiveFields.some(
-                (f) => f.required && (fieldValues[f.id] === '' || fieldValues[f.id] === undefined)
-              );
+            {/* Cartão de Resumo de Valores Atribuídos (Apenas Leitura Clicável) */}
+            <div className="bg-white rounded-2xl p-3 sm:p-4 border border-slate-200/80 shadow-soft space-y-2">
+              <div className="border-b border-slate-100 pb-2">
+                <h3 className="text-xs sm:text-sm font-black text-slate-800 tracking-tight">
+                  {t('unifiedKeypad.inputSummaryTitle', 'Valores Introduzidos')}
+                </h3>
+              </div>
 
-              return (
-                <div className="bg-white rounded-3xl p-4 sm:p-5 border border-slate-200/80 shadow-soft space-y-3">
-                  <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
-                    <div>
-                      <h3 className="text-sm font-black text-slate-800 tracking-tight">
-                        {t('unifiedKeypad.inputSummaryTitle', 'Valores Introduzidos')}
-                      </h3>
-                      {hasMissingRequired && (
-                        <p className="text-[11px] text-slate-500">
-                          {t('unifiedKeypad.inputSummarySubtitle', 'Toque num valor para o introduzir ou alterar.')}
-                        </p>
-                      )}
-                    </div>
+              {/* Lista de Campos de Leitura */}
+              <div className="space-y-1.5">
+                {currentActiveFields.map((f) => {
+                  const rawVal = fieldValues[f.id];
+                  const unit = fieldUnits[f.id] || f.defaultUnit;
+                  const displayVal =
+                    rawVal !== '' && rawVal !== undefined
+                      ? formatNumberForDisplay(Number(rawVal))
+                      : '—';
+                  const hasError = validation.errors && validation.errors[f.id];
+                  const hasWarning = validation.warnings && validation.warnings[f.id];
+
+                  return (
                     <button
+                      key={f.id}
                       type="button"
-                      onClick={() => handleOpenUnifiedKeypad()}
-                      aria-label={t('unifiedKeypad.enterValues', 'Introduzir Valores')}
-                      className="min-h-[48px] px-3.5 py-2 rounded-xl bg-[#114037] hover:bg-[#175348] active:scale-95 text-white text-xs font-bold flex items-center gap-1.5 shadow-xs transition-all cursor-pointer focus-visible:outline-2 focus-visible:outline-[#3CA64C]"
+                      onClick={() => handleOpenUnifiedKeypad(f.id)}
+                      aria-label={`${t('unifiedKeypad.edit', 'Editar')} ${f.label}`}
+                      className={`w-full min-h-[44px] sm:min-h-[48px] px-3 py-2 rounded-xl border flex items-center justify-between text-left transition-all cursor-pointer touch-target focus-visible:outline-2 focus-visible:outline-[#114037] ${
+                        hasError
+                          ? 'border-rose-300 bg-rose-50/60'
+                          : hasWarning
+                          ? 'border-amber-300 bg-amber-50/60'
+                          : 'border-slate-200 bg-slate-50/70 hover:bg-slate-100 active:bg-slate-200/70'
+                      }`}
                     >
-                      <Calculator className="w-3.5 h-3.5 text-[#3CA64C]" aria-hidden="true" />
-                      <span>{t('unifiedKeypad.enterValues', 'Introduzir Valores')}</span>
-                    </button>
-                  </div>
+                      <div className="min-w-0 flex-1 pr-2">
+                        <span className="text-xs sm:text-sm font-semibold text-slate-800 block truncate">
+                          {f.label}
+                        </span>
+                        {hasError && (
+                          <span className="text-[10.5px] font-medium text-rose-600 block truncate mt-0.5">
+                            {hasError}
+                          </span>
+                        )}
+                      </div>
 
-                  {/* Lista de Campos de Leitura */}
-                  <div className="space-y-2">
-                    {currentActiveFields.map((f) => {
-                      const rawVal = fieldValues[f.id];
-                      const unit = fieldUnits[f.id] || f.defaultUnit;
-                      const displayVal =
-                        rawVal !== '' && rawVal !== undefined
-                          ? formatNumberForDisplay(Number(rawVal))
-                          : '—';
-                      const hasError = validation.errors && validation.errors[f.id];
-                      const hasWarning = validation.warnings && validation.warnings[f.id];
-
-                      return (
-                        <button
-                          key={f.id}
-                          type="button"
-                          onClick={() => handleOpenUnifiedKeypad(f.id)}
-                          aria-label={`${t('unifiedKeypad.edit', 'Editar')} ${f.label}`}
-                          className={`w-full min-h-[48px] px-3.5 py-2.5 rounded-2xl border flex items-center justify-between text-left transition-all cursor-pointer focus-visible:outline-2 focus-visible:outline-[#114037] ${
-                            hasError
-                              ? 'border-rose-300 bg-rose-50/60'
-                              : hasWarning
-                              ? 'border-amber-300 bg-amber-50/60'
-                              : 'border-slate-200 bg-slate-50/70 hover:bg-slate-100 active:bg-slate-200/70'
-                          }`}
+                      <div className="flex items-center gap-2 shrink-0">
+                        <div className="text-right">
+                          <span className="text-sm sm:text-base font-extrabold font-mono-numbers text-slate-900">
+                            {displayVal}
+                          </span>
+                          <span className="ml-1 text-xs font-bold text-[#1D734B]">{unit}</span>
+                        </div>
+                        <div
+                          aria-hidden="true"
+                          className="w-7 h-7 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-slate-600 hover:text-slate-900 shadow-2xs"
                         >
-                          <div className="min-w-0 flex-1 pr-3">
-                            <span className="text-xs sm:text-sm font-semibold text-slate-800 block truncate">
-                              {f.label}
-                            </span>
-                            {hasError && (
-                              <span className="text-[11px] font-medium text-rose-600 block truncate mt-0.5">
-                                {hasError}
-                              </span>
-                            )}
-                          </div>
-
-                          <div className="flex items-center gap-2.5 shrink-0">
-                            <div className="text-right">
-                              <span className="text-sm sm:text-base font-extrabold font-mono-numbers text-slate-900">
-                                {displayVal}
-                              </span>
-                              <span className="ml-1 text-xs font-bold text-[#1D734B]">{unit}</span>
-                            </div>
-                            <div
-                              aria-hidden="true"
-                              className="w-8 h-8 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-slate-600 hover:text-slate-900 shadow-2xs"
-                            >
-                              <Pencil className="w-3.5 h-3.5 stroke-[2.2]" aria-hidden="true" />
-                            </div>
-                          </div>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              );
-            })()}
+                          <Pencil className="w-3 h-3 stroke-[2.2]" aria-hidden="true" />
+                        </div>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
 
             {/* Caixa Dedicada de Notas de Validação Agronómica e Técnica */}
             {validation.warnings && Object.keys(validation.warnings).length > 0 && (
@@ -1528,18 +1504,6 @@ export const UniversalCalculatorTemplate: React.FC<UniversalCalculatorTemplatePr
                     )}
                 </div>
               )}
-
-              <div className="flex items-center justify-end px-1">
-                <button
-                  type="button"
-                  onClick={() => handleOpenUnifiedKeypad()}
-                  aria-label={t('unifiedKeypad.enterValues', 'Introduzir Valores')}
-                  className="min-h-[48px] px-3.5 py-2 rounded-xl bg-white border border-[#114037]/20 hover:border-[#114037] text-[#114037] text-xs font-bold flex items-center gap-1.5 shadow-2xs hover:bg-[#114037]/5 active:scale-95 transition-all cursor-pointer focus-visible:outline-2 focus-visible:outline-[#114037]"
-                >
-                  <Calculator className="w-4 h-4 text-[#1D734B]" aria-hidden="true" />
-                  <span>{t('unifiedKeypad.enterValues', 'Introduzir Valores')}</span>
-                </button>
-              </div>
 
               <CalculatorInputsPanel
                 title={definition.title}

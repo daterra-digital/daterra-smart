@@ -12,7 +12,7 @@ import type {
 export const DaterraUnifiedKeypadModal: React.FC<DaterraUnifiedKeypadModalProps> = ({
   isOpen,
   title,
-  subtitle,
+  subtitle: _subtitle,
   modes,
   activeModeId: initialModeId,
   onModeChange,
@@ -448,12 +448,11 @@ export const DaterraUnifiedKeypadModal: React.FC<DaterraUnifiedKeypadModalProps>
         className="w-full h-dvh sm:h-auto sm:max-h-[92vh] sm:max-w-[560px] bg-[#114037] text-white flex flex-col sm:rounded-3xl shadow-2xl border border-[#1D734B]/50 overflow-hidden keypad-modal-container"
       >
         {/* Cabeçalho do Modal com Botão X (Cancelar Seguro) */}
-        <header className="px-3.5 py-1.5 sm:px-5 sm:py-2.5 bg-[#0d332c] border-b border-[#1D734B]/40 flex items-center justify-between shrink-0 min-h-[52px]">
+        <header className="px-3.5 py-2 sm:px-4 sm:py-2.5 bg-[#0d332c] border-b border-[#1D734B]/40 flex items-center justify-between shrink-0 min-h-[48px]">
           <div className="min-w-0 flex-1 mr-2">
-            <h2 id="unified-keypad-title" className="text-sm sm:text-base font-black tracking-tight text-white truncate">
+            <h2 id="unified-keypad-title" className="text-base sm:text-lg font-bold tracking-tight text-white truncate">
               {title}
             </h2>
-            {subtitle && <p className="text-[11px] text-[#3CA64C] font-semibold truncate">{subtitle}</p>}
           </div>
 
           <button

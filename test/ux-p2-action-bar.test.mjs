@@ -131,16 +131,16 @@ describe('Correção UX P2: Barra Contextual Inferior de Ações (CalculatorActi
     assert.strictEqual(resDebito.debito_por_bico_l_min, 1.2);
   });
 
-  test('9. Rótulo "Guardar no Histórico" rigoroso em todos os 8 idiomas', () => {
+  test('9. Rótulo "Guardar Histórico" rigoroso em todos os 8 idiomas', () => {
     const expected = {
-      pt: 'Guardar no Histórico',
-      br: 'Salvar no Histórico',
-      en: 'Save to History',
-      es: 'Guardar en Historial',
-      fr: "Enregistrer dans l'historique",
-      it: 'Salva nella cronologia',
-      de: 'In Verlauf speichern',
-      el: 'Αποθήκευση στο ιστορικό'
+      pt: 'Guardar Histórico',
+      br: 'Salvar Histórico',
+      en: 'Save History',
+      es: 'Guardar Historial',
+      fr: "Enregistrer l'historique",
+      it: 'Salva cronologia',
+      de: 'Verlauf speichern',
+      el: 'Αποθήκευση ιστορικού'
     };
 
     for (const [lang, expText] of Object.entries(expected)) {

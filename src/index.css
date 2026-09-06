@@ -127,11 +127,11 @@ body {
 
 /* Layout Tokens & Ergonomia Mobile-First / Safe Area */
 :root {
-  --bottom-nav-content-height: 4rem; /* 64px */
+  --bottom-nav-content-height: 5rem; /* 80px (antes: 4rem/64px) */
   --bottom-safe-area: env(safe-area-inset-bottom, 0px);
   --bottom-nav-total-height: calc(var(--bottom-nav-content-height) + var(--bottom-safe-area));
   --calculator-action-bar-height: 4.25rem; /* ~68px */
-  --calculator-mobile-bottom-offset: calc(var(--bottom-nav-total-height) + var(--calculator-action-bar-height) + 1rem);
+  --calculator-mobile-bottom-offset: calc(var(--calculator-action-bar-height) + var(--bottom-safe-area) + 1rem);
   --calculator-tablet-bottom-offset: calc(var(--calculator-action-bar-height) + var(--bottom-safe-area) + 1rem);
   --mobile-content-bottom-offset: calc(var(--bottom-nav-total-height) + 1rem);
 }
@@ -153,13 +153,13 @@ body {
   position: fixed;
   left: 0;
   right: 0;
-  bottom: var(--bottom-nav-total-height);
+  bottom: 0;
   z-index: 25;
 }
 
 @media (min-width: 768px) {
   .calculator-action-bar-position {
-    bottom: var(--bottom-safe-area, 0px);
+    bottom: 0;
   }
 }
 

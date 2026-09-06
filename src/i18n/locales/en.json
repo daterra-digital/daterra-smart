@@ -291,7 +291,7 @@
     }
   },
   "calculatorActionBar": {
-    "save": "Save to History",
+    "save": "Save History",
     "saveCalculation": "Save Calculation",
     "history": "History",
     "openHistory": "Open History",

@@ -13,6 +13,7 @@
 
 import React from 'react';
 import { Save } from 'lucide-react';
+import { useLanguage } from '../../../context/LanguageContext.tsx';
 import type { CalculatorResultDefinition } from './types.ts';
 import { CalculatorResultCard } from './CalculatorResultCard.tsx';
 
@@ -52,9 +53,10 @@ export const CalculatorResultsPanel: React.FC<CalculatorResultsPanelProps> = ({
   outputValues,
   onSave,
   isSaving = false,
-  saveButtonLabel = 'Guardar Cálculo no Histórico',
+  saveButtonLabel,
   onOpenResultHelp
 }) => {
+  const { t } = useLanguage();
   // Configuração da grelha: 1 coluna se houver 1 resultado, 2 colunas se houver mais
   const gridColsClass = results.length === 1 ? 'grid-cols-1' : 'grid-cols-1 sm:grid-cols-2';
 
@@ -107,7 +109,7 @@ export const CalculatorResultsPanel: React.FC<CalculatorResultsPanelProps> = ({
         className="w-full py-4 bg-daterra-accent hover:bg-daterra-accent/90 disabled:opacity-50 text-white font-extrabold text-sm rounded-2xl transition-all shadow-xl shadow-daterra-accent/30 flex items-center justify-center gap-2 active:scale-95 touch-target cursor-pointer"
       >
         <Save className="w-5 h-5 shrink-0" />
-        <span>{saveButtonLabel}</span>
+        <span>{saveButtonLabel || t('calculatorActionBar.save', 'Guardar Histórico')}</span>
       </button>
     </section>
   );

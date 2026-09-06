@@ -45,7 +45,7 @@ export const BottomNavigationBar: React.FC = () => {
       <div
         className="grid grid-cols-4 items-center w-full px-1"
         style={{
-          height: 'var(--bottom-nav-content-height, 4rem)'
+          height: 'var(--bottom-nav-content-height, 5rem)'
         }}
       >
         {navItems.map((item) => {

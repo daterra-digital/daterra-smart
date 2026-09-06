@@ -58,11 +58,12 @@ describe('Decisao de UX: Acessos ao DaterraUnifiedKeypad e Resumo de Valores', (
     assert.ok(!stickyAside.includes('handleOpenUnifiedKeypad'), 'Sticky result header nao deve acionar keypad');
   });
 
-  test('4. O cartao "Valores Introduzidos" contem o botao "Introduzir Valores" e linhas com foco', () => {
+  test('4. O cartao "Valores Introduzidos" contem apenas o titulo e linhas de campos clicaveis sem botao redundante', () => {
     const templateContent = fs.readFileSync(universalTemplatePath, 'utf8');
-    assert.ok(templateContent.includes("t('unifiedKeypad.enterValues', 'Introduzir Valores')"), 'Cartao deve ter botao com enterValues');
     assert.ok(templateContent.includes("t('unifiedKeypad.inputSummaryTitle', 'Valores Introduzidos')"), 'Cartao deve ter inputSummaryTitle');
-    assert.ok(templateContent.includes("t('unifiedKeypad.inputSummarySubtitle', 'Toque num valor para o introduzir ou alterar.')"), 'Cartao deve ter inputSummarySubtitle');
+    assert.ok(!templateContent.includes("t('unifiedKeypad.enterValues', 'Introduzir Valores')"), 'Cartao nao deve ter botao redundante Introduzir Valores');
+    assert.ok(!templateContent.includes("t('unifiedKeypad.inputSummarySubtitle'"), 'Cartao nao deve ter subtitulo descritivo redundante');
+    assert.ok(templateContent.includes("handleOpenUnifiedKeypad(f.id)"), 'Cada linha de campo deve acionar o keypad diretamente');
   });
 
   test('5. Formulas agronomicas e pure functions permanecem 100% inalteradas', () => {

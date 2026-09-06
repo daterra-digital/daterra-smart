@@ -45,6 +45,9 @@ export const PrivateLayout: React.FC = () => {
   };
 
   const isActive = (path: string) => location.pathname === path;
+  const isCalculatorActive =
+    location.pathname.startsWith('/ferramentas/') ||
+    (location.pathname === '/ferramentas' && new URLSearchParams(location.search).has('tool'));
 
   return (
     <div className="min-h-screen flex flex-col bg-[#F2F2F2]">
@@ -265,17 +268,23 @@ export const PrivateLayout: React.FC = () => {
       </header>
 
       {/* Conteúdo Principal */}
-      <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full mobile-content-spacing md:pb-8">
+      <main
+        className={`flex-1 p-3 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full ${
+          isCalculatorActive ? 'calculator-content-spacing' : 'mobile-content-spacing md:pb-8'
+        }`}
+      >
         <Outlet />
       </main>
 
-      {/* Rodapé Global com margem compensatória para não sobrepor a barra móvel */}
-      <div className="mobile-content-spacing md:pb-0">
-        <Footer />
-      </div>
+      {/* Rodapé Global (oculto em calculadoras ativas) */}
+      {!isCalculatorActive && (
+        <div className="mobile-content-spacing md:pb-0">
+          <Footer />
+        </div>
+      )}
 
-      {/* Barra de Navegação Inferior Móvel Fixa */}
-      <BottomNavigationBar />
+      {/* Barra de Navegação Inferior Móvel Fixa (oculta em calculadoras ativas) */}
+      {!isCalculatorActive && <BottomNavigationBar />}
     </div>
   );
 };

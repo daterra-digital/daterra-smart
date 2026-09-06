@@ -83,7 +83,7 @@ export const CalculatorActionBar: React.FC<CalculatorActionBarProps> = ({
             className={`w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0 ${isSaveActive ? 'text-[#3CA64C]' : 'text-slate-400'}`}
             aria-hidden="true"
           />
-          <span className="truncate">{saveButtonLabel || t('calculatorActionBar.save', 'Guardar no Histórico')}</span>
+          <span className="truncate">{saveButtonLabel || t('calculatorActionBar.save', 'Guardar Histórico')}</span>
         </button>
 
         {/* 2. Botão Histórico: ~25% da largura (Ação Secundária) */}

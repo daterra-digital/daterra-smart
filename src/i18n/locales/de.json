@@ -437,7 +437,7 @@
     }
   },
   "calculatorActionBar": {
-    "save": "In Verlauf speichern",
+    "save": "Verlauf speichern",
     "saveCalculation": "Berechnung speichern",
     "history": "Verlauf",
     "openHistory": "Verlauf öffnen",
