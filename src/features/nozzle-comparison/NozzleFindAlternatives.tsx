@@ -2,6 +2,7 @@ import React from 'react';
 import {
   SlidersHorizontal,
   ChevronDown,
+  ChevronUp,
   CheckCircle2,
   AlertCircle,
   RotateCcw,
@@ -17,17 +18,18 @@ import {
   NOZZLES_DATABASE,
   NOZZLES_BY_ID,
   AVAILABLE_BRANDS,
-  getGroupedModelsForBrand
+  getGroupedModelsForBrand,
+  getVariantsForModel
 } from './nozzleComparison.data';
 import {
   findNozzleAlternatives,
   formatPt,
-  calculateNozzleFlow
+  calculateNozzleFlow,
+  sortNozzlesByNominalFlow,
+  getNozzleColorPresentation
 } from './nozzleComparison.calculations';
 import { parsePortugueseDecimal } from './nozzleComparison.validation';
-import { NozzleSelector } from './NozzleSelector';
 import { PressureControl } from './PressureControl';
-import { TotalBoomFlowSection } from './TotalBoomFlowSection';
 import { NozzleColorBadge } from './NozzleColorBadge';
 
 export interface NozzleFindAlternativesProps {
@@ -45,10 +47,50 @@ export const NozzleFindAlternatives: React.FC<NozzleFindAlternativesProps> = ({
   const [entryMode, setEntryMode] = React.useState<'by_nozzle' | 'by_flow'>('by_nozzle');
 
   // Estado do Bico de Referência
-  const [refBrand, setRefBrand] = React.useState<string>('Albuz');
-  const [refModel, setRefModel] = React.useState<string>('ATR');
-  const [refSprayAngle, setRefSprayAngle] = React.useState<string | number>(80);
+  const [refBrand, setRefBrand] = React.useState<string>(() => {
+    const init = NOZZLES_BY_ID.get(initialRefNozzleId);
+    return init?.brand || 'Albuz';
+  });
+  const [refModel, setRefModel] = React.useState<string>(() => {
+    const init = NOZZLES_BY_ID.get(initialRefNozzleId);
+    return init?.model || 'ATR';
+  });
+  const [refSwirlPlate, setRefSwirlPlate] = React.useState<string>(() => {
+    const init = NOZZLES_BY_ID.get(initialRefNozzleId);
+    return init?.swirlPlate || '';
+  });
+  const [refDisc, setRefDisc] = React.useState<string>(() => {
+    const init = NOZZLES_BY_ID.get(initialRefNozzleId);
+    return init?.disc || '';
+  });
   const [refNozzleId, setRefNozzleId] = React.useState<string>(initialRefNozzleId);
+  const [isColorMenuOpen, setIsColorMenuOpen] = React.useState<boolean>(false);
+  const colorMenuRef = React.useRef<HTMLDivElement>(null);
+
+  // Fechar menu de cores ao clicar fora
+  React.useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (colorMenuRef.current && !colorMenuRef.current.contains(e.target as Node)) {
+        setIsColorMenuOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Sincronizar com initialRefNozzleId se mudar
+  React.useEffect(() => {
+    if (initialRefNozzleId && initialRefNozzleId !== refNozzleId) {
+      const n = NOZZLES_BY_ID.get(initialRefNozzleId);
+      if (n) {
+        setRefBrand(n.brand);
+        setRefModel(n.model);
+        setRefSwirlPlate(n.swirlPlate || '');
+        setRefDisc(n.disc || '');
+        setRefNozzleId(n.id);
+      }
+    }
+  }, [initialRefNozzleId]);
 
   // Estado do Débito Desejado Manual (L/min)
   const [manualFlowInput, setManualFlowInput] = React.useState<string>('0,80');
@@ -75,19 +117,151 @@ export const NozzleFindAlternatives: React.FC<NozzleFindAlternativesProps> = ({
   const [nozzleBId, setNozzleBId] = React.useState<string | null>(null);
   const [selectionNotice, setSelectionNotice] = React.useState<string>('');
 
+  // Paginação / Limite de alternativas visíveis (6 cartões por página)
+  const [visibleCount, setVisibleCount] = React.useState<number>(6);
+
   // Bico de Referência Resolvido
   const refNozzle: Nozzle | undefined = React.useMemo(() => {
     return NOZZLES_BY_ID.get(refNozzleId);
   }, [refNozzleId]);
 
+  // Modelos agrupados por tipo para a marca de referência
+  const groupedRefModels = React.useMemo(() => {
+    return getGroupedModelsForBrand(refBrand);
+  }, [refBrand]);
+
+  // Variantes do modelo de referência
+  const refModelVariants = React.useMemo(() => {
+    if (!refBrand || !refModel) return [];
+    return getVariantsForModel(refBrand, refModel);
+  }, [refBrand, refModel]);
+
+  const refVariants = React.useMemo(() => {
+    if (!refModelVariants || refModelVariants.length === 0) return [];
+    return [...refModelVariants].sort(sortNozzlesByNominalFlow);
+  }, [refModelVariants]);
+
+  // Determinar se o modelo é modular (Difusor + Disco / Pastilha)
+  const isModular = React.useMemo(() => {
+    return refVariants.some(v => Boolean(v.disc || v.swirlPlate));
+  }, [refVariants]);
+
+  // Difusores para modelos modulares
+  const availableRefSwirlPlates = React.useMemo(() => {
+    if (!isModular) return [];
+    const set = new Set<string>();
+    refVariants.forEach(v => {
+      if (v.swirlPlate) set.add(v.swirlPlate);
+    });
+    return Array.from(set).sort();
+  }, [refVariants, isModular]);
+
+  // Discos para modelos modulares
+  const availableRefDiscs = React.useMemo(() => {
+    if (!isModular) return [];
+    const set = new Set<string>();
+    const subset = refSwirlPlate
+      ? refVariants.filter(v => v.swirlPlate === refSwirlPlate)
+      : refVariants;
+    subset.forEach(v => {
+      if (v.disc) set.add(v.disc);
+    });
+    return Array.from(set).sort();
+  }, [refVariants, refSwirlPlate, isModular]);
+
+  // Opções para 'Cor do Fabricante' em modelos não-modulares
+  const refColorOptions = React.useMemo(() => {
+    if (isModular || refVariants.length === 0) return [];
+    const map = new Map<string, Nozzle>();
+    refVariants.forEach(v => {
+      const key = v.color ? `${v.color}${v.isoCode ? ` (ISO ${v.isoCode})` : ''}` : (v.modelNorm || v.id);
+      if (!map.has(key) || (v.isTop && !map.get(key)?.isTop)) {
+        map.set(key, v);
+      }
+    });
+    return Array.from(map.values())
+      .sort(sortNozzlesByNominalFlow)
+      .map(nozzle => {
+        const pres = getNozzleColorPresentation(nozzle);
+        return {
+          id: nozzle.id,
+          label: nozzle.color || nozzle.modelNorm || 'Padrão',
+          color: nozzle.color,
+          isoCode: nozzle.isoCode,
+          nominalFlow: nozzle.nominalFlowLMin,
+          refPressure: nozzle.referencePressureBar,
+          nozzle,
+          pres
+        };
+      });
+  }, [refVariants, isModular]);
+
+  // Mudança de Marca
+  const handleRefBrandChange = (newBrand: string) => {
+    setRefBrand(newBrand);
+    const groups = getGroupedModelsForBrand(newBrand);
+    const firstModel = groups[0]?.models[0]?.model || '';
+    setRefModel(firstModel);
+    if (firstModel) {
+      const vars = getVariantsForModel(newBrand, firstModel).sort(sortNozzlesByNominalFlow);
+      if (vars.length > 0) {
+        const mod = vars.some(v => Boolean(v.disc || v.swirlPlate));
+        if (mod) {
+          setRefSwirlPlate(vars[0].swirlPlate || '');
+          setRefDisc(vars[0].disc || '');
+        } else {
+          setRefSwirlPlate('');
+          setRefDisc('');
+        }
+        setRefNozzleId(vars[0].id);
+      } else {
+        setRefNozzleId('');
+        setRefSwirlPlate('');
+        setRefDisc('');
+      }
+    } else {
+      setRefNozzleId('');
+      setRefSwirlPlate('');
+      setRefDisc('');
+    }
+  };
+
+  // Mudança de Modelo
+  const handleRefModelChange = (newModel: string) => {
+    setRefModel(newModel);
+    const vars = getVariantsForModel(refBrand, newModel).sort(sortNozzlesByNominalFlow);
+    if (vars.length > 0) {
+      const mod = vars.some(v => Boolean(v.disc || v.swirlPlate));
+      if (mod) {
+        setRefSwirlPlate(vars[0].swirlPlate || '');
+        setRefDisc(vars[0].disc || '');
+      } else {
+        setRefSwirlPlate('');
+        setRefDisc('');
+      }
+      setRefNozzleId(vars[0].id);
+    } else {
+      setRefNozzleId('');
+      setRefSwirlPlate('');
+      setRefDisc('');
+    }
+  };
+
+  // Débito Calculado do Bico de Referência (quando no modo by_nozzle)
+  const refCalculatedFlow = React.useMemo(() => {
+    if (entryMode === 'by_nozzle' && refNozzle) {
+      return calculateNozzleFlow(refNozzle, workingPressureBar);
+    }
+    return undefined;
+  }, [entryMode, refNozzle, workingPressureBar]);
+
   // Débito Alvo (L/min)
   const targetFlowLMin = React.useMemo(() => {
-    if (entryMode === 'by_nozzle' && refNozzle) {
-      const calc = calculateNozzleFlow(refNozzle, workingPressureBar);
-      return calc.flowLMin;
+    if (entryMode === 'by_nozzle' && refCalculatedFlow) {
+      return refCalculatedFlow.flowLMin;
     }
     return parsePortugueseDecimal(manualFlowInput) || 0.80;
-  }, [entryMode, refNozzle, workingPressureBar, manualFlowInput]);
+  }, [entryMode, refCalculatedFlow, manualFlowInput]);
 
   // Modelos agrupados por tipo para o dropdown de filtro
   const groupedModelsForFilter = React.useMemo(() => {
@@ -212,6 +386,47 @@ export const NozzleFindAlternatives: React.FC<NozzleFindAlternativesProps> = ({
     if (currentB !== nozzleBId) setNozzleBId(currentB);
   }, [searchResults]);
 
+  // Repor contagem inicial de 6 cartões quando a pesquisa é alterada
+  React.useEffect(() => {
+    setVisibleCount(6);
+  }, [searchResults]);
+
+  // Resultados a exibir: ordenação prioritária e preservação de bicos selecionados
+  const displayedResults = React.useMemo(() => {
+    if (searchResults.length <= visibleCount) {
+      return searchResults;
+    }
+
+    if (!nozzleAId && !nozzleBId) {
+      return searchResults.slice(0, visibleCount);
+    }
+
+    // Identificar itens selecionados
+    const selectedItems = searchResults.filter(
+      r => r.nozzle.id === nozzleAId || r.nozzle.id === nozzleBId
+    );
+
+    // Itens não selecionados na ordem prioritária
+    const unselectedItems = searchResults.filter(
+      r => r.nozzle.id !== nozzleAId && r.nozzle.id !== nozzleBId
+    );
+
+    // Se todos os selecionados já estão na fatia visível normal, manter a ordem prioritária intacta
+    const normalSlice = searchResults.slice(0, visibleCount);
+    const allSelectedInNormalSlice = selectedItems.every(item =>
+      normalSlice.some(r => r.nozzle.id === item.nozzle.id)
+    );
+
+    if (allSelectedInNormalSlice) {
+      return normalSlice;
+    }
+
+    // Se algum bico selecionado estivesse fora dos primeiros cartões,
+    // preserva os selecionados no topo dos visíveis para nunca ficarem ocultos
+    const remainingSlots = Math.max(0, visibleCount - selectedItems.length);
+    return [...selectedItems, ...unselectedItems.slice(0, remainingSlots)];
+  }, [searchResults, visibleCount, nozzleAId, nozzleBId]);
+
   // Gestão Canónica de Seleção (Bico A e Bico B)
   const handleToggleSelection = (nId: string) => {
     if (nId === nozzleAId) {
@@ -284,25 +499,25 @@ export const NozzleFindAlternatives: React.FC<NozzleFindAlternativesProps> = ({
   return (
     <div className="space-y-6 animate-fade-in">
       
-      {/* 1. SELETOR DE MODO DE ENTRADA */}
-      <div className="bg-white p-5 sm:p-6 rounded-3xl border border-slate-200 shadow-soft space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
+      {/* 1. SELETOR DE MODO DE ENTRADA: REDUZIDO EM ALTURA E NO ESTILO DE COMPARAR DOIS BICOS */}
+      <div className="bg-white p-3.5 sm:p-4 rounded-3xl border border-slate-200 shadow-soft space-y-3">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 border-b border-slate-100 pb-3">
           <div>
-            <span className="text-[10px] font-black uppercase text-daterra-primary tracking-wider">
+            <span className="text-[10px] font-black uppercase text-daterra-primary tracking-wider block">
               Objetivo de Pulverização
             </span>
-            <h2 className="text-lg font-black text-slate-900">
-              Definir débito alvo ou bico atual
+            <h2 className="text-base sm:text-lg font-black text-slate-900 leading-tight">
+              {entryMode === 'by_nozzle' ? 'Definir o bico atual' : 'Definir débito alvo'}
             </h2>
           </div>
 
-          <div className="flex items-center gap-1.5 bg-slate-100 p-1.5 rounded-2xl border border-slate-200 self-start sm:self-auto">
+          <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-2xl border border-slate-200/80 self-start sm:self-auto shrink-0">
             <button
               type="button"
               onClick={() => setEntryMode('by_nozzle')}
               className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer ${
                 entryMode === 'by_nozzle'
-                  ? 'bg-white text-daterra-primary shadow-sm'
+                  ? 'bg-white text-daterra-primary shadow-xs'
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
@@ -313,7 +528,7 @@ export const NozzleFindAlternatives: React.FC<NozzleFindAlternativesProps> = ({
               onClick={() => setEntryMode('by_flow')}
               className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer ${
                 entryMode === 'by_flow'
-                  ? 'bg-white text-daterra-primary shadow-sm'
+                  ? 'bg-white text-daterra-primary shadow-xs'
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
@@ -322,88 +537,334 @@ export const NozzleFindAlternatives: React.FC<NozzleFindAlternativesProps> = ({
           </div>
         </div>
 
-        {/* MODO A: A PARTIR DE BICO EXISTENTE */}
+        {/* MODO A: A PARTIR DE BICO EXISTENTE - APENAS MARCA, MODELO E COR DO FABRICANTE (OU DIFUSOR + DISCO) */}
         {entryMode === 'by_nozzle' ? (
-          <div className="space-y-4">
-            <p className="text-xs text-slate-500 font-medium">
-              Selecione o bico atualmente montado no seu pulverizador para procurar alternativas equivalentes.
-            </p>
-            <NozzleSelector
-              side="A"
-              title="Bico de Referência"
-              selectedBrand={refBrand}
-              selectedModel={refModel}
-              selectedSprayAngle={refSprayAngle}
-              selectedNozzleId={refNozzleId}
-              onBrandChange={brand => {
-                setRefBrand(brand);
-                setRefModel('');
-                setRefSprayAngle('');
-                setRefNozzleId('');
-              }}
-              onModelChange={model => {
-                setRefModel(model);
-                setRefSprayAngle('');
-                setRefNozzleId('');
-              }}
-              onSprayAngleChange={angle => setRefSprayAngle(angle)}
-              onNozzleChange={id => setRefNozzleId(id)}
-              selectedNozzle={refNozzle}
-            />
+          <div>
+            {isModular ? (
+              /* CASO MODULAR: Marca, Modelo, Difusor, Disco / Pastilha */
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 animate-fade-in">
+                {/* 1. Marca */}
+                <div>
+                  <label htmlFor="ref-brand-select" className="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">
+                    Marca
+                  </label>
+                  <div className="relative">
+                    <select
+                      id="ref-brand-select"
+                      value={refBrand}
+                      onChange={e => handleRefBrandChange(e.target.value)}
+                      className="w-full h-9 px-2.5 pr-7 bg-white hover:bg-slate-50 border border-slate-300 focus:border-daterra-primary text-slate-900 rounded-xl text-xs font-bold outline-none transition-all appearance-none cursor-pointer shadow-2xs"
+                    >
+                      <option value="">-- Marca --</option>
+                      {AVAILABLE_BRANDS.map(b => (
+                        <option key={b} value={b}>{b}</option>
+                      ))}
+                    </select>
+                    <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  </div>
+                </div>
+
+                {/* 2. Modelo */}
+                <div>
+                  <label htmlFor="ref-model-select" className="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">
+                    Modelo
+                  </label>
+                  <div className="relative">
+                    <select
+                      id="ref-model-select"
+                      value={refModel}
+                      onChange={e => handleRefModelChange(e.target.value)}
+                      disabled={!refBrand}
+                      className={`w-full h-9 px-2.5 pr-7 border rounded-xl text-xs font-bold outline-none transition-all appearance-none shadow-2xs ${
+                        !refBrand
+                          ? 'bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed'
+                          : 'bg-white hover:bg-slate-50 border-slate-300 focus:border-daterra-primary text-slate-900 cursor-pointer'
+                      }`}
+                    >
+                      <option value="">{!refBrand ? 'Escolha marca' : '-- Modelo --'}</option>
+                      {groupedRefModels.map(g => (
+                        <optgroup key={g.group} label={`── ${g.group} ──`} className="font-black text-slate-400">
+                          {g.models.map(m => (
+                            <option key={m.model} value={m.model} className="font-bold text-slate-900">
+                              {m.model} ({m.nozzleType})
+                            </option>
+                          ))}
+                        </optgroup>
+                      ))}
+                    </select>
+                    <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  </div>
+                </div>
+
+                {/* 3. Difusor */}
+                <div>
+                  <label htmlFor="ref-swirl-select" className="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">
+                    Difusor
+                  </label>
+                  <div className="relative">
+                    <select
+                      id="ref-swirl-select"
+                      value={refSwirlPlate || ''}
+                      onChange={e => {
+                        const swirl = e.target.value;
+                        setRefSwirlPlate(swirl);
+                        const match = refVariants.find(
+                          v => v.swirlPlate === swirl && (!refDisc || v.disc === refDisc)
+                        ) || refVariants.find(v => v.swirlPlate === swirl);
+                        if (match) {
+                          setRefNozzleId(match.id);
+                          if (match.disc) setRefDisc(match.disc);
+                        }
+                      }}
+                      className="w-full h-9 px-2.5 pr-7 bg-white hover:bg-slate-50 border border-slate-300 focus:border-daterra-primary text-slate-900 rounded-xl text-xs font-bold outline-none appearance-none cursor-pointer shadow-2xs"
+                    >
+                      <option value="">-- Difusor --</option>
+                      {availableRefSwirlPlates.map(swirl => (
+                        <option key={swirl} value={swirl}>
+                          Difusor {swirl}
+                        </option>
+                      ))}
+                    </select>
+                    <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  </div>
+                </div>
+
+                {/* 4. Disco / Pastilha */}
+                <div>
+                  <label htmlFor="ref-disc-select" className="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">
+                    Disco / Pastilha
+                  </label>
+                  <div className="relative">
+                    <select
+                      id="ref-disc-select"
+                      value={refDisc || ''}
+                      onChange={e => {
+                        const disc = e.target.value;
+                        setRefDisc(disc);
+                        const match = refVariants.find(
+                          v => v.disc === disc && (!refSwirlPlate || v.swirlPlate === refSwirlPlate)
+                        ) || refVariants.find(v => v.disc === disc);
+                        if (match) {
+                          setRefNozzleId(match.id);
+                          if (match.swirlPlate) setRefSwirlPlate(match.swirlPlate);
+                        }
+                      }}
+                      className="w-full h-9 px-2.5 pr-7 bg-white hover:bg-slate-50 border border-slate-300 focus:border-daterra-primary text-slate-900 rounded-xl text-xs font-bold outline-none appearance-none cursor-pointer shadow-2xs"
+                    >
+                      <option value="">-- Disco --</option>
+                      {availableRefDiscs.map(disc => (
+                        <option key={disc} value={disc}>
+                          Disco {disc}
+                        </option>
+                      ))}
+                    </select>
+                    <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  </div>
+                </div>
+              </div>
+            ) : (
+              /* CASO PADRÃO: Marca, Modelo, Cor do Fabricante */
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 animate-fade-in">
+                {/* 1. Marca */}
+                <div>
+                  <label htmlFor="ref-brand-select" className="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">
+                    Marca
+                  </label>
+                  <div className="relative">
+                    <select
+                      id="ref-brand-select"
+                      value={refBrand}
+                      onChange={e => handleRefBrandChange(e.target.value)}
+                      className="w-full h-9 px-2.5 pr-7 bg-white hover:bg-slate-50 border border-slate-300 focus:border-daterra-primary text-slate-900 rounded-xl text-xs font-bold outline-none transition-all appearance-none cursor-pointer shadow-2xs"
+                    >
+                      <option value="">-- Marca --</option>
+                      {AVAILABLE_BRANDS.map(b => (
+                        <option key={b} value={b}>{b}</option>
+                      ))}
+                    </select>
+                    <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  </div>
+                </div>
+
+                {/* 2. Modelo */}
+                <div>
+                  <label htmlFor="ref-model-select" className="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">
+                    Modelo
+                  </label>
+                  <div className="relative">
+                    <select
+                      id="ref-model-select"
+                      value={refModel}
+                      onChange={e => handleRefModelChange(e.target.value)}
+                      disabled={!refBrand}
+                      className={`w-full h-9 px-2.5 pr-7 border rounded-xl text-xs font-bold outline-none transition-all appearance-none shadow-2xs ${
+                        !refBrand
+                          ? 'bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed'
+                          : 'bg-white hover:bg-slate-50 border-slate-300 focus:border-daterra-primary text-slate-900 cursor-pointer'
+                      }`}
+                    >
+                      <option value="">{!refBrand ? 'Escolha marca' : '-- Modelo --'}</option>
+                      {groupedRefModels.map(g => (
+                        <optgroup key={g.group} label={`── ${g.group} ──`} className="font-black text-slate-400">
+                          {g.models.map(m => (
+                            <option key={m.model} value={m.model} className="font-bold text-slate-900">
+                              {m.model} ({m.nozzleType})
+                            </option>
+                          ))}
+                        </optgroup>
+                      ))}
+                    </select>
+                    <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  </div>
+                </div>
+
+                {/* 3. Cor do Bico */}
+                <div>
+                  <label className="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">
+                    Cor do Bico
+                  </label>
+                  <div className="relative" ref={colorMenuRef}>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (refModel && refColorOptions.length > 0) {
+                          setIsColorMenuOpen(!isColorMenuOpen);
+                        }
+                      }}
+                      disabled={!refModel}
+                      aria-haspopup="listbox"
+                      aria-expanded={isColorMenuOpen}
+                      aria-label="Selecionar cor do bico"
+                      className={`w-full h-9 px-2.5 border rounded-xl text-xs font-bold transition-all flex items-center justify-between shadow-2xs ${
+                        !refModel
+                          ? 'bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed'
+                          : 'bg-white hover:bg-slate-50 border-slate-300 focus:border-daterra-primary text-slate-900 cursor-pointer'
+                      }`}
+                    >
+                      {refNozzle ? (
+                        <div className="flex items-center gap-2 min-w-0">
+                          <span
+                            aria-hidden="true"
+                            className="w-3.5 h-3.5 rounded-full border shadow-xs shrink-0"
+                            style={{
+                              backgroundColor: getNozzleColorPresentation(refNozzle).hex,
+                              borderColor: getNozzleColorPresentation(refNozzle).hex.toLowerCase() === '#ffffff' ? '#94a3b8' : 'rgba(0,0,0,0.15)'
+                            }}
+                          />
+                          <span className="font-black text-slate-900 truncate">
+                            {refNozzle.color || refNozzle.modelNorm}
+                            {refNozzle.isoCode ? ` (ISO ${refNozzle.isoCode})` : ''}
+                          </span>
+                          <span className="text-[10px] text-slate-500 font-mono-numbers shrink-0 hidden sm:inline">
+                            • {formatPt(refNozzle.nominalFlowLMin, 2)} L/min
+                          </span>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-2 text-slate-400">
+                          <span className="w-3.5 h-3.5 rounded-full bg-slate-300 shrink-0" />
+                          <span>{!refModel ? 'ND (Selecione modelo)' : '-- Selecione a cor --'}</span>
+                        </div>
+                      )}
+                      <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform ${isColorMenuOpen ? 'rotate-180' : ''}`} />
+                    </button>
+
+                    {/* Menu Dropdown de Cores */}
+                    {isColorMenuOpen && refModel && (
+                      <div
+                        role="listbox"
+                        aria-label="Cores do bico disponíveis"
+                        className="absolute z-30 mt-1 w-full max-h-56 overflow-y-auto bg-white border border-slate-200 rounded-xl shadow-xl p-1 space-y-0.5 animate-fade-in"
+                      >
+                        {refColorOptions.map(opt => {
+                          const isSelected = refNozzleId === opt.id;
+                          return (
+                            <button
+                              key={opt.id}
+                              type="button"
+                              role="option"
+                              aria-selected={isSelected}
+                              onClick={() => {
+                                setRefNozzleId(opt.id);
+                                setIsColorMenuOpen(false);
+                              }}
+                              className={`w-full p-1.5 rounded-lg text-left text-xs font-bold transition-all flex items-center justify-between cursor-pointer ${
+                                isSelected
+                                  ? 'bg-daterra-primary text-white shadow-xs'
+                                  : 'hover:bg-slate-100 text-slate-800'
+                              }`}
+                            >
+                              <div className="flex items-center gap-2">
+                                <span
+                                  aria-hidden="true"
+                                  className="w-3.5 h-3.5 rounded-full border shadow-xs shrink-0"
+                                  style={{
+                                    backgroundColor: opt.pres.hex,
+                                    borderColor: opt.pres.hex.toLowerCase() === '#ffffff' ? '#94a3b8' : 'rgba(0,0,0,0.1)'
+                                  }}
+                                />
+                                <span className="font-extrabold">{opt.label}</span>
+                                {opt.isoCode && (
+                                  <span className={`text-[10px] font-mono-numbers ${isSelected ? 'text-white/80' : 'text-slate-500'}`}>
+                                    (ISO {opt.isoCode})
+                                  </span>
+                                )}
+                              </div>
+
+                              <span className={`text-[10px] font-black font-mono-numbers ${isSelected ? 'text-white' : 'text-slate-700'}`}>
+                                {formatPt(opt.nominalFlow, 2)} L/min
+                              </span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         ) : (
           /* MODO B: POR DÉBITO MANUAL */
-          <div className="space-y-4 max-w-md">
-            <div>
-              <label htmlFor="manual-target-flow" className="block text-xs font-bold text-slate-700 mb-1">
-                Débito Alvo Desejado por Bico (L/min)
-              </label>
-              <div className="relative">
-                <input
-                  id="manual-target-flow"
-                  type="text"
-                  value={manualFlowInput}
-                  onChange={e => setManualFlowInput(e.target.value)}
-                  placeholder="Ex: 0,80"
-                  className="w-full h-12 px-4 pr-16 bg-slate-50 border border-slate-300 rounded-2xl text-base font-black text-slate-900 font-mono-numbers focus:border-daterra-primary focus:bg-white outline-none"
-                />
-                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">
-                  L/min
-                </span>
-              </div>
+          <div className="space-y-2 max-w-sm">
+            <label htmlFor="manual-target-flow" className="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">
+              Débito Alvo Desejado por Bico (L/min)
+            </label>
+            <div className="relative">
+              <input
+                id="manual-target-flow"
+                type="text"
+                value={manualFlowInput}
+                onChange={e => setManualFlowInput(e.target.value)}
+                placeholder="Ex: 0,80"
+                className="w-full h-9 px-3 pr-14 bg-white border border-slate-300 rounded-xl text-xs font-black text-slate-900 font-mono-numbers focus:border-daterra-primary outline-none shadow-2xs"
+              />
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-400 pointer-events-none">
+                L/min
+              </span>
             </div>
           </div>
         )}
-      </div>
 
-      {/* 2. CONTROLO DE PRESSÃO DE TRABALHO E TOLERÂNCIA */}
-      <div className="space-y-4">
-        <PressureControl
-          workingPressureBar={workingPressureBar}
-          onChangePressure={setWorkingPressureBar}
-          nozzleA={refNozzle}
-        />
-
-        {/* Tolerância de Débito (±5%, ±10%, ±15%) */}
-        <div className="bg-white p-4 sm:p-5 rounded-3xl border border-slate-200 shadow-soft flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        {/* TOLERÂNCIA DE PROXIMIDADE DE DÉBITO (LOGO POR BAIXO DOS CAMPOS) */}
+        <div className="pt-2.5 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div>
             <span className="text-xs font-black text-slate-900 block">
               Tolerância de proximidade de débito
             </span>
-            <span className="text-xs text-slate-500 font-medium">
+            <span className="text-[11px] text-slate-500 font-medium">
               Gama admissível em redor do débito alvo de {formatPt(targetFlowLMin, 2)} L/min.
             </span>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 shrink-0 self-start sm:self-auto">
             {[5, 10, 15].map(t => (
               <button
                 key={t}
                 type="button"
                 onClick={() => setTolerance(t as 5 | 10 | 15)}
-                className={`px-3 py-2 rounded-xl text-xs font-black transition-all cursor-pointer ${
+                className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer ${
                   tolerance === t
-                    ? 'bg-daterra-primary text-white shadow-sm ring-2 ring-daterra-accent/40'
+                    ? 'bg-daterra-primary text-white shadow-xs ring-1 ring-daterra-accent/40'
                     : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                 }`}
               >
@@ -413,6 +874,15 @@ export const NozzleFindAlternatives: React.FC<NozzleFindAlternativesProps> = ({
           </div>
         </div>
       </div>
+
+      {/* 2. CONTROLO DE PRESSÃO DE TRABALHO */}
+      <PressureControl
+        workingPressureBar={workingPressureBar}
+        onChangePressure={setWorkingPressureBar}
+        nozzleA={refNozzle}
+        referenceNozzle={entryMode === 'by_nozzle' ? refNozzle : undefined}
+        calculatedFlow={refCalculatedFlow}
+      />
 
       {/* 3. FILTROS AVANÇADOS DE CATÁLOGO */}
       <div className="bg-white rounded-3xl border border-slate-200 shadow-soft overflow-hidden">
@@ -615,13 +1085,7 @@ export const NozzleFindAlternatives: React.FC<NozzleFindAlternativesProps> = ({
         </div>
       </div>
 
-      {/* 4. SECÇÃO OPCIONAL DE DÉBITO TOTAL DO CONJUNTO */}
-      <TotalBoomFlowSection
-        flowPerNozzleLMin={targetFlowLMin}
-        nozzleLabel={entryMode === 'by_nozzle' && refNozzle ? `${refNozzle.brand} ${refNozzle.model}` : 'Débito Alvo'}
-      />
-
-      {/* 5. RESULTADOS E SELEÇÃO DE DOIS BICOS: BICO A E BICO B */}
+      {/* 4. RESULTADOS E SELEÇÃO DE DOIS BICOS: BICO A E BICO B */}
       <div className="space-y-4">
         
         {/* Barra Superior de Estado da Seleção */}
@@ -634,6 +1098,11 @@ export const NozzleFindAlternatives: React.FC<NozzleFindAlternativesProps> = ({
               <span className="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 text-xs font-black">
                 {searchResults.length}
               </span>
+              {searchResults.length > visibleCount && (
+                <span className="text-xs font-bold text-slate-500">
+                  (a exibir {displayedResults.length} de {searchResults.length})
+                </span>
+              )}
             </div>
             <p className="text-xs text-slate-500 font-medium">
               Bicos com débito dentro de ±{tolerance}% a {formatPt(workingPressureBar, 1)} bar (Alvo: {formatPt(targetFlowLMin, 2)} L/min).
@@ -701,8 +1170,9 @@ export const NozzleFindAlternatives: React.FC<NozzleFindAlternativesProps> = ({
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {searchResults.map(res => {
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {displayedResults.map(res => {
               const n = res.nozzle;
               const flow = res.calculatedFlow;
               const isA = nozzleAId === n.id;
@@ -847,7 +1317,47 @@ export const NozzleFindAlternatives: React.FC<NozzleFindAlternativesProps> = ({
               );
             })}
           </div>
-        )}
+
+          {/* Paginação / Expansão Progressiva de Alternativas (6 iniciais) */}
+          {searchResults.length > 6 && (
+            <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
+              {displayedResults.length < searchResults.length ? (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => setVisibleCount(prev => Math.min(searchResults.length, prev + 6))}
+                    aria-label={`Mostrar mais alternativas. A exibir ${displayedResults.length} de ${searchResults.length}`}
+                    className="w-full sm:w-auto px-6 py-3 bg-white hover:bg-slate-50 text-slate-800 hover:text-daterra-primary font-black text-xs sm:text-sm rounded-2xl border border-slate-300 hover:border-daterra-primary shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-98"
+                  >
+                    <ChevronDown className="w-4 h-4 text-daterra-primary shrink-0" />
+                    <span>
+                      Mostrar mais alternativas (a exibir {displayedResults.length} de {searchResults.length})
+                    </span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setVisibleCount(searchResults.length)}
+                    className="text-xs font-bold text-slate-500 hover:text-daterra-primary underline px-3 py-1.5 transition-colors cursor-pointer"
+                  >
+                    Ver todas ({searchResults.length})
+                  </button>
+                </>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setVisibleCount(6)}
+                  aria-label="Recolher para os 6 principais bicos"
+                  className="w-full sm:w-auto px-6 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-black text-xs sm:text-sm rounded-2xl border border-slate-200 transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-98"
+                >
+                  <ChevronUp className="w-4 h-4 text-slate-600 shrink-0" />
+                  <span>Recolher para os 6 principais</span>
+                </button>
+              )}
+            </div>
+          )}
+        </div>
+      )}
       </div>
     </div>
   );

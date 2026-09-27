@@ -490,15 +490,11 @@ export function sortNozzlesByNominalFlow(a: Nozzle, b: Nozzle): number {
 }
 
 /**
- * Retorna a tolerância percentual de inspeção técnica / intervalo de controlo:
- * - Débito nominal inferior a 1,00 L/min: tolerância de ±15% (0.15)
- * - Débito nominal igual ou superior a 1,00 L/min: tolerância de ±10% (0.10)
+ * Retorna o desvio máximo admissível para inspeção técnica e calibração:
+ * Para todos os bicos, o desvio máximo admissível é sempre de 10% (0.10).
  */
-export function getInspectionTolerance(nominalFlowLMin: number): number {
-  if (nominalFlowLMin < 1.0) {
-    return 0.15; // ±15%
-  }
-  return 0.10; // ±10%
+export function getInspectionTolerance(_nominalFlowLMin?: number): number {
+  return 0.10; // ±10% fixo para todos os bicos
 }
 
 /**
@@ -771,11 +767,11 @@ export function calculateNozzleFlow(nozzle: Nozzle, workingPressureBar: number):
     originBadgeText = 'Débito estimado';
   }
 
-  // Tolerância escalonada (±15% se < 1.00 L/min, ±10% se >= 1.00 L/min)
-  const toleranceRatio = getInspectionTolerance(flowLMin);
-  const tolerancePercentage = Math.round(toleranceRatio * 100);
+  // Desvio máximo admissível fixo em 10% para todos os bicos (Regra Oficial DATERRA Smart)
+  const toleranceRatio = getInspectionTolerance(flowLMin); // sempre 0.10
+  const tolerancePercentage = Math.round(toleranceRatio * 100); // 10%
   
-  // Limites de controlo: limiteInferior = Q * (1 - tol), limiteSuperior = Q * (1 + tol)
+  // Limites admissíveis: Desvio mínimo = Q - 10% (Q * 0.90), Desvio máximo = Q + 10% (Q * 1.10)
   const deviationMinLMin = Number((flowLMin * (1 - toleranceRatio)).toFixed(2));
   const deviationMaxLMin = Number((flowLMin * (1 + toleranceRatio)).toFixed(2));
 

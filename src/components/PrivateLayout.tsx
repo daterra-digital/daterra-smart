@@ -283,8 +283,8 @@ export const PrivateLayout: React.FC = () => {
         </div>
       )}
 
-      {/* Barra de Navegação Inferior Móvel Fixa (oculta em calculadoras ativas) */}
-      {!isCalculatorActive && <BottomNavigationBar />}
+      {/* Barra de Navegação Inferior Móvel Fixa (sempre visível no mobile) */}
+      <BottomNavigationBar />
     </div>
   );
 };

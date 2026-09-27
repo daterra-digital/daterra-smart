@@ -438,9 +438,9 @@ export function runAllTests() {
     }
   });
 
-  // 34. Tolerâncias Escalonadas
-  test(34, 'Calibração: Tolerâncias escalonadas: ±15% se Q < 1.00 L/min e ±10% se Q >= 1.00 L/min', () => {
-    if (getInspectionTolerance(0.80) !== 0.15) throw new Error('Esperado 0.15 para Q=0.80');
+  // 34. Desvio Máximo Admissível de 10%
+  test(34, 'Calibração: Desvio máximo admissível fixo em 10% (±10%) para todos os bicos', () => {
+    if (getInspectionTolerance(0.80) !== 0.10) throw new Error('Esperado 0.10 para Q=0.80');
     if (getInspectionTolerance(1.03) !== 0.10) throw new Error('Esperado 0.10 para Q=1.03');
   });
 
