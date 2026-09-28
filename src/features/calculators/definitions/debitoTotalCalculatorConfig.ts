@@ -168,10 +168,11 @@ export const debitoTotalCalculatorConfig: CalculatorDefinition = {
         const base = values['baseLargura'];
         if (base === 'boom_total_width') return [12, 24, 36, 48];
         if (base === 'row_spacing') return [2, 3, 4, 5];
+        if (base === 'effective_treated_band') return [0.5, 0.75, 1.25, 1.5];
         return [];
       },
       required: true,
-      min: 1,
+      min: 0.2,
       minInclusive: true,
       max: 60,
       maxInclusive: true,
@@ -179,7 +180,7 @@ export const debitoTotalCalculatorConfig: CalculatorDefinition = {
       maxDecimals: 2,
       allowNegative: false,
       allowExpressions: true,
-      description: 'Largura efetivamente tratada em cada passagem. Selecione a forma como esta largura foi determinada para evitar utilizar uma medida inadequada.',
+      description: 'Largura tratada em cada passagem.',
       helpFile: 'DebitoTotalFAQLargura.md'
     },
 
@@ -190,25 +191,25 @@ export const debitoTotalCalculatorConfig: CalculatorDefinition = {
       canonicalKey: 'working_width_interpretation',
       dimension: 'text',
       defaultUnit: '',
-      defaultValue: undefined,
+      defaultValue: 'boom_total_width',
       allowedUnits: [''],
       type: 'select',
       required: true,
       options: [
         {
           value: 'boom_total_width',
-          label: 'Largura total da barra',
+          label: 'Barra Horizontal',
           description: 'Distância total entre os bicos extremos da barra. Adequado para aplicação em área total com barra horizontal.'
         },
         {
           value: 'row_spacing',
-          label: 'Distância entrelinhas',
+          label: 'Distância Entrelinha',
           description: 'Distância entre o centro de uma linha e o centro da linha adjacente. Utilize esta opção apenas quando a entrelinha representar a largura efetivamente tratada em cada passagem.',
           contextualWarning: 'Em tratamentos de linhas alternadas, algumas linhas podem não receber aplicação direta em cada passagem. Confirme se a estratégia, a cobertura e o intervalo entre aplicações são adequados à cultura, ao produto e ao risco fitossanitário.'
         },
         {
           value: 'effective_treated_band',
-          label: 'Faixa efetiva tratada',
+          label: 'Pulverização em Banda',
           description: 'Largura realmente abrangida pela aplicação em cada passagem. Pode exigir medição ou validação no campo.'
         },
         {
@@ -246,7 +247,7 @@ export const debitoTotalCalculatorConfig: CalculatorDefinition = {
   results: [
     {
       id: 'debitoTotal',
-      label: 'DÉBITO TOTAL DO PULVERIZADOR:',
+      label: 'DÉBITO TOTAL DO PULVERIZADOR',
       canonicalKey: 'total_flow_rate',
       dimension: 'flow_rate',
       defaultUnit: 'L/min',
@@ -326,14 +327,17 @@ export const debitoTotalCalculatorConfig: CalculatorDefinition = {
     }
 
     // Validação Campo 3: Largura de Trabalho
+    const minW = base === 'effective_treated_band' ? 0.2 : 1;
     if (rawW === undefined || rawW === '' || rawW === null) {
       errors['larguraTrabalho'] = 'Introduza a largura de trabalho efetiva.';
     } else if (isNaN(W)) {
       errors['larguraTrabalho'] = 'Introduza um valor numérico válido.';
     } else if (W <= 0) {
       errors['larguraTrabalho'] = 'A largura deve ser superior a zero.';
-    } else if (W < 1) {
-      errors['larguraTrabalho'] = 'A largura mínima é 1,0 m.';
+    } else if (W < minW) {
+      errors['larguraTrabalho'] = base === 'effective_treated_band'
+        ? 'A largura mínima em banda é 0,2 m.'
+        : 'A largura mínima é 1,0 m.';
     } else if (W > 60) {
       errors['larguraTrabalho'] = 'A largura máxima é 60,0 m.';
     }

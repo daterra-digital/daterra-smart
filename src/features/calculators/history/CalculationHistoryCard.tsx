@@ -46,6 +46,7 @@ export const CalculationHistoryCard: React.FC<CalculationHistoryCardProps> = ({
   const isVolumeCaldaTrv = record.calculatorId === 'calc_volume_calda_trv';
   const isDebitoTotal = record.calculatorId === 'calc_debito_total';
   const isEppo = record.calculatorId === 'calc_eppo';
+  const isCalibracaoPulverizador = record.calculatorId === 'calc_calibracao_pulverizador';
 
   // --- CAMPOS DA DOSE ---
   const volPrepDose = record.inputs['volPrepararDose']?.rawValue ?? '-';
@@ -190,6 +191,45 @@ export const CalculationHistoryCard: React.FC<CalculationHistoryCardProps> = ({
   const eppoConcVal = record.inputs['concProduto']?.rawValue ?? '-';
   const eppoConcUnit = record.inputs['concProduto']?.unit ?? 'mL/hL';
 
+  // --- CAMPOS DA CALIBRAÇÃO DE PULVERIZADOR (FASE A) ---
+  const calibMode = String(record.inputs['mode']?.rawValue || 'lwa');
+  const isCalibLwa = calibMode === 'lwa';
+  const calibHeight = record.inputs['treatedHeightM']?.rawValue ?? '-';
+  const calibRowSpacing = record.inputs['rowSpacingM']?.rawValue ?? '-';
+  const calibWidth = record.inputs['canopyWidthM']?.rawValue ?? '-';
+  const calibSides = record.inputs['treatedSides']?.rawValue ?? '2';
+  const calibCulture = record.inputs['cultureId']?.rawValue;
+
+  const calibLwaOut = record.outputs['lwaHa'] || record.outputs['lwa_m2_ha'];
+  const calibLwaVal = calibLwaOut?.rawValue !== undefined
+    ? Number(calibLwaOut.rawValue).toLocaleString('pt-PT', { maximumFractionDigits: 0 })
+    : '-';
+
+  const calibTrvOut = record.outputs['trvM3PerHa'] || record.outputs['trvHa'] || record.outputs['trv_m3_ha'];
+  const calibTrvVal = calibTrvOut?.rawValue !== undefined
+    ? Number(calibTrvOut.rawValue).toLocaleString('pt-PT', { maximumFractionDigits: 0 })
+    : '-';
+
+  const calibKOut = record.outputs['selectedK'] || record.outputs['selected_k_l_m3'];
+  const calibKVal = calibKOut?.rawValue !== undefined
+    ? Number(calibKOut.rawValue).toLocaleString('pt-PT', { minimumFractionDigits: 3, maximumFractionDigits: 3 })
+    : '-';
+
+  const calibSprayVolOut = record.outputs['primaryResult'] || record.outputs['volCaldaRecomendado'] || record.outputs['sprayVolumeLHa'] || record.outputs['recommended_spray_volume_l_ha'];
+  const calibSprayVolVal = calibSprayVolOut?.rawValue !== undefined
+    ? Number(calibSprayVolOut.rawValue).toLocaleString('pt-PT', { minimumFractionDigits: 1, maximumFractionDigits: 1 })
+    : '-';
+
+  const calibProdTankOut = record.outputs['produtoPorDeposito'] || record.outputs['productPerTank'] || record.outputs['product_per_tank'];
+  const calibProdTankVal = calibProdTankOut?.rawValue !== undefined
+    ? Number(calibProdTankOut.rawValue).toLocaleString('pt-PT', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+    : '-';
+  const calibProdTankUnit = calibProdTankOut?.unit ?? 'kg';
+  const calibProdTankSubVal = calibProdTankOut?.subValue !== undefined
+    ? Number(calibProdTankOut.subValue).toLocaleString('pt-PT', { maximumFractionDigits: 1 })
+    : null;
+  const calibProdTankSubUnit = calibProdTankOut?.subUnit ?? 'g';
+
   // --- RESULTADO PRINCIPAL DE PESTICIDA (COMUM A DOSE E CONCENTRAÇÃO) ---
   const pfValue = isConcentracao
     ? (record.outputs['quantidade_pf_ml']?.rawValue !== undefined
@@ -231,6 +271,8 @@ export const CalculationHistoryCard: React.FC<CalculationHistoryCardProps> = ({
     ? 'Débito Total do Pulverizador'
     : isEppo
     ? 'Calculadora EPPO (LWA / TRV)'
+    : isCalibracaoPulverizador
+    ? 'Calibração Pulverizador'
     : 'Cálculo de Dose por Hectare';
 
   return (
@@ -270,6 +312,12 @@ export const CalculationHistoryCard: React.FC<CalculationHistoryCardProps> = ({
             </span>
           )}
 
+          {isCalibracaoPulverizador && (
+            <span className="text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-900 border border-emerald-300/80">
+              {isCalibLwa ? 'LWA' : 'TRV'}
+            </span>
+          )}
+
           {/* Badge "Local" */}
           <span className="text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 bg-slate-100 text-slate-600 rounded-full">
             Local
@@ -278,7 +326,46 @@ export const CalculationHistoryCard: React.FC<CalculationHistoryCardProps> = ({
       </div>
 
       {/* 2. Resultados em Destaque */}
-      {isDebitoTotal ? (
+      {isCalibracaoPulverizador ? (
+        <div className="bg-slate-50 p-3 rounded-xl border border-slate-100 flex items-center justify-between gap-4">
+          <div>
+            <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-500 block">
+              {isCalibLwa ? 'Área Parede Foliar (LWA)' : 'Volume de Calda Recomendado'}
+            </span>
+            <div className="text-base sm:text-lg font-black font-mono-numbers text-daterra-primary">
+              {isCalibLwa ? (
+                <>
+                  {calibLwaVal} <span className="text-xs font-bold text-daterra-accent">m²/ha</span>
+                </>
+              ) : (
+                <>
+                  {calibSprayVolVal} <span className="text-xs font-bold text-daterra-accent">L/ha</span>
+                  {calibTrvVal !== '-' && (
+                    <span className="text-xs font-medium text-slate-500 ml-1.5">
+                      ({calibTrvVal} m³/ha · k: {calibKVal})
+                    </span>
+                  )}
+                </>
+              )}
+            </div>
+          </div>
+          {calibProdTankOut && calibProdTankOut.rawValue !== 0 && calibProdTankVal !== '-' && (
+            <div className="text-right">
+              <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-500 block">
+                Produto / Depósito
+              </span>
+              <div className="text-base sm:text-lg font-black font-mono-numbers text-daterra-primary">
+                {calibProdTankVal} <span className="text-xs font-bold text-daterra-accent">{calibProdTankUnit}</span>
+                {calibProdTankSubVal && (
+                  <span className="text-xs font-medium text-slate-500 ml-1.5">
+                    ({calibProdTankSubVal} {calibProdTankSubUnit})
+                  </span>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      ) : isDebitoTotal ? (
         <div className="bg-slate-50 p-3 rounded-xl border border-slate-100 flex items-center justify-between gap-4">
           <div>
             <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-500 block">
@@ -411,6 +498,31 @@ export const CalculationHistoryCard: React.FC<CalculationHistoryCardProps> = ({
       )}
 
       {/* 3. Resumo dos Campos de Entrada */}
+      {isCalibracaoPulverizador && (
+        <div className="text-xs font-mono-numbers text-slate-600 bg-slate-100/70 px-2.5 py-1.5 rounded-lg flex items-center justify-between flex-wrap gap-2">
+          <span>Altura: <strong className="font-bold text-slate-800">{calibHeight} m</strong></span>
+          <span>·</span>
+          <span>Entrelinha: <strong className="font-bold text-slate-800">{calibRowSpacing} m</strong></span>
+          {!isCalibLwa && (
+            <>
+              <span>·</span>
+              <span>Largura: <strong className="font-bold text-slate-800">{calibWidth} m</strong></span>
+            </>
+          )}
+          {isCalibLwa && (
+            <>
+              <span>·</span>
+              <span>Faces: <strong className="font-bold text-slate-800">{calibSides}</strong></span>
+            </>
+          )}
+          {calibCulture && (
+            <>
+              <span>·</span>
+              <span className="capitalize"><strong className="font-bold text-slate-800">{String(calibCulture)}</strong></span>
+            </>
+          )}
+        </div>
+      )}
       {isEppo && (
         <div className="text-xs font-mono-numbers text-slate-600 bg-slate-100/70 px-2.5 py-1.5 rounded-lg flex items-center justify-between flex-wrap gap-2">
           <span>{isEppoLwa ? 'LWA' : 'TRV'}: <strong className="font-bold text-slate-800">{eppoGeomVal} {eppoGeomUnit}</strong></span>

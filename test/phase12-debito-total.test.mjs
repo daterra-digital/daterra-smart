@@ -254,8 +254,8 @@ describe('Fase 12 — Calculadora de Débito Total do Pulverizador (calc_debito_
       assert.deepEqual(presets, [2, 3, 4, 5]);
     });
 
-    test('4.4 Atalhos dinâmicos vazios para "effective_treated_band" e "manual_width"', () => {
-      assert.deepEqual(wField.getDynamicPresets({ baseLargura: 'effective_treated_band' }), []);
+    test('4.4 Atalhos dinâmicos para "effective_treated_band": [0.5, 0.75, 1.25, 1.5] e vazios para "manual_width"', () => {
+      assert.deepEqual(wField.getDynamicPresets({ baseLargura: 'effective_treated_band' }), [0.5, 0.75, 1.25, 1.5]);
       assert.deepEqual(wField.getDynamicPresets({ baseLargura: 'manual_width' }), []);
       assert.deepEqual(wField.getDynamicPresets({}), []);
     });
@@ -265,6 +265,24 @@ describe('Fase 12 — Calculadora de Débito Total do Pulverizador (calc_debito_
       const vField = debitoTotalCalculatorConfig.fields.find(f => f.id === 'velocidadeTrabalho');
       assert.deepEqual(qField.presets, [200, 400, 600, 800]);
       assert.deepEqual(vField.presets, [4, 6, 8, 10]);
+    });
+
+    test('4.6 Atalhos de banda (0.5, 0.75, 1.25, 1.5) validam e calculam com sucesso', () => {
+      const presets = [0.5, 0.75, 1.25, 1.5];
+      for (const w of presets) {
+        const inputs = {
+          volumeCalda: { rawValue: 300 },
+          velocidadeTrabalho: { rawValue: 6 },
+          larguraTrabalho: { rawValue: w },
+          baseLargura: { rawValue: 'effective_treated_band' }
+        };
+        const valRes = debitoTotalCalculatorConfig.validate(inputs);
+        assert.equal(valRes.isValid, true, `Largura ${w} m deve ser válida em effective_treated_band`);
+        const calcRes = debitoTotalCalculatorConfig.calculate(inputs);
+        assert.ok(calcRes.debitoTotal);
+        // Qt = (300 * w * 6) / 600 = 3 * w
+        assert.equal(calcRes.debitoTotal.rawValue, Math.round(3 * w * 10) / 10);
+      }
     });
   });
 

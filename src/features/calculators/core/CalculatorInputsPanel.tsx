@@ -76,37 +76,37 @@ export const CalculatorInputsPanel: React.FC<CalculatorInputsPanelProps> = ({
   }, [fields, modes, activeModeId]);
 
   return (
-    <section className="bg-white p-6 sm:p-8 rounded-3xl shadow-soft border border-slate-200 space-y-6">
+    <section className="bg-white p-4 sm:p-5 rounded-2xl md:rounded-3xl shadow-soft border border-slate-200 space-y-3.5">
       {/* 1. Aviso Contextual de Valores Importados (quando aplicável) */}
       {importedNotice && (
-        <div className="p-3.5 bg-emerald-50 border border-emerald-200/80 rounded-2xl flex items-center gap-2.5 text-xs font-semibold text-emerald-800 animate-fade-in">
+        <div className="p-3 bg-emerald-50 border border-emerald-200/80 rounded-xl flex items-center gap-2 text-xs font-semibold text-emerald-800 animate-fade-in">
           <Info className="w-4 h-4 shrink-0 text-daterra-accent" />
           <span>{importedNotice}</span>
         </div>
       )}
 
       {/* 2. Cabeçalho do Painel de Entradas */}
-      <div>
-        <div className="flex items-center gap-2 mb-1 flex-wrap">
-          <h2 className="text-xl font-extrabold text-daterra-primary leading-tight">
+      <div className="flex items-center justify-between gap-2 border-b border-slate-100 pb-2">
+        <div>
+          <h2 className="text-base sm:text-lg font-extrabold text-daterra-primary leading-tight">
             {title}
           </h2>
-          {generalHelpFile && (
-            <DidacticHelp
-              faqFile={generalHelpFile as FAQFileType}
-              buttonLabel="Ajuda"
-            />
-          )}
+          <p className="text-xs text-slate-500 leading-tight mt-0.5">
+            {subtitle}
+          </p>
         </div>
-        <p className="text-xs text-slate-500 leading-relaxed">
-          {subtitle}
-        </p>
+        {generalHelpFile && (
+          <DidacticHelp
+            faqFile={generalHelpFile as FAQFileType}
+            buttonLabel="Ajuda"
+          />
+        )}
       </div>
 
       {/* 3. Seletor Oficial de Modos (Planta Jovem vs Planta Adulta) */}
       {modes && modes.length > 0 && (
-        <div className="space-y-2">
-          <div className="grid grid-cols-2 p-1.5 bg-slate-100 rounded-2xl border border-slate-200">
+        <div className="space-y-1.5">
+          <div className="grid grid-cols-2 p-1 bg-slate-100 rounded-xl border border-slate-200">
             {modes.map((m) => {
               const isActive = activeModeId === m.id;
               const isJovem = m.id === 'jovem';
@@ -116,15 +116,15 @@ export const CalculatorInputsPanel: React.FC<CalculatorInputsPanelProps> = ({
                   key={m.id}
                   type="button"
                   onClick={() => onModeChange?.(m.id)}
-                  className={`py-3 px-4 rounded-xl text-xs font-extrabold transition-all flex items-center justify-center gap-2 touch-target cursor-pointer ${
+                  className={`py-2 px-3 rounded-lg text-xs font-extrabold transition-all flex items-center justify-center gap-1.5 touch-target cursor-pointer ${
                     isActive
                       ? isJovem
-                        ? 'bg-daterra-accent text-white shadow-md'
-                        : 'bg-daterra-primary text-white shadow-md'
+                        ? 'bg-daterra-accent text-white shadow-xs'
+                        : 'bg-daterra-primary text-white shadow-xs'
                       : 'text-slate-600 hover:text-slate-900'
                   }`}
                 >
-                  <Icon className="w-4 h-4" />
+                  <Icon className="w-3.5 h-3.5" />
                   <span>{m.label}</span>
                 </button>
               );
@@ -134,7 +134,7 @@ export const CalculatorInputsPanel: React.FC<CalculatorInputsPanelProps> = ({
       )}
 
       {/* 4. Lista de Campos de Entrada Visíveis */}
-      <div className="space-y-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-3.5">
         {visibleFields.map((field) => {
           const effectiveField = field.getDynamicPresets
             ? { ...field, presets: field.getDynamicPresets(values) }

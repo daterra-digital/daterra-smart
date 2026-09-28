@@ -1,10 +1,18 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import './index.css';
 
-// Gestão de Ciclo de Vida do Service Worker e Sincronização Imediata (Mobile, Tablet, Desktop)
-if ('serviceWorker' in navigator) {
+// Em desenvolvimento (localhost), desativar e desregistar Service Workers residuais para evitar telas em branco por cache
+if (import.meta.env.DEV && 'serviceWorker' in navigator) {
+  navigator.serviceWorker.getRegistrations().then((registrations) => {
+    for (const registration of registrations) {
+      registration.unregister().catch(() => {});
+    }
+  });
+} else if ('serviceWorker' in navigator) {
+  // Gestão de Ciclo de Vida do Service Worker e Sincronização Imediata em Produção (Mobile, Tablet, Desktop)
   let refreshing = false;
   navigator.serviceWorker.addEventListener('controllerchange', () => {
     if (!refreshing) {
@@ -50,6 +58,8 @@ if ('scrollRestoration' in window.history) {
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <App />
+    <ErrorBoundary>
+      <App />
+    </ErrorBoundary>
   </React.StrictMode>
 );

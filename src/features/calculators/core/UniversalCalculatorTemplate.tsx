@@ -50,16 +50,31 @@ import {
   type OverwriteComparisonItem
 } from '../history/TransferOverwritePromptModal.tsx';
 import { CanopyDensitySelector } from '../../volume-calda-trv/components/CanopyDensitySelector.tsx';
-import type {
-  CanopyProfileId,
-  CanopyDensityTierId,
-  CanopyDensityTier
+import {
+  evaluateTrvVolumeInterpretation,
+  type CanopyProfileId,
+  type CanopyDensityTierId,
+  type CanopyDensityTier
 } from '../../volume-calda-trv/trvAssistance.ts';
-import { evaluateTrvVolumeInterpretation } from '../../volume-calda-trv/trvAssistance.ts';
 import {
   WorkingWidthCriteriaSelector,
   type WorkingWidthCriterionId
 } from '../../debito-total/components/WorkingWidthCriteriaSelector.tsx';
+import { CalibracaoMetodoSelector } from '../../calibracao-pulverizador/components/CalibracaoMetodoSelector.tsx';
+import { CalibracaoContextSelectors } from '../../calibracao-pulverizador/components/CalibracaoContextSelectors.tsx';
+import { CalibracaoPhaseBSection } from '../../calibracao-pulverizador/components/CalibracaoPhaseBSection.tsx';
+import { CalibracaoPhaseCNozzleSelectionSection } from '../../calibracao-pulverizador/components/CalibracaoPhaseCNozzleSelectionSection.tsx';
+import {
+  isAdoptedSprayVolumeVisible,
+  isAdoptedSprayVolumeRequired
+} from '../../calibracao-pulverizador/calibracaoPulverizadorValidation.ts';
+import type {
+  CalibracaoMetodo,
+  CanopyDensityTierId as CalibracaoCanopyDensityTierId,
+  LwaVThicknessId,
+  LwaVStageId
+} from '../../calibracao-pulverizador/calibracaoPulverizadorTypes.ts';
+import { resolveFriendlyValidationMessage } from '../../calibracao-pulverizador/calibracaoPulverizadorValidationFallback.ts';
 
 /**
  * Hook responsivo para detetar viewport desktop (>= 1024px)
@@ -143,7 +158,8 @@ export const UniversalCalculatorTemplate: React.FC<UniversalCalculatorTemplatePr
     definition.id === 'calc_volume_copa' ||
     definition.id === 'calc_volume_calda_trv' ||
     definition.id === 'calc_debito_total' ||
-    definition.id === 'calc_eppo';
+    definition.id === 'calc_eppo' ||
+    definition.id === 'calc_calibracao_pulverizador';
   const [isUnifiedKeypadOpen, setIsUnifiedKeypadOpen] = useState<boolean>(false);
 
   // Estados Locais e Voláteis de Apoio Agronómico TRV (Subfase 1B.4B)
@@ -156,6 +172,31 @@ export const UniversalCalculatorTemplate: React.FC<UniversalCalculatorTemplatePr
   const isDebitoTotal = definition.id === 'calc_debito_total';
   const [showNozzleCalculation, setShowNozzleCalculation] = useState<boolean>(() => {
     return Boolean(initialInputs?.['numeroBicos']?.rawValue);
+  });
+
+  // Reset transversal de scroll ao entrar ou trocar de calculadora (isolado de modais, inputs e parâmetros)
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      window.scrollTo(0, 0);
+      if (document.documentElement) document.documentElement.scrollTop = 0;
+      if (document.body) document.body.scrollTop = 0;
+    }
+  }, [definition.id]);
+
+  // Estados Locais e Voláteis de Calibração de Pulverizador (Fase A e Fase B)
+  const isCalibracaoPulverizador = definition.id === 'calc_calibracao_pulverizador';
+  const [calibracaoCulture, setCalibracaoCulture] = useState<string>('vinha');
+  const [calibracaoConduction, setCalibracaoConduction] = useState<string>('espaldeira');
+  const [calibracaoPhenology, setCalibracaoPhenology] = useState<string>('vinha_pintor_maturacao');
+  const [calibracaoDensity, setCalibracaoDensity] = useState<CalibracaoCanopyDensityTierId>('moderate');
+  const [calibracaoThickness, setCalibracaoThickness] = useState<LwaVThicknessId>('estreita');
+  const [calibracaoStage, setCalibracaoStage] = useState<LwaVStageId>('int_5');
+  const [useManualAdoptedVolumeInLwa, setUseManualAdoptedVolumeInLwa] = useState<boolean>(false);
+  const [calibracaoWorkingWidthSource, setCalibracaoWorkingWidthSource] = useState<'auto-row-spacing' | 'manual'>(() => {
+    if (initialInputs && initialInputs['workingWidthM'] !== undefined) {
+      return 'manual';
+    }
+    return 'auto-row-spacing';
   });
 
   // 2. Consulta Reativa do Histórico Offline em calculation_history_v2
@@ -185,6 +226,16 @@ export const UniversalCalculatorTemplate: React.FC<UniversalCalculatorTemplatePr
         initial[f.id] = initialInputs[f.id].rawValue;
       } else {
         initial[f.id] = f.defaultValue ?? '';
+      }
+    }
+    if (definition.id === 'calc_calibracao_pulverizador') {
+      if (initial['workingWidthM'] === '' || initial['workingWidthM'] === undefined) {
+        initial['workingWidthM'] = initial['rowSpacingM'] || 2.5;
+      }
+    }
+    if (definition.id === 'calc_debito_total') {
+      if (!initial['baseLargura']) {
+        initial['baseLargura'] = 'boom_total_width';
       }
     }
     return initial;
@@ -401,14 +452,38 @@ export const UniversalCalculatorTemplate: React.FC<UniversalCalculatorTemplatePr
   // Handlers do Formulário
   const handleFieldChange = (fieldId: string, newValue: number | string, newUnit: string) => {
     setUserModifiedFields((prev) => new Set(prev).add(fieldId));
-    setFieldValues((prev) => ({ ...prev, [fieldId]: newValue }));
+    setFieldValues((prev) => {
+      const next = { ...prev, [fieldId]: newValue };
+      if (isCalibracaoPulverizador) {
+        if (fieldId === 'rowSpacingM' && calibracaoWorkingWidthSource === 'auto-row-spacing') {
+          next['workingWidthM'] = newValue;
+        }
+      }
+      return next;
+    });
     setFieldUnits((prev) => ({ ...prev, [fieldId]: newUnit }));
+
+    if (isCalibracaoPulverizador && fieldId === 'workingWidthM') {
+      setCalibracaoWorkingWidthSource('manual');
+    }
 
     if (isVolumeCaldaTrv && fieldId === 'coeficienteVolumeCalda') {
       setSelectedDensityTier(null);
       setIsManualK(true);
     }
   };
+
+  const handleNozzleCountChange = useCallback((count: number) => {
+    const val = count && count > 0 ? count : '';
+    setFieldValues((prev) => {
+      if (prev['activeNozzleCount'] === val) return prev;
+      return { ...prev, activeNozzleCount: val };
+    });
+    setFieldUnits((prev) => {
+      if (prev['activeNozzleCount'] === 'bicos') return prev;
+      return { ...prev, activeNozzleCount: 'bicos' };
+    });
+  }, []);
 
   // Handlers e Interpretação de Apoio Agronómico TRV (Subfase 1B.4B)
   const handleSelectCanopyProfile = useCallback((newProfile: CanopyProfileId) => {
@@ -479,6 +554,46 @@ export const UniversalCalculatorTemplate: React.FC<UniversalCalculatorTemplatePr
         : definition.fields;
     }
 
+    if (isCalibracaoPulverizador) {
+      const currentDoseUnit = fieldUnits['doseValue'] || 'L/ha';
+      const isVisible = isAdoptedSprayVolumeVisible({
+        method: activeModeId,
+        cultureId: calibracaoCulture,
+        useManualAdoptedVolumeInLwa,
+        doseUnit: currentDoseUnit
+      });
+      const isRequired = isAdoptedSprayVolumeRequired({
+        method: activeModeId,
+        cultureId: calibracaoCulture,
+        useManualAdoptedVolumeInLwa,
+        doseUnit: currentDoseUnit,
+        finalTankVolumeL: fieldValues['finalTankVolumeL'],
+        doseValue: fieldValues['doseValue']
+      });
+
+      if (!isVisible) {
+        // Não pedir volume adotado quando o método não for LWA ou dose for por 100 L / concentração
+        fields = fields.filter((f) => f.id !== 'adoptedSprayVolumeLHa');
+      } else if (isRequired) {
+        fields = fields.map((f) => {
+          if (f.id === 'adoptedSprayVolumeLHa') {
+            return { ...f, required: true };
+          }
+          return f;
+        });
+      }
+
+      // Filtrar campos operacionais da Fase B geridos na secção específica
+      fields = fields.filter(
+        (f) =>
+          ![
+            'travelSpeedKmH',
+            'workingWidthM',
+            'activeNozzleCount'
+          ].includes(f.id)
+      );
+    }
+
     if (isDebitoTotal) {
       // 1. Filtrar baseLargura (gerida pelo WorkingWidthCriteriaSelector)
       // 2. Filtrar numeroBicos caso a opção de cálculo por bico não esteja ativa
@@ -500,16 +615,21 @@ export const UniversalCalculatorTemplate: React.FC<UniversalCalculatorTemplatePr
         }
         if (f.id === 'larguraTrabalho') {
           let dynamicLabel = f.label;
+          let dynamicPresets = f.presets;
           if (base === 'boom_total_width') {
             dynamicLabel = `${t('debitoTotal.assistance.widthCriteria.boom', 'Barra Horizontal')} (m)`;
+            dynamicPresets = [12.0, 15.0, 18.0, 24.0];
           } else if (base === 'row_spacing') {
-            dynamicLabel = `${t('debitoTotal.assistance.widthCriteria.rowSpacing', 'Distância Entrelinhas')} (m)`;
+            dynamicLabel = `${t('debitoTotal.assistance.widthCriteria.rowSpacing', 'Distância Entrelinha')} (m)`;
+            dynamicPresets = [2.5, 3.0, 3.5, 4.0];
           } else if (base === 'effective_treated_band') {
-            dynamicLabel = `${t('debitoTotal.assistance.widthCriteria.band', 'Pulverização em Faixa')} (m)`;
+            dynamicLabel = `${t('debitoTotal.assistance.widthCriteria.band', 'Pulverização em Banda')} (m)`;
+            dynamicPresets = [0.5, 0.75, 1.25, 1.5];
           }
           return {
             ...f,
-            label: dynamicLabel
+            label: dynamicLabel,
+            presets: dynamicPresets
           };
         }
         return f;
@@ -517,17 +637,65 @@ export const UniversalCalculatorTemplate: React.FC<UniversalCalculatorTemplatePr
     }
 
     return fields;
-  }, [definition.fields, definition.modes, activeModeId, isDebitoTotal, showNozzleCalculation, fieldValues, t]);
+  }, [
+    definition.fields,
+    definition.modes,
+    activeModeId,
+    isCalibracaoPulverizador,
+    calibracaoCulture,
+    useManualAdoptedVolumeInLwa,
+    isDebitoTotal,
+    showNozzleCalculation,
+    fieldValues,
+    fieldUnits,
+    t
+  ]);
 
   // Preparação Declarativa dos Campos para o DaterraUnifiedKeypadModal (inclui todos os campos para suporte a modos dinâmicos)
   const allUnifiedFields = useMemo<UnifiedKeypadField[]>(() => {
     let fieldsToMap = definition.fields;
+    if (definition.modes && activeModeId) {
+      const modeDef = definition.modes.find((m) => m.id === activeModeId);
+      if (modeDef?.fieldIds) {
+        fieldsToMap = definition.fields.filter((f) => modeDef.fieldIds!.includes(f.id));
+      }
+    }
+
     if (isDebitoTotal) {
       fieldsToMap = fieldsToMap.filter((f) => {
         if (f.id === 'baseLargura') return false;
         if (f.id === 'numeroBicos' && !showNozzleCalculation) return false;
         return true;
       });
+    }
+
+    if (isCalibracaoPulverizador) {
+      const currentDoseUnit = fieldUnits['doseValue'] || 'L/ha';
+      const isVisible = isAdoptedSprayVolumeVisible({
+        method: activeModeId,
+        cultureId: calibracaoCulture,
+        useManualAdoptedVolumeInLwa,
+        doseUnit: currentDoseUnit
+      });
+      const isRequired = isAdoptedSprayVolumeRequired({
+        method: activeModeId,
+        cultureId: calibracaoCulture,
+        useManualAdoptedVolumeInLwa,
+        doseUnit: currentDoseUnit,
+        finalTankVolumeL: fieldValues['finalTankVolumeL'],
+        doseValue: fieldValues['doseValue']
+      });
+
+      if (!isVisible) {
+        fieldsToMap = fieldsToMap.filter((f) => f.id !== 'adoptedSprayVolumeLHa');
+      } else if (isRequired) {
+        fieldsToMap = fieldsToMap.map((f) => {
+          if (f.id === 'adoptedSprayVolumeLHa') {
+            return { ...f, required: true };
+          }
+          return f;
+        });
+      }
     }
 
     return fieldsToMap.map((f) => {
@@ -553,11 +721,11 @@ export const UniversalCalculatorTemplate: React.FC<UniversalCalculatorTemplatePr
             label = `${t('debitoTotal.assistance.widthCriteria.boom', 'Barra Horizontal')} (m)`;
             presets = [12.0, 15.0, 18.0, 24.0];
           } else if (base === 'row_spacing') {
-            label = `${t('debitoTotal.assistance.widthCriteria.rowSpacing', 'Distância Entrelinhas')} (m)`;
+            label = `${t('debitoTotal.assistance.widthCriteria.rowSpacing', 'Distância Entrelinha')} (m)`;
             presets = [2.5, 3.0, 3.5, 4.0];
           } else if (base === 'effective_treated_band') {
-            label = `${t('debitoTotal.assistance.widthCriteria.band', 'Pulverização em Faixa')} (m)`;
-            presets = [0.8, 1.0, 1.2, 1.5];
+            label = `${t('debitoTotal.assistance.widthCriteria.band', 'Pulverização em Banda')} (m)`;
+            presets = [0.5, 0.75, 1.25, 1.5];
           }
         }
       }
@@ -582,7 +750,7 @@ export const UniversalCalculatorTemplate: React.FC<UniversalCalculatorTemplatePr
         description
       };
     });
-  }, [definition.fields, isDebitoTotal, showNozzleCalculation, fieldValues, fieldUnits, t]);
+  }, [definition.fields, definition.modes, isCalibracaoPulverizador, activeModeId, isDebitoTotal, showNozzleCalculation, fieldValues, fieldUnits, calibracaoCulture, useManualAdoptedVolumeInLwa, t]);
 
   const unifiedModes = useMemo(() => {
     if (!definition.modes || definition.modes.length <= 1) return undefined;
@@ -619,6 +787,107 @@ export const UniversalCalculatorTemplate: React.FC<UniversalCalculatorTemplatePr
           calculatorId: definition.id,
           calculatorVersion: definition.version
         };
+      }
+
+      if (isCalibracaoPulverizador) {
+        if (calibracaoCulture) {
+          tempInputs['cultureId'] = {
+            rawValue: calibracaoCulture,
+            unit: '',
+            normalizedValue: 0,
+            dimension: 'text',
+            canonicalKey: 'crop_profile',
+            label: 'Cultura',
+            source: 'user_input',
+            localId: 'cultureId',
+            calculatorId: definition.id,
+            calculatorVersion: definition.version
+          };
+        }
+        if (calibracaoConduction) {
+          tempInputs['conductionId'] = {
+            rawValue: calibracaoConduction,
+            unit: '',
+            normalizedValue: 0,
+            dimension: 'text',
+            canonicalKey: 'training_system',
+            label: 'Modo de Condução',
+            source: 'user_input',
+            localId: 'conductionId',
+            calculatorId: definition.id,
+            calculatorVersion: definition.version
+          };
+        }
+        if (calibracaoPhenology) {
+          tempInputs['phenologyId'] = {
+            rawValue: calibracaoPhenology,
+            unit: '',
+            normalizedValue: 0,
+            dimension: 'text',
+            canonicalKey: 'phenology_stage',
+            label: 'Estado Fenológico',
+            source: 'user_input',
+            localId: 'phenologyId',
+            calculatorId: definition.id,
+            calculatorVersion: definition.version
+          };
+        }
+        if (calibracaoDensity) {
+          tempInputs['canopyDensity'] = {
+            rawValue: calibracaoDensity,
+            unit: '',
+            normalizedValue: 0,
+            dimension: 'text',
+            canonicalKey: 'canopy_density',
+            label: 'Densidade Foliar',
+            source: 'user_input',
+            localId: 'canopyDensity',
+            calculatorId: definition.id,
+            calculatorVersion: definition.version
+          };
+        }
+        if (calibracaoThickness) {
+          tempInputs['canopyThickness'] = {
+            rawValue: calibracaoThickness,
+            unit: '',
+            normalizedValue: 0,
+            dimension: 'text',
+            canonicalKey: 'canopy_thickness',
+            label: 'Espessura da Sebe',
+            source: 'user_input',
+            localId: 'canopyThickness',
+            calculatorId: definition.id,
+            calculatorVersion: definition.version
+          };
+        }
+        if (calibracaoStage) {
+          tempInputs['phenologyStage'] = {
+            rawValue: calibracaoStage,
+            unit: '',
+            normalizedValue: 0,
+            dimension: 'text',
+            canonicalKey: 'phenology_interval',
+            label: 'Intervalo Fenológico',
+            source: 'user_input',
+            localId: 'phenologyStage',
+            calculatorId: definition.id,
+            calculatorVersion: definition.version
+          };
+        }
+        if (useManualAdoptedVolumeInLwa) {
+          tempInputs['useManualAdoptedVolumeInLwa'] = {
+            rawValue: 'true',
+            unit: '',
+            normalizedValue: 1,
+            dimension: 'text',
+            canonicalKey: 'lwa_manual_volume_override',
+            label: 'Usar Volume Adotado Manual',
+            source: 'user_input',
+            localId: 'useManualAdoptedVolumeInLwa',
+            calculatorId: definition.id,
+            calculatorVersion: definition.version
+          };
+        }
       }
 
       if (definition.modes && effMode) {
@@ -686,6 +955,25 @@ export const UniversalCalculatorTemplate: React.FC<UniversalCalculatorTemplatePr
             if (geomVal !== undefined && areaParc !== undefined) {
               secondaryText = `${formatNumberForDisplay(Number(geomVal))} ${geomUnit} • ${formatNumberForDisplay(Number(areaParc))} ha`;
             }
+          } else if (definition.id === 'calc_calibracao_pulverizador') {
+            if (effMode === 'lwa') {
+              const h = tempInputs['treatedHeightM']?.rawValue;
+              const r = tempInputs['rowSpacingM']?.rawValue;
+              const faces = tempInputs['treatedSides']?.rawValue || 2;
+              const lwaOut = outputs['lwaHa']?.rawValue ?? outputs['primaryResult']?.subValue;
+              const taxaOut = outputs['taxaLwa']?.rawValue;
+              if (h && r) {
+                secondaryText = `${formatNumberForDisplay(Number(h))} m • ${faces} faces • ${formatNumberForDisplay(Number(r))} m entrelinha${lwaOut ? ` (LWA: ${formatNumberForDisplay(Number(lwaOut))} m²/ha${taxaOut ? ` · ${taxaOut} L/10 000 m²` : ''})` : ''}`;
+              }
+            } else {
+              const h = tempInputs['treatedHeightM']?.rawValue;
+              const w = tempInputs['canopyWidthM']?.rawValue;
+              const r = tempInputs['rowSpacingM']?.rawValue;
+              const trvOut = outputs['trvM3PerHa']?.rawValue;
+              if (h && w && r) {
+                secondaryText = `${formatNumberForDisplay(Number(h))} × ${formatNumberForDisplay(Number(w))} m • ${formatNumberForDisplay(Number(r))} m entrelinha${trvOut ? ` (TRV: ${formatNumberForDisplay(Number(trvOut))} m³/ha)` : ''}`;
+              }
+            }
           }
 
           const primaryLabel = primaryRes?.label || 'Resultado';
@@ -718,6 +1006,10 @@ export const UniversalCalculatorTemplate: React.FC<UniversalCalculatorTemplatePr
         defaultStatusMsg = t('debitoTotal.enterDataPrompt', 'Introduza o volume de calda, velocidade e largura para calcular o débito total.');
       } else if (definition.id === 'calc_eppo') {
         defaultStatusMsg = t('eppo.enterDataPrompt', 'Introduza as dimensões da parcela e coeficiente para calcular o volume EPPO.');
+      } else if (definition.id === 'calc_calibracao_pulverizador') {
+        defaultStatusMsg = activeModeId === 'lwa'
+          ? t('calibracaoPulverizador.enterDataPromptLwa', 'Introduza a altura e a distância entrelinhas para calcular o LWA.')
+          : t('calibracaoPulverizador.enterDataPromptTrv', 'Introduza a altura, largura e entrelinha para calcular o TRV e calda.');
       }
 
       const primaryLabel = definition.results[0]?.label || 'Resultado';
@@ -731,7 +1023,22 @@ export const UniversalCalculatorTemplate: React.FC<UniversalCalculatorTemplatePr
         statusMessage: defaultStatusMsg
       };
     },
-    [definition, activeModeId, fieldValues, fieldUnits, showNozzleCalculation, t]
+    [
+      definition,
+      activeModeId,
+      fieldValues,
+      fieldUnits,
+      showNozzleCalculation,
+      isCalibracaoPulverizador,
+      calibracaoCulture,
+      calibracaoConduction,
+      calibracaoPhenology,
+      calibracaoDensity,
+      calibracaoThickness,
+      calibracaoStage,
+      useManualAdoptedVolumeInLwa,
+      t
+    ]
   );
 
   const handleUnifiedKeypadConfirm = (
@@ -767,6 +1074,17 @@ export const UniversalCalculatorTemplate: React.FC<UniversalCalculatorTemplatePr
     });
 
     setIsUnifiedKeypadOpen(false);
+
+    if (isCalibracaoPulverizador) {
+      if ('workingWidthM' in confirmedFields) {
+        setCalibracaoWorkingWidthSource('manual');
+      } else if ('rowSpacingM' in confirmedFields && calibracaoWorkingWidthSource === 'auto-row-spacing') {
+        setFieldValues((prev) => ({
+          ...prev,
+          workingWidthM: confirmedFields['rowSpacingM'].value
+        }));
+      }
+    }
 
     if (isVolumeCaldaTrv && 'coeficienteVolumeCalda' in confirmedFields) {
       setSelectedDensityTier(null);
@@ -818,8 +1136,122 @@ export const UniversalCalculatorTemplate: React.FC<UniversalCalculatorTemplatePr
       };
     }
 
+    if (isCalibracaoPulverizador) {
+      if (calibracaoCulture) {
+        inputs['cultureId'] = {
+          rawValue: calibracaoCulture,
+          unit: '',
+          normalizedValue: 0,
+          dimension: 'text',
+          canonicalKey: 'crop_profile',
+          label: 'Cultura',
+          source: 'user_input',
+          localId: 'cultureId',
+          calculatorId: definition.id,
+          calculatorVersion: definition.version
+        };
+      }
+      if (calibracaoConduction) {
+        inputs['conductionId'] = {
+          rawValue: calibracaoConduction,
+          unit: '',
+          normalizedValue: 0,
+          dimension: 'text',
+          canonicalKey: 'training_system',
+          label: 'Modo de Condução',
+          source: 'user_input',
+          localId: 'conductionId',
+          calculatorId: definition.id,
+          calculatorVersion: definition.version
+        };
+      }
+      if (calibracaoPhenology) {
+        inputs['phenologyId'] = {
+          rawValue: calibracaoPhenology,
+          unit: '',
+          normalizedValue: 0,
+          dimension: 'text',
+          canonicalKey: 'phenology_stage',
+          label: 'Estado Fenológico',
+          source: 'user_input',
+          localId: 'phenologyId',
+          calculatorId: definition.id,
+          calculatorVersion: definition.version
+        };
+      }
+      if (calibracaoDensity) {
+        inputs['canopyDensity'] = {
+          rawValue: calibracaoDensity,
+          unit: '',
+          normalizedValue: 0,
+          dimension: 'text',
+          canonicalKey: 'canopy_density',
+          label: 'Densidade Foliar',
+          source: 'user_input',
+          localId: 'canopyDensity',
+          calculatorId: definition.id,
+          calculatorVersion: definition.version
+        };
+      }
+      if (calibracaoThickness) {
+        inputs['canopyThickness'] = {
+          rawValue: calibracaoThickness,
+          unit: '',
+          normalizedValue: 0,
+          dimension: 'text',
+          canonicalKey: 'canopy_thickness',
+          label: 'Espessura da Sebe',
+          source: 'user_input',
+          localId: 'canopyThickness',
+          calculatorId: definition.id,
+          calculatorVersion: definition.version
+        };
+      }
+      if (calibracaoStage) {
+        inputs['phenologyStage'] = {
+          rawValue: calibracaoStage,
+          unit: '',
+          normalizedValue: 0,
+          dimension: 'text',
+          canonicalKey: 'phenology_interval',
+          label: 'Intervalo Fenológico',
+          source: 'user_input',
+          localId: 'phenologyStage',
+          calculatorId: definition.id,
+          calculatorVersion: definition.version
+        };
+      }
+      if (useManualAdoptedVolumeInLwa) {
+        inputs['useManualAdoptedVolumeInLwa'] = {
+          rawValue: 'true',
+          unit: '',
+          normalizedValue: 1,
+          dimension: 'text',
+          canonicalKey: 'lwa_manual_volume_override',
+          label: 'Usar Volume Adotado Manual',
+          source: 'user_input',
+          localId: 'useManualAdoptedVolumeInLwa',
+          calculatorId: definition.id,
+          calculatorVersion: definition.version
+        };
+      }
+    }
+
     return inputs;
-  }, [definition, fieldValues, fieldUnits, activeModeId]);
+  }, [
+    definition,
+    fieldValues,
+    fieldUnits,
+    activeModeId,
+    isCalibracaoPulverizador,
+    calibracaoCulture,
+    calibracaoConduction,
+    calibracaoPhenology,
+    calibracaoDensity,
+    calibracaoThickness,
+    calibracaoStage,
+    useManualAdoptedVolumeInLwa
+  ]);
 
   // 10. Execução do Motor de Cálculo em Tempo Real
   const structuredOutputs = useMemo<Record<string, StructuredValue>>(() => {
@@ -839,9 +1271,78 @@ export const UniversalCalculatorTemplate: React.FC<UniversalCalculatorTemplatePr
     return { isValid: true, errors: {}, warnings: {} };
   }, [definition, structuredInputs]);
 
+  // Título e avisos amigáveis para a caixa de validação dedicada ("Atenção aos dados introduzidos")
+  const validationCardTitle = t(
+    'calibracaoPulverizador.validation.title',
+    t('validationNotes.title', 'Atenção aos dados introduzidos')
+  );
+
+  const { bulletNotices, legalNote } = useMemo(() => {
+    if (!validation.warnings || Object.keys(validation.warnings).length === 0) {
+      return { bulletNotices: [], legalNote: null };
+    }
+
+    const notices: { key: string; message: string }[] = [];
+    const seenMessages = new Set<string>();
+    let legal: string | null = null;
+
+    for (const [key, rawMsg] of Object.entries(validation.warnings)) {
+      const resolved = resolveFriendlyValidationMessage(rawMsg || key, t);
+      if (!resolved) continue;
+
+      // Se for a nota legal (labelPrevalence ou general)
+      if (
+        key === 'general' ||
+        key.startsWith('general:') ||
+        rawMsg === 'calibracaoPulverizador.warnings.labelPrevalence' ||
+        resolved.includes('autorização de venda prevalecem sempre') ||
+        resolved.startsWith('Nota: As indicações do rótulo')
+      ) {
+        legal = resolved;
+        continue;
+      }
+
+      // Deduplicação de mensagens
+      if (!seenMessages.has(resolved)) {
+        seenMessages.add(resolved);
+        notices.push({ key, message: resolved });
+      }
+    }
+
+    return { bulletNotices: notices, legalNote: legal };
+  }, [validation.warnings, t]);
+
   // 12. Resolução Dinâmica de Microlearning de Resultados por Modo
   const resolvedResults = useMemo(() => {
-    return definition.results.map((res) => {
+    let list = definition.results;
+    if (definition.modes && activeModeId) {
+      const modeDef = definition.modes.find((m) => m.id === activeModeId);
+      if (modeDef?.resultIds && modeDef.resultIds.length > 0) {
+        list = list.filter((r) => modeDef.resultIds!.includes(r.id));
+      }
+    }
+
+    if (isCalibracaoPulverizador) {
+      if (activeModeId === 'lwa') {
+        list = list.filter((r) => r.id !== 'trvM3PerHa');
+        if (!structuredOutputs['volCaldaAdotado']) {
+          list = list.filter((r) => r.id !== 'volCaldaAdotado');
+        }
+      } else if (activeModeId === 'trv') {
+        list = list.filter((r) => r.id !== 'lwaHa' && r.id !== 'taxaLwa' && r.id !== 'volCaldaAdotado');
+      }
+      if (!structuredOutputs['caudalMedioPorBico']) {
+        list = list.filter((r) => r.id !== 'caudalMedioPorBico');
+      }
+      if (!structuredOutputs['caudalTotalNecessario']) {
+        list = list.filter((r) => r.id !== 'caudalTotalNecessario');
+      }
+      if (!structuredOutputs['tempoTeoricoPorHa']) {
+        list = list.filter((r) => r.id !== 'tempoTeoricoPorHa');
+      }
+    }
+
+    return list.map((res) => {
       let resolvedHelpFile = res.helpFile;
       if (res.helpFileByMode && activeModeId && res.helpFileByMode[activeModeId]) {
         resolvedHelpFile = res.helpFileByMode[activeModeId];
@@ -851,7 +1352,7 @@ export const UniversalCalculatorTemplate: React.FC<UniversalCalculatorTemplatePr
         helpFile: resolvedHelpFile
       };
     });
-  }, [definition.results, activeModeId]);
+  }, [definition.results, definition.modes, activeModeId, isCalibracaoPulverizador, structuredOutputs]);
 
   const primaryResultDef = resolvedResults[0];
   const primaryOutput = primaryResultDef ? structuredOutputs[primaryResultDef.id] : undefined;
@@ -883,10 +1384,12 @@ export const UniversalCalculatorTemplate: React.FC<UniversalCalculatorTemplatePr
         }
       }
 
+      const hasValue = validation.isValid && out !== undefined && out.rawValue !== undefined && out.rawValue !== null;
+
       map[resDef.id] = {
-        value: validation.isValid && out ? out.rawValue : 0,
-        unit: out ? out.unit : resDef.defaultUnit,
-        subValue: validation.isValid ? (subVal ?? undefined) : undefined,
+        value: hasValue ? out.rawValue : (validation.isValid ? 'A completar dados' : 0),
+        unit: hasValue ? out.unit : (validation.isValid ? '' : resDef.defaultUnit),
+        subValue: validation.isValid && hasValue ? (subVal ?? undefined) : undefined,
         subUnit: subUnit ?? undefined,
         hasHelp: !!resDef.helpFile,
         isInvalid: !validation.isValid,
@@ -1011,7 +1514,7 @@ export const UniversalCalculatorTemplate: React.FC<UniversalCalculatorTemplatePr
   const currentModeLabel = definition.modes?.find((m) => m.id === activeModeId)?.label ?? badgeMode;
 
   return (
-    <div className="space-y-6 animate-fade-in calculator-content-spacing">
+    <div className="space-y-3.5 sm:space-y-4 animate-fade-in calculator-content-spacing">
       {/* 1. Barra de Topo Oficial */}
       <CalculatorHeader
         title={definition.title}
@@ -1095,6 +1598,13 @@ export const UniversalCalculatorTemplate: React.FC<UniversalCalculatorTemplatePr
                       {t('eppo.parcelAreaLabel', 'Área da Parcela')}: {formatNumberForDisplay(Number(outputValues['areaParcela'].value))} ha ({formatNumberForDisplay(Number(outputValues['areaParcela'].subValue || 0))} m²)
                     </span>
                   )}
+                  {definition.id === 'calc_calibracao_pulverizador' && (
+                    <span className="text-[11px] text-[#3CA64C] font-semibold block truncate">
+                      {activeModeId === 'lwa'
+                        ? `${t('calibracaoPulverizador.methods.lwa.label', 'LWA')} · ${formatNumberForDisplay(Number(outputValues['lwaHa']?.value || outputValues['primaryResult']?.subValue || 0))} m²/ha${outputValues['taxaLwa']?.value ? ` · ${outputValues['taxaLwa']?.value} L/10 000 m²` : ''}`
+                        : `${t('calibracaoPulverizador.methods.trv.label', 'TRV')} · ${formatNumberForDisplay(Number(outputValues['trvM3PerHa']?.value || 0))} m³/ha`}
+                    </span>
+                  )}
                   {primaryOutput?.subValue !== undefined && definition.id !== 'calc_debito_total' && (
                     <span className="text-[10.5px] text-slate-300 block truncate">
                       {t('unifiedKeypad.productEquivalence', 'Equivalente a')} {formatNumberForDisplay(Number(primaryOutput.subValue))} {primaryOutput.subUnit}{['mL', 'g', 'L', 'kg'].includes(primaryOutput.subUnit || '') ? ` ${t('unifiedKeypad.ofProduct', 'de produto')}` : ''}
@@ -1116,6 +1626,8 @@ export const UniversalCalculatorTemplate: React.FC<UniversalCalculatorTemplatePr
                       ? t('debitoTotal.enterDataPrompt', 'Introduza o volume de calda, velocidade e largura para calcular o débito total.')
                       : definition.id === 'calc_eppo'
                       ? t('eppo.enterDataPrompt', 'Introduza as dimensões da parcela e coeficiente para calcular o volume EPPO.')
+                      : definition.id === 'calc_calibracao_pulverizador'
+                      ? t('calibracaoPulverizador.enterDataPrompt', 'Introduza a geometria da vegetação para planear o volume e produto.')
                       : t('unifiedKeypad.enterDataPrompt', 'Introduza os dados para ver o resultado')}
                   </span>
                 </div>
@@ -1166,20 +1678,68 @@ export const UniversalCalculatorTemplate: React.FC<UniversalCalculatorTemplatePr
 
             {/* Seletor de Critério de Largura (calc_debito_total) em Mobile */}
             {isDebitoTotal && (
-              <WorkingWidthCriteriaSelector
-                selectedCriterion={
-                  (fieldValues['baseLargura'] === 'row_spacing' ||
-                  fieldValues['baseLargura'] === 'effective_treated_band' ||
-                  fieldValues['baseLargura'] === 'boom_total_width')
-                    ? (fieldValues['baseLargura'] as WorkingWidthCriterionId)
-                    : 'boom_total_width'
-                }
-                onSelectCriterion={(crit) => handleFieldChange('baseLargura', crit, '')}
-                isDesktop={false}
-              />
+              <>
+                <WorkingWidthCriteriaSelector
+                  selectedCriterion={
+                    (fieldValues['baseLargura'] === 'row_spacing' ||
+                    fieldValues['baseLargura'] === 'effective_treated_band' ||
+                    fieldValues['baseLargura'] === 'boom_total_width')
+                      ? (fieldValues['baseLargura'] as WorkingWidthCriterionId)
+                      : 'boom_total_width'
+                  }
+                  onSelectCriterion={(crit) => handleFieldChange('baseLargura', crit, '')}
+                  isDesktop={false}
+                />
+                <div className="flex items-center justify-between px-1">
+                  <button
+                    type="button"
+                    onClick={() => setShowNozzleCalculation((prev) => !prev)}
+                    className={`min-h-[44px] px-3.5 py-2.5 rounded-2xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 ${
+                      showNozzleCalculation
+                        ? 'bg-slate-100 hover:bg-slate-200 text-slate-700'
+                        : 'bg-[#114037]/10 hover:bg-[#114037]/15 text-[#114037] border border-[#114037]/20'
+                    }`}
+                    aria-pressed={showNozzleCalculation}
+                  >
+                    <span className="text-sm font-extrabold">{showNozzleCalculation ? '−' : '+'}</span>
+                    <span>
+                      {showNozzleCalculation
+                        ? t('debitoTotal.assistance.nozzleCalculation.hide', 'Ocultar cálculo por bico')
+                        : t('debitoTotal.assistance.nozzleCalculation.show', 'Calcular débito por bico (opcional)')}
+                    </span>
+                  </button>
+                </div>
+              </>
             )}
+            {/* Seletor de Método e Contexto de Calibração de Pulverizador (calc_calibracao_pulverizador) em Mobile */}
+            {isCalibracaoPulverizador && (
+              <div className="space-y-3">
+                <CalibracaoMetodoSelector
+                  selectedMethod={activeModeId as CalibracaoMetodo}
+                  onSelectMethod={(m: CalibracaoMetodo) => handleModeChange(m)}
+                />
+                <CalibracaoContextSelectors
+                  method={activeModeId as CalibracaoMetodo}
+                  cultureId={calibracaoCulture}
+                  conductionId={calibracaoConduction}
+                  phenologyId={calibracaoPhenology}
+                  canopyDensity={calibracaoDensity}
+                  canopyThickness={calibracaoThickness}
+                  phenologyStage={calibracaoStage}
+                  useManualAdoptedVolumeInLwa={useManualAdoptedVolumeInLwa}
+                  onSelectCulture={setCalibracaoCulture}
+                  onSelectConduction={setCalibracaoConduction}
+                  onSelectPhenology={setCalibracaoPhenology}
+                  onSelectCanopyDensity={setCalibracaoDensity}
+                  onSelectCanopyThickness={setCalibracaoThickness}
+                  onSelectPhenologyStage={setCalibracaoStage}
+                  onToggleManualAdoptedVolumeInLwa={setUseManualAdoptedVolumeInLwa}
+                />
+              </div>
+            )}
+
             {/* Seletor de Modo Mobile (se existirem modos declarados) */}
-            {definition.modes && definition.modes.length > 1 && (
+            {definition.modes && definition.modes.length > 1 && !isCalibracaoPulverizador && (
               <div className="bg-white rounded-2xl p-2 sm:p-2.5 border border-slate-200/80 shadow-xs flex items-center justify-between gap-2">
                 <span className="text-xs font-bold text-slate-600 shrink-0">Modo:</span>
                 <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none">
@@ -1230,7 +1790,6 @@ export const UniversalCalculatorTemplate: React.FC<UniversalCalculatorTemplatePr
                       ? formatNumberForDisplay(Number(rawVal))
                       : '—';
                   const hasError = validation.errors && validation.errors[f.id];
-                  const hasWarning = validation.warnings && validation.warnings[f.id];
 
                   return (
                     <button
@@ -1241,8 +1800,6 @@ export const UniversalCalculatorTemplate: React.FC<UniversalCalculatorTemplatePr
                       className={`w-full min-h-[44px] sm:min-h-[48px] px-3 py-2 rounded-xl border flex items-center justify-between text-left transition-all cursor-pointer touch-target focus-visible:outline-2 focus-visible:outline-[#114037] ${
                         hasError
                           ? 'border-rose-300 bg-rose-50/60'
-                          : hasWarning
-                          ? 'border-amber-300 bg-amber-50/60'
                           : 'border-slate-200 bg-slate-50/70 hover:bg-slate-100 active:bg-slate-200/70'
                       }`}
                     >
@@ -1250,11 +1807,11 @@ export const UniversalCalculatorTemplate: React.FC<UniversalCalculatorTemplatePr
                         <span className="text-xs sm:text-sm font-semibold text-slate-800 block truncate">
                           {f.label}
                         </span>
-                        {hasError && (
+                        {hasError ? (
                           <span className="text-[10.5px] font-medium text-rose-600 block truncate mt-0.5">
-                            {hasError}
+                            {resolveFriendlyValidationMessage(hasError, t)}
                           </span>
-                        )}
+                        ) : null}
                       </div>
 
                       <div className="flex items-center gap-2 shrink-0">
@@ -1277,30 +1834,113 @@ export const UniversalCalculatorTemplate: React.FC<UniversalCalculatorTemplatePr
               </div>
             </div>
 
-            {/* Caixa Dedicada de Notas de Validação Agronómica e Técnica */}
-            {validation.warnings && Object.keys(validation.warnings).length > 0 && (
+            {/* Caixa Dedicada: Atenção aos dados introduzidos */}
+            {bulletNotices.length > 0 && (
               <div
                 role="note"
-                className="bg-amber-50 border border-amber-200/90 rounded-2xl p-3.5 sm:p-4 text-amber-900 shadow-2xs space-y-2 animate-fade-in"
+                aria-label={validationCardTitle}
+                className="bg-amber-50 border border-amber-200/90 rounded-2xl p-4 text-amber-900 shadow-2xs space-y-3 animate-fade-in"
               >
                 <div className="flex items-center gap-2 font-bold text-xs sm:text-sm text-amber-950">
                   <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" aria-hidden="true" />
-                  <span>{t('validationNotes.title', 'Notas de Validação')}</span>
+                  <span>{validationCardTitle}</span>
                 </div>
-                <div className="space-y-1.5 pl-6 text-xs leading-relaxed text-amber-900">
-                  {Object.entries(validation.warnings).map(([fId, warnMsg]) => {
-                    const fieldDef = definition.fields.find((f) => f.id === fId);
-                    const fieldLabel = fieldDef ? fieldDef.label : fId;
-                    return (
-                      <p key={fId}>
-                        <span className="font-bold">{fieldLabel}:</span>{' '}
-                        <span>{t(warnMsg, warnMsg)}</span>
-                      </p>
-                    );
-                  })}
-                </div>
+                <ul className="space-y-2 text-xs leading-relaxed text-amber-900 list-disc pl-5">
+                  {bulletNotices.map((notice, idx) => (
+                    <li key={notice.key || idx} className="pl-0.5">
+                      <span>{notice.message}</span>
+                    </li>
+                  ))}
+                </ul>
+                {legalNote && (
+                  <div className="pt-2 border-t border-amber-200/70 text-[11.5px] leading-relaxed text-amber-800/90 font-medium">
+                    <span>{legalNote}</span>
+                  </div>
+                )}
               </div>
             )}
+
+            {/* Secção da Fase B — Ajuste Operacional (calc_calibracao_pulverizador) em Mobile */}
+            {isCalibracaoPulverizador && (
+              <CalibracaoPhaseBSection
+                travelSpeedKmH={fieldValues['travelSpeedKmH']}
+                workingWidthM={fieldValues['workingWidthM']}
+                activeNozzleCount={fieldValues['activeNozzleCount']}
+                workingWidthSource={calibracaoWorkingWidthSource}
+                rowSpacingM={fieldValues['rowSpacingM']}
+                phaseAVolume={
+                  structuredOutputs['volCaldaAdotado']?.rawValue !== undefined
+                    ? Number(structuredOutputs['volCaldaAdotado'].rawValue)
+                    : structuredOutputs['volCaldaRecomendado']?.rawValue !== undefined
+                    ? Number(structuredOutputs['volCaldaRecomendado'].rawValue)
+                    : structuredOutputs['volCaldaSugerido']?.rawValue !== undefined
+                    ? Number(structuredOutputs['volCaldaSugerido'].rawValue)
+                    : undefined
+                }
+                totalFlowRequiredLMin={
+                  structuredOutputs['caudalTotalNecessario']?.rawValue !== undefined
+                    ? Number(structuredOutputs['caudalTotalNecessario'].rawValue)
+                    : undefined
+                }
+                flowPerNozzleLMin={
+                  structuredOutputs['caudalMedioPorBico']?.rawValue !== undefined
+                    ? Number(structuredOutputs['caudalMedioPorBico'].rawValue)
+                    : undefined
+                }
+                theoreticalTimePerHaMinutes={
+                  structuredOutputs['tempoTeoricoPorHa']?.rawValue !== undefined
+                    ? Number(structuredOutputs['tempoTeoricoPorHa'].rawValue)
+                    : undefined
+                }
+                phaseBState={structuredOutputs['phaseBState']?.rawValue as any}
+                onSpeedChange={(speed) => handleFieldChange('travelSpeedKmH', speed, 'km/h')}
+                onWidthChange={(width, source) => {
+                  if (source) setCalibracaoWorkingWidthSource(source);
+                  handleFieldChange('workingWidthM', width, 'm');
+                }}
+                onOpenKeypad={handleOpenUnifiedKeypad}
+                isDesktop={false}
+              />
+            )}
+
+            {/* Secção da Fase C — Seleção de bicos e pressão de trabalho (calc_calibracao_pulverizador) em Mobile */}
+            {isCalibracaoPulverizador && (
+              <CalibracaoPhaseCNozzleSelectionSection
+                phaseAVolume={
+                  structuredOutputs['volCaldaAdotado']?.rawValue !== undefined
+                    ? Number(structuredOutputs['volCaldaAdotado'].rawValue)
+                    : structuredOutputs['volCaldaRecomendado']?.rawValue !== undefined
+                    ? Number(structuredOutputs['volCaldaRecomendado'].rawValue)
+                    : structuredOutputs['volCaldaSugerido']?.rawValue !== undefined
+                    ? Number(structuredOutputs['volCaldaSugerido'].rawValue)
+                    : undefined
+                }
+                travelSpeedKmH={
+                  fieldValues['travelSpeedKmH'] !== undefined && fieldValues['travelSpeedKmH'] !== ''
+                    ? Number(fieldValues['travelSpeedKmH'])
+                    : undefined
+                }
+                workingWidthM={
+                  fieldValues['workingWidthM'] !== undefined && fieldValues['workingWidthM'] !== ''
+                    ? Number(fieldValues['workingWidthM'])
+                    : undefined
+                }
+                activeNozzleCount={fieldValues['activeNozzleCount']}
+                totalFlowRequiredLMin={
+                  structuredOutputs['caudalTotalNecessario']?.rawValue !== undefined
+                    ? Number(structuredOutputs['caudalTotalNecessario'].rawValue)
+                    : undefined
+                }
+                flowPerNozzleLMin={
+                  structuredOutputs['caudalMedioPorBico']?.rawValue !== undefined
+                    ? Number(structuredOutputs['caudalMedioPorBico'].rawValue)
+                    : undefined
+                }
+                onNozzleCountChange={handleNozzleCountChange}
+                isDesktop={false}
+              />
+            )}
+
 
             {/* Ação e Bloco de Divulgação Progressiva do Cálculo por Bico (calc_debito_total) em Mobile */}
             {isDebitoTotal && (
@@ -1408,9 +2048,22 @@ export const UniversalCalculatorTemplate: React.FC<UniversalCalculatorTemplatePr
             )}
           </div>
         ) : (
-          /* Desktop View: Grid 5/12 + 7/12 com inputs tradicionais e resultados */
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-            <div className="lg:col-span-5 space-y-6">
+          /* Desktop View: Cartão de Resultados Superior em Largura Total seguido de Entradas Empilhadas */
+          <div className="space-y-3.5 sm:space-y-4">
+            {/* 1. Cartão de Resultados Superior em Largura Total */}
+            <CalculatorResultsPanel
+              headerTitle={`RESULTADO DO CÁLCULO DE ${definition.category.toUpperCase()}`}
+              badgeMode={currentModeLabel}
+              results={resolvedResults}
+              outputValues={outputValues}
+              onSave={handleSave}
+              isSaving={isSaving}
+              saveButtonLabel={saveButtonLabel}
+              onOpenResultHelp={onOpenResultHelp}
+            />
+
+            {/* 2. Cartões de Entrada de Dados Empilhados por Baixo */}
+            <div className="space-y-3.5 sm:space-y-4">
               {/* Assistência Agronómica de Densidade de Copa (calc_volume_calda_trv) em Desktop */}
               {isVolumeCaldaTrv && (
                 <CanopyDensitySelector
@@ -1505,22 +2158,182 @@ export const UniversalCalculatorTemplate: React.FC<UniversalCalculatorTemplatePr
                 </div>
               )}
 
+              {/* Seletor de Método e Contexto de Calibração de Pulverizador (calc_calibracao_pulverizador) em Desktop */}
+              {isCalibracaoPulverizador && (
+                <div className="space-y-4">
+                  <CalibracaoMetodoSelector
+                    selectedMethod={activeModeId as CalibracaoMetodo}
+                    onSelectMethod={(m: CalibracaoMetodo) => handleModeChange(m)}
+                  />
+                  <CalibracaoContextSelectors
+                    method={activeModeId as CalibracaoMetodo}
+                    cultureId={calibracaoCulture}
+                    conductionId={calibracaoConduction}
+                    phenologyId={calibracaoPhenology}
+                    canopyDensity={calibracaoDensity}
+                    canopyThickness={calibracaoThickness}
+                    phenologyStage={calibracaoStage}
+                    useManualAdoptedVolumeInLwa={useManualAdoptedVolumeInLwa}
+                    onSelectCulture={setCalibracaoCulture}
+                    onSelectConduction={setCalibracaoConduction}
+                    onSelectPhenology={setCalibracaoPhenology}
+                    onSelectCanopyDensity={setCalibracaoDensity}
+                    onSelectCanopyThickness={setCalibracaoThickness}
+                    onSelectPhenologyStage={setCalibracaoStage}
+                    onToggleManualAdoptedVolumeInLwa={setUseManualAdoptedVolumeInLwa}
+                  />
+                </div>
+              )}
+
+              {/* Seletor de Modo Desktop (se existirem modos declarados fora da Calibração) */}
+              {definition.modes && definition.modes.length > 1 && !isCalibracaoPulverizador && (
+                <div className="bg-white rounded-2xl p-3 border border-slate-200/80 shadow-xs flex items-center justify-between gap-3">
+                  <span className="text-xs font-bold text-slate-600 shrink-0">Modo:</span>
+                  <div className="flex items-center gap-2">
+                    {definition.modes.map((m) => {
+                      const isSelected = activeModeId === m.id;
+                      return (
+                        <button
+                          key={m.id}
+                          type="button"
+                          onClick={() => handleModeChange(m.id)}
+                          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                            isSelected
+                              ? 'bg-[#114037] text-white shadow-xs'
+                              : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                          }`}
+                        >
+                          {m.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
               <CalculatorInputsPanel
                 title={definition.title}
                 subtitle={definition.subtitle}
                 generalHelpFile={definition.generalHelpFile}
-                modes={definition.modes}
+                modes={isCalibracaoPulverizador ? undefined : definition.modes}
                 activeModeId={activeModeId}
                 onModeChange={handleModeChange}
-                fields={isDebitoTotal ? currentActiveFields : definition.fields}
+                fields={currentActiveFields}
                 values={fieldValues}
                 units={fieldUnits}
                 onChange={handleFieldChange}
                 onOpenKeypad={handleOpenKeypad}
                 errors={validation.errors}
-                warnings={validation.warnings}
+                warnings={isCalibracaoPulverizador ? undefined : validation.warnings}
                 importedNotice={activeImportedNotice}
               />
+
+              {/* Caixa Dedicada de Validação em Desktop */}
+              {bulletNotices.length > 0 && (
+                <div
+                  role="note"
+                  aria-label={validationCardTitle}
+                  className="bg-amber-50 border border-amber-200/90 rounded-2xl p-4 text-amber-900 shadow-2xs space-y-3 animate-fade-in"
+                >
+                  <div className="flex items-center gap-2 font-bold text-xs sm:text-sm text-amber-950">
+                    <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" aria-hidden="true" />
+                    <span>{validationCardTitle}</span>
+                  </div>
+                  <ul className="space-y-2 text-xs leading-relaxed text-amber-900 list-disc pl-5">
+                    {bulletNotices.map((notice, idx) => (
+                      <li key={notice.key || idx} className="pl-0.5">
+                        <span>{notice.message}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  {legalNote && (
+                    <div className="pt-2 border-t border-amber-200/70 text-[11.5px] leading-relaxed text-amber-800/90 font-medium">
+                      <span>{legalNote}</span>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Secção da Fase B — Ajuste Operacional (calc_calibracao_pulverizador) em Desktop */}
+              {isCalibracaoPulverizador && (
+                <CalibracaoPhaseBSection
+                  travelSpeedKmH={fieldValues['travelSpeedKmH']}
+                  workingWidthM={fieldValues['workingWidthM']}
+                  activeNozzleCount={fieldValues['activeNozzleCount']}
+                  workingWidthSource={calibracaoWorkingWidthSource}
+                  rowSpacingM={fieldValues['rowSpacingM']}
+                  phaseAVolume={
+                    structuredOutputs['volCaldaAdotado']?.rawValue !== undefined
+                      ? Number(structuredOutputs['volCaldaAdotado'].rawValue)
+                      : structuredOutputs['volCaldaRecomendado']?.rawValue !== undefined
+                      ? Number(structuredOutputs['volCaldaRecomendado'].rawValue)
+                      : structuredOutputs['volCaldaSugerido']?.rawValue !== undefined
+                      ? Number(structuredOutputs['volCaldaSugerido'].rawValue)
+                      : undefined
+                  }
+                  totalFlowRequiredLMin={
+                    structuredOutputs['caudalTotalNecessario']?.rawValue !== undefined
+                      ? Number(structuredOutputs['caudalTotalNecessario'].rawValue)
+                      : undefined
+                  }
+                  flowPerNozzleLMin={
+                    structuredOutputs['caudalMedioPorBico']?.rawValue !== undefined
+                      ? Number(structuredOutputs['caudalMedioPorBico'].rawValue)
+                      : undefined
+                  }
+                  theoreticalTimePerHaMinutes={
+                    structuredOutputs['tempoTeoricoPorHa']?.rawValue !== undefined
+                      ? Number(structuredOutputs['tempoTeoricoPorHa'].rawValue)
+                      : undefined
+                  }
+                  phaseBState={structuredOutputs['phaseBState']?.rawValue as any}
+                  onSpeedChange={(speed) => handleFieldChange('travelSpeedKmH', speed, 'km/h')}
+                  onWidthChange={(width, source) => {
+                    if (source) setCalibracaoWorkingWidthSource(source);
+                    handleFieldChange('workingWidthM', width, 'm');
+                  }}
+                  onOpenKeypad={handleOpenUnifiedKeypad}
+                  isDesktop={true}
+                />
+              )}
+
+              {/* Secção da Fase C — Seleção de bicos e pressão de trabalho (calc_calibracao_pulverizador) em Desktop */}
+              {isCalibracaoPulverizador && (
+                <CalibracaoPhaseCNozzleSelectionSection
+                  phaseAVolume={
+                    structuredOutputs['volCaldaAdotado']?.rawValue !== undefined
+                      ? Number(structuredOutputs['volCaldaAdotado'].rawValue)
+                      : structuredOutputs['volCaldaRecomendado']?.rawValue !== undefined
+                      ? Number(structuredOutputs['volCaldaRecomendado'].rawValue)
+                      : structuredOutputs['volCaldaSugerido']?.rawValue !== undefined
+                      ? Number(structuredOutputs['volCaldaSugerido'].rawValue)
+                      : undefined
+                  }
+                  travelSpeedKmH={
+                    fieldValues['travelSpeedKmH'] !== undefined && fieldValues['travelSpeedKmH'] !== ''
+                      ? Number(fieldValues['travelSpeedKmH'])
+                      : undefined
+                  }
+                  workingWidthM={
+                    fieldValues['workingWidthM'] !== undefined && fieldValues['workingWidthM'] !== ''
+                      ? Number(fieldValues['workingWidthM'])
+                      : undefined
+                  }
+                  activeNozzleCount={fieldValues['activeNozzleCount']}
+                  totalFlowRequiredLMin={
+                    structuredOutputs['caudalTotalNecessario']?.rawValue !== undefined
+                      ? Number(structuredOutputs['caudalTotalNecessario'].rawValue)
+                      : undefined
+                  }
+                  flowPerNozzleLMin={
+                    structuredOutputs['caudalMedioPorBico']?.rawValue !== undefined
+                      ? Number(structuredOutputs['caudalMedioPorBico'].rawValue)
+                      : undefined
+                  }
+                  onNozzleCountChange={handleNozzleCountChange}
+                  isDesktop={true}
+                />
+              )}
 
               {unneededNotice && (
                 <div className="p-3.5 bg-amber-50 border border-amber-200 rounded-2xl flex items-start gap-2.5 text-xs text-amber-900 animate-fade-in">
@@ -1529,62 +2342,45 @@ export const UniversalCalculatorTemplate: React.FC<UniversalCalculatorTemplatePr
                 </div>
               )}
             </div>
-
-            <div className="lg:col-span-7 space-y-6">
-              <CalculatorResultsPanel
-                headerTitle={`RESULTADO DO CÁLCULO DE ${definition.category.toUpperCase()}`}
-                badgeMode={currentModeLabel}
-                results={resolvedResults}
-                outputValues={outputValues}
-                onSave={handleSave}
-                isSaving={isSaving}
-                saveButtonLabel={saveButtonLabel}
-                onOpenResultHelp={onOpenResultHelp}
-              />
-            </div>
           </div>
         )
       ) : (
-        /* Calculadoras Não-Piloto (Legadas / Fora da Fase 1): Grid Padrão Inalterado */
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-          <div className="lg:col-span-5 space-y-6">
-            <CalculatorInputsPanel
-              title={definition.title}
-              subtitle={definition.subtitle}
-              generalHelpFile={definition.generalHelpFile}
-              modes={definition.modes}
-              activeModeId={activeModeId}
-              onModeChange={handleModeChange}
-              fields={definition.fields}
-              values={fieldValues}
-              units={fieldUnits}
-              onChange={handleFieldChange}
-              onOpenKeypad={handleOpenKeypad}
-              errors={validation.errors}
-              warnings={validation.warnings}
-              importedNotice={activeImportedNotice}
-            />
+        /* Calculadoras Não-Piloto (Legadas / Fora da Fase 1): Resultados no Topo e Entradas Empilhadas */
+        <div className="space-y-3.5 sm:space-y-4">
+          <CalculatorResultsPanel
+            headerTitle={`RESULTADO DO CÁLCULO DE ${definition.category.toUpperCase()}`}
+            badgeMode={currentModeLabel}
+            results={resolvedResults}
+            outputValues={outputValues}
+            onSave={handleSave}
+            isSaving={isSaving}
+            saveButtonLabel={saveButtonLabel}
+            onOpenResultHelp={onOpenResultHelp}
+          />
 
-            {unneededNotice && (
-              <div className="p-3.5 bg-amber-50 border border-amber-200 rounded-2xl flex items-start gap-2.5 text-xs text-amber-900 animate-fade-in">
-                <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
-                <span className="font-semibold leading-relaxed">{unneededNotice}</span>
-              </div>
-            )}
-          </div>
+          <CalculatorInputsPanel
+            title={definition.title}
+            subtitle={definition.subtitle}
+            generalHelpFile={definition.generalHelpFile}
+            modes={definition.modes}
+            activeModeId={activeModeId}
+            onModeChange={handleModeChange}
+            fields={definition.fields}
+            values={fieldValues}
+            units={fieldUnits}
+            onChange={handleFieldChange}
+            onOpenKeypad={handleOpenKeypad}
+            errors={validation.errors}
+            warnings={validation.warnings}
+            importedNotice={activeImportedNotice}
+          />
 
-          <div className="lg:col-span-7 space-y-6">
-            <CalculatorResultsPanel
-              headerTitle={`RESULTADO DO CÁLCULO DE ${definition.category.toUpperCase()}`}
-              badgeMode={currentModeLabel}
-              results={resolvedResults}
-              outputValues={outputValues}
-              onSave={handleSave}
-              isSaving={isSaving}
-              saveButtonLabel={saveButtonLabel}
-              onOpenResultHelp={onOpenResultHelp}
-            />
-          </div>
+          {unneededNotice && (
+            <div className="p-3.5 bg-amber-50 border border-amber-200 rounded-2xl flex items-start gap-2.5 text-xs text-amber-900 animate-fade-in">
+              <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+              <span className="font-semibold leading-relaxed">{unneededNotice}</span>
+            </div>
+          )}
         </div>
       )}
 

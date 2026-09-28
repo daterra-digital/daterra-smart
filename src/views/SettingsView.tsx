@@ -3,7 +3,8 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { 
   User, Bell, Database, HelpCircle, Info, 
   Download, Upload, CheckCircle2, 
-  AlertTriangle, Globe, ShieldAlert
+  AlertTriangle, Globe, ShieldAlert,
+  Building2, Palette, Image as ImageIcon
 } from 'lucide-react';
 import { db } from '../db/db';
 import { supabase } from '../lib/supabaseClient';
@@ -13,6 +14,12 @@ import { MicrolearningModal } from '../components/MicrolearningModal';
 import { HelpView } from './HelpView';
 import { AboutView } from './AboutView';
 import type { Profile } from '../types/profile';
+import type { CoBrandingConfig } from '../features/smart-debito/types';
+import {
+  getStoredCoBrandingConfig,
+  saveStoredCoBrandingConfig,
+  PRESET_CO_BRANDING_PALETTES
+} from '../features/smart-debito/coBrandingStorage';
 
 type SettingsSubmenu = 'perfil' | 'preferencias' | 'notificacoes' | 'gestao_dados' | 'ajuda' | 'sobre';
 
@@ -75,6 +82,70 @@ export const SettingsView: React.FC = () => {
   const [address, setAddress] = useState('');
   const [postalCode, setPostalCode] = useState('');
   const [city, setCity] = useState('');
+
+  // ---------------------------------------------------------------------------
+  // ESTADOS 1.1: CO-BRANDING E PERSONALIZAÇÃO INSTITUCIONAL
+  // ---------------------------------------------------------------------------
+  const [coBranding, setCoBranding] = useState<CoBrandingConfig>(() => getStoredCoBrandingConfig());
+  const [originalCoBranding, setOriginalCoBranding] = useState<CoBrandingConfig>(() => getStoredCoBrandingConfig());
+  const [coBrandingFeedback, setCoBrandingFeedback] = useState<string | null>(null);
+  const [isSavingCoBranding, setIsSavingCoBranding] = useState(false);
+
+  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      const dataUri = evt.target?.result as string;
+      if (dataUri) {
+        setCoBranding((prev) => ({ ...prev, logoUrl: dataUri }));
+      }
+    };
+    reader.readAsDataURL(file);
+    e.target.value = '';
+  };
+
+  const handleApplyPalette = (palette: (typeof PRESET_CO_BRANDING_PALETTES)[0]) => {
+    setCoBranding((prev) => ({
+      ...prev,
+      primaryColor: palette.primary,
+      secondaryColor: palette.secondary,
+      textColor: palette.text
+    }));
+  };
+
+  const handleFillFromProfile = () => {
+    const fullPostal = postalCode ? `${postalCode}${city ? ' ' + city : ''}` : '';
+    setCoBranding((prev) => ({
+      ...prev,
+      companyName: company || `${firstName} ${lastName}`.trim() || prev.companyName,
+      address: address || prev.address,
+      postalCode: fullPostal || prev.postalCode,
+      phone: mobile || prev.phone,
+      email: email || prev.email
+    }));
+  };
+
+  const handleSaveCoBranding = (e: FormEvent) => {
+    e.preventDefault();
+    setIsSavingCoBranding(true);
+    try {
+      saveStoredCoBrandingConfig(coBranding);
+      setOriginalCoBranding({ ...coBranding });
+      setCoBrandingFeedback('Configuração de Co-Branding guardada com sucesso! Aplicada aos relatórios e ferramentas.');
+      setTimeout(() => setCoBrandingFeedback(null), 5000);
+    } catch {
+      setCoBrandingFeedback('Erro ao guardar a configuração de Co-Branding.');
+    } finally {
+      setIsSavingCoBranding(false);
+    }
+  };
+
+  const handleCancelCoBranding = () => {
+    setCoBranding({ ...originalCoBranding });
+    setCoBrandingFeedback(null);
+  };
 
   // Carregar perfil ao montar ou quando user.id alterar
   useEffect(() => {
@@ -592,6 +663,395 @@ export const SettingsView: React.FC = () => {
                   className="w-full sm:w-auto px-8 min-h-[48px] bg-[#3CA64C] hover:bg-[#359445] text-white font-black text-xs rounded-2xl shadow-md flex items-center justify-center gap-2 transition-all active:scale-95 disabled:opacity-50 touch-target"
                 >
                   <span>{isSaving ? 'A guardar…' : 'Guardar Alterações do Perfil'}</span>
+                </button>
+              </div>
+            </form>
+          </div>
+
+          {/* ========================================================================= */}
+          {/* CARTÃO 2: CO-BRANDING E PERSONALIZAÇÃO INSTITUCIONAL                     */}
+          {/* ========================================================================= */}
+          <div className="bg-white p-6 sm:p-8 rounded-3xl shadow-soft border border-slate-200 space-y-8">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
+              <div>
+                <h2 className="text-fluid-subtitle font-black text-[#114037]">
+                  Definições — Co-Branding & Personalização Institucional
+                </h2>
+                <p className="text-xs text-slate-500 font-medium mt-1">
+                  Configure o logotipo, paleta de cores e dados da sua organização para emissão de relatórios oficiais (como o Smart Débito ISO 16122).
+                </p>
+              </div>
+
+              {/* Interruptor Ativar / Desativar Co-Branding */}
+              <div className="flex items-center gap-3 shrink-0 bg-slate-50 px-4 py-2 rounded-2xl border border-slate-200">
+                <span className="text-xs font-bold text-slate-700">
+                  {coBranding.isEnabled ? 'Co-Branding Ativo' : 'Desativado'}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setCoBranding((prev) => ({ ...prev, isEnabled: !prev.isEnabled }))}
+                  className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                    coBranding.isEnabled ? 'bg-[#3CA64C]' : 'bg-slate-300'
+                  }`}
+                  aria-label="Ativar ou desativar Co-Branding"
+                >
+                  <span
+                    className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${
+                      coBranding.isEnabled ? 'translate-x-5' : 'translate-x-0'
+                    }`}
+                  />
+                </button>
+              </div>
+            </div>
+
+            {/* Mensagem de Feedback ao Guardar */}
+            {coBrandingFeedback && (
+              <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-2xl text-xs font-bold text-emerald-800 flex items-center gap-2 animate-fade-in">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                <span>{coBrandingFeedback}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleSaveCoBranding} className="space-y-8">
+              {/* SUB-BLOCO 1: Pré-visualização do Banner em Tempo Real */}
+              <div className="bg-slate-50/80 p-5 rounded-2xl border border-slate-200 space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-xs font-black uppercase tracking-wider text-[#1D734B]">
+                    Pré-visualização do Banner Oficial
+                  </h3>
+                  <span className="text-[11px] font-bold text-slate-500">
+                    Aparência nos Relatórios PDF e na Aplicação
+                  </span>
+                </div>
+
+                <div
+                  style={{
+                    backgroundColor: coBranding.primaryColor,
+                    color: coBranding.textColor,
+                    borderColor: coBranding.secondaryColor
+                  }}
+                  className="w-full rounded-2xl p-4 sm:p-5 border-2 shadow-xs transition-all relative overflow-hidden"
+                >
+                  {/* Friso decorativo na cor secundária */}
+                  <div
+                    style={{ backgroundColor: coBranding.secondaryColor }}
+                    className="absolute top-0 left-0 right-0 h-1.5"
+                  />
+
+                  <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                    {/* Logotipo em espaço dedicado branco + Dados da Empresa */}
+                    <div className="flex items-center gap-4 min-w-0">
+                      {/* Espaço dedicado com fundo branco puro para acomodar o logotipo */}
+                      <div
+                        style={{ borderColor: coBranding.secondaryColor }}
+                        className="h-14 w-32 sm:h-16 sm:w-36 bg-white rounded-xl p-1.5 flex items-center justify-center shrink-0 shadow-sm border border-slate-200 overflow-hidden"
+                      >
+                        {coBranding.logoUrl ? (
+                          <img
+                            src={coBranding.logoUrl}
+                            alt={coBranding.companyName}
+                            className="max-h-full max-w-full object-contain"
+                          />
+                        ) : (
+                          <div className="flex items-center gap-1.5 text-slate-400">
+                            <Building2 className="w-6 h-6 text-slate-400" />
+                            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Logótipo</span>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2">
+                          <h4 className="text-sm sm:text-base font-extrabold tracking-tight truncate">
+                            {coBranding.companyName || 'Nome da Empresa'}
+                          </h4>
+                          <span
+                            style={{
+                              backgroundColor: coBranding.secondaryColor,
+                              color: coBranding.textColor
+                            }}
+                            className="text-[9px] uppercase tracking-wider font-extrabold px-1.5 py-0.5 rounded shadow-xs shrink-0"
+                          >
+                            {coBranding.isEnabled ? 'Co-Branding Ativo' : 'Desativado'}
+                          </span>
+                        </div>
+
+                        <p className="text-xs opacity-90 mt-1 truncate">
+                          {coBranding.address || 'Morada da Empresa'}{coBranding.postalCode ? ` · ${coBranding.postalCode}` : ''}
+                        </p>
+
+                        <p className="text-[11px] opacity-80 mt-0.5 truncate">
+                          {coBranding.phone ? `Tel: ${coBranding.phone}` : ''}
+                          {coBranding.email ? ` | Email: ${coBranding.email}` : ''}
+                          {coBranding.website ? ` | ${coBranding.website}` : ''}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Tag no topo direito */}
+                    <div className="self-end md:self-center shrink-0">
+                      <span
+                        style={{ backgroundColor: coBranding.secondaryColor, color: '#FFFFFF' }}
+                        className="text-[10px] font-black tracking-wider uppercase px-2.5 py-1 rounded-lg shadow-xs"
+                      >
+                        INSPEÇÃO OFICIAL ISO 16122
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* SUB-BLOCO 2: Logotipo e Paleta de Cores */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                {/* Logotipo da Empresa */}
+                <div className="bg-slate-50/80 p-5 rounded-2xl border border-slate-200 space-y-4">
+                  <h3 className="text-xs font-black uppercase tracking-wider text-[#1D734B]">
+                    Logotipo da Empresa
+                  </h3>
+                  <p className="text-xs text-slate-600 leading-relaxed">
+                    Carregue o logotipo da sua organização (PNG, JPG ou SVG). O sistema enquadra-o automaticamente num espaço com fundo branco neutro no banner do PDF e da plataforma, acomodando ficheiros com ou sem fundo.
+                  </p>
+
+                  <div className="flex items-center gap-4 pt-1">
+                    {/* Miniatura com Fundo Branco */}
+                    <div className="h-16 w-32 bg-white rounded-xl border border-slate-300 p-1.5 flex items-center justify-center shrink-0 shadow-xs overflow-hidden">
+                      {coBranding.logoUrl ? (
+                        <img
+                          src={coBranding.logoUrl}
+                          alt="Logo"
+                          className="max-h-full max-w-full object-contain"
+                        />
+                      ) : (
+                        <div className="flex items-center gap-1.5 text-slate-400">
+                          <ImageIcon className="w-5 h-5" />
+                          <span className="text-[10px] font-bold uppercase tracking-wider">Sem Logo</span>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="flex flex-col gap-2">
+                      <label className="min-h-[44px] px-4 py-2 bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 rounded-xl font-bold text-xs flex items-center gap-2 cursor-pointer transition-colors shadow-xs touch-target">
+                        <Upload className="w-4 h-4 text-[#1D734B]" />
+                        <span>Carregar Ficheiro de Logotipo</span>
+                        <input
+                          type="file"
+                          accept="image/png,image/jpeg,image/svg+xml,image/webp"
+                          onChange={handleLogoUpload}
+                          className="hidden"
+                        />
+                      </label>
+
+                      {coBranding.logoUrl && (
+                        <button
+                          type="button"
+                          onClick={() => setCoBranding((prev) => ({ ...prev, logoUrl: null }))}
+                          className="text-xs text-rose-600 hover:text-rose-800 font-bold text-left hover:underline px-1"
+                        >
+                          Remover Logotipo Atual
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Paleta Dinâmica de 3 Cores */}
+                <div className="bg-slate-50/80 p-5 rounded-2xl border border-slate-200 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-xs font-black uppercase tracking-wider text-[#1D734B]">
+                      Paleta de 3 Cores
+                    </h3>
+                    <Palette className="w-4 h-4 text-[#1D734B]" />
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-3">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1.5">Cor Primária</label>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="color"
+                          value={coBranding.primaryColor}
+                          onChange={(e) => setCoBranding((prev) => ({ ...prev, primaryColor: e.target.value }))}
+                          className="w-10 h-10 rounded-lg border border-slate-300 cursor-pointer p-0.5 shrink-0 bg-white"
+                        />
+                        <input
+                          type="text"
+                          value={coBranding.primaryColor}
+                          onChange={(e) => setCoBranding((prev) => ({ ...prev, primaryColor: e.target.value }))}
+                          className="w-full min-h-[40px] px-2 py-1 bg-white border border-slate-300 rounded-lg text-xs font-mono font-bold uppercase"
+                        />
+                      </div>
+                      <span className="text-[10px] text-slate-500 mt-1 block">Fundo do Banner</span>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1.5">Cor Secundária</label>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="color"
+                          value={coBranding.secondaryColor}
+                          onChange={(e) => setCoBranding((prev) => ({ ...prev, secondaryColor: e.target.value }))}
+                          className="w-10 h-10 rounded-lg border border-slate-300 cursor-pointer p-0.5 shrink-0 bg-white"
+                        />
+                        <input
+                          type="text"
+                          value={coBranding.secondaryColor}
+                          onChange={(e) => setCoBranding((prev) => ({ ...prev, secondaryColor: e.target.value }))}
+                          className="w-full min-h-[40px] px-2 py-1 bg-white border border-slate-300 rounded-lg text-xs font-mono font-bold uppercase"
+                        />
+                      </div>
+                      <span className="text-[10px] text-slate-500 mt-1 block">Frisos e Selo</span>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1.5">Cor do Texto</label>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="color"
+                          value={coBranding.textColor}
+                          onChange={(e) => setCoBranding((prev) => ({ ...prev, textColor: e.target.value }))}
+                          className="w-10 h-10 rounded-lg border border-slate-300 cursor-pointer p-0.5 shrink-0 bg-white"
+                        />
+                        <input
+                          type="text"
+                          value={coBranding.textColor}
+                          onChange={(e) => setCoBranding((prev) => ({ ...prev, textColor: e.target.value }))}
+                          className="w-full min-h-[40px] px-2 py-1 bg-white border border-slate-300 rounded-lg text-xs font-mono font-bold uppercase"
+                        />
+                      </div>
+                      <span className="text-[10px] text-slate-500 mt-1 block">Texto do Banner</span>
+                    </div>
+                  </div>
+
+                  {/* Sugestões Rápidas de Paletas */}
+                  <div className="pt-1">
+                    <span className="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-2">
+                      Sugestões Rápidas:
+                    </span>
+                    <div className="flex flex-wrap gap-2">
+                      {PRESET_CO_BRANDING_PALETTES.map((pal) => (
+                        <button
+                          key={pal.name}
+                          type="button"
+                          onClick={() => handleApplyPalette(pal)}
+                          className="py-1.5 px-2.5 rounded-xl text-xs font-semibold bg-white border border-slate-300 hover:border-[#114037] text-slate-700 flex items-center gap-2 transition-colors shadow-2xs"
+                        >
+                          <span
+                            style={{ backgroundColor: pal.primary }}
+                            className="w-3 h-3 rounded-full inline-block border border-slate-300"
+                          />
+                          <span
+                            style={{ backgroundColor: pal.secondary }}
+                            className="w-3 h-3 rounded-full inline-block border border-slate-300"
+                          />
+                          <span>{pal.name}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* SUB-BLOCO 3: Dados Cadastrais da Empresa para o Banner */}
+              <div className="bg-slate-50/80 p-5 rounded-2xl border border-slate-200 space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <h3 className="text-xs font-black uppercase tracking-wider text-[#1D734B]">
+                    Dados da Empresa no Banner e Relatórios
+                  </h3>
+                  <button
+                    type="button"
+                    onClick={handleFillFromProfile}
+                    className="text-xs font-bold text-[#1D734B] hover:text-[#114037] hover:underline flex items-center gap-1.5 self-start sm:self-auto"
+                  >
+                    <span>Preencher com dados do Perfil de Utilizador</span>
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div className="sm:col-span-2 lg:col-span-1">
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5">Nome da Empresa</label>
+                    <input
+                      type="text"
+                      value={coBranding.companyName}
+                      onChange={(e) => setCoBranding((prev) => ({ ...prev, companyName: e.target.value }))}
+                      placeholder="Ex: AgroTec Serviços Lda"
+                      className="w-full min-h-[48px] px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-semibold outline-none focus:border-[#3CA64C]"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5">Morada</label>
+                    <input
+                      type="text"
+                      value={coBranding.address}
+                      onChange={(e) => setCoBranding((prev) => ({ ...prev, address: e.target.value }))}
+                      placeholder="Ex: Zona Industrial Lote 14"
+                      className="w-full min-h-[48px] px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-semibold outline-none focus:border-[#3CA64C]"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5">Código-Postal e Localidade</label>
+                    <input
+                      type="text"
+                      value={coBranding.postalCode}
+                      onChange={(e) => setCoBranding((prev) => ({ ...prev, postalCode: e.target.value }))}
+                      placeholder="Ex: 2000-001 Santarém"
+                      className="w-full min-h-[48px] px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-semibold outline-none focus:border-[#3CA64C]"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5">Telefone de Contacto</label>
+                    <input
+                      type="text"
+                      value={coBranding.phone}
+                      onChange={(e) => setCoBranding((prev) => ({ ...prev, phone: e.target.value }))}
+                      placeholder="Ex: +351 243 000 111"
+                      className="w-full min-h-[48px] px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-semibold input-mono outline-none focus:border-[#3CA64C]"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5">E-mail Institucional</label>
+                    <input
+                      type="email"
+                      value={coBranding.email}
+                      onChange={(e) => setCoBranding((prev) => ({ ...prev, email: e.target.value }))}
+                      placeholder="Ex: servicos@empresa.pt"
+                      className="w-full min-h-[48px] px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-semibold outline-none focus:border-[#3CA64C]"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5">Website</label>
+                    <input
+                      type="text"
+                      value={coBranding.website}
+                      onChange={(e) => setCoBranding((prev) => ({ ...prev, website: e.target.value }))}
+                      placeholder="Ex: www.empresa.pt"
+                      className="w-full min-h-[48px] px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-semibold outline-none focus:border-[#3CA64C]"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Botões de Ação do Cartão de Co-Branding */}
+              <div className="flex flex-col-reverse sm:flex-row items-center justify-end gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={handleCancelCoBranding}
+                  disabled={isSavingCoBranding}
+                  className="w-full sm:w-auto px-6 min-h-[48px] border border-slate-300 rounded-2xl font-bold text-xs text-slate-700 hover:bg-slate-100 disabled:opacity-50 transition-all touch-target"
+                >
+                  Cancelar
+                </button>
+
+                <button
+                  type="submit"
+                  disabled={isSavingCoBranding}
+                  className="w-full sm:w-auto px-8 min-h-[48px] bg-[#3CA64C] hover:bg-[#359445] text-white font-black text-xs rounded-2xl shadow-md flex items-center justify-center gap-2 transition-all active:scale-95 disabled:opacity-50 touch-target"
+                >
+                  <span>{isSavingCoBranding ? 'A guardar…' : 'Guardar Configuração de Co-Branding'}</span>
                 </button>
               </div>
             </form>

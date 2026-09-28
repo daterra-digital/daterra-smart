@@ -66,10 +66,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     let isMounted = true;
 
+    // Timeout defensivo para garantir que a interface nunca fica bloqueada se o Supabase não responder
+    const authTimeout = setTimeout(() => {
+      if (isMounted) {
+        setIsAuthLoading(false);
+      }
+    }, 3500);
+
     // 1. Obter sessão inicial persistida no cliente Supabase
     supabase.auth
       .getSession()
       .then(async ({ data: { session }, error }) => {
+        clearTimeout(authTimeout);
         if (error) {
           console.error('Erro ao recuperar a sessão Supabase:', error.message);
         }
@@ -85,6 +93,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
       })
       .catch((err) => {
+        clearTimeout(authTimeout);
         console.error('Falha inesperada na recuperação da sessão:', err);
         if (isMounted) {
           setIsAuthLoading(false);

@@ -22,8 +22,8 @@ export interface CalculatorFieldDefinition {
   defaultUnit: string;
   /** Unidades autorizadas na seleção do teclado/campo */
   allowedUnits: string[];
-  /** Valor numérico inicial sugerido */
-  defaultValue?: number;
+  /** Valor inicial sugerido (numérico ou string para campos select) */
+  defaultValue?: number | string;
   /** Atalhos rápidos (presets) de valores comuns (ex: [50, 100, 200, 500, 1000]) */
   presets?: number[];
   /** Limites agronómicos recomendados e regras de validação do teclado */
@@ -108,12 +108,14 @@ export interface CalculatorModeDefinition {
   id: string;
   /** Rótulo visual oficial do modo (ex: 'Planta Jovem', 'Planta Adulta') */
   label: string;
-  /** Ícone opcional ('sprout' | 'trees' | 'default') */
-  icon?: 'sprout' | 'trees' | 'default';
+  /** Ícone opcional ('sprout' | 'trees' | 'layers' | 'default') */
+  icon?: 'sprout' | 'trees' | 'layers' | 'default';
   /** Descrição explicativa do modo */
   description?: string;
   /** Lista ordenada de IDs dos campos de entrada ativos/visíveis neste modo */
   fieldIds: string[];
+  /** Lista ordenada opcional de IDs dos resultados ativos/visíveis neste modo */
+  resultIds?: string[];
 }
 
 /**

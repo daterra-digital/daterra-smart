@@ -94,7 +94,7 @@ export const HistoryDetailModal: React.FC<HistoryDetailModalProps> = ({
             <span className="text-[10px] font-extrabold uppercase tracking-widest text-daterra-accent block">
               {record.calculatorId === 'calc_concentracao'
                 ? 'CONCENTRAÇÃO DA CALDA'
-                : record.calculatorId === 'calc_velocidade_real' || record.calculatorId === 'calc_area_parede_foliar'
+                : record.calculatorId === 'calc_velocidade_real' || record.calculatorId === 'calc_area_parede_foliar' || record.calculatorId === 'calc_calibracao_pulverizador'
                 ? 'CALIBRAÇÃO'
                 : 'DETALHES DO CÁLCULO'}
             </span>
@@ -106,6 +106,16 @@ export const HistoryDetailModal: React.FC<HistoryDetailModalProps> = ({
                   ? 'Velocidade Real de Trabalho'
                   : record.calculatorId === 'calc_area_parede_foliar'
                   ? 'Área de Parede Foliar'
+                  : record.calculatorId === 'calc_volume_copa'
+                  ? 'Volume de Copa (TRV)'
+                  : record.calculatorId === 'calc_volume_calda_trv'
+                  ? 'Volume de Calda por TRV'
+                  : record.calculatorId === 'calc_debito_total'
+                  ? 'Débito Total do Pulverizador'
+                  : record.calculatorId === 'calc_eppo'
+                  ? 'Calculadora EPPO (LWA / TRV)'
+                  : record.calculatorId === 'calc_calibracao_pulverizador'
+                  ? 'Calibração Pulverizador'
                   : 'Cálculo de Dose por Hectare'
               )}
             </h2>

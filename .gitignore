@@ -53,3 +53,12 @@ scratch/
 *.pem
 *.key
 
+# Python & Ambientes Virtuais (Services)
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+ENV/
+env/
+

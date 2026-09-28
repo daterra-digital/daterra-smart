@@ -57,25 +57,30 @@ export const CalculatorResultsPanel: React.FC<CalculatorResultsPanelProps> = ({
   onOpenResultHelp
 }) => {
   const { t } = useLanguage();
-  // Configuração da grelha: 1 coluna se houver 1 resultado, 2 colunas se houver mais
-  const gridColsClass = results.length === 1 ? 'grid-cols-1' : 'grid-cols-1 sm:grid-cols-2';
+  // Configuração responsiva da grelha: adapta-se perfeitamente à largura total do ecrã
+  const gridColsClass = React.useMemo(() => {
+    if (results.length === 1) return 'grid-cols-1 max-w-xl mx-auto';
+    if (results.length === 2) return 'grid-cols-1 sm:grid-cols-2';
+    if (results.length === 3) return 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3';
+    return 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4';
+  }, [results.length]);
 
   return (
-    <section className="bg-gradient-to-br from-daterra-primary via-[#175348] to-daterra-secondary text-white p-6 sm:p-8 rounded-3xl shadow-floating border border-white/10 space-y-6">
+    <section className="bg-gradient-to-br from-daterra-primary via-[#175348] to-daterra-secondary text-white p-4 sm:p-5 rounded-2xl md:rounded-3xl shadow-floating border border-white/10 space-y-3.5">
       {/* 1. Barra de Título do Painel de Resultados */}
-      <div className="flex items-center justify-between border-b border-white/15 pb-4">
+      <div className="flex items-center justify-between border-b border-white/15 pb-2.5">
         <span className="text-xs font-bold uppercase tracking-wider text-daterra-accent">
           {headerTitle}
         </span>
         {badgeMode && (
-          <span className="px-3 py-1 bg-white/10 rounded-full text-xs font-bold font-sans">
+          <span className="px-2.5 py-0.5 bg-white/10 rounded-full text-xs font-bold font-sans">
             {badgeMode}
           </span>
         )}
       </div>
 
       {/* 2. Grelha Responsiva de Resultados */}
-      <div className={`grid ${gridColsClass} gap-6`}>
+      <div className={`grid ${gridColsClass} gap-2.5 sm:gap-3`}>
         {results.map((resDef) => {
           const item = outputValues[resDef.id] || {
             value: 0,
@@ -102,15 +107,20 @@ export const CalculatorResultsPanel: React.FC<CalculatorResultsPanelProps> = ({
       </div>
 
       {/* 3. Botão Oficial de Gravação de Cálculo */}
-      <button
-        type="button"
-        onClick={onSave}
-        disabled={isSaving}
-        className="w-full py-4 bg-daterra-accent hover:bg-daterra-accent/90 disabled:opacity-50 text-white font-extrabold text-sm rounded-2xl transition-all shadow-xl shadow-daterra-accent/30 flex items-center justify-center gap-2 active:scale-95 touch-target cursor-pointer"
-      >
-        <Save className="w-5 h-5 shrink-0" />
-        <span>{saveButtonLabel || t('calculatorActionBar.save', 'Guardar Histórico')}</span>
-      </button>
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2.5 border-t border-white/10">
+        <span className="text-xs text-emerald-100/75 font-medium hidden sm:block">
+          {t('calibracaoPulverizador.resultsLiveHint', 'Resultados calculados dinamicamente em tempo real.')}
+        </span>
+        <button
+          type="button"
+          onClick={onSave}
+          disabled={isSaving}
+          className="w-full sm:w-auto px-6 py-2.5 bg-daterra-accent hover:bg-daterra-accent/90 disabled:opacity-50 text-white font-extrabold text-xs sm:text-sm rounded-xl transition-all shadow-lg shadow-daterra-accent/25 flex items-center justify-center gap-2 active:scale-95 touch-target cursor-pointer shrink-0"
+        >
+          <Save className="w-4 h-4 shrink-0" />
+          <span>{saveButtonLabel || t('calculatorActionBar.save', 'Guardar Histórico')}</span>
+        </button>
+      </div>
     </section>
   );
 };

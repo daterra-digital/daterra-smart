@@ -17,6 +17,7 @@ import { AlertCircle, AlertTriangle } from 'lucide-react';
 import { useLanguage } from '../../../context/LanguageContext.tsx';
 import type { CalculatorFieldDefinition } from './types.ts';
 import { DidacticHelp, type FAQFileType } from '../../concentracao/DidacticHelp.tsx';
+import { resolveFriendlyValidationMessage } from '../../calibracao-pulverizador/calibracaoPulverizadorValidationFallback.ts';
 
 export interface CalculatorInputFieldProps {
   /** Definição declarativa do campo */
@@ -68,12 +69,12 @@ export const CalculatorInputField: React.FC<CalculatorInputFieldProps> = ({
     .join(' ') || undefined;
 
   return (
-    <div className="space-y-1.5">
+    <div className="space-y-1">
       {/* 1. Cabeçalho do Campo: Rótulo semântico + Botão de Microlearning Contextual */}
       <div className="flex items-center justify-between">
         <label
           htmlFor={field.id}
-          className="text-xs font-bold text-slate-700 select-none cursor-pointer"
+          className="text-xs font-bold text-slate-700 select-none cursor-pointer block truncate"
         >
           {field.label}
           {field.required && <span className="text-rose-500 ml-0.5">*</span>}
@@ -91,14 +92,14 @@ export const CalculatorInputField: React.FC<CalculatorInputFieldProps> = ({
 
       {/* 2. Campo de Entrada Táctil/Físico OU Seletor Estruturado */}
       {field.type === 'select' ? (
-        <div className="space-y-2">
+        <div className="space-y-1.5">
           <div className="relative">
             <select
               id={field.id}
               name={field.id}
               value={value !== undefined && value !== null ? String(value) : ''}
               onChange={(e) => onChange(e.target.value, '')}
-              className={`w-full px-4 py-3.5 bg-slate-50 border rounded-2xl text-sm font-bold text-slate-800 cursor-pointer hover:border-daterra-accent outline-none transition-all touch-target focus:ring-2 focus:ring-daterra-accent/30 focus:border-daterra-accent ${
+              className={`w-full px-3 py-2 bg-slate-50 border rounded-xl text-xs sm:text-sm font-bold text-slate-800 cursor-pointer hover:border-daterra-accent outline-none transition-all touch-target focus:ring-2 focus:ring-daterra-accent/30 focus:border-daterra-accent ${
                 error
                   ? 'border-rose-400 bg-rose-50/20 text-rose-900'
                   : warning
@@ -123,7 +124,7 @@ export const CalculatorInputField: React.FC<CalculatorInputFieldProps> = ({
           {selectedOption?.description && (
             <div
               id={`${field.id}-option-desc`}
-              className="p-3 bg-slate-100/80 rounded-xl text-xs text-slate-600 leading-relaxed border border-slate-200/60"
+              className="p-2.5 bg-slate-100/80 rounded-xl text-xs text-slate-600 leading-relaxed border border-slate-200/60"
             >
               <strong className="font-bold text-slate-800 block mb-0.5">
                 {selectedOption.label}:
@@ -137,7 +138,7 @@ export const CalculatorInputField: React.FC<CalculatorInputFieldProps> = ({
             <div
               id={`${field.id}-contextual-warning`}
               role="status"
-              className="p-3 bg-amber-50/90 border border-amber-200/80 rounded-xl text-xs text-amber-900 leading-relaxed flex items-start gap-2 animate-fade-in"
+              className="p-2.5 bg-amber-50/90 border border-amber-200/80 rounded-xl text-xs text-amber-900 leading-relaxed flex items-start gap-2 animate-fade-in"
             >
               <AlertTriangle className="w-4 h-4 shrink-0 text-amber-600 mt-0.5" />
               <span>{selectedOption.contextualWarning}</span>
@@ -161,7 +162,7 @@ export const CalculatorInputField: React.FC<CalculatorInputFieldProps> = ({
             }}
             value={displayString}
             placeholder="0"
-            className={`w-full px-4 py-3.5 bg-slate-50 border rounded-2xl text-base font-bold font-mono-numbers text-daterra-primary cursor-pointer hover:border-daterra-accent outline-none transition-all touch-target focus:ring-2 focus:ring-daterra-accent/30 focus:border-daterra-accent ${
+            className={`w-full px-3 py-2 bg-slate-50 border rounded-xl text-sm sm:text-base font-bold font-mono-numbers text-daterra-primary cursor-pointer hover:border-daterra-accent outline-none transition-all touch-target focus:ring-2 focus:ring-daterra-accent/30 focus:border-daterra-accent ${
               error
                 ? 'border-rose-400 bg-rose-50/20 text-rose-900'
                 : warning
@@ -184,8 +185,8 @@ export const CalculatorInputField: React.FC<CalculatorInputFieldProps> = ({
 
       {/* 3. Pílulas de Atalhos Rápidos (Presets) */}
       {field.presets && field.presets.length > 0 && (
-        <div className="flex items-center gap-1.5 pt-1 pb-0.5 flex-wrap">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 shrink-0 mr-1">
+        <div className="flex items-center gap-1.5 pt-0.5 flex-wrap">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 shrink-0 mr-0.5">
             Atalhos:
           </span>
           {field.presets.slice(0, 4).map((preset) => (
@@ -193,14 +194,14 @@ export const CalculatorInputField: React.FC<CalculatorInputFieldProps> = ({
               key={preset}
               type="button"
               onClick={() => onChange(preset, unit)}
-              className={`px-2.5 py-1 text-xs font-bold rounded-xl transition-all font-mono-numbers shrink-0 touch-target sm:min-h-0 sm:h-auto active:scale-95 ${
+              className={`px-2 py-0.5 text-xs font-bold rounded-lg transition-all font-mono-numbers shrink-0 cursor-pointer active:scale-95 ${
                 Number(value) === preset
                   ? 'bg-daterra-primary text-white shadow-xs'
                   : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
               }`}
-              title={`Definir ${preset} ${unit}`}
+              title={`Definir ${formatDisplayValue(preset)} ${unit}`}
             >
-              {preset}
+              {formatDisplayValue(preset)}
             </button>
           ))}
         </div>
@@ -210,7 +211,7 @@ export const CalculatorInputField: React.FC<CalculatorInputFieldProps> = ({
       {field.description && (
         <p
           id={`${field.id}-description`}
-          className="text-xs text-slate-500 mt-1 leading-relaxed"
+          className="text-[11px] text-slate-500 mt-0.5 leading-tight line-clamp-2"
         >
           {field.description}
         </p>
@@ -220,13 +221,13 @@ export const CalculatorInputField: React.FC<CalculatorInputFieldProps> = ({
       {error && (
         <p id={`${field.id}-error`} className="text-xs font-semibold text-rose-600 flex items-center gap-1 mt-1 animate-fade-in">
           <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-          <span>{error}</span>
+          <span>{resolveFriendlyValidationMessage(error, t)}</span>
         </p>
       )}
       {!error && warning && (
         <p id={`${field.id}-warning`} className="text-xs font-semibold text-amber-600 flex items-center gap-1 mt-1 animate-fade-in">
           <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
-          <span>{t(warning, warning)}</span>
+          <span>{resolveFriendlyValidationMessage(warning, t)}</span>
         </p>
       )}
     </div>

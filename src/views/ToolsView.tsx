@@ -58,6 +58,16 @@ const TOOLS_CATALOG: ToolModule[] = [
     isCore: true
   },
   {
+    id: 'drone_buffer_zone',
+    name: 'Drone Buffer Zone & Legal Compliance (SprayOps)',
+    category: 'Pulverização',
+    description: 'Cálculo de zonas tampão dinâmicas, mitigação de deriva e conformidade legal (DGAV / DL 91/2016) para drones agrícolas.',
+    icon: Layers,
+    isCore: true,
+    caminho: '/ferramentas/drone-buffer-zone',
+    prioridade: 'alta'
+  },
+  {
     id: 'calc_velocidade_real',
     name: 'Velocidade Real de Trabalho',
     category: 'Calibração',
@@ -77,11 +87,14 @@ const TOOLS_CATALOG: ToolModule[] = [
     prioridade: 'alta'
   },
   {
-    id: 'calibracao_bicos',
-    name: 'Calibração e Débito de Bicos',
+    id: 'smart_debito',
+    name: 'Smart Débito (ISO 16122)',
     category: 'Calibração',
-    description: 'Afera o débito real em proveta por bico e deteta desvios de desgaste acima de ±10% (Norma ISO 16122).',
-    icon: Gauge
+    description: 'Auditoria de pulverizadores (valores manuais ou de caudolímetro eletrónico por offset) e validação de desvios e simetria bilateral (ISO 16122-2 / ISO 16122-3).',
+    icon: Gauge,
+    isCore: true,
+    caminho: '/ferramentas/smart-debito',
+    prioridade: 'alta'
   },
   {
     id: 'calc_volume_copa',
@@ -111,6 +124,16 @@ const TOOLS_CATALOG: ToolModule[] = [
     icon: Gauge,
     isCore: true,
     caminho: '/ferramentas/debito-total',
+    prioridade: 'alta'
+  },
+  {
+    id: 'calc_calibracao_pulverizador',
+    name: 'Calibração Pulverizador',
+    category: 'Calibração',
+    description: 'Planeamento de volume de calda e produto por LWA/TRV.',
+    icon: FlaskConical,
+    isCore: true,
+    caminho: '/ferramentas/calibracao-pulverizador',
     prioridade: 'alta'
   },
   {

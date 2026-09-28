@@ -17,7 +17,10 @@ import { VolumeCopaCalculator } from './features/volume-copa/VolumeCopaCalculato
 import { VolumeCaldaTrvCalculator } from './features/volume-calda-trv/VolumeCaldaTrvCalculator';
 import { DebitoTotalCalculator } from './features/debito-total/DebitoTotalCalculator';
 import { EppoCalculator } from './features/eppo/EppoCalculator';
+import { CalibracaoPulverizador } from './features/calibracao-pulverizador/CalibracaoPulverizador';
 import { NozzleComparisonView } from './features/nozzle-comparison/NozzleComparisonView';
+import { DroneComplianceView } from './features/drone-compliance/DroneComplianceView';
+import { SmartDebitoView } from './features/smart-debito/SmartDebitoView';
 import { MisturaView } from './views/MisturaView';
 import { ProjetoAgrosmartView } from './views/ProjetoAgrosmartView';
 import { AboutView } from './views/AboutView';
@@ -36,7 +39,12 @@ if (gaMeasurementId) {
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isAuthenticated, isAuthLoading } = useAuth();
 
-  if (isAuthLoading) {
+  const isDevBypass =
+    import.meta.env.DEV &&
+    (typeof window !== 'undefined' &&
+      (window.location.search.includes('mock_auth=true') || window.location.hash.includes('mock_auth=true')));
+
+  if (isAuthLoading && !isDevBypass) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#F2F2F2]">
         <div className="flex flex-col items-center gap-3">
@@ -47,7 +55,7 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
     );
   }
 
-  if (!isAuthenticated) {
+  if (!isAuthenticated && !isDevBypass) {
     return <Navigate to="/login" replace />;
   }
   return <>{children}</>;
@@ -128,8 +136,11 @@ export const AppContent: React.FC = () => {
           <Route path="/ferramentas/volume-copa" element={<VolumeCopaCalculator />} />
           <Route path="/ferramentas/volume-calda-trv" element={<VolumeCaldaTrvCalculator />} />
           <Route path="/ferramentas/debito-total" element={<DebitoTotalCalculator />} />
+          <Route path="/ferramentas/calibracao-pulverizador" element={<CalibracaoPulverizador />} />
           <Route path="/ferramentas/eppo" element={<EppoCalculator />} />
           <Route path="/ferramentas/comparador-bicos" element={<NozzleComparisonView />} />
+          <Route path="/ferramentas/drone-buffer-zone" element={<DroneComplianceView />} />
+          <Route path="/ferramentas/smart-debito" element={<SmartDebitoView />} />
           <Route path="/ferramentas/mistura" element={<MisturaView />} />
           <Route path="/academia" element={<AcademyView />} />
           <Route path="/definicoes" element={<SettingsView />} />

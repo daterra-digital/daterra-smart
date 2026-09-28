@@ -60,3 +60,14 @@ export function unlockBodyScroll(): void {
     window.scrollTo(0, savedScrollY);
   }
 }
+
+export function forceResetBodyScroll(): void {
+  if (typeof window === 'undefined' || typeof document === 'undefined') return;
+  lockCount = 0;
+  document.body.style.overflow = originalOverflow || '';
+  document.body.style.position = originalPosition || '';
+  document.body.style.top = originalTop || '';
+  document.body.style.width = originalWidth || '';
+  document.body.style.paddingRight = originalPaddingRight || '';
+  document.body.classList.remove('modal-scroll-locked');
+}

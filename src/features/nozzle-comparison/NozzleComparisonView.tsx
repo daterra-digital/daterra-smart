@@ -1,30 +1,35 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  ArrowLeftRight,
   ChevronLeft,
   RotateCcw,
   ShieldCheck,
   Scale,
   GraduationCap,
   History,
-  Search
+  Search,
+  Bookmark,
+  BookOpen
 } from 'lucide-react';
-import { PressureControl } from './PressureControl';
-import { NozzleComparisonCard } from './NozzleComparisonCard';
-import { ComparisonTable } from './ComparisonTable';
+import { NozzleComparisonTopCard } from './NozzleComparisonTopCard';
+import { NozzleComparisonDesktopContent } from './NozzleComparisonDesktopContent';
+import { NozzleSelectorDrawer } from './NozzleSelectorDrawer';
+import { NozzleComparisonMatrixModal } from './NozzleComparisonMatrixModal';
 import { NozzleMicrolearningModal } from './NozzleMicrolearningModal';
 import { NozzleComparisonHistoryModal } from './NozzleComparisonHistoryModal';
+import { NozzleCurvesModal } from './NozzleCurvesModal';
 import { NozzleFindAlternatives } from './NozzleFindAlternatives';
 import { NOZZLES_BY_ID } from './nozzleComparison.data';
 import { calculateNozzleFlow, compareNozzles } from './nozzleComparison.calculations';
 import { NozzleComparisonMobileView } from './NozzleComparisonMobileView';
 import type { Nozzle, ActiveComparisonMode } from './nozzleComparison.types';
+import { useLiveQuery } from 'dexie-react-hooks';
+import { db } from '../../db/db';
 
 export const NozzleComparisonView: React.FC = () => {
   const navigate = useNavigate();
 
-  // Detetar viewport mobile para renderizar a interface dedicada de smartphone
+  // Detetar viewport mobile para renderizar a interface dedicada de smartphone (< 768px)
   const [isMobile, setIsMobile] = React.useState<boolean>(() =>
     typeof window !== 'undefined' ? window.innerWidth < 768 : false
   );
@@ -38,26 +43,16 @@ export const NozzleComparisonView: React.FC = () => {
   // Modo Ativo: 'comparar' ou 'alternativas'
   const [activeMode, setActiveMode] = React.useState<ActiveComparisonMode>('comparar');
 
-  // Estados de Seleção Bico A
-  const [selectedBrandA, setSelectedBrandA] = React.useState<string>('Albuz');
-  const [selectedModelA, setSelectedModelA] = React.useState<string>('ATR');
-  const [selectedSprayAngleA, setSelectedSprayAngleA] = React.useState<string | number>(80);
-  const [selectedSwirlPlateA, setSelectedSwirlPlateA] = React.useState<string>('');
-  const [selectedDiscA, setSelectedDiscA] = React.useState<string>('');
+  // Estados de Seleção
   const [selectedNozzleIdA, setSelectedNozzleIdA] = React.useState<string>('albuz_atr_80_amarelo');
+  const [selectedNozzleIdB, setSelectedNozzleIdB] = React.useState<string>('teejet_xr_110_verde');
+  const [workingPressureBar, setWorkingPressureBar] = React.useState<number>(7.6);
 
-  // Estados de Seleção Bico B
-  const [selectedBrandB, setSelectedBrandB] = React.useState<string>('TeeJet');
-  const [selectedModelB, setSelectedModelB] = React.useState<string>('XR');
-  const [selectedSprayAngleB, setSelectedSprayAngleB] = React.useState<string | number>(110);
-  const [selectedSwirlPlateB, setSelectedSwirlPlateB] = React.useState<string>('');
-  const [selectedDiscB, setSelectedDiscB] = React.useState<string>('');
-  const [selectedNozzleIdB, setSelectedNozzleIdB] = React.useState<string>('teejet_xr_110_amarelo');
-
-  // Pressão de Trabalho (Bar)
-  const [workingPressureBar, setWorkingPressureBar] = React.useState<number>(3.0);
-
-  // Modais
+  // Modais e Gavetas
+  const [isDrawerOpen, setIsDrawerOpen] = React.useState<boolean>(false);
+  const [drawerSide, setDrawerSide] = React.useState<'A' | 'B'>('A');
+  const [isMatrixOpen, setIsMatrixOpen] = React.useState<boolean>(false);
+  const [isCurvesOpen, setIsCurvesOpen] = React.useState<boolean>(false);
   const [isMicrolearningOpen, setIsMicrolearningOpen] = React.useState<boolean>(false);
   const [isHistoryOpen, setIsHistoryOpen] = React.useState<boolean>(false);
 
@@ -81,7 +76,6 @@ export const NozzleComparisonView: React.FC = () => {
     return calculateNozzleFlow(nozzleB, workingPressureBar);
   }, [nozzleB, workingPressureBar]);
 
-  // Resumo Comparativo Combinado
   const comparisonResult = React.useMemo(() => {
     if (!flowA || !flowB) return undefined;
     return compareNozzles(flowA, flowB);
@@ -89,68 +83,22 @@ export const NozzleComparisonView: React.FC = () => {
 
   // Ação: Trocar Bico A e Bico B
   const handleSwapNozzles = () => {
-    const tempBrand = selectedBrandA;
-    const tempModel = selectedModelA;
-    const tempAngle = selectedSprayAngleA;
-    const tempSwirl = selectedSwirlPlateA;
-    const tempDisc = selectedDiscA;
     const tempId = selectedNozzleIdA;
-
-    setSelectedBrandA(selectedBrandB);
-    setSelectedModelA(selectedModelB);
-    setSelectedSprayAngleA(selectedSprayAngleB);
-    setSelectedSwirlPlateA(selectedSwirlPlateB);
-    setSelectedDiscA(selectedDiscB);
     setSelectedNozzleIdA(selectedNozzleIdB);
-
-    setSelectedBrandB(tempBrand);
-    setSelectedModelB(tempModel);
-    setSelectedSprayAngleB(tempAngle);
-    setSelectedSwirlPlateB(tempSwirl);
-    setSelectedDiscB(tempDisc);
     setSelectedNozzleIdB(tempId);
   };
 
   // Ação: Reiniciar Seleção
   const handleReset = () => {
-    setSelectedBrandA('');
-    setSelectedModelA('');
-    setSelectedSprayAngleA('');
-    setSelectedSwirlPlateA('');
-    setSelectedDiscA('');
     setSelectedNozzleIdA('');
-
-    setSelectedBrandB('');
-    setSelectedModelB('');
-    setSelectedSprayAngleB('');
-    setSelectedSwirlPlateB('');
-    setSelectedDiscB('');
     setSelectedNozzleIdB('');
-
     setWorkingPressureBar(3.0);
   };
 
   // Ação: Carregar Comparação do Histórico
   const handleLoadFromHistory = (nIdA: string, nIdB: string, pBar: number) => {
-    const nA = NOZZLES_BY_ID.get(nIdA);
-    const nB = NOZZLES_BY_ID.get(nIdB);
-
-    if (nA) {
-      setSelectedBrandA(nA.brand);
-      setSelectedModelA(nA.model);
-      setSelectedSprayAngleA(nA.sprayAngleDeg || '');
-      setSelectedSwirlPlateA(nA.swirlPlate || '');
-      setSelectedDiscA(nA.disc || '');
-      setSelectedNozzleIdA(nA.id);
-    }
-    if (nB) {
-      setSelectedBrandB(nB.brand);
-      setSelectedModelB(nB.model);
-      setSelectedSprayAngleB(nB.sprayAngleDeg || '');
-      setSelectedSwirlPlateB(nB.swirlPlate || '');
-      setSelectedDiscB(nB.disc || '');
-      setSelectedNozzleIdB(nB.id);
-    }
+    setSelectedNozzleIdA(nIdA);
+    setSelectedNozzleIdB(nIdB);
     setWorkingPressureBar(pBar);
     setActiveMode('comparar');
   };
@@ -161,45 +109,47 @@ export const NozzleComparisonView: React.FC = () => {
     altId: string,
     pressureBar: number
   ) => {
-    const nA = NOZZLES_BY_ID.get(refId);
-    const nB = NOZZLES_BY_ID.get(altId);
-
-    if (nA) {
-      setSelectedBrandA(nA.brand);
-      setSelectedModelA(nA.model);
-      setSelectedSwirlPlateA(nA.swirlPlate || '');
-      setSelectedDiscA(nA.disc || '');
-      setSelectedNozzleIdA(nA.id);
-    }
-    if (nB) {
-      setSelectedBrandB(nB.brand);
-      setSelectedModelB(nB.model);
-      setSelectedSwirlPlateB(nB.swirlPlate || '');
-      setSelectedDiscB(nB.disc || '');
-      setSelectedNozzleIdB(nB.id);
-    }
+    setSelectedNozzleIdA(refId);
+    setSelectedNozzleIdB(altId);
     setWorkingPressureBar(pressureBar);
     setActiveMode('comparar');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
+
+  // Contagem de histórico local
+  const historyCount = useLiveQuery(
+    async () => {
+      try {
+        if (!db || !db.calculation_history) return 0;
+        return await db.calculation_history
+          .where('calculator_type')
+          .equals('comparador_bicos' as any)
+          .count();
+      } catch (err) {
+        console.error('Erro ao consultar histórico:', err);
+        return 0;
+      }
+    },
+    []
+  ) ?? 0;
 
   if (isMobile) {
     return <NozzleComparisonMobileView />;
   }
 
   return (
-    <div className="space-y-2.5 sm:space-y-3 pb-12 animate-fade-in">
+    <div className="space-y-4 pb-28 md:pb-24 animate-fade-in font-sans max-w-6xl mx-auto">
       
-      {/* 1. CABEÇALHO DA FERRAMENTA (ULTRA-COMPACTO) */}
-      <div className="bg-white px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-2xl border border-slate-200 shadow-soft flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-        <div className="flex items-center gap-2.5">
+      {/* 1. CABEÇALHO DA FERRAMENTA (PADRÃO CALCULADORA DE CONCENTRAÇÃO) */}
+      <div className="bg-white px-4 py-3 rounded-2xl border border-slate-200 shadow-soft flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
           <button
             type="button"
             onClick={() => navigate('/ferramentas')}
             aria-label="Voltar ao catálogo de ferramentas"
-            className="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-all flex items-center gap-1 text-xs font-bold"
+            className="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-all flex items-center gap-1 text-xs font-bold cursor-pointer"
           >
-            <ChevronLeft className="w-3.5 h-3.5 text-daterra-primary" />
+            <ChevronLeft className="w-4 h-4 text-daterra-primary" />
             <span>Voltar</span>
           </button>
           <div className="h-5 w-[1px] bg-slate-200 hidden sm:block" />
@@ -208,25 +158,24 @@ export const NozzleComparisonView: React.FC = () => {
               <h1 className="text-base sm:text-lg font-black text-daterra-primary leading-tight">
                 Comparador de Bicos
               </h1>
-              <span className="text-[9px] font-extrabold uppercase tracking-wider text-daterra-accent bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-200">
-                v1.1
+              <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200">
+                Ferramenta Ativa
               </span>
             </div>
-            <p className="text-[11px] text-slate-500 font-medium hidden md:block">
-              Compare dois bicos conhecidos ou encontre alternativas de débito equivalente.
+            <p className="text-xs text-slate-500 font-medium">
+              Compare desempenho, débito e espectro de gotas lado a lado.
             </p>
           </div>
         </div>
 
-        {/* Ações de Topo: Microlearning, Histórico e Reset */}
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-2 self-end sm:self-auto">
           <button
             type="button"
             onClick={() => setIsMicrolearningOpen(true)}
-            aria-label="Abrir guia de microlearning agronómico"
-            className="px-2.5 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-900 border border-emerald-200 rounded-lg text-xs font-bold transition-all flex items-center gap-1 shadow-xs"
+            aria-label="Abrir guia agronómico"
+            className="px-2.5 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-daterra-primary border border-emerald-200 rounded-lg text-xs font-bold transition-all flex items-center gap-1 shadow-xs cursor-pointer"
           >
-            <GraduationCap className="w-3.5 h-3.5 text-emerald-700" />
+            <GraduationCap className="w-3.5 h-3.5 text-daterra-accent" />
             <span className="hidden sm:inline">Microlearning</span>
           </button>
 
@@ -234,10 +183,10 @@ export const NozzleComparisonView: React.FC = () => {
             type="button"
             onClick={() => setIsHistoryOpen(true)}
             aria-label="Abrir histórico local de comparações"
-            className="px-2.5 py-1.5 bg-sky-50 hover:bg-sky-100 text-sky-900 border border-sky-200 rounded-lg text-xs font-bold transition-all flex items-center gap-1 shadow-xs"
+            className="px-2.5 py-1.5 bg-sky-50 hover:bg-sky-100 text-sky-900 border border-sky-200 rounded-lg text-xs font-bold transition-all flex items-center gap-1 shadow-xs cursor-pointer"
           >
             <History className="w-3.5 h-3.5 text-sky-700" />
-            <span className="hidden sm:inline">Histórico</span>
+            <span className="hidden sm:inline">Histórico ({historyCount})</span>
           </button>
 
           {activeMode === 'comparar' && (
@@ -245,7 +194,7 @@ export const NozzleComparisonView: React.FC = () => {
               type="button"
               onClick={handleReset}
               aria-label="Reiniciar seleções do comparador"
-              className="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-bold transition-all flex items-center gap-1"
+              className="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-bold transition-all flex items-center gap-1 cursor-pointer"
             >
               <RotateCcw className="w-3 h-3" />
               <span>Reiniciar</span>
@@ -254,218 +203,72 @@ export const NozzleComparisonView: React.FC = () => {
         </div>
       </div>
 
-      {/* 2. SELEÇÃO DO MODO (EQUILIBRADO, ELEGANTE E COMPACTO) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        {/* Botão Modo 1: Comparar dois bicos */}
+      {/* 2. CARTÃO VERDE ESCURO (#114037) — COMPARAÇÃO DE BICOS COM ESPECTRO DV10/DV50/DV90 */}
+      <NozzleComparisonTopCard
+        nozzleA={nozzleA}
+        nozzleB={nozzleB}
+        flowA={flowA}
+        flowB={flowB}
+        workingPressureBar={workingPressureBar}
+        onSwapNozzles={handleSwapNozzles}
+      />
+
+      {/* 3. SELETOR DE MODO (TABS) */}
+      <div className="grid grid-cols-2 gap-2 bg-slate-200/60 p-1 rounded-2xl max-w-xl mx-auto w-full">
         <button
           type="button"
           onClick={() => setActiveMode('comparar')}
-          className={`p-3.5 sm:px-4 sm:py-3.5 rounded-2xl border text-left transition-all flex items-center justify-between gap-3 cursor-pointer ${
+          className={`py-2.5 rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-2 cursor-pointer ${
             activeMode === 'comparar'
-              ? 'bg-gradient-to-r from-daterra-primary to-slate-900 text-white border-daterra-primary shadow-md ring-1 ring-daterra-accent/40'
-              : 'bg-white hover:bg-slate-50 text-slate-800 border-slate-200 shadow-soft'
+              ? 'bg-[#114037] text-white shadow-xs'
+              : 'text-slate-600 hover:text-slate-900'
           }`}
         >
-          <div className="flex items-center gap-3 min-w-0">
-            <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 font-bold ${
-              activeMode === 'comparar' ? 'bg-white/10 text-daterra-accent' : 'bg-slate-100 text-daterra-primary'
-            }`}>
-              <Scale className="w-5 h-5" />
-            </div>
-            <div className="min-w-0">
-              <div className="flex items-center gap-2">
-                <h2 className="text-sm font-black leading-tight truncate">
-                  Comparar dois bicos
-                </h2>
-                <span className={`text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-md ${
-                  activeMode === 'comparar' ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'
-                }`}>
-                  Direto
-                </span>
-              </div>
-              <p className={`text-[11px] truncate mt-0.5 ${
-                activeMode === 'comparar' ? 'text-slate-200' : 'text-slate-500'
-              }`}>
-                Confronte débitos, curvas de pressão e gotas
-              </p>
-            </div>
-          </div>
+          <Scale className="w-4 h-4" />
+          <span>Comparar 2 Bicos</span>
         </button>
-
-        {/* Botão Modo 2: Encontrar alternativas */}
         <button
           type="button"
           onClick={() => setActiveMode('alternativas')}
-          className={`p-3.5 sm:px-4 sm:py-3.5 rounded-2xl border text-left transition-all flex items-center justify-between gap-3 cursor-pointer ${
+          className={`py-2.5 rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-2 cursor-pointer ${
             activeMode === 'alternativas'
-              ? 'bg-gradient-to-r from-daterra-primary to-slate-900 text-white border-daterra-primary shadow-md ring-1 ring-daterra-accent/40'
-              : 'bg-white hover:bg-slate-50 text-slate-800 border-slate-200 shadow-soft'
+              ? 'bg-[#114037] text-white shadow-xs'
+              : 'text-slate-600 hover:text-slate-900'
           }`}
         >
-          <div className="flex items-center gap-3 min-w-0">
-            <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 font-bold ${
-              activeMode === 'alternativas' ? 'bg-white/10 text-daterra-accent' : 'bg-slate-100 text-daterra-primary'
-            }`}>
-              <Search className="w-5 h-5" />
-            </div>
-            <div className="min-w-0">
-              <div className="flex items-center gap-2">
-                <h2 className="text-sm font-black leading-tight truncate">
-                  Encontrar alternativas
-                </h2>
-                <span className={`text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-md ${
-                  activeMode === 'alternativas' ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'
-                }`}>
-                  Pesquisa
-                </span>
-              </div>
-              <p className={`text-[11px] truncate mt-0.5 ${
-                activeMode === 'alternativas' ? 'text-slate-200' : 'text-slate-500'
-              }`}>
-                Descubra opções equivalentes (±5%, ±10%, ±15%)
-              </p>
-            </div>
-          </div>
+          <Search className="w-4 h-4" />
+          <span>Encontrar Alternativas</span>
         </button>
       </div>
 
-      {/* 3. CONTEÚDO DO MODO SELECIONADO */}
+      {/* 4. CONTEÚDO DO MODO SELECIONADO */}
       {activeMode === 'alternativas' ? (
-        /* ================= MODO 2: ENCONTRAR ALTERNATIVAS ================= */
         <NozzleFindAlternatives
           initialRefNozzleId={selectedNozzleIdA || 'albuz_atr_80_amarelo'}
           initialPressureBar={workingPressureBar}
           onSelectForComparison={handleSelectAlternativeForComparison}
         />
       ) : (
-        /* ================= MODO 1: COMPARAR DOIS BICOS ================= */
-        <div className="space-y-4 animate-fade-in">
-          
-          {/* 1. CARTÃO RESULTADOS INDIVIDUAIS (ESTRUTURA UNIFICADA E ELEGANTE) */}
-          <div className="bg-white p-4 sm:p-5 rounded-2xl md:rounded-3xl border border-slate-200 shadow-soft space-y-4">
-            
-            {/* Cabeçalho do Cartão Resultados Individuais */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
-              <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-xl bg-daterra-primary text-white flex items-center justify-center font-bold shrink-0">
-                  <Scale className="w-4 h-4 text-daterra-accent" />
-                </div>
-                <div>
-                  <span className="text-[10px] font-extrabold uppercase tracking-widest text-daterra-accent block">
-                    Análise Lado a Lado
-                  </span>
-                  <h2 className="text-base sm:text-lg font-black text-slate-900 leading-tight">
-                    Resultados Individuais
-                  </h2>
-                </div>
-              </div>
-
-              {/* Botão de Trocar Bicos Integrado no Cabeçalho do Cartão */}
-              <button
-                type="button"
-                onClick={handleSwapNozzles}
-                aria-label="Trocar dados entre Bico A e Bico B"
-                className="px-3.5 py-1.5 bg-slate-50 hover:bg-slate-100 active:bg-slate-200 text-slate-800 rounded-xl text-xs font-black transition-all border border-slate-300 shadow-xs flex items-center gap-2 active:scale-95 cursor-pointer self-start sm:self-auto"
-              >
-                <ArrowLeftRight className="w-3.5 h-3.5 text-daterra-primary" />
-                <span>Trocar bicos (Bico A ⟷ Bico B)</span>
-              </button>
-            </div>
-
-            {/* Grid dos dois bicos lado a lado */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              <NozzleComparisonCard
-                side="A"
-                title="Bico A"
-                selectedBrand={selectedBrandA}
-                selectedModel={selectedModelA}
-                selectedSwirlPlate={selectedSwirlPlateA}
-                selectedDisc={selectedDiscA}
-                selectedNozzleId={selectedNozzleIdA}
-                onBrandChange={brand => {
-                  setSelectedBrandA(brand);
-                  setSelectedModelA('');
-                  setSelectedSwirlPlateA('');
-                  setSelectedDiscA('');
-                  setSelectedNozzleIdA('');
-                }}
-                onModelChange={model => {
-                  setSelectedModelA(model);
-                  setSelectedSwirlPlateA('');
-                  setSelectedDiscA('');
-                  setSelectedNozzleIdA('');
-                }}
-                onSwirlPlateChange={swirl => setSelectedSwirlPlateA(swirl)}
-                onDiscChange={disc => setSelectedDiscA(disc)}
-                onNozzleChange={id => setSelectedNozzleIdA(id)}
-                selectedNozzle={nozzleA}
-                calculatedFlow={flowA}
-                workingPressureBar={workingPressureBar}
-              />
-
-              <NozzleComparisonCard
-                side="B"
-                title="Bico B"
-                selectedBrand={selectedBrandB}
-                selectedModel={selectedModelB}
-                selectedSwirlPlate={selectedSwirlPlateB}
-                selectedDisc={selectedDiscB}
-                selectedNozzleId={selectedNozzleIdB}
-                onBrandChange={brand => {
-                  setSelectedBrandB(brand);
-                  setSelectedModelB('');
-                  setSelectedSwirlPlateB('');
-                  setSelectedDiscB('');
-                  setSelectedNozzleIdB('');
-                }}
-                onModelChange={model => {
-                  setSelectedModelB(model);
-                  setSelectedSwirlPlateB('');
-                  setSelectedDiscB('');
-                  setSelectedNozzleIdB('');
-                }}
-                onSwirlPlateChange={swirl => setSelectedSwirlPlateB(swirl)}
-                onDiscChange={disc => setSelectedDiscB(disc)}
-                onNozzleChange={id => setSelectedNozzleIdB(id)}
-                selectedNozzle={nozzleB}
-                calculatedFlow={flowB}
-                workingPressureBar={workingPressureBar}
-              />
-            </div>
-          </div>
-
-          {/* 2. CARTÃO PRESSÃO DE TRABALHO (ESTRITAMENTE O ESSENCIAL) */}
-          <PressureControl
-            workingPressureBar={workingPressureBar}
-            onChangePressure={setWorkingPressureBar}
-            nozzleA={nozzleA}
-            nozzleB={nozzleB}
-          />
-
-          {/* 3. MATRIZ TÉCNICA COMPARATIVA (COM DIMENSIONAMENTO DA BARRA, BOTÃO AJUDA/MICROLEARNING, ANÁLISE DIFERENCIAL E ESPECIFICAÇÕES) */}
-          {flowA && flowB ? (
-            <ComparisonTable
-              flowA={flowA}
-              flowB={flowB}
-              comparison={comparisonResult}
-              workingPressureBar={workingPressureBar}
-              onOpenMicrolearning={() => setIsMicrolearningOpen(true)}
-            />
-          ) : (
-            <div className="bg-slate-50 p-6 rounded-3xl border border-dashed border-slate-300 text-center space-y-2">
-              <Scale className="w-8 h-8 text-slate-400 mx-auto" />
-              <h3 className="text-sm font-extrabold text-slate-700">
-                Comparação pendente
-              </h3>
-              <p className="text-xs text-slate-500 max-w-sm mx-auto">
-                Selecione o Bico A e o Bico B acima para desbloquear o resumo diferencial detalhado, a matriz técnica e a interpretação orientadora.
-              </p>
-            </div>
-          )}
-        </div>
+        <NozzleComparisonDesktopContent
+          nozzleA={nozzleA}
+          nozzleB={nozzleB}
+          flowA={flowA}
+          flowB={flowB}
+          workingPressureBar={workingPressureBar}
+          onChangePressure={setWorkingPressureBar}
+          onEditNozzleA={() => {
+            setDrawerSide('A');
+            setIsDrawerOpen(true);
+          }}
+          onEditNozzleB={() => {
+            setDrawerSide('B');
+            setIsDrawerOpen(true);
+          }}
+          onOpenMatrixModal={() => setIsMatrixOpen(true)}
+        />
       )}
 
-      {/* AVISO TÉCNICO NO FINAL */}
+      {/* 5. AVISO TÉCNICO NO FINAL */}
       <div className="p-4 bg-slate-50 border border-slate-200 rounded-3xl text-xs text-slate-600 leading-relaxed space-y-1">
         <span className="font-extrabold text-slate-800 flex items-center gap-1.5">
           <ShieldCheck className="w-4 h-4 text-daterra-primary" />
@@ -476,13 +279,74 @@ export const NozzleComparisonView: React.FC = () => {
         </p>
       </div>
 
-      {/* MODAL 1: MICROLEARNING AGRONÓMICO (15 Tópicos) */}
+      {/* 6. BARRA DE RODAPÉ FIXA OFICIAL (PADRÃO DATERRA SMART) */}
+      <aside
+        aria-label="Ações da ferramenta"
+        className="fixed bottom-[var(--bottom-nav-total-height,5rem)] md:bottom-0 inset-x-0 bg-white/95 backdrop-blur-md border-t border-slate-200/80 p-2.5 z-35 shadow-[0_-4px_16px_rgba(0,0,0,0.06)]"
+      >
+        <div className="max-w-4xl mx-auto grid grid-cols-3 gap-2">
+          <button
+            type="button"
+            onClick={() => setIsHistoryOpen(true)}
+            className="h-12 bg-[#3CA64C] hover:bg-[#349142] text-white rounded-xl text-xs font-bold shadow-md flex items-center justify-center gap-2 active:scale-98 transition-all cursor-pointer"
+          >
+            <Bookmark className="w-4 h-4" />
+            <span>Guardar</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setIsHistoryOpen(true)}
+            className="h-12 bg-slate-100 hover:bg-slate-200 text-[#114037] rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-colors cursor-pointer"
+          >
+            <History className="w-4 h-4 text-slate-500" />
+            <span>Histórico ({historyCount})</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setIsMicrolearningOpen(true)}
+            className="h-12 bg-slate-100 hover:bg-slate-200 text-[#114037] rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-colors cursor-pointer"
+          >
+            <BookOpen className="w-4 h-4 text-slate-500" />
+            <span>Guia</span>
+          </button>
+        </div>
+      </aside>
+
+      {/* 7. MODAIS E GAVETAS */}
+      <NozzleSelectorDrawer
+        isOpen={isDrawerOpen}
+        onClose={() => setIsDrawerOpen(false)}
+        side={drawerSide}
+        currentNozzleId={drawerSide === 'A' ? selectedNozzleIdA : selectedNozzleIdB}
+        onSelectNozzle={id => drawerSide === 'A' ? setSelectedNozzleIdA(id) : setSelectedNozzleIdB(id)}
+      />
+
+      <NozzleComparisonMatrixModal
+        isOpen={isMatrixOpen}
+        onClose={() => setIsMatrixOpen(false)}
+        nozzleA={nozzleA}
+        nozzleB={nozzleB}
+        flowA={flowA}
+        flowB={flowB}
+        comparison={comparisonResult}
+        workingPressureBar={workingPressureBar}
+      />
+
+      <NozzleCurvesModal
+        isOpen={isCurvesOpen}
+        onClose={() => setIsCurvesOpen(false)}
+        nozzleA={nozzleA}
+        nozzleB={nozzleB}
+        flowA={flowA}
+        flowB={flowB}
+        workingPressureBar={workingPressureBar}
+      />
+
       <NozzleMicrolearningModal
         isOpen={isMicrolearningOpen}
         onClose={() => setIsMicrolearningOpen(false)}
       />
 
-      {/* MODAL 2: HISTÓRICO LOCAL INDEXEDDB */}
       <NozzleComparisonHistoryModal
         isOpen={isHistoryOpen}
         onClose={() => setIsHistoryOpen(false)}

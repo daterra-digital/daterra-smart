@@ -5,6 +5,7 @@ import { NozzleComparisonTopCard } from './NozzleComparisonTopCard';
 import { NozzleSelectorDrawer } from './NozzleSelectorDrawer';
 import { NozzleCurvesModal } from './NozzleCurvesModal';
 import { NozzleComparisonMatrixModal } from './NozzleComparisonMatrixModal';
+import { NozzleComparisonMatrixCard } from './NozzleComparisonMatrixCard';
 import { NozzleMicrolearningModal } from './NozzleMicrolearningModal';
 import { NozzleComparisonHistoryModal } from './NozzleComparisonHistoryModal';
 import { NozzleFindAlternatives } from './NozzleFindAlternatives';
@@ -53,6 +54,7 @@ export const NozzleComparisonMobileView: React.FC = () => {
   const [isMatrixOpen, setIsMatrixOpen] = React.useState<boolean>(false);
   const [isMicrolearningOpen, setIsMicrolearningOpen] = React.useState<boolean>(false);
   const [isHistoryOpen, setIsHistoryOpen] = React.useState<boolean>(false);
+  const [analysisTab, setAnalysisTab] = React.useState<'matrix' | 'chart'>('matrix');
 
   const nozzleA = React.useMemo(() => NOZZLES_BY_ID.get(selectedNozzleIdA), [selectedNozzleIdA]);
   const nozzleB = React.useMemo(() => NOZZLES_BY_ID.get(selectedNozzleIdB), [selectedNozzleIdB]);
@@ -69,6 +71,12 @@ export const NozzleComparisonMobileView: React.FC = () => {
   const openDrawer = (side: 'A' | 'B') => {
     setDrawerSide(side);
     setIsDrawerOpen(true);
+  };
+
+  const handleSwapNozzles = () => {
+    const tmp = selectedNozzleIdA;
+    setSelectedNozzleIdA(selectedNozzleIdB);
+    setSelectedNozzleIdB(tmp);
   };
 
   const handleSelectAlternative = (refId: string, altId: string, pBar: number) => {
@@ -132,6 +140,7 @@ export const NozzleComparisonMobileView: React.FC = () => {
         flowA={flowA}
         flowB={flowB}
         workingPressureBar={workingPressureBar}
+        onSwapNozzles={handleSwapNozzles}
       />
 
       {/* Seletor de Modo: Comparar 2 Bicos vs Encontrar Alternativas */}
@@ -291,32 +300,48 @@ export const NozzleComparisonMobileView: React.FC = () => {
             </div>
           </div>
 
-          {/* Botões: Matriz Comparativa e Gráfico Comparativo */}
-          <div className="grid grid-cols-2 gap-2.5">
+          {/* Tabs: Matriz Comparativa vs Gráfico Comparativo */}
+          <div className="grid grid-cols-2 gap-2 bg-slate-200/70 p-1 rounded-2xl">
             <button
               type="button"
-              onClick={() => setIsMatrixOpen(true)}
-              className="h-12 bg-white hover:bg-slate-50 border border-slate-200 text-[#114037] font-bold text-xs rounded-xl shadow-xs flex items-center justify-center gap-2 active:scale-98 transition-all"
+              onClick={() => setAnalysisTab('matrix')}
+              className={`h-11 rounded-xl font-bold text-xs shadow-xs flex items-center justify-center gap-2 transition-all cursor-pointer ${
+                analysisTab === 'matrix' ? 'bg-[#114037] text-white' : 'text-slate-600 hover:text-slate-900'
+              }`}
             >
-              <TableProperties className="w-4 h-4 text-[#114037]" />
+              <TableProperties className="w-4 h-4" />
               <span>Matriz Comparativa</span>
             </button>
             <button
               type="button"
-              onClick={() => setIsCurvesOpen(true)}
-              className="h-12 bg-white hover:bg-slate-50 border border-slate-200 text-[#114037] font-bold text-xs rounded-xl shadow-xs flex items-center justify-center gap-2 active:scale-98 transition-all"
+              onClick={() => {
+                setAnalysisTab('chart');
+                setIsCurvesOpen(true);
+              }}
+              className={`h-11 rounded-xl font-bold text-xs shadow-xs flex items-center justify-center gap-2 transition-all cursor-pointer ${
+                analysisTab === 'chart' ? 'bg-[#114037] text-white' : 'text-slate-600 hover:text-slate-900'
+              }`}
             >
-              <LineChart className="w-4 h-4 text-[#114037]" />
+              <LineChart className="w-4 h-4" />
               <span>Gráfico Comparativo</span>
             </button>
           </div>
+
+          {/* Cartão Inline: Matriz Comparativa */}
+          <NozzleComparisonMatrixCard
+            nozzleA={nozzleA}
+            nozzleB={nozzleB}
+            flowA={flowA}
+            flowB={flowB}
+            onOpenDetailsModal={() => setIsMatrixOpen(true)}
+          />
         </div>
       )}
 
       {/* Barra de Ações Fixa no Rodapé (posicionada sobre a BottomNavigationBar) */}
       <aside
         aria-label="Ações da ferramenta"
-        className="fixed bottom-[var(--bottom-nav-total-height,5rem)] inset-x-0 bg-white/95 backdrop-blur-md border-t border-slate-200/80 p-2.5 z-35 shadow-[0_-4px_16px_rgba(0,0,0,0.06)]"
+        className="fixed bottom-[var(--bottom-nav-total-height,5rem)] md:bottom-0 inset-x-0 bg-white/95 backdrop-blur-md border-t border-slate-200/80 p-2.5 z-35 shadow-[0_-4px_16px_rgba(0,0,0,0.06)]"
       >
         <div className="max-w-md mx-auto grid grid-cols-3 gap-2">
           <button
