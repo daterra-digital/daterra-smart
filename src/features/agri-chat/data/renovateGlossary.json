@@ -1,0 +1,1182 @@
+{
+  "metadata": {
+    "source": "Dicionário Técnico",
+    "sourceUrl": "https://docs.google.com/document/d/e/2PACX-1vQRyHqXXSQFQ-B2XEy3yasisKf-Ejho3KhXE0Yw_GbNYbebSZNTu71X_ewgTttD9PTl9zUj2RNUUSde/pub",
+    "lastSyncedAt": "2026-09-29T23:29:44.879Z",
+    "totalProhibitedRules": 4,
+    "totalTerms": 162
+  },
+  "prohibitedRules": [
+    {
+      "id": "canopy",
+      "rawRule": "Canopy: NUNCA traduzir para \"dossel\" (pt-BR). Utilizar Copa ou Parede vegetativa.",
+      "term": "Canopy",
+      "prohibited": [
+        "dossel"
+      ],
+      "preferred": "Copa ou Parede vegetativa"
+    },
+    {
+      "id": "nozzle",
+      "rawRule": "Nozzle: NUNCA traduzir para \"ponta\" (pt-BR) ou \"boquilha\" (es-ES). Utilizar Bico.",
+      "term": "Nozzle",
+      "prohibited": [
+        "ponta",
+        "boquilha"
+      ],
+      "preferred": "Bico"
+    },
+    {
+      "id": "flow-rate-nozzle-flow-rate",
+      "rawRule": "Flow rate / Nozzle flow rate: NUNCA traduzir para \"caudal\" neste contexto. Utilizar Débito ou Débito do bico.",
+      "term": "Flow rate / Nozzle flow rate",
+      "prohibited": [
+        "caudal"
+      ],
+      "preferred": "Débito ou Débito do bico"
+    },
+    {
+      "id": "tree-row-volume-trv",
+      "rawRule": "Tree Row Volume (TRV): Utilizar Volume de vegetação por hectare.",
+      "term": "Tree Row Volume (TRV)",
+      "prohibited": [],
+      "preferred": "Volume de vegetação por hectare"
+    }
+  ],
+  "terms": [
+    {
+      "id": "agitacao",
+      "en": "Agitation, Stirring",
+      "fr": "Agitation",
+      "pt": "Agitação",
+      "definition": "Operação destinada a produzir e a manter a homogeneidade da calda no interior do depósito, ou a facilitar a saída de pó/grânulos."
+    },
+    {
+      "id": "agitacao-hidraulica",
+      "en": "Hydraulic agitation",
+      "fr": "Agitation hydraulique",
+      "pt": "Agitação hidráulica",
+      "definition": "Agitação por meio de uma bomba que recircula a calda a pulverizar."
+    },
+    {
+      "id": "agitacao-mecanica",
+      "en": "Mechanical agitation",
+      "fr": "Agitation mécanique",
+      "pt": "Agitação mecânica",
+      "definition": "Agitação da calda, pó ou grânulos provocada por órgãos móveis no interior do depósito."
+    },
+    {
+      "id": "agitacao-pneumatica",
+      "en": "Pneumatic agitation",
+      "fr": "Agitation pneumatique",
+      "pt": "Agitação pneumática",
+      "definition": "Agitação no interior do depósito pela utilização de uma corrente de ar."
+    },
+    {
+      "id": "alto-volume",
+      "en": "High volume",
+      "fr": "Haut volume",
+      "pt": "Alto volume",
+      "definition": "Volume superior a 700 L/ha (culturas herbáceas) e 1000 L/ha (arbustivas/arbóreas)."
+    },
+    {
+      "id": "amortecedor-pneumatico",
+      "en": "Pneumatic pressure pulsation damper (Air chamber/vessel)",
+      "fr": "Amortisseur pneumatique (Cloche à air)",
+      "pt": "Amortecedor pneumático (Tanque de oscilação / Câmara de pressão)",
+      "definition": "Dispositivo com ou sem pressão prévia na saída da bomba para atenuar as pulsações de pressão."
+    },
+    {
+      "id": "angulo-nominal-de-pulverizacao",
+      "en": "Nominal spray angle",
+      "fr": "Angle nominal de pulvérisation",
+      "pt": "Ângulo nominal de pulverização",
+      "definition": "Ângulo de pulverização obtido a uma pressão de referência para caracterizar um bico."
+    },
+    {
+      "id": "angulo-de-pulverizacao",
+      "en": "Spray angle",
+      "fr": "Angle de pulvérisation",
+      "pt": "Ângulo de pulverização",
+      "definition": "Ângulo formado pelos bordos exteriores do jato junto do bico."
+    },
+    {
+      "id": "arrastamento",
+      "en": "Drift",
+      "fr": "Dérive",
+      "pt": "Arrastamento (Perdas por deriva ou desvio)",
+      "definition": "Quantidade de produto que, sob a forma de partículas ou vapor, se afasta do alvo por ação de movimentos do ar."
+    },
+    {
+      "id": "baixo-volume",
+      "en": "Low volume",
+      "fr": "Bas volume",
+      "pt": "Baixo volume",
+      "definition": "Volume de 50 a 200 L/ha (herbáceas) e 200 a 500 L/ha (arbóreas)."
+    },
+    {
+      "id": "balizamento",
+      "en": "Tramline",
+      "fr": "Voies matérialisées au champ",
+      "pt": "Balizamento",
+      "definition": "Sistema de marcação no campo para a passagem da máquina segundo linhas estabelecidas."
+    },
+    {
+      "id": "barra-de-pulverizacao",
+      "en": "Spray boom",
+      "fr": "Rampe",
+      "pt": "Barra de pulverização (Rampa)",
+      "definition": "Dispositivo que suporta os bicos de pulverização e as respetivas condutas de alimentação."
+    },
+    {
+      "id": "bico-de-correntes-opostas",
+      "en": "Impriming stream nozzle",
+      "fr": "Buse à courants contrariés",
+      "pt": "Bico de correntes opostas",
+      "definition": "Bico em que a pulverização se obtém pelo choque de vários filetes líquidos."
+    },
+    {
+      "id": "bico-defletor",
+      "en": "Deflector nozzle (Anvil/Impact nozzle)",
+      "fr": "Buse à miroir",
+      "pt": "Bico defletor (Bico de espelho)",
+      "definition": "Bico equipado com um defletor que produz um jato de grande ângulo e fraca espessura."
+    },
+    {
+      "id": "bico-de-dupla-fenda",
+      "en": "Double fan slit nozzle",
+      "fr": "Buse double à fente",
+      "pt": "Bico de dupla fenda",
+      "definition": "Bico de fenda dotado de dois orifícios separados."
+    },
+    {
+      "id": "bico-de-fenda",
+      "en": "Fan nozzle (Slit nozzle)",
+      "fr": "Buse à fente",
+      "pt": "Bico de fenda (Bico de jato em leque)",
+      "definition": "Bico com orifício em fenda que produz um jato plano."
+    },
+    {
+      "id": "bico-de-fenda-descentrada",
+      "en": "Off-centre fan nozzle",
+      "fr": "Buse à fente excentrée",
+      "pt": "Bico de fenda descentrada",
+      "definition": "Bico de fenda com ângulo de pulverização e distribuição assimétricos."
+    },
+    {
+      "id": "bico-de-jato-conico",
+      "en": "Cone nozzle (Swirl nozzle)",
+      "fr": "Buse à turbulence",
+      "pt": "Bico de jato cónico (Bico de turbulência)",
+      "definition": "Bico onde o líquido é posto em rotação, produzindo um jato cónico."
+    },
+    {
+      "id": "bico-de-jato-regulavel",
+      "en": "Adjustable nozzle",
+      "fr": "Buse à jet réglable",
+      "pt": "Bico de jato regulável",
+      "definition": "Bico que permite modificar a forma do jato sem mudança completa de componentes."
+    },
+    {
+      "id": "bico-orientavel",
+      "en": "Directional nozzle",
+      "fr": "Buse orientable",
+      "pt": "Bico orientável",
+      "definition": "Bico cuja orientação pode ser modificada em relação à barra ou à lança."
+    },
+    {
+      "id": "bico-de-pulverizacao-hidraulica",
+      "en": "Hydraulic energy nozzle",
+      "fr": "Buse de pulvérisation hydraulique",
+      "pt": "Bico de pulverização hidráulica",
+      "definition": "Peça onde a pulverização ocorre pela passagem de um líquido sob pressão através de um orifício."
+    },
+    {
+      "id": "bocal-ou-bucal-de-pulverizacao",
+      "en": "Air blast nozzle (Twin fluid nozzle)",
+      "fr": "Tuyère de pulvérisation",
+      "pt": "Bocal ou bucal de pulverização (Dispersor)",
+      "definition": "Órgão onde a pulverização ocorre pela ação do escoamento rápido do ar sobre o líquido."
+    },
+    {
+      "id": "bomba",
+      "en": "Pump",
+      "fr": "Pompe",
+      "pt": "Bomba",
+      "definition": "Órgão que imprime ao líquido a pressão para garantir a pulverização."
+    },
+    {
+      "id": "bomba-de-engrenagens",
+      "en": "Gear pump",
+      "fr": "Pompe à engrenages",
+      "pt": "Bomba de engrenagens (Bomba de carretos)",
+      "definition": "Bomba volumétrica cujo escoamento se faz por ação de engrenagens."
+    },
+    {
+      "id": "bomba-centrifuga",
+      "en": "Centrifugal pump",
+      "fr": "Pompe centrifuge",
+      "pt": "Bomba centrífuga",
+      "definition": "Bomba não volumétrica cujo escoamento é assegurado por impulsores."
+    },
+    {
+      "id": "bomba-de-embolo",
+      "en": "Piston pump",
+      "fr": "Pompe à piston",
+      "pt": "Bomba de êmbolo",
+      "definition": "Bomba volumétrica cujo escoamento se deve à deslocação de um ou mais êmbolos (pistões)."
+    },
+    {
+      "id": "bomba-de-membrana",
+      "en": "Diaphragm pump",
+      "fr": "Pompe à membrane",
+      "pt": "Bomba de membrana (Bomba de diafragma)",
+      "definition": "Bomba volumétrica cujo escoamento se deve à deformação de uma membrana."
+    },
+    {
+      "id": "bomba-de-embolo-membrana",
+      "en": "Piston-diaphragm pump",
+      "fr": "Pompe à piston-membrane",
+      "pt": "Bomba de êmbolo-membrana",
+      "definition": "Bomba cujo escoamento combina êmbolo de grande diâmetro com membrana."
+    },
+    {
+      "id": "bomba-de-roletes",
+      "en": "Roller pump",
+      "fr": "Pompe à rouleaux",
+      "pt": "Bomba de roletes",
+      "definition": "Bomba volumétrica cujo escoamento ocorre pela mudança de volume entre roletes num rotor."
+    },
+    {
+      "id": "bomba-peristaltica",
+      "en": "Peristaltic pump",
+      "fr": "Pompe péristaltique",
+      "pt": "Bomba peristáltica",
+      "definition": "Bomba volumétrica com escoamento gerado pela deformação contínua de uma conduta flexível."
+    },
+    {
+      "id": "bomba-volumetrica",
+      "en": "Volumetric pump",
+      "fr": "Pompe volumétrique",
+      "pt": "Bomba volumétrica",
+      "definition": "Termo genérico para bombas com variação da capacidade de bombagem (êmbolo, membrana, engrenagens)."
+    },
+    {
+      "id": "calda",
+      "en": "Spray mixture",
+      "fr": "Bouillie",
+      "pt": "Calda",
+      "definition": "Líquido que contém o produto fitofarmacêutico preparado para a aplicação."
+    },
+    {
+      "id": "calibragem",
+      "en": "Calibration",
+      "fr": "Tarage",
+      "pt": "Calibragem",
+      "definition": "Regulação do equipamento para obter a quantidade desejada de produto a aplicar."
+    },
+    {
+      "id": "camara-de-turbulencia",
+      "en": "Swirl chamber",
+      "fr": "Chambre de turbulence",
+      "pt": "Câmara de turbulência",
+      "definition": "Cavidade onde a calda é posta em rotação num bico de jato cónico."
+    },
+    {
+      "id": "coletor-defletor",
+      "en": "Collector deflector",
+      "fr": "Collecteur-déflecteur",
+      "pt": "Coletor-defletor",
+      "definition": "Dispositivo destinado a concentrar o fluxo de ar para lhe assegurar uma orientação definida."
+    },
+    {
+      "id": "compartimento-para-equipamento-de-protecao-individual",
+      "en": "Protective clothing box",
+      "fr": "Coffre à équipements de protection",
+      "pt": "Compartimento para equipamento de proteção individual",
+      "definition": "Espaço no pulverizador para acondicionar EPI."
+    },
+    {
+      "id": "corpo-do-bico",
+      "en": "Nozzle body",
+      "fr": "Corps de buse",
+      "pt": "Corpo do bico",
+      "definition": "Elemento principal de suporte dos restantes componentes do bico."
+    },
+    {
+      "id": "corretor-de-declive",
+      "en": "Slope compensator",
+      "fr": "Correcteur de pente",
+      "pt": "Corretor de declive",
+      "definition": "Sistema que mantém a barra paralela ao solo em declives."
+    },
+    {
+      "id": "debito-de-ar",
+      "en": "Airflow",
+      "fr": "Débit d'air",
+      "pt": "Débito de ar (Volume de ar)",
+      "definition": "Volume de ar que passa através de uma secção na unidade de tempo."
+    },
+    {
+      "id": "debito-de-saida-de-liquido",
+      "en": "Liquid output",
+      "fr": "Débit de sortie de liquide",
+      "pt": "Débito de saída de líquido",
+      "definition": "Volume de líquido fornecido por um aparelho na unidade de tempo (L/min)."
+    },
+    {
+      "id": "defletor",
+      "en": "Deflector (Air deflector)",
+      "fr": "Déflecteur",
+      "pt": "Defletor",
+      "definition": "Peça destinada a modificar a direção de um fluxo de ar."
+    },
+    {
+      "id": "deposito",
+      "en": "Spray tank",
+      "fr": "Cuve",
+      "pt": "Depósito",
+      "definition": "Elemento que contém a calda ou o produto a aplicar."
+    },
+    {
+      "id": "dispositivo-para-auto-enchimento",
+      "en": "Hydraulic injector (Filler)",
+      "fr": "Hydro-injecteur (Hydroremplisseur)",
+      "pt": "Dispositivo para auto-enchimento (Hidroinjetor)",
+      "definition": "Dispositivo que utiliza a velocidade de injeção de líquido para criar depressão e encher o depósito."
+    },
+    {
+      "id": "distribuidor",
+      "en": "Control manifold (Delivery manifold)",
+      "fr": "Distributeur",
+      "pt": "Distribuidor",
+      "definition": "Dispositivo que permite selecionar e dirigir o escoamento do líquido ou poeiras."
+    },
+    {
+      "id": "distribuidores-de-granulos",
+      "en": "Granules distributor",
+      "fr": "Distributeur de granulés",
+      "pt": "Distribuidores de grânulos",
+      "definition": "Aparelhos destinados à aplicação de grânulos."
+    },
+    {
+      "id": "dose",
+      "en": "Dose rate",
+      "fr": "Dose",
+      "pt": "Dose",
+      "definition": "Quantidade de substância ativa ou produto formulado aplicada por unidade de área ou volume."
+    },
+    {
+      "id": "doseador-injetor-de-calda",
+      "en": "Metering injection system",
+      "fr": "Doseur-injecteur de bouillie",
+      "pt": "Doseador-injetor de calda",
+      "definition": "Sistema que injeta produto formulado na conduta a uma concentração predeterminada."
+    },
+    {
+      "id": "embolo",
+      "en": "Piston",
+      "fr": "Piston",
+      "pt": "Êmbolo (Pistão)",
+      "definition": "Peça cilíndrica que desliza no interior de um cilindro."
+    },
+    {
+      "id": "extensao-da-lanca",
+      "en": "Spray lance extension",
+      "fr": "Allonge de lance",
+      "pt": "Extensão da lança",
+      "definition": "Tubo que permite aumentar o comprimento da lança de pulverização."
+    },
+    {
+      "id": "filtro",
+      "en": "Filter",
+      "fr": "Filtre",
+      "pt": "Filtro",
+      "definition": "Elemento destinado a reter as partículas da calda."
+    },
+    {
+      "id": "filtro-de-aspiracao",
+      "en": "Suction strainer",
+      "fr": "Crépine",
+      "pt": "Filtro de aspiração",
+      "definition": "Dispositivo na conduta de aspiração que impede a entrada de corpos estranhos."
+    },
+    {
+      "id": "filtro-do-bico",
+      "en": "Nozzle filter",
+      "fr": "Filtre de buse",
+      "pt": "Filtro do bico",
+      "definition": "Elemento a montante do bico que previne entupimentos."
+    },
+    {
+      "id": "filtro-de-enchimento",
+      "en": "Tank filling strainer",
+      "fr": "Tamis (Panier-filtre)",
+      "pt": "Filtro de enchimento",
+      "definition": "Peça filtrante na abertura do depósito."
+    },
+    {
+      "id": "gota",
+      "en": "Droplet",
+      "fr": "Goutte",
+      "pt": "Gota",
+      "definition": "Partícula de líquido com formato tendencialmente esférico."
+    },
+    {
+      "id": "granulos",
+      "en": "Granules",
+      "fr": "Granulés",
+      "pt": "Grânulos",
+      "definition": "Partículas de dimensões definidas contendo a matéria ativa."
+    },
+    {
+      "id": "guincho-da-barra-de-pulverizacao",
+      "en": "Boom winch",
+      "fr": "Treuil de rampe",
+      "pt": "Guincho da barra de pulverização (Elevador da barra de pulverização)",
+      "definition": "Mecanismo para regular a barra em altura."
+    },
+    {
+      "id": "incorporador-do-produto",
+      "en": "Chemical introduction bowl",
+      "fr": "Incorporateur de produit",
+      "pt": "Incorporador do produto",
+      "definition": "Depósito lateral onde se colocam os produtos fitofarmacêuticos para transferência para o depósito principal."
+    },
+    {
+      "id": "indicador-do-nivel-do-deposito",
+      "en": "Spray tank contents gauge",
+      "fr": "Jauge de niveau de la cuve",
+      "pt": "Indicador do nível do depósito",
+      "definition": "Dispositivo de leitura visual do volume de líquido no depósito."
+    },
+    {
+      "id": "injecao",
+      "en": "Injection",
+      "fr": "Injection",
+      "pt": "Injeção",
+      "definition": "Introdução sob pressão de um fluido noutro."
+    },
+    {
+      "id": "injetor-de-solo",
+      "en": "Soil injector",
+      "fr": "Pal-injecteur",
+      "pt": "Injetor de solo",
+      "definition": "Aparelho destinado a introduzir produtos fluidos no solo."
+    },
+    {
+      "id": "jato",
+      "en": "Spray",
+      "fr": "Jet",
+      "pt": "Jato",
+      "definition": "Conjunto de gotas emitidas por um bico."
+    },
+    {
+      "id": "lanca",
+      "en": "Spray lance",
+      "fr": "Lance",
+      "pt": "Lança",
+      "definition": "Tubo com bicos na extremidade, comandado manualmente."
+    },
+    {
+      "id": "largura-tratada",
+      "en": "Swath",
+      "fr": "Largeur traitée",
+      "pt": "Largura tratada",
+      "definition": "Distância entre eixos de duas passagens consecutivas do equipamento."
+    },
+    {
+      "id": "manometro",
+      "en": "Pressure gauge",
+      "fr": "Manomètre",
+      "pt": "Manómetro",
+      "definition": "Instrumento para indicar visualmente a pressão de um fluido."
+    },
+    {
+      "id": "medio-volume",
+      "en": "Medium volume",
+      "fr": "Moyen volume",
+      "pt": "Médio volume",
+      "definition": "Volume de 200 a 700 L/ha (herbáceas) e 500 a 1000 L/ha (arbóreas)."
+    },
+    {
+      "id": "muito-baixo-volume",
+      "en": "Very low volume",
+      "fr": "Très bas volume",
+      "pt": "Muito baixo volume",
+      "definition": "Volume de 5 a 50 L/ha (herbáceas) e 50 a 200 L/ha (arbóreas)."
+    },
+    {
+      "id": "orgao-de-humectacao",
+      "en": "Wiper",
+      "fr": "Organe d'humectation",
+      "pt": "Órgão de humectação",
+      "definition": "Dispositivo que aplica produto por contacto direto sobre a superfície alvo."
+    },
+    {
+      "id": "pastilha",
+      "en": "Nozzle disc",
+      "fr": "Embout de buse",
+      "pt": "Pastilha",
+      "definition": "Peça que contém o orifício terminal de um bico cónico."
+    },
+    {
+      "id": "penetracao-da-pulverizacao",
+      "en": "Spray penetration",
+      "fr": "Pénétration de la pulvérisation",
+      "pt": "Penetração da pulverização",
+      "definition": "Capacidade das gotas atingirem o interior da massa foliar."
+    },
+    {
+      "id": "po-para-polvilhacao",
+      "en": "Dust",
+      "fr": "Poudre pour poudrage",
+      "pt": "Pó para polvilhação",
+      "definition": "Produto sólido finamente dividido para aplicação direta."
+    },
+    {
+      "id": "polvilhador",
+      "en": "Duster",
+      "fr": "Poudreuse",
+      "pt": "Polvilhador",
+      "definition": "Aparelho para aplicação de produtos em pó."
+    },
+    {
+      "id": "ponteira-multipla",
+      "en": "Spray lance boom",
+      "fr": "Rateau de lance",
+      "pt": "Ponteira múltipla",
+      "definition": "Parte terminal da lança equipada com vários bicos."
+    },
+    {
+      "id": "pulverizacao",
+      "en": "Spraying",
+      "fr": "Pulvérisation",
+      "pt": "Pulverização",
+      "definition": "Divisão e emissão no ar de uma calda sob a forma de gotas."
+    },
+    {
+      "id": "pulverizacao-centrifuga",
+      "en": "Centrifugal spraying",
+      "fr": "Pulvérisation centrifuge",
+      "pt": "Pulverização centrífuga",
+      "definition": "Pulverização obtida por força centrífuga (ex: discos rotativos)."
+    },
+    {
+      "id": "pulverizacao-eletrostatica",
+      "en": "Electrostatic spraying",
+      "fr": "Pulvérisation électrostatique",
+      "pt": "Pulverização eletrostática",
+      "definition": "Pulverização que utiliza cargas elétricas para melhorar a deposição de gotas no alvo."
+    },
+    {
+      "id": "pulverizacao-por-pressao-do-liquido",
+      "en": "Hydraulic pressure spraying",
+      "fr": "Pulvérisation à pression de liquide",
+      "pt": "Pulverização por pressão do líquido",
+      "definition": "Pulverização exclusiva por ação da pressão sobre um orifício."
+    },
+    {
+      "id": "pulverizador",
+      "en": "Sprayer",
+      "fr": "Pulvérisateur",
+      "pt": "Pulverizador",
+      "definition": "Equipamento base utilizado na aplicação de calda."
+    },
+    {
+      "id": "pulverizador-autopropulsor",
+      "en": "Self-propelled sprayer",
+      "fr": "Pulvérisateur automoteur",
+      "pt": "Pulverizador autopropulsor",
+      "definition": "Equipamento de pulverização de locomoção própria."
+    },
+    {
+      "id": "pulverizador-em-carrinho-de-mao",
+      "en": "Wheel-barrow sprayer",
+      "fr": "Pulvérisateur sur brouette",
+      "pt": "Pulverizador em carrinho de mão",
+      "definition": "Pulverizador montado numa estrutura de tração manual tipo carrinho de mão."
+    },
+    {
+      "id": "pulverizador-de-dorso",
+      "en": "Knapsack sprayer",
+      "fr": "Pulvérisateur à dos",
+      "pt": "Pulverizador de dorso",
+      "definition": "Pulverizador suportado às costas do operador."
+    },
+    {
+      "id": "pulverizador-de-jato-projetado",
+      "en": "Hydraulic sprayer",
+      "fr": "Pulvérisateur à pression à jet projeté",
+      "pt": "Pulverizador de jato projetado",
+      "definition": "Efetua a pulverização sem fluxo de ar auxiliar (transporte apenas hidráulico)."
+    },
+    {
+      "id": "pulverizador-de-jato-transportado",
+      "en": "Air carrier sprayer (with hydraulic nozzles)",
+      "fr": "Pulvérisateur à pression à jet porté",
+      "pt": "Pulverizador de jato transportado",
+      "definition": "O transporte das gotas é auxiliado por um fluxo de ar de uma turbina."
+    },
+    {
+      "id": "pulverizador-motorizado-de-dorso",
+      "en": "Motorized knapsack sprayer",
+      "fr": "Pulvérisateur à moteur à dos",
+      "pt": "Pulverizador motorizado de dorso",
+      "definition": "Pulverizador com motor acoplado suportado às costas."
+    },
+    {
+      "id": "pulverizador-pneumatico",
+      "en": "Air carrier sprayer (with airblast nozzles)",
+      "fr": "Pulvérisateur pneumatique",
+      "pt": "Pulverizador pneumático",
+      "definition": "Equipamento que usa bocais de pulverização pneumática (o ar estilhaça as gotas)."
+    },
+    {
+      "id": "pulverizador-pneumatico-de-dorso",
+      "en": "Knapsack mistblower",
+      "fr": "Atomiseur à dos",
+      "pt": "Pulverizador pneumático de dorso (Atomizador de dorso)",
+      "definition": "Versão portátil às costas do pulverizador pneumático."
+    },
+    {
+      "id": "pulverizador-de-pressao-previa",
+      "en": "Compression sprayer",
+      "fr": "Pulvérisateur à pression préalable",
+      "pt": "Pulverizador de pressão prévia (Pulverizador de compressão)",
+      "definition": "A pressão é gerada previamente por ar/gás comprimido."
+    },
+    {
+      "id": "pulverizador-rebocado-por-trator",
+      "en": "Trailed sprayer",
+      "fr": "Pulvérisateur traîné sur le tracteur",
+      "pt": "Pulverizador rebocado por trator",
+      "definition": "Pulverizador acoplado que suporta o seu próprio peso sobre rodas independentes."
+    },
+    {
+      "id": "pulverizador-suspenso-nos-tres-pontos-do-trator",
+      "en": "Tractor mounted sprayer",
+      "fr": "Pulvérisateur porté sur le tracteur",
+      "pt": "Pulverizador suspenso nos três pontos do trator (Pulverizador montado)",
+      "definition": "Pulverizador cujo peso total, quando elevado, é suportado pelo trator."
+    },
+    {
+      "id": "pulverizador-termico",
+      "en": "Thermal sprayer",
+      "fr": "Pulvérisateur thermique",
+      "pt": "Pulverizador térmico (Nebulizador térmico)",
+      "definition": "Equipamento que pulveriza por recurso a energia térmica."
+    },
+    {
+      "id": "regulador-de-pressao",
+      "en": "Pressure regulator",
+      "fr": "Réducteur de pression",
+      "pt": "Regulador de pressão",
+      "definition": "Dispositivo que mantém a pressão de trabalho num valor calibrado."
+    },
+    {
+      "id": "sistema-de-debito-proporcional-ao-avanco",
+      "en": "Ground speed system",
+      "fr": "Système DPA",
+      "pt": "Sistema de débito proporcional ao avanço (DPA)",
+      "definition": "Sistema que mantém o volume/ha constante adaptando-se à velocidade do trator."
+    },
+    {
+      "id": "sistema-de-debito-proporcional-a-rotacao-do-motor",
+      "en": "Motor speed system",
+      "fr": "Système DPM",
+      "pt": "Sistema de débito proporcional à rotação do motor (DPM)",
+      "definition": "Sistema que varia o débito segundo as RPM do motor da máquina."
+    },
+    {
+      "id": "sobreposicao-dos-jatos",
+      "en": "Spray overlap",
+      "fr": "Recouvrement des jets",
+      "pt": "Sobreposição dos jatos",
+      "definition": "A zona na superfície alvo onde ocorre sobreposição de calda entre bicos adjacentes."
+    },
+    {
+      "id": "tampao-do-bico",
+      "en": "Blank nozzle disc",
+      "fr": "Bouchon de buse",
+      "pt": "Tampão do bico",
+      "definition": "Dispositivo destinado a cegar/bloquear um bico na barra."
+    },
+    {
+      "id": "taxa-de-cobertura",
+      "en": "Spray coverage",
+      "fr": "Taux de couverture",
+      "pt": "Taxa de cobertura",
+      "definition": "Rácio entre a superfície coberta por líquido e a superfície total do alvo."
+    },
+    {
+      "id": "tracador-de-percursos",
+      "en": "Swath marker (Bout)",
+      "fr": "Traceur de parcours",
+      "pt": "Traçador de percursos",
+      "definition": "Sistema de marcação (ex: espuma) que indica o limite da faixa já pulverizada."
+    },
+    {
+      "id": "tratamento-por-injecao",
+      "en": "Treatment by injection",
+      "fr": "Traitement par injection",
+      "pt": "Tratamento por injeção",
+      "definition": "Método onde o produto é introduzido no solo, planta ou água através de injeção."
+    },
+    {
+      "id": "tremonha",
+      "en": "Hopper (Seed/Grain box)",
+      "fr": "Trémie (Caisse/Coffre)",
+      "pt": "Tremonha",
+      "definition": "Compartimento que alimenta os órgãos de distribuição contendo grânulos ou sementes."
+    },
+    {
+      "id": "tremonha-de-polvilhacao",
+      "en": "Dust hopper",
+      "fr": "Trémie à poudre",
+      "pt": "Tremonha de polvilhação",
+      "definition": "Tremonha dedicada a formulações em pó."
+    },
+    {
+      "id": "turbina",
+      "en": "Fan (Blower)",
+      "fr": "Turbine (Ventilateur)",
+      "pt": "Turbina (Ventilador)",
+      "definition": "Dispositivo que gera a corrente de ar por ação de palhetas rotativas."
+    },
+    {
+      "id": "turbina-axial",
+      "en": "Axial flow fan",
+      "fr": "Ventilateur à flux axial (Hélicoïde)",
+      "pt": "Turbina axial (Turbina helicoidal)",
+      "definition": "Turbina que cria o fluxo de ar paralelamente ao seu eixo de rotação."
+    },
+    {
+      "id": "turbina-de-fluxo-cruzado",
+      "en": "Cross-flow fan",
+      "fr": "Ventilateur centrifuge basse pression",
+      "pt": "Turbina de fluxo cruzado (Turbina centrífuga de baixa pressão)",
+      "definition": "Turbina geradora de fluxo linear e perpendicular."
+    },
+    {
+      "id": "ventilateur-centrifuge-turbina-radial",
+      "en": "Radial",
+      "fr": "Centrifugal fan",
+      "pt": "Ventilateur centrifuge / Turbina radial (Turbina centrífuga)",
+      "definition": "Turbina que gera uma corrente de ar forte, na perpendicular ao eixo, recorrendo a força centrífuga."
+    },
+    {
+      "id": "ultra-baixo-volume",
+      "en": "Ultra low volume",
+      "fr": "Ultra bas volume",
+      "pt": "Ultra baixo volume",
+      "definition": "Volume de calda menor a 5 L/ha, independentemente da cultura."
+    },
+    {
+      "id": "valvula-de-seguranca",
+      "en": "Safety valve",
+      "fr": "Soupape de sûreté",
+      "pt": "Válvula de segurança",
+      "definition": "Limitador que impede que a pressão do circuito exceda o valor de segurança."
+    },
+    {
+      "id": "volume-por-hectare",
+      "en": "Volume-hectare",
+      "fr": "Volume-hectare",
+      "pt": "Volume por hectare",
+      "definition": "Volume de calda distribuído por pulverizador numa área de 1 hectare."
+    },
+    {
+      "id": "area-de-parede-foliar",
+      "en": "Leaf Wall Area (LWA)",
+      "fr": "Surface de haie foliaire (LWA)",
+      "pt": "Área de Parede Foliar (LWA)",
+      "definition": "Medida utilizada em culturas com crescimento vertical (como vinha ou pomares) para determinar a dose de tratamento requerida."
+    },
+    {
+      "id": "pression-de-service-pressao-de-trabalho",
+      "en": "Operating pressure",
+      "fr": "Pression de travail",
+      "pt": "Pression de service / Pressão de trabalho",
+      "definition": "Pressão operacional na qual o líquido se encontra no circuito do pulverizador, medida em bar, essencial para regular o débito e o tamanho das gotas."
+    },
+    {
+      "id": "fato-de-protecao",
+      "en": "Protective suit",
+      "fr": "Combinaison de protection",
+      "pt": "Fato de proteção",
+      "definition": "Elemento do Equipamento de Proteção Individual (EPI) que visa proteger o corpo do operador contra a exposição à calda fitofarmacêutica."
+    },
+    {
+      "id": "inspection-obligatoire-inspecao-obrigatoria",
+      "en": "Mandatory inspection",
+      "fr": "Contrôle obligatoire",
+      "pt": "Inspection obligatoire / Inspeção obrigatória",
+      "definition": "Inspeção periódica exigida por lei aos equipamentos de aplicação de produtos fitofarmacêuticos (em Portugal realizada pelos Centros IPP)."
+    },
+    {
+      "id": "velocidade-do-vento",
+      "en": "Wind speed",
+      "fr": "Vitesse du vent",
+      "pt": "Velocidade do vento",
+      "definition": "Fator climático crítico (medido em km/h) que determina o risco de arrastamento (deriva) da calda durante a pulverização."
+    },
+    {
+      "id": "pressao-de-pulverizacao",
+      "en": "Spray pressure",
+      "fr": "Pression de pulvérisation",
+      "pt": "Pressão de pulverização",
+      "definition": "Pressão do líquido no circuito gerada pela bomba, que afeta diretamente o débito dos bicos e o espetro de gotas."
+    },
+    {
+      "id": "registre-phytosanitaire-caderno-de-campo",
+      "en": "Field Notebook",
+      "fr": "Cahier d'exploitation",
+      "pt": "Registre phytosanitaire / Caderno de Campo",
+      "definition": "Documento obrigatório para o registo das práticas agrícolas e tratamentos fitossanitários realizados na exploração."
+    },
+    {
+      "id": "debito-total",
+      "en": "Total flow rate",
+      "fr": "Débit total",
+      "pt": "Débito total",
+      "definition": "Somatório do débito de todos os bicos de pulverização da máquina, habitualmente medido em L/min."
+    },
+    {
+      "id": "hauteur-de-la-vegetation-altura-da-copa",
+      "en": "Canopy height",
+      "fr": "Hauteur de la haie foliaire",
+      "pt": "Hauteur de la végétation / Altura da copa",
+      "definition": "Parâmetro da cultura (medido em metros) correspondente à dimensão vertical da folhagem, utilizado no cálculo da Área de Parede Foliar (LWA) ou Volume de Vegetação (TRV)."
+    },
+    {
+      "id": "largeur-de-la-vegetation-largura-da-copa",
+      "en": "Canopy width",
+      "fr": "Épaisseur de la haie foliaire",
+      "pt": "Largeur de la végétation / Largura da copa",
+      "definition": "Parâmetro da cultura (medido em metros) correspondente à dimensão horizontal da folhagem, utilizado no cálculo do Volume de Vegetação (TRV)."
+    },
+    {
+      "id": "sala-de-armazenamento-de-produtos-fitofarmaceuticos",
+      "en": "PPP storage room",
+      "fr": "Local phytopharmaceutique",
+      "pt": "Sala de armazenamento de produtos fitofarmacêuticos (ou Armazém de produtos fitofarmacêuticos)",
+      "definition": "Local com requisitos legais específicos (ventilação, retenção de derrames, sinalização) destinado à guarda exclusiva de Produtos Fitofarmacêuticos (PPP)."
+    },
+    {
+      "id": "praga",
+      "en": "Pest",
+      "fr": "Ravageur",
+      "pt": "Praga",
+      "definition": "Organismo nocivo (insetos, ácaros, roedores, etc.) que causa danos às culturas. Na documentação oficial, juntamente com as doenças e infestantes, são designados por \"inimigos das culturas\"."
+    },
+    {
+      "id": "doenca",
+      "en": "Disease",
+      "fr": "Maladie",
+      "pt": "Doença",
+      "definition": "Perturbação fisiológica na planta causada por agentes patogénicos (fungos, bactérias, vírus)."
+    },
+    {
+      "id": "debito-real-do-bico",
+      "en": "Actual nozzle flow rate",
+      "fr": "Débit réel de la buse",
+      "pt": "Débito real do bico",
+      "definition": "O volume de líquido efetivamente debitado pelo bico num determinado intervalo de tempo (medido no campo), por oposição ao débito nominal tabelado pelo fabricante."
+    },
+    {
+      "id": "metodo-de-calculo-da-dose",
+      "en": "Dosage calculation method",
+      "fr": "Méthode de calcul de la dose",
+      "pt": "Método de cálculo da dose",
+      "definition": "A fórmula ou procedimento utilizado para determinar a quantidade de produto fitofarmacêutico a aplicar por unidade de área (ex: kg/ha, L/ha) com base na biometria da cultura (como o LWA ou TRV)."
+    },
+    {
+      "id": "hauteur-de-la-haie-altura-da-folhagem",
+      "en": "Leaf height",
+      "fr": "Hauteur du feuillage",
+      "pt": "Hauteur de la haie / Altura da folhagem (ou Altura da sebe)",
+      "definition": "Sinónimo prático de \"Canopy height\" no contexto específico do cálculo da Área de Parede Foliar (LWA), correspondendo à altura efetiva da parede de vegetação tratada."
+    },
+    {
+      "id": "abaque-des-buses-tabela-de-bicos",
+      "en": "Nozzles chart",
+      "fr": "Tableau des buses",
+      "pt": "Abaque des buses / Tabela de bicos",
+      "definition": "Tabela fornecida pelos fabricantes de bicos que relaciona a pressão de trabalho com o débito nominal e o tamanho das gotas, organizada habitualmente por cores (norma ISO)."
+    },
+    {
+      "id": "anemometro",
+      "en": "Anemometer",
+      "fr": "Anémomètre",
+      "pt": "Anemómetro",
+      "definition": "Instrumento utilizado para medir a velocidade do vento, essencial para avaliar o risco de arrastamento (deriva) antes de iniciar a pulverização."
+    },
+    {
+      "id": "pavilhao",
+      "en": "Hangar",
+      "fr": "Hangar",
+      "pt": "Pavilhão (ou Parque de máquinas)",
+      "definition": "Estrutura coberta utilizada na exploração agrícola para guardar e proteger tratores, pulverizadores e outros equipamentos."
+    },
+    {
+      "id": "manuseamento-de-produtos-fitofarmaceuticos",
+      "en": "PPP handling",
+      "fr": "Manipulation des produits phytopharmaceutiques",
+      "pt": "Manuseamento de produtos fitofarmacêuticos",
+      "definition": "Conjunto de operações (preparação da calda, enchimento, lavagem) que exigem o uso de Equipamento de Proteção Individual (EPI) devido aos riscos associados."
+    },
+    {
+      "id": "armazenamento-de-produtos-fitofarmaceuticos",
+      "en": "PPP storage",
+      "fr": "Stockage des produits phytopharmaceutiques",
+      "pt": "Armazenamento de produtos fitofarmacêuticos",
+      "definition": "Prática de guarda de produtos fitofarmacêuticos em instalações com requisitos de segurança e salubridade regulamentados por lei."
+    },
+    {
+      "id": "pesticida",
+      "en": "Pesticide",
+      "fr": "Pesticide",
+      "pt": "Pesticida (ou Produto Fitofarmacêutico)",
+      "definition": "Substância utilizada para combater pragas. Em contexto agrícola e legal em Portugal, deve privilegiar-se o uso do termo \"Produto Fitofarmacêutico\" para abranger também fungicidas, herbicidas, etc."
+    },
+    {
+      "id": "oidio",
+      "en": "Powdery Mildew",
+      "fr": "Oïdium",
+      "pt": "Oídio",
+      "definition": "Doença fúngica (Erysiphe necator) muito comum na vinha, caracterizada pelo aparecimento de um pó acinzentado nas folhas e cachos."
+    },
+    {
+      "id": "mildio",
+      "en": "Downy Mildew",
+      "fr": "Mildiou",
+      "pt": "Míldio",
+      "definition": "Doença fúngica (Plasmopara viticola) provocada por humidade, identificável pelas \"manchas de óleo\" na página superior das folhas da videira."
+    },
+    {
+      "id": "cigarrinha-verde",
+      "en": "Green Leafhopper",
+      "fr": "Cicadelle verte",
+      "pt": "Cigarrinha-verde",
+      "definition": "Praga de insetos suctores (Empoasca vitis) que ataca as folhas da videira, causando necroses nas margens do limbo foliar."
+    },
+    {
+      "id": "largura-de-trabalho",
+      "en": "Working width",
+      "fr": "Largeur de travail",
+      "pt": "Largura de trabalho",
+      "definition": "Largura efetiva tratada pelo equipamento numa passagem; em pulverizadores de barras corresponde à largura da barra, e em culturas em linha (vinha/pomares) é habitualmente igual à distância entrelinhas."
+    },
+    {
+      "id": "sceau-gradue-jarro-graduado",
+      "en": "Pitcher (Measuring jug)",
+      "fr": "Cruche graduée",
+      "pt": "Sceau gradué / Jarro graduado (ou Jarro medidor)",
+      "definition": "Recipiente graduado em litros ou mililitros utilizado na calibração de pulverizadores para recolher o débito de um bico durante 1 minuto."
+    },
+    {
+      "id": "codigo-e-cor-iso-do-bico",
+      "en": "Nozzle ISO code and color",
+      "fr": "Code ISO et couleur de buse",
+      "pt": "Código e cor ISO do bico",
+      "definition": "Codificação internacional normalizada (ISO 10625) que identifica o débito nominal dos bicos de pulverização através de cores específicas."
+    },
+    {
+      "id": "abaque-de-buse-tabela-de-debito-dos-bicos",
+      "en": "Calibration chart (Nozzle chart)",
+      "fr": "Tableau de débit",
+      "pt": "Abaque de buse / Tabela de débito dos bicos (ou Tabela de calibração)",
+      "definition": "Tabela fornecida pelo fabricante dos bicos que cruza a pressão de trabalho (bar) e a dimensão/cor do bico para indicar o débito teórico em L/min."
+    },
+    {
+      "id": "coeficiente-de-pulverizacao",
+      "en": "Spraying coefficient",
+      "fr": "Coefficient de pulvérisation",
+      "pt": "Coeficiente de pulverização",
+      "definition": "Fator empírico utilizado no cálculo do volume de calda em culturas tridimensionais (como vinha ou pomares), expresso em L/m³ de vegetação."
+    },
+    {
+      "id": "bico-anti-deriva",
+      "en": "Drift-reducing nozzle",
+      "fr": "Buse anti-dérive",
+      "pt": "Bico anti-deriva (ou Bico anti-arrastamento)",
+      "definition": "Bico de pulverização concebido (por exemplo, com injeção de ar ou pré-orifício) para produzir gotas de maior dimensão, reduzindo o risco de arrastamento do produto pelo vento."
+    },
+    {
+      "id": "cochonilha-algodao",
+      "en": "Mealybug",
+      "fr": "Cochenille farineuse",
+      "pt": "Cochonilha-algodão (ou Cochonilha)",
+      "definition": "Praga de insetos suctores que ataca várias culturas, segregando melaço que favorece o aparecimento de fumagina."
+    },
+    {
+      "id": "luvas-resistentes-a-produtos-quimicos",
+      "en": "Chemical resistant gloves",
+      "fr": "Gants de protection chimique",
+      "pt": "Luvas resistentes a produtos químicos",
+      "definition": "Elemento do Equipamento de Proteção Individual (EPI) em nitrilo ou neopreno indispensável na manipulação de produtos fitofarmacêuticos concentrados e na preparação da calda."
+    },
+    {
+      "id": "guia-tecnico",
+      "en": "Technical Guide",
+      "fr": "Guide technique",
+      "pt": "Guia Técnico",
+      "definition": "Documento de referência integrado na interface do simulador onde o utilizador consulta fórmulas de calibração, características dos produtos e limites legais."
+    },
+    {
+      "id": "forme-du-jet-padrao-de-pulverizacao",
+      "en": "Spray pattern",
+      "fr": "Spectre de pulvérisation",
+      "pt": "Forme du jet / Padrão de pulverização (ou Formato do jato)",
+      "definition": "Geometria e distribuição do jato líquido emitido pelo bico (em leque, cone oco, espelho), crucial para a cobertura uniforme do alvo."
+    },
+    {
+      "id": "plan-d-eau-cours-d-eau-captages-d-eau-massas-de-agua-origens-de-agua",
+      "en": "Water bodies",
+      "fr": "Water sources",
+      "pt": "Plan d'eau / Cours d'eau / Captages d'eau / Massas de água / Origens de água (ou Cursos de água)",
+      "definition": "Zonas sensíveis (rios, poços, furos, albufeiras) onde a legislação impõe distâncias mínimas de proteção (zonas tampão) na aplicação de produtos fitofarmacêuticos."
+    },
+    {
+      "id": "pomoideas",
+      "en": "Pome fruits",
+      "fr": "Fruits à pépins",
+      "pt": "Pomóideas (ou Fruteiras de caroço/pépins)",
+      "definition": "Categoria agronómica de fruteiras cujo fruto é um pomo (ex: macieira, pereira, marmeleiro)."
+    },
+    {
+      "id": "prunoideas",
+      "en": "Stone fruits",
+      "fr": "Fruits à noyau",
+      "pt": "Prunóideas (ou Fruteiras de caroço)",
+      "definition": "Categoria agronómica de fruteiras cujo fruto é uma drupa com caroço lenhoso (ex: pessegueiro, cerejeira, ameixeira, oliveira)."
+    },
+    {
+      "id": "bico-entupido",
+      "en": "Clogged nozzle",
+      "fr": "Buse bouchée",
+      "pt": "Bico entupido",
+      "definition": "Anomalia num bico de pulverização provocada por resíduos na calda ou sujidade, resultando num débito significativamente inferior ao nominal."
+    },
+    {
+      "id": "polinizadores",
+      "en": "Pollinators",
+      "fr": "Pollinisateurs",
+      "pt": "Polinizadores",
+      "definition": "Organismos não visados (ex: abelhas e ouvidors) essenciais aos ecossistemas agrícolas, protegidos por restrições legais específicas nos rótulos dos produtos fitofarmacêuticos."
+    },
+    {
+      "id": "codificacao-de-cor-iso-dos-bicos",
+      "en": "Nozzle ISO color code",
+      "fr": "Code couleur ISO des buses",
+      "pt": "Codificação de cor ISO dos bicos",
+      "definition": "Norma internacional (ISO 10625) que padroniza as cores dos bicos de pulverização de acordo com o seu débito nominal a 3 bar de pressão."
+    },
+    {
+      "id": "nombre-max-d-applications-saison-numero-maximo-de-aplicacoes-por-epoca",
+      "en": "Max apps",
+      "fr": "season",
+      "pt": "Nombre max. d'applications / saison / Número máximo de aplicações por época",
+      "definition": "Requisito legal constante no rótulo dos produtos fitofarmacêuticos que limita o número de tratamentos anuais para prevenir o aparecimento de resistências nos organismos alvo."
+    },
+    {
+      "id": "buses-actives-bicos-em-funcionamento",
+      "en": "Operating nozzles",
+      "fr": "Buses en fonctionnement",
+      "pt": "Buses actives / Bicos em funcionamento (ou Bicos ativos)",
+      "definition": "Bicos da barra de pulverização que se encontram abertos a debitar calda durante a aplicação ou ensaio de calibração."
+    },
+    {
+      "id": "pressao-nominal",
+      "en": "Nominal pressure",
+      "fr": "Pression nominale",
+      "pt": "Pressão nominal",
+      "definition": "Valor de referência de pressão (medido em bar) especificado pelos fabricantes para o cálculo normalizado dos débitos de calda."
+    },
+    {
+      "id": "mildio",
+      "en": "Downy mildew",
+      "fr": "Mildiou",
+      "pt": "Míldio",
+      "definition": "Importante doença fúngica (causada por oomicetas como Plasmopara viticola) que afeta gravemente a vinha e várias culturas agrícolas."
+    },
+    {
+      "id": "pedrado",
+      "en": "Scab (Apple/Pear)",
+      "fr": "Tavelure",
+      "pt": "Pedrado (da macieira/pereira)",
+      "definition": "Principal doença fúngica que afeta as pomóideas em Portugal, atacando folhas e frutos."
+    },
+    {
+      "id": "sala-armazem-de-armazenamento-de-produtos-fitofarmaceuticos",
+      "en": "PPP storage room",
+      "fr": "Local de stockage des produits phytosanitaires",
+      "pt": "Sala/Armazém de armazenamento de produtos fitofarmacêuticos",
+      "definition": "Instalação fechada a chave e sinalizada, destinada exclusivamente à guarda em segurança de produtos fitofarmacêuticos e respetivas embalagens."
+    },
+    {
+      "id": "zona-de-protecao",
+      "en": "Buffer zone",
+      "fr": "Zone tampon",
+      "pt": "Zona de proteção (ou Zona tampão)",
+      "definition": "Faixa de terreno não tratada, de largura definida no rótulo do produto fitofarmacêutico, destinada a proteger áreas sensíveis (como cursos de água ou habitats) contra o arrastamento da pulverização."
+    },
+    {
+      "id": "serradura",
+      "en": "Sawdust (for spill containment)",
+      "fr": "Sciure de bois",
+      "pt": "Serradura (para retenção de derrames)",
+      "definition": "Material absorvente inerte obrigatório no armazém de produtos fitofarmacêuticos para recolha e contenção em caso de derrames acidentais."
+    },
+    {
+      "id": "cigarrinha-verde",
+      "en": "Green leafhopper",
+      "fr": "Cicadelle verte",
+      "pt": "Cigarrinha-verde (Empoasca vitis)",
+      "definition": "Inseto praga da vinha que causa dessecação e manchas castanho-violáceas nas margens das folhas em castas tintas e ponteado pálido em castas brancas."
+    },
+    {
+      "id": "oidio",
+      "en": "Powdery mildew",
+      "fr": "Oïdium",
+      "pt": "Oídio (Uncinula necator / Erysiphe necator)",
+      "definition": "Doença fúngica chave na cultura da vinha caraterizada pelo aparecimento de uma poeira ou manchas pulverulentas acinzentadas/esbranquiçadas nas folhas e cachos."
+    },
+    {
+      "id": "anemometro",
+      "en": "Anemometer",
+      "fr": "Anémomètre",
+      "pt": "Anemómetro",
+      "definition": "Aparelho portátil utilizado no campo para medir a velocidade do vento antes e durante a aplicação de produtos fitofarmacêuticos, assegurando que não se ultrapassam os limites legais (habitualmente < 6,5 km/h ou brisa leve) para evitar o arrastamento/deriva da calda."
+    },
+    {
+      "id": "disque-de-reglage-disco-de-calibracao",
+      "en": "Calibration disk",
+      "fr": "Disque de calcul",
+      "pt": "Disque de réglage / Disco de calibração",
+      "definition": "Dispositivo analógico circular de cálculo rápido utilizado por agricultores e técnicos no campo para relacionar a velocidade de avanço, o débito dos bicos e o volume de calda desejado sem recorrer a cálculos complexos."
+    },
+    {
+      "id": "indice-de-densidade-da-cultura",
+      "en": "Crop density index",
+      "fr": "Indice de densité de la culture",
+      "pt": "Índice de densidade da cultura",
+      "definition": "Coeficiente aplicado na calibração (expresso em L/m³) para ajustar o volume de calda em função da densidade e porosidade da vegetação."
+    },
+    {
+      "id": "largura-de-trabalho",
+      "en": "Working width",
+      "fr": "Largeur de travail",
+      "pt": "Largura de trabalho",
+      "definition": "Largura efetiva coberta pela barra de pulverização ou distância entrelinhas tratada numa única passagem."
+    },
+    {
+      "id": "numero-de-bicos-em-funcionamento",
+      "en": "Number of operating nozzles",
+      "fr": "Nombre de buses en service",
+      "pt": "Número de bicos em funcionamento",
+      "definition": "Quantidade de bicos abertos e ativos no circuito de pulverização durante a aplicação."
+    }
+  ]
+}

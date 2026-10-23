@@ -63,7 +63,7 @@ export function calculateLwaPure(
 export const areaParedeFoliarCalculatorConfig: CalculatorDefinition = {
   id: 'calc_area_parede_foliar',
   version: '1.0.0',
-  title: 'Área de Parede Foliar',
+  title: 'Área de Parede Foliar (LWA)',
   subtitle: 'Calcula a área vertical de vegetação tratada por hectare (LWA) segundo a norma EPPO PP 1/239.',
   category: 'Calibração',
   badgeLabel: 'Norma EPPO PP 1/239',

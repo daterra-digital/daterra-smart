@@ -156,7 +156,7 @@ export const NozzleComparisonView: React.FC = () => {
           <div>
             <div className="flex items-center gap-2">
               <h1 className="text-base sm:text-lg font-black text-daterra-primary leading-tight">
-                Comparador de Bicos
+                Tabelas de Débito (Comparador)
               </h1>
               <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200">
                 Ferramenta Ativa

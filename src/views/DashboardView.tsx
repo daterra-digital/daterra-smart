@@ -1,12 +1,14 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { 
-  User, Sun, CloudRain, Wind, MapPin, Activity, 
+  User, MapPin, Activity, 
   GraduationCap, Calculator, Sparkles, ArrowRight, 
-  Cpu, Thermometer, ExternalLink, Calendar, Gauge, Trees, FlaskConical, CloudSun
+  Cpu, ExternalLink, Gauge, Trees, FlaskConical
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
+import { isLocalhost } from '../utils/environment';
+import { DashboardWeatherCard } from '../features/weather/components/DashboardWeatherCard';
 
 export const DashboardView: React.FC = () => {
   const { user, profile } = useAuth();
@@ -26,15 +28,6 @@ export const DashboardView: React.FC = () => {
   const userFirstName = userFullName.split(' ')[0] || 'Utilizador';
 
   const agromonitoringApiKey = import.meta.env.VITE_AGROMONITORING_KEY || 'NÃO_CONFIGURADA';
-
-  // Previsão Estendida da Semana para o Cartão de Meteorologia (2 Colunas)
-  const weeklyForecast = [
-    { day: 'Hoje (Seg)', temp: '24°C', min: '14°C', icon: Sun, label: 'Céu Limpo', wind: '12 km/h', humidity: '62%', driftRisk: 'Baixo' },
-    { day: 'Terça', temp: '26°C', min: '15°C', icon: Sun, label: 'Ensolarado', wind: '9 km/h', humidity: '55%', driftRisk: 'Muito Baixo' },
-    { day: 'Quarta', temp: '22°C', min: '13°C', icon: CloudSun, label: 'Parc. Nublado', wind: '16 km/h', humidity: '68%', driftRisk: 'Moderado' },
-    { day: 'Quinta', temp: '19°C', min: '11°C', icon: CloudRain, label: 'Chuva Fraca', wind: '22 km/h', humidity: '82%', driftRisk: 'Alto' },
-    { day: 'Sexta', temp: '21°C', min: '12°C', icon: CloudSun, label: 'Pouca Nuvem', wind: '14 km/h', humidity: '65%', driftRisk: 'Baixo' },
-  ];
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -103,88 +96,14 @@ export const DashboardView: React.FC = () => {
         {/* ----------------------------------------------------------------------- */}
         {/* LINHA 2 — CARTÃO DIREITO (2 COLUNAS): Meteorologia Estendida             */}
         {/* ----------------------------------------------------------------------- */}
-        <div className="lg:col-span-2 bg-white p-6 rounded-3xl shadow-soft border border-slate-200 flex flex-col justify-between space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold">
-                <Sun className="w-6 h-6" />
-              </div>
-              <div>
-                <h3 className="font-bold text-daterra-primary text-base">{t('nav.weather')}</h3>
-                <span className="text-[10px] text-slate-500 font-semibold block">{t('dashboard.extendedForecast')}</span>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-sky-50 text-sky-800 border border-sky-200 rounded-2xl text-xs font-bold font-mono-numbers">
-              <Calendar className="w-4 h-4 text-sky-600" />
-              <span>{t('dashboard.weatherCardTitle')}</span>
-            </div>
-          </div>
-
-
-          {/* Destaque do Dia Atual + Condição de Pulverização */}
-          <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 grid grid-cols-1 sm:grid-cols-3 gap-4 items-center">
-            <div className="flex items-center gap-3">
-              <Sun className="w-12 h-12 text-amber-500 shrink-0" />
-              <div>
-                <div className="flex items-baseline gap-2">
-                  <span className="text-3xl font-black text-slate-900 font-mono-numbers">24°C</span>
-                  <span className="text-xs text-slate-500 font-mono-numbers">/ 14°C</span>
-                </div>
-                <span className="text-xs font-bold text-slate-700 block">Céu Limpo • Hoje</span>
-              </div>
-            </div>
-
-            <div className="space-y-1 text-xs font-mono-numbers text-slate-600">
-              <div className="flex items-center gap-2">
-                <Wind className="w-4 h-4 text-slate-400" />
-                <span>Vento: <strong>12 km/h (NNE)</strong></span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CloudRain className="w-4 h-4 text-slate-400" />
-                <span>Humidade: <strong>62%</strong></span>
-              </div>
-            </div>
-
-            <div className="bg-emerald-50 p-3 rounded-xl border border-emerald-200 flex flex-col justify-center text-center">
-              <div className="flex items-center justify-center gap-1.5 text-emerald-800 font-bold text-xs">
-                <Thermometer className="w-4 h-4 text-emerald-600" />
-                <span>Janela de Pulverização</span>
-              </div>
-              <span className="text-[11px] text-emerald-700 font-semibold mt-0.5">
-                Risco de Deriva Baixo (Ótimo)
-              </span>
-            </div>
-          </div>
-
-          {/* Grelha da Previsão Estendida dos Restantes Dias */}
-          <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5 pt-1">
-            {weeklyForecast.map((item, index) => {
-              const Icon = item.icon;
-              return (
-                <div 
-                  key={index}
-                  className={`p-3 rounded-2xl border text-center flex flex-col items-center justify-between transition-all ${
-                    index === 0 
-                      ? 'bg-amber-50/60 border-amber-200 ring-2 ring-amber-400/30' 
-                      : 'bg-slate-50 border-slate-200 hover:border-slate-300'
-                  }`}
-                >
-                  <span className="text-[11px] font-extrabold text-slate-800">{item.day}</span>
-                  <Icon className="w-6 h-6 my-1.5 text-amber-500" />
-                  <div className="text-xs font-black text-slate-900 font-mono-numbers">
-                    {item.temp}
-                  </div>
-                  <span className="text-[10px] text-slate-500 font-medium block">{item.label}</span>
-                </div>
-              );
-            })}
-          </div>
+        <div className="lg:col-span-2">
+          <DashboardWeatherCard />
         </div>
 
         {/* ----------------------------------------------------------------------- */}
-        {/* LINHA 3 — CARTÃO LARGURA TOTAL (3 COLUNAS): Mapas NDVI                   */}
+        {/* LINHA 3 — CARTÃO LARGURA TOTAL (3 COLUNAS): Mapas NDVI (Localhost Only)  */}
         {/* ----------------------------------------------------------------------- */}
+        {isLocalhost() && (
         <div className="lg:col-span-3 bg-white p-6 rounded-3xl shadow-soft border border-slate-200 space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
             <div className="flex items-center gap-3">
@@ -300,6 +219,7 @@ export const DashboardView: React.FC = () => {
 
           </div>
         </div>
+        )}
 
         {/* ----------------------------------------------------------------------- */}
         {/* LINHA 4 — CARTÃO ESQUERDO (1 COLUNA): Academia DATERRA                   */}
@@ -385,7 +305,7 @@ export const DashboardView: React.FC = () => {
                 </div>
                 <div>
                   <span className="font-bold text-xs text-daterra-primary block group-hover:text-daterra-secondary leading-snug">
-                    Calculadora de Concentração da Calda
+                    Mistura de Calda (Concentração)
                   </span>
                   <span className="text-[10px] text-slate-500">Pulverização • Planta Jovem & Copa Adulta</span>
                 </div>
@@ -404,7 +324,7 @@ export const DashboardView: React.FC = () => {
                 </div>
                 <div>
                   <span className="font-bold text-xs text-daterra-primary block group-hover:text-daterra-secondary leading-snug">
-                    Calculadora de Dose por Hectare
+                    Mistura de Calda (Dose)
                   </span>
                   <span className="text-[10px] text-slate-500">Pulverização • Dose do Rótulo por Tanque</span>
                 </div>

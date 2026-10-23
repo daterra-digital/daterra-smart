@@ -1,5 +1,7 @@
 import Dexie, { type Table } from 'dexie';
 import type { CalculationHistoryRecord, CalibrationProfile } from '../types/calculator';
+import type { ActiveSubstance } from '../features/verificador-ph/types.ts';
+import { INITIAL_ACTIVE_SUBSTANCES } from '../features/verificador-ph/data.ts';
 
 export interface CalculationHistoryItem {
   id?: number;
@@ -163,6 +165,13 @@ export interface MixHistoryRecord {
   notes?: string;
 }
 
+export interface EppoHistoryRecord {
+  id?: number;
+  date: string; // ISO String
+  inputs: Record<string, any>;
+  results: Record<string, any>;
+}
+
 export class DaterraDatabase extends Dexie {
   calculation_history!: Table<CalculationHistoryItem>;
   profiles_cultures!: Table<ProfileCulture>;
@@ -178,6 +187,12 @@ export class DaterraDatabase extends Dexie {
 
   // Tabela da Ferramenta de Sequência de Mistura de Caldas
   mix_history!: Table<MixHistoryRecord>;
+
+  // Tabela da Ferramenta Verificador de pH e Compatibilidade
+  active_substances!: Table<ActiveSubstance, string>;
+
+  // Tabela da Ferramenta Ajuste da Dose (Método EPPO)
+  eppo_history!: Table<EppoHistoryRecord>;
 
   constructor() {
     super('DaterraSmartDB');
@@ -219,6 +234,37 @@ export class DaterraDatabase extends Dexie {
       calibration_profiles: '&id, userId, equipmentProfileId, status, syncStatus, isDeleted',
       mix_history: '++id, date'
     });
+
+    // Versão 6: Adição da tabela de substâncias ativas (active_substances)
+    this.version(6).stores({
+      calculation_history: '++id, date, calculator_type, profile_id',
+      profiles_cultures: '++id, name, crop_type',
+      profiles_equipment: '++id, name',
+      profiles_nozzles: '++id, manufacturer, model, equipment_id',
+      profiles_calibrations: '++id, equipment_id, nozzle_id',
+      microlearning_content: '++id, &field_key',
+      installed_tools: '++id, &tool_id',
+      calculation_history_v2: '&id, userId, calculatorId, createdAt, syncStatus, isDeleted, [calculatorId+userId+isDeleted]',
+      calibration_profiles: '&id, userId, equipmentProfileId, status, syncStatus, isDeleted',
+      mix_history: '++id, date',
+      active_substances: 'id, name, moa, nameEn'
+    });
+
+    // Versão 7: Adição de histórico da ferramenta Ajuste da Dose EPPO (eppo_history)
+    this.version(7).stores({
+      calculation_history: '++id, date, calculator_type, profile_id',
+      profiles_cultures: '++id, name, crop_type',
+      profiles_equipment: '++id, name',
+      profiles_nozzles: '++id, manufacturer, model, equipment_id',
+      profiles_calibrations: '++id, equipment_id, nozzle_id',
+      microlearning_content: '++id, &field_key',
+      installed_tools: '++id, &tool_id',
+      calculation_history_v2: '&id, userId, calculatorId, createdAt, syncStatus, isDeleted, [calculatorId+userId+isDeleted]',
+      calibration_profiles: '&id, userId, equipmentProfileId, status, syncStatus, isDeleted',
+      mix_history: '++id, date',
+      active_substances: 'id, name, moa, nameEn',
+      eppo_history: '++id, date'
+    });
   }
 }
 
@@ -230,7 +276,7 @@ export async function seedMicrolearningIfEmpty() {
     await db.microlearning_content.bulkAdd([
       {
         field_key: 'calc_concentracao',
-        title: 'Calculadora de Concentração da Calda',
+        title: 'Mistura de Calda (Concentração)',
         content: `[FAQ: Qual é a função desta calculadora?]
 - Determina a quantidade exata de Produto Fitofarmacêutico (PF) a adicionar ao depósito para um determinado volume de calda a preparar.
 
@@ -246,7 +292,7 @@ export async function seedMicrolearningIfEmpty() {
       },
       {
         field_key: 'calc_dose',
-        title: 'Calculadora de Dose por Hectare',
+        title: 'Mistura de Calda (Dose)',
         content: `[FAQ: Qual é a função desta calculadora?]
 - Converte a dose autorizada no rótulo (L/ha ou kg/ha) na quantidade exata de produto comercial a adicionar por depósito, com base no volume de calda calibrado no equipamento.
 
@@ -337,6 +383,13 @@ export async function seedMicrolearningIfEmpty() {
       { working_speed_kmh: 6.5, working_pressure_bar: 10, working_width_m: 2.2, active_nozzles_count: 12, total_flow_lmin: 12.36, calculated_spray_volume_lha: 518.88 },
       { working_speed_kmh: 5.0, working_pressure_bar: 3, working_width_m: 12.0, active_nozzles_count: 24, total_flow_lmin: 28.80, calculated_spray_volume_lha: 288.00 }
     ]);
+  }
+
+  // Seed inicial / atualização de substâncias ativas para o Verificador de pH (336 registos)
+  const activeSubstancesCount = await db.active_substances.count();
+  if (activeSubstancesCount < INITIAL_ACTIVE_SUBSTANCES.length) {
+    await db.active_substances.clear();
+    await db.active_substances.bulkPut(INITIAL_ACTIVE_SUBSTANCES);
   }
 }
 

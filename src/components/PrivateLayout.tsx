@@ -2,13 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { 
   LayoutDashboard, Calculator, GraduationCap, 
-  Map, Settings, LogOut, Wifi, WifiOff, Menu, X, User
+  Map, Settings, LogOut, Wifi, WifiOff, Menu, X, User, Bot
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import daterraLogo from '../assets/daterra-logo.svg';
 import { Footer } from './Footer';
 import { BottomNavigationBar } from './BottomNavigationBar';
+import { isLocalhost } from '../utils/environment';
 
 export const PrivateLayout: React.FC = () => {
   const { user, profile, logout } = useAuth();
@@ -48,9 +49,10 @@ export const PrivateLayout: React.FC = () => {
   const isCalculatorActive =
     location.pathname.startsWith('/ferramentas/') ||
     (location.pathname === '/ferramentas' && new URLSearchParams(location.search).has('tool'));
+  const isAssistenteActive = location.pathname === '/assistente';
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#F2F2F2]">
+    <div className={`flex flex-col bg-[#F2F2F2] ${isAssistenteActive ? 'h-screen overflow-hidden' : 'min-h-screen'}`}>
       {/* Header SaaS Privado */}
       <header className="sticky top-0 z-40 bg-daterra-primary text-white border-b border-daterra-secondary/40 shadow-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
@@ -89,6 +91,20 @@ export const PrivateLayout: React.FC = () => {
               <span>{t('nav.tools')}</span>
             </Link>
 
+            {isLocalhost() && (
+              <Link
+                to="/assistente"
+                className={`px-3 py-2 rounded-xl transition-all flex items-center gap-2 touch-target ${
+                  isActive('/assistente')
+                    ? 'bg-daterra-secondary text-white shadow-sm'
+                    : 'text-slate-200 hover:text-white hover:bg-white/10'
+                }`}
+              >
+                <Bot className="w-4 h-4 text-daterra-accent" />
+                <span>Assistente</span>
+              </Link>
+            )}
+
             <Link
               to="/academia"
               className={`px-3 py-2 rounded-xl transition-all flex items-center gap-2 touch-target ${
@@ -99,18 +115,6 @@ export const PrivateLayout: React.FC = () => {
             >
               <GraduationCap className="w-4 h-4 text-daterra-accent" />
               <span>{t('nav.academy')}</span>
-            </Link>
-
-            <Link
-              to="/exploracao"
-              className={`px-3 py-2 rounded-xl transition-all flex items-center gap-2 touch-target ${
-                isActive('/exploracao')
-                  ? 'bg-daterra-secondary text-white shadow-sm'
-                  : 'text-slate-200 hover:text-white hover:bg-white/10'
-              }`}
-            >
-              <Map className="w-4 h-4 text-daterra-accent" />
-              <span>{t('nav.exploration')}</span>
             </Link>
 
             <Link
@@ -215,6 +219,17 @@ export const PrivateLayout: React.FC = () => {
               <span>{t('nav.tools')}</span>
             </Link>
 
+            {isLocalhost() && (
+              <Link
+                to="/assistente"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center gap-3 py-3 px-4 rounded-xl text-sm font-bold text-white hover:bg-white/10 touch-target"
+              >
+                <Bot className="w-5 h-5 text-daterra-accent" />
+                <span>Assistente</span>
+              </Link>
+            )}
+
             <Link
               to="/academia"
               onClick={() => setMobileMenuOpen(false)}
@@ -269,15 +284,19 @@ export const PrivateLayout: React.FC = () => {
 
       {/* Conteúdo Principal */}
       <main
-        className={`flex-1 p-3 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full ${
-          isCalculatorActive ? 'calculator-content-spacing' : 'mobile-content-spacing md:pb-8'
+        className={`flex-1 w-full ${
+          isAssistenteActive
+            ? 'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-[calc(100dvh-5rem-5rem)] md:h-[calc(100dvh-5rem)] overflow-hidden flex flex-col py-3 sm:py-4'
+            : isCalculatorActive
+            ? 'p-3 sm:p-6 lg:p-8 max-w-7xl mx-auto calculator-content-spacing'
+            : 'p-3 sm:p-6 lg:p-8 max-w-7xl mx-auto mobile-content-spacing md:pb-8'
         }`}
       >
         <Outlet />
       </main>
 
-      {/* Rodapé Global (oculto em calculadoras ativas) */}
-      {!isCalculatorActive && (
+      {/* Rodapé Global (oculto em calculadoras ativas e assistente) */}
+      {!isCalculatorActive && !isAssistenteActive && (
         <div className="mobile-content-spacing md:pb-0">
           <Footer />
         </div>

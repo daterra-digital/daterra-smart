@@ -152,7 +152,7 @@ export function calculateDosePure(
 export const doseCalculatorConfig: CalculatorDefinition = {
   id: 'calc_dose',
   version: '1.0.0',
-  title: 'Calculadora de Dose',
+  title: 'Mistura de Calda (Dose)',
   subtitle: 'Calcule a quantidade total de produto comercial e a área coberta por cada tanque de calda.',
   category: 'PULVERIZAÇÃO',
   badgeLabel: 'Ferramenta Ativa',

@@ -3,12 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import {
   ChevronLeft,
   CheckCircle2,
-  Layers,
   History,
   Beaker,
   ArrowRight,
-  Droplets
+  Droplets,
+  Bookmark,
+  RotateCcw
 } from 'lucide-react';
+import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../db/db';
 import {
   FormulationSelector,
@@ -26,9 +28,6 @@ export const MisturaView: React.FC = () => {
   const [selectedIds, setSelectedIds] = useState<string[]>(['PH', 'WG', 'SC', 'EC', 'MOL']);
   const [tankCapacityL, setTankCapacityL] = useState<number>(1000);
 
-  // Tab ativa em ecrãs móveis ('selecao' | 'sequencia')
-  const [activeTab, setActiveTab] = useState<'selecao' | 'sequencia'>('sequencia');
-
   // Modais
   const [isJarTestOpen, setIsJarTestOpen] = useState<boolean>(false);
   const [isHistoryOpen, setIsHistoryOpen] = useState<boolean>(false);
@@ -36,10 +35,26 @@ export const MisturaView: React.FC = () => {
   // Feedback Toast
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  // Geração do Motor de Sequência de Mistura
+  // Contagem de histórico local em tempo real
+  const historyCount =
+    useLiveQuery(async () => {
+      try {
+        if (!db || !db.mix_history) return 0;
+        return await db.mix_history.count();
+      } catch {
+        return 0;
+      }
+    }, []) ?? 0;
+
+  // Geração do Motor de Sequência de Mistura (100% intacto)
   const sequenceAnalysis = useMemo(() => {
     return generateMixingSequence(selectedIds, tankCapacityL);
   }, [selectedIds, tankCapacityL]);
+
+  // Passos apenas de produtos (sem água) para resumo visual no cartão verde
+  const productSteps = useMemo(() => {
+    return sequenceAnalysis.steps.filter((s) => !s.isWater);
+  }, [sequenceAnalysis.steps]);
 
   // Manipuladores de Seleção de Formulações
   const handleToggleFormulation = (id: string) => {
@@ -54,7 +69,6 @@ export const MisturaView: React.FC = () => {
 
   const handleSelectMultiple = (ids: string[]) => {
     setSelectedIds(ids);
-    setActiveTab('sequencia');
   };
 
   const handleClearSelection = () => {
@@ -67,7 +81,7 @@ export const MisturaView: React.FC = () => {
 
   const handleReset = () => {
     setSelectedIds([]);
-    setActiveTab('selecao');
+    setTankCapacityL(1000);
   };
 
   // Guardar no Histórico IndexedDB (Dexie)
@@ -103,13 +117,12 @@ export const MisturaView: React.FC = () => {
     if (capacityL) {
       setTankCapacityL(capacityL);
     }
-    setActiveTab('sequencia');
     setToastMessage('Mistura carregada do histórico!');
     setTimeout(() => setToastMessage(null), 3000);
   };
 
   return (
-    <div className="space-y-6 pb-24 lg:pb-12 animate-fade-in max-w-7xl mx-auto">
+    <div className="space-y-4 pb-28 md:pb-24 animate-fade-in font-sans max-w-6xl mx-auto">
       {/* Toast Notification */}
       {toastMessage && (
         <div className="fixed top-20 right-4 z-50 bg-[#114037] text-white px-5 py-3.5 rounded-2xl shadow-2xl border border-[#3CA64C]/40 font-extrabold text-xs flex items-center gap-3 animate-fade-in">
@@ -118,96 +131,160 @@ export const MisturaView: React.FC = () => {
         </div>
       )}
 
-      {/* 1. Barra Superior de Regresso e Ferramenta */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white p-4 sm:p-5 rounded-3xl border border-slate-200 shadow-soft">
+      {/* 1. CABEÇALHO DA FERRAMENTA (PADRÃO COMPARADOR DE BICOS) */}
+      <div className="bg-white px-4 py-3 rounded-2xl border border-slate-200 shadow-soft flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <button
             type="button"
             onClick={() => navigate('/ferramentas')}
-            className="min-h-[44px] p-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-2xl transition-all flex items-center gap-1.5 text-xs font-bold touch-target active:scale-95"
+            aria-label="Voltar ao catálogo de ferramentas"
+            className="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-all flex items-center gap-1 text-xs font-bold cursor-pointer"
           >
-            <ChevronLeft className="w-4 h-4 text-[#114037]" />
-            <span>Voltar às Ferramentas</span>
+            <ChevronLeft className="w-4 h-4 text-daterra-primary" />
+            <span>Voltar</span>
           </button>
-          <div className="h-6 w-[1px] bg-slate-200 hidden sm:block" />
+          <div className="h-5 w-[1px] bg-slate-200 hidden sm:block" />
           <div>
-            <div className="flex items-center gap-1.5">
-              <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#1D734B]">
-                Pulverização & Caldas
+            <div className="flex items-center gap-2 flex-wrap">
+              <h1 className="text-base sm:text-lg font-black text-daterra-primary leading-tight">
+                Ordem de Mistura
+              </h1>
+              <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200">
+                Ferramenta Ativa
               </span>
-              <span className="text-[10px] text-slate-400">• Norma DGAV</span>
             </div>
-            <h1 className="text-base sm:text-xl font-black text-[#114037] leading-tight">
-              Guia de Sequência de Mistura
-            </h1>
+            <p className="text-xs text-slate-500 font-medium">
+              Ordem técnica W.A.L.E.S., volume de água e compatibilidade física • Norma DGAV
+            </p>
           </div>
         </div>
 
-        {/* Ações Rápidas: Microlearning Geral, Teste de Jarra e Histórico */}
-        <div className="flex items-center gap-2 flex-wrap">
+        <div className="flex items-center gap-2 self-end sm:self-auto">
           <DidacticHelp
             faqFile="MisturaFAQGeral.md"
             topic="mistura-geral"
             buttonLabel="Microlearning"
             variant="button"
             iconType="help"
+            className="px-2.5 py-1.5 !bg-emerald-50 hover:!bg-emerald-100 !text-daterra-primary border border-emerald-200 !rounded-lg !text-xs !font-bold shadow-xs"
           />
 
           <button
             type="button"
-            onClick={() => setIsJarTestOpen(true)}
-            className="min-h-[44px] px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl transition-all flex items-center gap-1.5 text-xs font-bold touch-target active:scale-95 border border-slate-200"
-          >
-            <Beaker className="w-4 h-4 text-[#1D734B]" />
-            <span className="hidden sm:inline">Teste de Jarra</span>
-          </button>
-
-          <button
-            type="button"
             onClick={() => setIsHistoryOpen(true)}
-            className="min-h-[44px] px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl transition-all flex items-center gap-1.5 text-xs font-bold touch-target active:scale-95 border border-slate-200"
+            aria-label="Abrir histórico local de misturas"
+            className="px-2.5 py-1.5 bg-sky-50 hover:bg-sky-100 text-sky-900 border border-sky-200 rounded-lg text-xs font-bold transition-all flex items-center gap-1 shadow-xs cursor-pointer"
           >
-            <History className="w-4 h-4 text-[#1D734B]" />
-            <span>Histórico</span>
-          </button>
-        </div>
-      </div>
-
-      {/* 2. Alternador de Vistas Mobile (Tabs) */}
-      <div className="lg:hidden">
-        <div className="grid grid-cols-2 p-1.5 bg-slate-200/80 rounded-2xl border border-slate-300">
-          <button
-            type="button"
-            onClick={() => setActiveTab('selecao')}
-            className={`min-h-[48px] py-2.5 px-4 rounded-xl text-xs font-extrabold transition-all flex items-center justify-center gap-2 touch-target ${
-              activeTab === 'selecao'
-                ? 'bg-[#114037] text-white shadow-md'
-                : 'text-slate-700 hover:text-slate-900'
-            }`}
-          >
-            <Layers className="w-4 h-4" />
-            <span>1. Selecionar ({selectedIds.length})</span>
+            <History className="w-3.5 h-3.5 text-sky-700" />
+            <span className="hidden sm:inline">Histórico ({historyCount})</span>
           </button>
 
           <button
             type="button"
-            onClick={() => setActiveTab('sequencia')}
-            className={`min-h-[48px] py-2.5 px-4 rounded-xl text-xs font-extrabold transition-all flex items-center justify-center gap-2 touch-target ${
-              activeTab === 'sequencia'
-                ? 'bg-[#114037] text-white shadow-md'
-                : 'text-slate-700 hover:text-slate-900'
-            }`}
+            onClick={handleReset}
+            aria-label="Reiniciar mistura"
+            className="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-bold transition-all flex items-center gap-1 cursor-pointer"
           >
-            <Droplets className="w-4 h-4 text-[#3AAA35]" />
-            <span>2. Ver Sequência</span>
+            <RotateCcw className="w-3 h-3" />
+            <span>Reiniciar</span>
           </button>
         </div>
       </div>
 
-      {/* 3. Estrutura Principal de Layout (Desktop: 2 Colunas / Mobile: Tabs) */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        {/* Coluna 1: Seletor de Formulações */}
-        <div className={`lg:col-span-5 ${activeTab === 'selecao' ? 'block' : 'hidden lg:block'}`}>
+      {/* 2. CARTÃO VERDE ESCURO (#114037) — RESUMO DA CALDA E ORDEM RÁPIDA */}
+      <div className="bg-[#114037] text-white p-3.5 sm:p-4 rounded-2xl md:rounded-3xl shadow-md border border-emerald-900/40 space-y-3">
+        <div className="flex items-center justify-between">
+          <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#a2d0c3]">
+            Protocolo W.A.L.E.S. • Resumo de Preparação da Calda
+          </span>
+          <button
+            type="button"
+            onClick={() => setIsJarTestOpen(true)}
+            className="px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-white text-[10px] sm:text-[11px] font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
+          >
+            <Beaker className="w-3.5 h-3.5 text-[#8ffa94]" />
+            <span>Teste de Jarra</span>
+          </button>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-4">
+          {/* Bloco 1: Água Inicial */}
+          <div className="bg-[#1b554a]/75 p-3 sm:p-4 rounded-xl border border-white/10 flex flex-col justify-between items-center text-center gap-1.5">
+            <span className="text-xs font-bold text-slate-100 tracking-tight">
+              1. Água Inicial (~50%)
+            </span>
+            <div className="flex items-baseline justify-center gap-1.5">
+              <span className="text-2xl sm:text-3xl md:text-4xl font-extrabold font-mono text-[#8ffa94] tracking-tight leading-none">
+                {sequenceAnalysis.waterInitialL ?? 500}
+              </span>
+              <span className="text-xs sm:text-sm font-semibold text-slate-200">L</span>
+            </div>
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[#8ffa94]/20 text-[#8ffa94] border border-[#8ffa94]/30">
+              <Droplets className="w-3 h-3" />
+              <span>Iniciar agitação</span>
+            </span>
+          </div>
+
+          {/* Bloco 2: Ordem de Entrada dos Produtos */}
+          <div className="bg-[#1b554a]/75 p-3 sm:p-4 rounded-xl border border-white/10 flex flex-col justify-between items-center text-center gap-2">
+            <span className="text-xs font-bold text-slate-100 tracking-tight">
+              2. Ordem de Entrada ({productSteps.length} {productSteps.length === 1 ? 'Produto' : 'Produtos'})
+            </span>
+
+            {productSteps.length > 0 ? (
+              <div className="flex items-center justify-center gap-1 flex-wrap py-1">
+                {productSteps.map((step, index) => (
+                  <React.Fragment key={step.id}>
+                    <span className="px-2 py-0.5 rounded-md font-mono text-xs font-black bg-[#114037] text-[#8ffa94] border border-[#8ffa94]/30">
+                      {step.sigla}
+                    </span>
+                    {index < productSteps.length - 1 && (
+                      <ArrowRight className="w-3 h-3 text-[#a2d0c3] shrink-0" />
+                    )}
+                  </React.Fragment>
+                ))}
+              </div>
+            ) : (
+              <span className="text-xs text-slate-300 italic py-2">
+                Nenhuma formulação selecionada
+              </span>
+            )}
+
+            <span className="text-[10px] font-semibold text-[#a2d0c3] uppercase tracking-wider">
+              Sequência Cronológica Automática
+            </span>
+          </div>
+
+          {/* Bloco 3: Água Final */}
+          <div className="bg-[#1b554a]/75 p-3 sm:p-4 rounded-xl border border-white/10 flex flex-col justify-between items-center text-center gap-1.5">
+            <span className="text-xs font-bold text-slate-100 tracking-tight">
+              3. Água Final (~50%)
+            </span>
+            <div className="flex items-baseline justify-center gap-1.5">
+              <span className="text-2xl sm:text-3xl md:text-4xl font-extrabold font-mono text-[#8ffa94] tracking-tight leading-none">
+                {sequenceAnalysis.waterFinalL ?? 500}
+              </span>
+              <span className="text-xs sm:text-sm font-semibold text-slate-200">L</span>
+            </div>
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-400/20 text-amber-300 border border-amber-400/30">
+              <span>Completar volume</span>
+            </span>
+          </div>
+        </div>
+
+        {/* Rodapé do Cartão Verde */}
+        <div className="flex items-center justify-between text-xs text-slate-200 pt-1 border-t border-white/10">
+          <span className="font-medium text-[11px]">Capacidade de referência do depósito</span>
+          <span className="font-mono font-bold text-white bg-[#1b554a] px-2 py-0.5 rounded text-xs">
+            {tankCapacityL} L • Agitação Contínua
+          </span>
+        </div>
+      </div>
+
+      {/* 3. CONTEÚDO PRINCIPAL (DIVULGAÇÃO PROGRESSIVA) */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
+        {/* Coluna Esquerda (5 cols): Formulações Introduzidas + Botão para Modal/Gaveta */}
+        <div className="lg:col-span-5">
           <FormulationSelector
             selectedIds={selectedIds}
             onToggleFormulation={handleToggleFormulation}
@@ -216,77 +293,56 @@ export const MisturaView: React.FC = () => {
           />
         </div>
 
-        {/* Coluna 2: Sequência de Mistura e Resultados */}
-        <div className={`lg:col-span-7 ${activeTab === 'sequencia' ? 'block' : 'hidden lg:block'}`}>
-          {selectedIds.length === 0 ? (
-            <div className="bg-white p-8 sm:p-12 rounded-3xl border border-slate-200 shadow-soft text-center space-y-4">
-              <div className="w-16 h-16 rounded-3xl bg-emerald-50 text-[#114037] flex items-center justify-center mx-auto border border-emerald-100">
-                <Layers className="w-8 h-8 text-[#1D734B]" />
-              </div>
-              <div className="space-y-1">
-                <h3 className="text-lg font-extrabold text-slate-800">
-                  Nenhuma formulação selecionada
-                </h3>
-                <p className="text-xs text-slate-500 max-w-md mx-auto leading-relaxed">
-                  Selecione no painel à esquerda as formulações (ex: Regulador de pH, WP, WG, SC, EC, Molhante, etc.) para gerar a sequência cronológica de mistura da calda.
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => {
-                  setSelectedIds(['PH', 'WG', 'SC', 'EC', 'MOL']);
-                  setActiveTab('sequencia');
-                }}
-                className="min-h-[44px] px-5 py-2.5 bg-[#114037] hover:bg-[#1D734B] text-white text-xs font-bold rounded-xl transition-all shadow-md touch-target"
-              >
-                Carregar Exemplo de Calda
-              </button>
-            </div>
-          ) : (
-            <MixingSequenceDisplay
-              analysis={sequenceAnalysis}
-              tankCapacityL={tankCapacityL}
-              onTankCapacityChange={setTankCapacityL}
-              onSaveToHistory={handleSaveToHistory}
-              onOpenJarTest={() => setIsJarTestOpen(true)}
-              onRemoveFormulation={handleRemoveFormulation}
-              onReset={handleReset}
+        {/* Coluna Direita (7 cols): Calibração do Depósito + Linha Cronológica em Acordeão */}
+        <div className="lg:col-span-7">
+          <MixingSequenceDisplay
+            analysis={sequenceAnalysis}
+            tankCapacityL={tankCapacityL}
+            onTankCapacityChange={setTankCapacityL}
+            onSaveToHistory={handleSaveToHistory}
+            onOpenJarTest={() => setIsJarTestOpen(true)}
+            onRemoveFormulation={handleRemoveFormulation}
+            onReset={handleReset}
+          />
+        </div>
+      </div>
+
+      {/* 4. BARRA DE RODAPÉ FIXA OFICIAL (PADRÃO DATERRA SMART) */}
+      <aside
+        aria-label="Ações da ferramenta"
+        className="fixed bottom-[var(--bottom-nav-total-height,5rem)] md:bottom-0 inset-x-0 bg-white/95 backdrop-blur-md border-t border-slate-200/80 p-2.5 z-35 shadow-[0_-4px_16px_rgba(0,0,0,0.06)]"
+      >
+        <div className="max-w-4xl mx-auto grid grid-cols-3 gap-2">
+          <button
+            type="button"
+            onClick={handleSaveToHistory}
+            className="h-12 bg-[#3CA64C] hover:bg-[#349142] text-white rounded-xl text-xs font-bold shadow-md flex items-center justify-center gap-2 active:scale-98 transition-all cursor-pointer"
+          >
+            <Bookmark className="w-4 h-4" />
+            <span>Guardar</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setIsHistoryOpen(true)}
+            className="h-12 bg-slate-100 hover:bg-slate-200 text-[#114037] rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-colors cursor-pointer"
+          >
+            <History className="w-4 h-4 text-slate-500" />
+            <span>Histórico ({historyCount})</span>
+          </button>
+          <div className="h-12">
+            <DidacticHelp
+              faqFile="MisturaFAQGeral.md"
+              topic="mistura-geral"
+              buttonLabel="Guia"
+              variant="button"
+              iconType="info"
+              className="w-full h-12 !bg-slate-100 hover:!bg-slate-200 !text-[#114037] !rounded-xl !text-xs !font-bold flex items-center justify-center gap-2 !border-0 !shadow-none"
             />
-          )}
+          </div>
         </div>
-      </div>
+      </aside>
 
-      {/* 4. Barra Fixa Inferior Mobile para Alternar Rapidamente */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 p-3 bg-white/95 backdrop-blur-md border-t border-slate-200 z-40 flex items-center justify-between gap-3 shadow-lg">
-        <div>
-          <span className="text-[10px] font-bold text-slate-400 block uppercase">Formulações</span>
-          <span className="text-xs font-extrabold text-[#114037]">
-            {selectedIds.length} selecionadas ({tankCapacityL} L)
-          </span>
-        </div>
-
-        {activeTab === 'selecao' ? (
-          <button
-            type="button"
-            onClick={() => setActiveTab('sequencia')}
-            className="min-h-[48px] px-5 py-2.5 bg-[#114037] text-white text-xs font-extrabold rounded-xl shadow-md flex items-center gap-1.5 touch-target active:scale-95"
-          >
-            <span>Ver Sequência</span>
-            <ArrowRight className="w-4 h-4" />
-          </button>
-        ) : (
-          <button
-            type="button"
-            onClick={() => setActiveTab('selecao')}
-            className="min-h-[48px] px-5 py-2.5 bg-slate-100 text-slate-800 border border-slate-300 text-xs font-extrabold rounded-xl shadow-xs flex items-center gap-1.5 touch-target active:scale-95"
-          >
-            <Layers className="w-4 h-4" />
-            <span>Adicionar Produtos</span>
-          </button>
-        )}
-      </div>
-
-      {/* Modais */}
+      {/* 5. MODAIS */}
       <JarTestModal
         isOpen={isJarTestOpen}
         onClose={() => setIsJarTestOpen(false)}

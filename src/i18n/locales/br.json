@@ -108,13 +108,13 @@
   },
   "microlearningContent": {
     "calc_concentracao": {
-      "title": "Calculadora de Concentração da Calda",
+      "title": "Mistura de Calda (Concentração)",
       "content": "[FAQ: Qual é a função da Calculadora de Concentração?]\n- Calcula a quantidade exata de defensivo agrícola a diluir por tanque para Planta Jovem ou Copa Adulta com base na dosagem autorizada no rótulo oficial.\n\n[FAQ: O que é o Modo Planta Jovem?]\n- Considera o volume a preparar e a concentração recomendada no rótulo para plantas em fase inicial de desenvolvimento.\n\n[FAQ: O que é o Modo Planta Adulta?]\n- Ajusta o cálculo integrando o volume de calda recomendado por hectare e o volume efetivamente aplicado pelo pulverizador.",
       "formula": "Q_p = Volume a Preparar (L) × Concentração (%) / 100",
       "unit_explanation": "Q_p : Quantidade de Defensivo (mL ou g)\nVolume : Litros (L)\nConcentração : Porcentagem (%)"
     },
     "calc_dose": {
-      "title": "Calculadora de Dose por Hectare",
+      "title": "Mistura de Calda (Dose)",
       "content": "[FAQ: Qual é a função desta calculadora?]\n- Converte a dose autorizada no rótulo (L/ha ou kg/ha) na quantidade exata de produto comercial a adicionar por tanque, com base no volume de calda calibrado no pulverizador.\n\n[FAQ: Como calcular a área coberta por cada tanque cheio?]\n- Divida a capacidade do tanque pelo volume de calda real aplicado por hectare. Exemplo: 1.000 L / 200 L/ha = 5,0 hectares tratados por tanque.",
       "formula": "Q_p = (C_d × D × 1.000) / V_a\nÁrea (ha) = C_d / V_a",
       "unit_explanation": "Q_p : Quantidade de Produto no Tanque (mL ou g)\nC_d : Volume a Preparar (L)\nD : Dose Autorizada (L/ha ou kg/ha)\nV_a : Volume Aplicado (L/ha)"

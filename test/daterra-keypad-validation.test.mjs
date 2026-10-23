@@ -515,18 +515,18 @@ describe('Validação Declarativa do DaterraKeypad (Substituição de evaluatedR
     assert.equal(validateKeypadValue(20.1, '20,1', false, vRules).isValid, false);
   });
 
-  test('39. Débito Total: Largura aceita 1, 24 e 60; bloqueia 0, 0.9 e 60.1', () => {
+  test('39. Débito Total: Largura aceita 0.2, 24 e 60; bloqueia 0, 0.1 e 60.1', () => {
     const wRules = getRules(wDebitoField);
-    assert.equal(wRules.min, 1);
+    assert.equal(wRules.min, 0.2);
     assert.equal(wRules.minInclusive, true);
     assert.equal(wRules.max, 60);
 
-    assert.equal(validateKeypadValue(1, '1', false, wRules).isValid, true);
+    assert.equal(validateKeypadValue(0.2, '0,2', false, wRules).isValid, true);
     assert.equal(validateKeypadValue(24, '24', false, wRules).isValid, true);
     assert.equal(validateKeypadValue(60, '60', false, wRules).isValid, true);
 
     assert.equal(validateKeypadValue(0, '0', false, wRules).isValid, false);
-    assert.equal(validateKeypadValue(0.9, '0,9', false, wRules).isValid, false);
+    assert.equal(validateKeypadValue(0.1, '0,1', false, wRules).isValid, false);
     assert.equal(validateKeypadValue(60.1, '60,1', false, wRules).isValid, false);
   });
 

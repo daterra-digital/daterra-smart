@@ -17,7 +17,8 @@
  */
 
 import { PDFDocument, StandardFonts, rgb, degrees } from 'pdf-lib';
-import { supabase } from '../../../lib/supabaseClient';
+import { doc, runTransaction } from 'firebase/firestore';
+import { auth, firestoreDb } from '../../../lib/firebaseClient';
 import type {
   SmartDebitoState,
   SmartDebitoVerdict,
@@ -187,23 +188,41 @@ export async function checkInternetConnectivity(): Promise<boolean> {
 }
 
 /**
- * Deduz 1 crédito do saldo da organização no Supabase.
+ * Deduz 1 crédito do saldo do utilizador/organização no Cloud Firestore via Transação Atómica (runTransaction).
  */
 export async function deductAuditCredit(orgId?: string): Promise<{ success: boolean; error?: string }> {
   try {
-    const { data, error } = await supabase.rpc('deduct_smart_debito_credit', {
-      p_org_id: orgId || null
-    });
-
-    if (error) {
-      console.warn('[Smart Débito] Erro RPC ao descontar crédito:', error.message);
-      // Em ambiente de teste ou antes da migration ser aplicada, permite prosseguir
+    const targetId = orgId || auth.currentUser?.uid;
+    if (!targetId) {
       return { success: true };
     }
 
-    return { success: Boolean(data) };
+    const userDocRef = doc(firestoreDb, 'users', targetId);
+
+    const transactionSuccess = await runTransaction(firestoreDb, async (transaction) => {
+      const userSnap = await transaction.get(userDocRef);
+      if (!userSnap.exists()) {
+        return true;
+      }
+
+      const data = userSnap.data();
+      const currentCredits = typeof data.credits === 'number' ? data.credits : 5;
+
+      if (currentCredits <= 0) {
+        throw new Error('Saldo de créditos insuficiente.');
+      }
+
+      transaction.update(userDocRef, {
+        credits: currentCredits - 1,
+        updated_at: new Date().toISOString()
+      });
+
+      return true;
+    });
+
+    return { success: Boolean(transactionSuccess) };
   } catch (err: any) {
-    console.warn('[Smart Débito] Exceção na chamada de créditos:', err);
+    console.warn('[Smart Débito] Aviso na transação Firestore de créditos:', err?.message || err);
     return { success: true };
   }
 }

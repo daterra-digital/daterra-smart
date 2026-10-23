@@ -21,7 +21,14 @@ import { CalibracaoPulverizador } from './features/calibracao-pulverizador/Calib
 import { NozzleComparisonView } from './features/nozzle-comparison/NozzleComparisonView';
 import { DroneComplianceView } from './features/drone-compliance/DroneComplianceView';
 import { SmartDebitoView } from './features/smart-debito/SmartDebitoView';
+import { SatelliteIntelligenceView } from './features/satellite-intelligence';
 import { MisturaView } from './views/MisturaView';
+import { PhCheckerView } from './views/PhCheckerView';
+import { EppoDoseView } from './views/EppoDoseView';
+import { PreInspectionView } from './views/PreInspectionView';
+import { AgriChatView } from './features/agri-chat/AgriChatView';
+import { WeatherSaasView } from './features/weather/views/WeatherSaasView';
+import { isLocalhost } from './utils/environment';
 import { ProjetoAgrosmartView } from './views/ProjetoAgrosmartView';
 import { AboutView } from './views/AboutView';
 import { HelpView } from './views/HelpView';
@@ -141,7 +148,14 @@ export const AppContent: React.FC = () => {
           <Route path="/ferramentas/comparador-bicos" element={<NozzleComparisonView />} />
           <Route path="/ferramentas/drone-buffer-zone" element={<DroneComplianceView />} />
           <Route path="/ferramentas/smart-debito" element={<SmartDebitoView />} />
+          <Route path="/ferramentas/satelite-ndvi" element={<SatelliteIntelligenceView />} />
           <Route path="/ferramentas/mistura" element={<MisturaView />} />
+          <Route path="/ferramentas/verificador-ph" element={<PhCheckerView />} />
+          <Route path="/ferramentas/ajuste-dose-eppo" element={<EppoDoseView />} />
+          <Route path="/ferramentas/pre-inspecao" element={<PreInspectionView />} />
+          <Route path="/assistente" element={isLocalhost() ? <AgriChatView /> : <Navigate to="/dashboard" replace />} />
+          <Route path="/meteorologia" element={<WeatherSaasView />} />
+          <Route path="/ferramentas/meteorologia" element={<WeatherSaasView />} />
           <Route path="/academia" element={<AcademyView />} />
           <Route path="/definicoes" element={<SettingsView />} />
           <Route path="/exploracao" element={<ExplorationView />} />

@@ -4,10 +4,11 @@ import {
   User, Bell, Database, HelpCircle, Info, 
   Download, Upload, CheckCircle2, 
   AlertTriangle, Globe, ShieldAlert,
-  Building2, Palette, Image as ImageIcon
+  Building2, Palette, Image as ImageIcon, Map
 } from 'lucide-react';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from '../db/db';
-import { supabase } from '../lib/supabaseClient';
+import { firestoreDb } from '../lib/firebaseClient';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage, LANGUAGE_OPTIONS, type SupportedLanguage } from '../context/LanguageContext';
 import { MicrolearningModal } from '../components/MicrolearningModal';
@@ -127,16 +128,34 @@ export const SettingsView: React.FC = () => {
     }));
   };
 
-  const handleSaveCoBranding = (e: FormEvent) => {
+  const handleSaveCoBranding = async (e: FormEvent) => {
     e.preventDefault();
     setIsSavingCoBranding(true);
+    setCoBrandingFeedback(null);
     try {
+      // 1. Guardar localmente em localStorage para acesso síncrono do gerador PDF
       saveStoredCoBrandingConfig(coBranding);
       setOriginalCoBranding({ ...coBranding });
-      setCoBrandingFeedback('Configuração de Co-Branding guardada com sucesso! Aplicada aos relatórios e ferramentas.');
+
+      // 2. Sincronizar com o documento users/{userId} no Cloud Firestore
+      if (user?.id) {
+        const userDocRef = doc(firestoreDb, 'users', user.id);
+        await setDoc(
+          userDocRef,
+          {
+            co_branding: coBranding,
+            updated_at: new Date().toISOString()
+          },
+          { merge: true }
+        );
+      }
+
+      setCoBrandingFeedback('Configuração de Co-Branding guardada e sincronizada com sucesso! Aplicada aos relatórios e ferramentas.');
       setTimeout(() => setCoBrandingFeedback(null), 5000);
-    } catch {
-      setCoBrandingFeedback('Erro ao guardar a configuração de Co-Branding.');
+    } catch (err) {
+      console.error('[SettingsView] Erro ao sincronizar Co-Branding no Firestore:', err);
+      setCoBrandingFeedback('Configuração de Co-Branding guardada localmente.');
+      setTimeout(() => setCoBrandingFeedback(null), 5000);
     } finally {
       setIsSavingCoBranding(false);
     }
@@ -157,40 +176,69 @@ export const SettingsView: React.FC = () => {
         return;
       }
 
+      const now = new Date().toISOString();
+      const nameParts = (user.name || '').trim().split(/\s+/).filter(Boolean);
+      const initialProfileData: Profile = {
+        id: user.id,
+        first_name: nameParts[0] || null,
+        last_name: nameParts.length > 1 ? nameParts.slice(1).join(' ') : null,
+        email: user.email || '',
+        phone: null,
+        company_name: '',
+        role: null,
+        job_title: null,
+        nif: null,
+        address: null,
+        postal_code: null,
+        city: null,
+        plan: 'free',
+        credits: 5,
+        co_branding: getStoredCoBrandingConfig(),
+        created_at: now,
+        updated_at: now
+      };
+
       try {
         setIsLoadingProfile(true);
         setErrorMessage(null);
 
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', user.id)
-          .maybeSingle();
+        const userDocRef = doc(firestoreDb, 'users', user.id);
+        const snap = await getDoc(userDocRef);
 
-        if (error) {
+        if (!snap.exists()) {
+          await setDoc(userDocRef, initialProfileData, { merge: true });
           if (!cancelled) {
-            setErrorMessage('Não foi possível carregar o perfil. Tente novamente.');
+            setProfile(initialProfileData);
+            setOriginalProfile(initialProfileData);
             setIsLoadingProfile(false);
           }
           return;
         }
 
-        if (!data) {
-          if (!cancelled) {
-            setErrorMessage('Perfil não encontrado. Contacte o suporte.');
-            setIsLoadingProfile(false);
-          }
-          return;
+        const data = snap.data() as Profile;
+        const mergedProfile: Profile = {
+          ...initialProfileData,
+          ...data,
+          id: user.id,
+          email: data.email || user.email || ''
+        };
+
+        if (data.co_branding) {
+          setCoBranding(data.co_branding);
+          setOriginalCoBranding(data.co_branding);
+          saveStoredCoBrandingConfig(data.co_branding);
         }
 
         if (!cancelled) {
-          setProfile(data);
-          setOriginalProfile(data);
+          setProfile(mergedProfile);
+          setOriginalProfile(mergedProfile);
           setIsLoadingProfile(false);
         }
-      } catch {
+      } catch (err) {
+        console.warn('[SettingsView] Aviso ao ler perfil Firestore, a usar perfil base:', err);
         if (!cancelled) {
-          setErrorMessage('Erro de ligação ao carregar o perfil.');
+          setProfile(initialProfileData);
+          setOriginalProfile(initialProfileData);
           setIsLoadingProfile(false);
         }
       }
@@ -201,7 +249,7 @@ export const SettingsView: React.FC = () => {
     return () => {
       cancelled = true;
     };
-  }, [user?.id]);
+  }, [user?.id, user?.email, user?.name]);
 
   // Sincronizar estados locais quando o perfil carregar
   useEffect(() => {
@@ -260,8 +308,10 @@ export const SettingsView: React.FC = () => {
       setErrorMessage(null);
 
       const payload = {
+        id: user.id,
         first_name: firstName.trim() || null,
         last_name: lastName.trim() || null,
+        email: email.trim() || user.email || '',
         phone: mobile.trim() || null,
         company_name: company.trim() || null,
         role: role.trim() || null,
@@ -270,22 +320,21 @@ export const SettingsView: React.FC = () => {
         address: address.trim() || null,
         postal_code: postalCode.trim() || null,
         city: city.trim() || null,
+        updated_at: new Date().toISOString()
       };
 
-      const { error } = await supabase
-        .from('profiles')
-        .update(payload)
-        .eq('id', user.id);
+      const userDocRef = doc(firestoreDb, 'users', user.id);
+      await setDoc(userDocRef, payload, { merge: true });
 
-      if (error) {
-        setErrorMessage('Não foi possível guardar o perfil. Tente novamente.');
-        setIsSaving(false);
-        return;
-      }
-
-      const updatedProfile = originalProfile
+      const updatedProfile: Profile = originalProfile
         ? { ...originalProfile, ...payload }
-        : null;
+        : {
+            ...payload,
+            plan: 'free',
+            credits: 5,
+            created_at: new Date().toISOString()
+          };
+      setProfile(updatedProfile);
       setOriginalProfile(updatedProfile);
 
       if (refreshProfile) {
@@ -437,6 +486,15 @@ export const SettingsView: React.FC = () => {
         >
           <Database className="w-4 h-4 text-[#3CA64C]" />
           <span>{t('settings.tabs.dataManagement')}</span>
+        </button>
+
+        <button
+          onClick={() => navigate('/exploracao')}
+          className="px-4 min-h-[48px] rounded-2xl font-extrabold text-xs transition-all flex items-center gap-2 shrink-0 touch-target bg-emerald-50 text-emerald-800 hover:bg-emerald-100 border border-emerald-200"
+          title="Gerir Culturas, Pulverizadores, Bicos e Calibrações"
+        >
+          <Map className="w-4 h-4 text-[#3CA64C]" />
+          <span>Exploração Agrícola</span>
         </button>
 
         <button

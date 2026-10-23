@@ -81,13 +81,13 @@ export const CalculatorResultCard: React.FC<CalculatorResultCardProps> = ({
             iconType="help"
             iconClassName="w-3.5 h-3.5 text-daterra-accent group-hover:text-white transition-colors"
             buttonLabel={`Ajuda sobre ${resultDef.label}`}
-            className="min-w-[32px] min-h-[32px] p-1 text-daterra-accent hover:text-white bg-white/10 hover:bg-white/20 rounded-lg border border-white/10 transition-colors group touch-target -mr-1 -mt-0.5 flex items-center justify-center shrink-0"
+            className="min-w-[48px] min-h-[48px] p-2.5 text-daterra-accent hover:text-white bg-white/10 hover:bg-white/20 rounded-xl border border-white/10 transition-colors group touch-target -mr-2 -mt-1 flex items-center justify-center shrink-0"
           />
         ) : (hasHelp || onOpenResultHelp) ? (
           <button
             type="button"
             onClick={() => onOpenResultHelp?.(resultDef.id)}
-            className="min-w-[32px] min-h-[32px] p-1 text-daterra-accent hover:text-white bg-white/10 hover:bg-white/20 rounded-lg border border-white/10 transition-colors touch-target -mr-1 -mt-0.5 flex items-center justify-center shrink-0"
+            className="min-w-[48px] min-h-[48px] p-2.5 text-daterra-accent hover:text-white bg-white/10 hover:bg-white/20 rounded-xl border border-white/10 transition-colors touch-target -mr-2 -mt-1 flex items-center justify-center shrink-0"
             title={`Ajuda sobre ${resultDef.label}`}
             aria-label={`Ajuda pedagógica sobre ${resultDef.label}`}
           >

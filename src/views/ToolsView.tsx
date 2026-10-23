@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useSearchParams, useNavigate, Navigate } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { 
   Search, X, CheckCircle2, Download, ArrowRight, Plus, Trash2,
   FlaskConical, Calculator, Gauge, Trees, Scale, ClipboardCheck, 
   CloudSun, Layers, Tractor, ChevronLeft, SlidersHorizontal, 
-  Sparkles, Save, Sprout, AlertCircle, Leaf
+  Sparkles, Save, Sprout, AlertCircle, Leaf, Satellite
 } from 'lucide-react';
 
 import { db } from '../db/db';
@@ -17,6 +17,7 @@ import { UniversalCalculatorTemplate } from '../features/calculators/core/index.
 import { doseCalculatorConfig } from '../features/calculators/definitions/doseCalculatorConfig.ts';
 import { concentracaoCalculatorConfig } from '../features/calculators/definitions/concentracaoCalculatorConfig.ts';
 import { velocidadeRealCalculatorConfig } from '../features/calculators/definitions/velocidadeRealCalculatorConfig.ts';
+import { isToolAllowedInCurrentEnv } from '../utils/environment';
 
 export interface ToolModule {
   id: string;
@@ -29,56 +30,21 @@ export interface ToolModule {
   prioridade?: string;
 }
 
-// Catálogo de Ferramentas e Funcionalidades Agronómicas
+// Catálogo de Ferramentas e Funcionalidades Agronómicas (Ordenado Alfabeticamente A-Z)
 const TOOLS_CATALOG: ToolModule[] = [
   {
-    id: 'comparador_bicos',
-    name: 'Comparador de Bicos de Pulverização',
-    category: 'Calibração',
-    description: 'Compare débitos técnicos reais, curvas de pressão e espectro de gotas de dois bicos em simultâneo.',
+    id: 'ajuste_dose_eppo',
+    name: 'Ajuste da Dose (Método EPPO)',
+    category: 'Pulverização',
+    description: 'Harmonização de doses (D_LWA, D_TRV, D_GA, mL/hL) e quantidade de produto no depósito para culturas 3D segundo EPPO PP 1/239 (3).',
     icon: Scale,
     isCore: true,
-    caminho: '/ferramentas/comparador-bicos',
-    prioridade: 'alta'
-  },
-  {
-    id: 'calc_concentracao',
-    name: 'Calculadora de Concentração da Calda',
-    category: 'Pulverização',
-    description: 'Calcula a quantidade exata de pesticida a diluir por depósito para Planta Jovem ou Copa Adulta.',
-    icon: FlaskConical,
-    isCore: true
-  },
-  {
-    id: 'calc_dose',
-    name: 'Calculadora de Dose por Hectare',
-    category: 'Pulverização',
-    description: 'Converte a dose do rótulo (L/ha ou kg/ha) para a calda do depósito e calcula a área coberta por tanque.',
-    icon: Calculator,
-    isCore: true
-  },
-  {
-    id: 'drone_buffer_zone',
-    name: 'Drone Buffer Zone & Legal Compliance (SprayOps)',
-    category: 'Pulverização',
-    description: 'Cálculo de zonas tampão dinâmicas, mitigação de deriva e conformidade legal (DGAV / DL 91/2016) para drones agrícolas.',
-    icon: Layers,
-    isCore: true,
-    caminho: '/ferramentas/drone-buffer-zone',
-    prioridade: 'alta'
-  },
-  {
-    id: 'calc_velocidade_real',
-    name: 'Velocidade Real de Trabalho',
-    category: 'Calibração',
-    description: 'Calcule a velocidade real do equipamento no campo para apoiar a calibração.',
-    icon: Gauge,
-    isCore: true,
+    caminho: '/ferramentas/ajuste-dose-eppo',
     prioridade: 'alta'
   },
   {
     id: 'calc_area_parede_foliar',
-    name: 'Área de Parede Foliar',
+    name: 'Área de Parede Foliar (LWA)',
     category: 'Calibração',
     description: 'Calcula a área de parede foliar por hectare (LWA - Leaf Wall Area).',
     icon: Leaf,
@@ -87,44 +53,11 @@ const TOOLS_CATALOG: ToolModule[] = [
     prioridade: 'alta'
   },
   {
-    id: 'smart_debito',
-    name: 'Smart Débito (ISO 16122)',
-    category: 'Calibração',
-    description: 'Auditoria de pulverizadores (valores manuais ou de caudolímetro eletrónico por offset) e validação de desvios e simetria bilateral (ISO 16122-2 / ISO 16122-3).',
-    icon: Gauge,
-    isCore: true,
-    caminho: '/ferramentas/smart-debito',
-    prioridade: 'alta'
-  },
-  {
-    id: 'calc_volume_copa',
-    name: 'Volume de Copa (TRV)',
-    category: 'Calibração',
-    description: 'Determina a massa foliar tridimensional (m³/ha) em pomares e vinhas para cálculo de dosagem proporcional.',
-    icon: Trees,
-    isCore: true,
-    caminho: '/ferramentas/volume-copa',
-    prioridade: 'alta'
-  },
-  {
-    id: 'calc_volume_calda_trv',
-    name: 'Volume de Calda Adequado por TRV',
-    category: 'Calibração',
-    description: 'Estima o volume de calda por hectare com base no Volume de Copa (TRV) e num coeficiente técnico de calibração.',
-    icon: FlaskConical,
-    isCore: true,
-    caminho: '/ferramentas/volume-calda-trv',
-    prioridade: 'alta'
-  },
-  {
-    id: 'calc_debito_total',
-    name: 'Débito Total do Pulverizador',
-    category: 'Calibração',
-    description: 'Calcula o débito global do pulverizador a partir do volume de calda, velocidade de trabalho e largura efetiva tratada.',
-    icon: Gauge,
-    isCore: true,
-    caminho: '/ferramentas/debito-total',
-    prioridade: 'alta'
+    id: 'gestao_caderno_campo',
+    name: 'Caderno de Campo Digital DGAV',
+    category: 'Gestão',
+    description: 'Registo digital de tratamentos fitossanitários com verificação automática de limites SIFITO.',
+    icon: ClipboardCheck
   },
   {
     id: 'calc_calibracao_pulverizador',
@@ -147,11 +80,34 @@ const TOOLS_CATALOG: ToolModule[] = [
     prioridade: 'alta'
   },
   {
-    id: 'gestao_caderno_campo',
-    name: 'Caderno de Campo Digital DGAV',
-    category: 'Gestão',
-    description: 'Registo digital de tratamentos fitossanitários com verificação automática de limites SIFITO.',
-    icon: ClipboardCheck
+    id: 'verificador_ph',
+    name: 'Consulta de pH',
+    category: 'Pulverização',
+    description: 'Consulte o pH ideal da calda, constante pKa, código MoA e estabilidade de substâncias ativas offline.',
+    icon: FlaskConical,
+    isCore: true,
+    caminho: '/ferramentas/verificador-ph',
+    prioridade: 'alta'
+  },
+  {
+    id: 'calc_debito_total',
+    name: 'Débito Total do Pulverizador',
+    category: 'Calibração',
+    description: 'Calcula o débito global do pulverizador a partir do volume de calda, velocidade de trabalho e largura efetiva tratada.',
+    icon: Gauge,
+    isCore: true,
+    caminho: '/ferramentas/debito-total',
+    prioridade: 'alta'
+  },
+  {
+    id: 'drone_buffer_zone',
+    name: 'Drone Buffer Zone & Legal Compliance (SprayOps)',
+    category: 'Pulverização',
+    description: 'Cálculo de zonas tampão dinâmicas, mitigação de deriva e conformidade legal (DGAV / DL 91/2016) para drones agrícolas.',
+    icon: Layers,
+    isCore: true,
+    caminho: '/ferramentas/drone-buffer-zone',
+    prioridade: 'alta'
   },
   {
     id: 'clima_estacao_agricola',
@@ -161,8 +117,41 @@ const TOOLS_CATALOG: ToolModule[] = [
     icon: CloudSun
   },
   {
+    id: 'gestao_exploracoes',
+    name: 'Gestão de Explorações e Parcelas',
+    category: 'Gestão',
+    description: 'Registo centralizado de parcelas, culturas, pulverizadores e bicos da exploração agrícola.',
+    icon: Tractor
+  },
+  {
+    id: 'satelite_ndvi',
+    name: 'Inteligência de Satélite & NDVI (Copernicus)',
+    category: 'Pulverização',
+    description: 'Monitorização de vigor vegetativo Sentinel-2 (10m), modulação de volume de calda por NDVI e intercâmbio de talhões (KML/GeoJSON).',
+    icon: Satellite,
+    isCore: true,
+    caminho: '/ferramentas/satelite-ndvi',
+    prioridade: 'alta'
+  },
+  {
+    id: 'calc_concentracao',
+    name: 'Mistura de Calda (Concentração)',
+    category: 'Pulverização',
+    description: 'Calcula a quantidade exata de pesticida a diluir por depósito para Planta Jovem ou Copa Adulta.',
+    icon: FlaskConical,
+    isCore: true
+  },
+  {
+    id: 'calc_dose',
+    name: 'Mistura de Calda (Dose)',
+    category: 'Pulverização',
+    description: 'Converte a dose do rótulo (L/ha ou kg/ha) para a calda do depósito e calcula a área coberta por tanque.',
+    icon: Calculator,
+    isCore: true
+  },
+  {
     id: 'mistura_compatibilidade',
-    name: 'Guia de Sequência de Mistura',
+    name: 'Ordem de Mistura',
     category: 'Pulverização',
     description: 'Ordem correta de adição de produtos no depósito para evitar floculação e inativação de substâncias.',
     icon: Layers,
@@ -171,11 +160,63 @@ const TOOLS_CATALOG: ToolModule[] = [
     prioridade: 'alta'
   },
   {
-    id: 'gestao_exploracoes',
-    name: 'Gestão de Explorações e Parcelas',
-    category: 'Gestão',
-    description: 'Registo centralizado de parcelas, culturas, pulverizadores e bicos da exploração agrícola.',
-    icon: Tractor
+    id: 'pre_inspecao_dgav',
+    name: 'Pré-Inspeção',
+    category: 'Calibração',
+    description: 'Diagnóstico prévio em Modo Expresso e Detalhado (ISO 16122 / DGAV) para avaliar o estado do equipamento antes da inspeção oficial.',
+    icon: ClipboardCheck,
+    isCore: true,
+    caminho: '/ferramentas/pre-inspecao',
+    prioridade: 'alta'
+  },
+  {
+    id: 'smart_debito',
+    name: 'Smart Débito (ISO 16122)',
+    category: 'Calibração',
+    description: 'Auditoria de pulverizadores (valores manuais ou de caudolímetro eletrónico por offset) e validação de desvios e simetria bilateral (ISO 16122-2 / ISO 16122-3).',
+    icon: Gauge,
+    isCore: true,
+    caminho: '/ferramentas/smart-debito',
+    prioridade: 'alta'
+  },
+  {
+    id: 'comparador_bicos',
+    name: 'Tabelas de Débito (Comparador)',
+    category: 'Calibração',
+    description: 'Compare débitos técnicos reais, curvas de pressão e espectro de gotas de dois bicos em simultâneo.',
+    icon: Scale,
+    isCore: true,
+    caminho: '/ferramentas/comparador-bicos',
+    prioridade: 'alta'
+  },
+  {
+    id: 'calc_velocidade_real',
+    name: 'Velocidade Real de Trabalho',
+    category: 'Calibração',
+    description: 'Calcule a velocidade real do equipamento no campo para apoiar a calibração.',
+    icon: Gauge,
+    isCore: true,
+    prioridade: 'alta'
+  },
+  {
+    id: 'calc_volume_calda_trv',
+    name: 'Volume de Calda Adequado por TRV',
+    category: 'Calibração',
+    description: 'Estima o volume de calda por hectare com base no Volume de Copa (TRV) e num coeficiente técnico de calibração.',
+    icon: FlaskConical,
+    isCore: true,
+    caminho: '/ferramentas/volume-calda-trv',
+    prioridade: 'alta'
+  },
+  {
+    id: 'calc_volume_copa',
+    name: 'Volume de Copa (TRV)',
+    category: 'Calibração',
+    description: 'Determina a massa foliar tridimensional (m³/ha) em pomares e vinhas para cálculo de dosagem proporcional.',
+    icon: Trees,
+    isCore: true,
+    caminho: '/ferramentas/volume-copa',
+    prioridade: 'alta'
   }
 ];
 
@@ -253,7 +294,9 @@ export const ToolsView: React.FC = () => {
 
   // Leitura do IndexedDB via Dexie das Ferramentas Instaladas
   const installedToolItems = useLiveQuery(() => db.installed_tools.toArray(), []);
-  const installedToolIds = new Set(installedToolItems?.map(t => t.tool_id) || ['calc_concentracao', 'calc_dose', 'calc_area_parede_foliar', 'mistura_compatibilidade']);
+  const installedToolIds = useMemo(() => {
+    return new Set(installedToolItems?.map(t => t.tool_id) || ['calc_concentracao', 'calc_dose', 'calc_area_parede_foliar', 'mistura_compatibilidade']);
+  }, [installedToolItems]);
 
   // --- ESTADOS INTERNOS DAS CALCULADORAS ---
   // Concentração
@@ -345,13 +388,24 @@ export const ToolsView: React.FC = () => {
     window.scrollTo(0, 0);
   };
 
-  // Filtro Dinâmico do Catálogo de Ferramentas
-  const filteredTools = TOOLS_CATALOG.filter(tool => {
-    const matchesCategory = selectedCategory === 'Todas' || tool.category === selectedCategory;
-    const matchesSearch = tool.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          tool.description.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesCategory && matchesSearch;
-  });
+  // Catálogo de ferramentas visíveis no ambiente atual (filtrado para 10 ferramentas homologadas no GitHub Pages)
+  const visibleCatalog = useMemo(() => {
+    return TOOLS_CATALOG.filter(tool => isToolAllowedInCurrentEnv(tool.id));
+  }, []);
+
+  // Filtro Dinâmico do Catálogo de Ferramentas (Ordenado Alfabeticamente A-Z)
+  const filteredTools = useMemo(() => {
+    return visibleCatalog.filter(tool => {
+      const matchesCategory = selectedCategory === 'Todas' || tool.category === selectedCategory;
+      const matchesSearch = tool.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                            tool.description.toLowerCase().includes(searchQuery.toLowerCase());
+      return matchesCategory && matchesSearch;
+    }).sort((a, b) => a.name.localeCompare(b.name, 'pt-PT', { sensitivity: 'base' }));
+  }, [visibleCatalog, selectedCategory, searchQuery]);
+
+  const activeInstalledCount = useMemo(() => {
+    return visibleCatalog.filter(t => installedToolIds.has(t.id)).length;
+  }, [visibleCatalog, installedToolIds]);
 
   // --- LÓGICA DE CÁLCULO DAS CALCULADORAS ---
   const calculateConcentrationResult = () => {
@@ -520,7 +574,11 @@ export const ToolsView: React.FC = () => {
   }
 
   if (currentViewTool) {
-    const currentToolData = TOOLS_CATALOG.find(t => t.id === currentViewTool);
+    if (!isToolAllowedInCurrentEnv(currentViewTool)) {
+      handleBackToCatalog();
+      return null;
+    }
+    const currentToolData = visibleCatalog.find(t => t.id === currentViewTool);
 
     return (
       <div className="space-y-6 animate-fade-in">
@@ -569,7 +627,7 @@ export const ToolsView: React.FC = () => {
               <div>
                 <div className="flex items-center gap-2 mb-1">
                   <h2 className="text-xl font-extrabold text-daterra-primary">
-                    Calculadora de Concentração
+                    Mistura de Calda (Concentração)
                   </h2>
                   <DidacticHelp faqFile="ConcentracaoFAQGeral.md" buttonLabel="Ajuda" />
                 </div>
@@ -867,7 +925,7 @@ export const ToolsView: React.FC = () => {
               {t('tools.title')}
             </h1>
             <span className="px-3 py-1 bg-[#114037]/10 text-[#114037] text-xs font-extrabold rounded-full">
-              {installedToolIds.size} de {TOOLS_CATALOG.length} ativas
+              {activeInstalledCount} de {visibleCatalog.length} ativas
             </span>
           </div>
           <p className="text-xs text-slate-500 font-medium mt-1">

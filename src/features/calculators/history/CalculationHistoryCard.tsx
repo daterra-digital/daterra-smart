@@ -262,7 +262,7 @@ export const CalculationHistoryCard: React.FC<CalculationHistoryCardProps> = ({
     : isVelocidade
     ? 'Velocidade Real de Trabalho'
     : isAreaParedeFoliar
-    ? 'Área de Parede Foliar'
+    ? 'Área de Parede Foliar (LWA)'
     : isVolumeCopa
     ? 'Volume de Copa (TRV)'
     : isVolumeCaldaTrv

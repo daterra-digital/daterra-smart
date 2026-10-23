@@ -129,7 +129,7 @@ export const NozzleComparisonMobileView: React.FC = () => {
           Calibração de Bicos
         </span>
         <h1 className="text-xl font-black text-daterra-primary leading-tight">
-          Comparador de Bicos
+          Tabelas de Débito (Comparador)
         </h1>
       </div>
 

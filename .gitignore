@@ -52,6 +52,8 @@ scratch/
 # Chaves privadas e certificados locais
 *.pem
 *.key
+*service-account*.json
+functions/lib/
 
 # Python & Ambientes Virtuais (Services)
 __pycache__/

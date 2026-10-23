@@ -105,7 +105,7 @@ export const HistoryDetailModal: React.FC<HistoryDetailModalProps> = ({
                   : record.calculatorId === 'calc_velocidade_real'
                   ? 'Velocidade Real de Trabalho'
                   : record.calculatorId === 'calc_area_parede_foliar'
-                  ? 'Área de Parede Foliar'
+                  ? 'Área de Parede Foliar (LWA)'
                   : record.calculatorId === 'calc_volume_copa'
                   ? 'Volume de Copa (TRV)'
                   : record.calculatorId === 'calc_volume_calda_trv'

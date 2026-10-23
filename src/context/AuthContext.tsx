@@ -1,253 +1,275 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import type { Session, User as SupabaseUser } from '@supabase/supabase-js';
-import { supabase } from '../lib/supabaseClient';
-import type { Profile } from '../types/profile';
+import {
+  onAuthStateChanged,
+  isSignInWithEmailLink,
+  signInWithEmailLink,
+  GoogleAuthProvider,
+  signInWithPopup,
+  signOut,
+  type User as FirebaseUser
+} from 'firebase/auth';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { httpsCallable } from 'firebase/functions';
+import { auth, firestoreDb, functions } from '../lib/firebaseClient';
+import type { Profile, PendingRegistrationData } from '../types/profile';
 
-export type AuthUser = SupabaseUser & {
+const PENDING_AUTH_STORAGE_KEY = 'daterra_pending_auth';
+
+export type AuthUser = {
+  id: string;
+  uid: string;
+  email: string;
   name?: string;
   farmName?: string;
   plan?: string;
+  user_metadata?: {
+    full_name?: string;
+    name?: string;
+    farm_name?: string;
+    plan?: string;
+  };
 };
 
 export interface AuthContextType {
-  session: Session | null;
   user: AuthUser | null;
   profile: Profile | null;
   isAuthenticated: boolean;
   isAuthLoading: boolean;
-  sendOtp: (email: string, captchaToken?: string) => Promise<{ error: string | null }>;
-  verifyOtp: (email: string, token: string) => Promise<{ error: string | null }>;
+  requestMagicLink: (data: PendingRegistrationData, captchaToken?: string) => Promise<{ error: string | null }>;
+  completeMagicLinkSignIn: (emailOverride?: string) => Promise<{ error: string | null; needsEmail?: boolean }>;
+  signInWithGoogle: () => Promise<{ error: string | null }>;
   logout: () => Promise<void>;
-  refreshProfile?: () => Promise<void>;
+  refreshProfile: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const mapSupabaseUser = (sbUser: SupabaseUser | null): AuthUser | null => {
-  if (!sbUser) return null;
-  const name =
-    sbUser.user_metadata?.full_name ||
-    sbUser.user_metadata?.name ||
-    (sbUser.email ? sbUser.email.split('@')[0] : 'Utilizador');
+const mapFirebaseUser = (fbUser: FirebaseUser | null, profileData?: Profile | null): AuthUser | null => {
+  if (!fbUser) return null;
+  const fullName = profileData
+    ? `${profileData.first_name ?? ''} ${profileData.last_name ?? ''}`.trim()
+    : fbUser.displayName || '';
+  const name = fullName || (fbUser.email ? fbUser.email.split('@')[0] : 'Utilizador');
+  const farmName = profileData?.company_name || 'Exploração Agrícola';
+  const plan = profileData?.plan || 'DATERRA Smart';
 
   return {
-    ...sbUser,
+    id: fbUser.uid,
+    uid: fbUser.uid,
+    email: fbUser.email || '',
     name,
-    farmName: sbUser.user_metadata?.farm_name || 'Exploração Agrícola',
-    plan: sbUser.user_metadata?.plan || 'DATERRA Smart'
+    farmName,
+    plan,
+    user_metadata: { full_name: name, name, farm_name: farmName, plan }
   };
 };
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<AuthUser | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [isAuthLoading, setIsAuthLoading] = useState<boolean>(true);
 
-  async function loadProfile(userId: string) {
+  const ensureAndLoadProfile = async (fbUser: FirebaseUser): Promise<Profile | null> => {
     try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', userId)
-        .maybeSingle();
+      const userDocRef = doc(firestoreDb, 'users', fbUser.uid);
+      const snap = await getDoc(userDocRef);
 
-      if (error || !data) {
-        setProfile(null);
-        return;
+      let pending: PendingRegistrationData | null = null;
+      try {
+        const raw = localStorage.getItem(PENDING_AUTH_STORAGE_KEY);
+        if (raw) pending = JSON.parse(raw) as PendingRegistrationData;
+      } catch {
+        pending = null;
       }
 
-      setProfile(data);
-    } catch {
-      setProfile(null);
-    }
-  }
+      if (!snap.exists()) {
+        const now = new Date().toISOString();
+        const displayParts = (fbUser.displayName || '').trim().split(/\s+/).filter(Boolean);
+        const defaultFirstName = displayParts[0] || null;
+        const defaultLastName = displayParts.length > 1 ? displayParts.slice(1).join(' ') : null;
 
-  useEffect(() => {
-    let isMounted = true;
-
-    // Timeout defensivo para garantir que a interface nunca fica bloqueada se o Supabase não responder
-    const authTimeout = setTimeout(() => {
-      if (isMounted) {
-        setIsAuthLoading(false);
-      }
-    }, 3500);
-
-    // 1. Obter sessão inicial persistida no cliente Supabase
-    supabase.auth
-      .getSession()
-      .then(async ({ data: { session }, error }) => {
-        clearTimeout(authTimeout);
-        if (error) {
-          console.error('Erro ao recuperar a sessão Supabase:', error.message);
-        }
-        if (isMounted) {
-          setSession(session);
-          setUser(mapSupabaseUser(session?.user ?? null));
-          if (session?.user?.id) {
-            await loadProfile(session.user.id);
-          } else {
-            setProfile(null);
-          }
-          setIsAuthLoading(false);
-        }
-      })
-      .catch((err) => {
-        clearTimeout(authTimeout);
-        console.error('Falha inesperada na recuperação da sessão:', err);
-        if (isMounted) {
-          setIsAuthLoading(false);
-        }
-      });
-
-    // 2. Ouvir alterações reais de autenticação (SIGNED_IN, SIGNED_OUT, TOKEN_REFRESHED)
-    const {
-      data: { subscription }
-    } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      if (isMounted) {
-        setSession(session);
-        setUser(mapSupabaseUser(session?.user ?? null));
-        if (session?.user?.id) {
-          await loadProfile(session.user.id);
-        } else {
-          setProfile(null);
-        }
-        setIsAuthLoading(false);
-      }
-    });
-
-    return () => {
-      isMounted = false;
-      subscription.unsubscribe();
-    };
-  }, []);
-
-  const sendOtp = async (email: string, captchaToken?: string): Promise<{ error: string | null }> => {
-    try {
-      const cleanEmail = email.trim().toLowerCase();
-      if (!cleanEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
-        return { error: 'Por favor introduza um endereço de email válido.' };
+        const newProfile: Profile = {
+          id: fbUser.uid,
+          first_name: pending?.firstName?.trim() || defaultFirstName,
+          last_name: pending?.lastName?.trim() || defaultLastName,
+          email: fbUser.email || pending?.email || '',
+          phone: null,
+          company_name: pending?.companyName?.trim() ?? '',
+          role: null,
+          job_title: null,
+          nif: null,
+          address: null,
+          postal_code: null,
+          city: null,
+          plan: 'free',
+          credits: 5,
+          created_at: now,
+          updated_at: now
+        };
+        await setDoc(userDocRef, newProfile, { merge: true });
+        localStorage.removeItem(PENDING_AUTH_STORAGE_KEY);
+        setProfile(newProfile);
+        return newProfile;
       }
 
-      const { data, error } = await supabase.functions.invoke('send-otp', {
-        body: {
-          email: cleanEmail,
-          action: 'magiclink',
-          ...(captchaToken ? { captchaToken } : {})
-        }
-      });
-
-      if (error) {
-        console.error('❌ [sendOtp] Erro ao invocar Edge Function send-otp:', error);
-
-        let detailedMessage = '';
-
-        // Tenta extrair a mensagem de erro retornada no corpo da resposta HTTP da Edge Function
-        if ('context' in error && error.context) {
-          try {
-            const ctx = error.context as Response;
-            const cloned = ctx.clone ? ctx.clone() : ctx;
-            const body = await cloned.json();
-            detailedMessage = body?.error || body?.message || body?.details || '';
-          } catch {
-            try {
-              const text = await (error.context as Response).text();
-              if (text) detailedMessage = text;
-            } catch {
-              // fallback silencioso
-            }
-          }
-        }
-
-        if (detailedMessage) {
-          return { error: detailedMessage };
-        }
-
-        if (error.name === 'FunctionsFetchError' || error.message?.includes('Failed to send')) {
-          return {
-            error: 'Não foi possível conectar à Edge Function "send-otp". Verifique se a função está deployada no Supabase com CORS e --no-verify-jwt.'
-          };
-        }
-
-        return { error: error.message || 'Não foi possível enviar o código de acesso. Tente novamente.' };
-      }
-
-      if (data?.error) {
-        return { error: data.error };
-      }
-
-      return { error: null };
-    } catch (err: any) {
-      console.error('❌ [sendOtp] Exceção inesperada:', err);
-      return { error: err?.message || 'Ocorreu um erro inesperado ao solicitar o código. Tente novamente.' };
+      const existingData = snap.data() as Profile;
+      localStorage.removeItem(PENDING_AUTH_STORAGE_KEY);
+      setProfile(existingData);
+      return existingData;
+    } catch (err) {
+      console.error('[AuthContext] Erro ao carregar/criar perfil Firestore:', err);
+      return null;
     }
   };
 
-  const verifyOtp = async (email: string, token: string): Promise<{ error: string | null }> => {
+  useEffect(() => {
+    let isMounted = true;
+    const authTimeout = setTimeout(() => {
+      if (isMounted) setIsAuthLoading(false);
+    }, 3000);
+
+    if (typeof window !== 'undefined' && isSignInWithEmailLink(auth, window.location.href)) {
+      completeMagicLinkSignIn();
+    }
+
+    const unsubscribe = onAuthStateChanged(auth, async (fbUser) => {
+      clearTimeout(authTimeout);
+      if (fbUser) {
+        const loadedProfile = await ensureAndLoadProfile(fbUser);
+        if (isMounted) setUser(mapFirebaseUser(fbUser, loadedProfile));
+      } else if (isMounted) {
+        setUser(null);
+        setProfile(null);
+      }
+      if (isMounted && !isSignInWithEmailLink(auth, window.location.href)) {
+        setIsAuthLoading(false);
+      }
+    });
+    return () => {
+      isMounted = false;
+      clearTimeout(authTimeout);
+      unsubscribe();
+    };
+  }, []);
+
+  const requestMagicLink = async (
+    data: PendingRegistrationData,
+    captchaToken?: string
+  ): Promise<{ error: string | null }> => {
     try {
-      const cleanEmail = email.trim().toLowerCase();
-      const cleanToken = token.trim();
-
-      if (!cleanEmail) {
-        return { error: 'O endereço de email é obrigatório.' };
-      }
-      if (cleanToken.length !== 6 || !/^\d{6}$/.test(cleanToken)) {
-        return { error: 'O código de verificação deve conter exatamente 6 dígitos numéricos.' };
+      const cleanEmail = data.email.trim().toLowerCase();
+      if (!cleanEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
+        return { error: 'Por favor introduza um endereço de e-mail válido.' };
       }
 
-      const { data, error } = await supabase.auth.verifyOtp({
+      localStorage.setItem(
+        PENDING_AUTH_STORAGE_KEY,
+        JSON.stringify({ ...data, email: cleanEmail })
+      );
+
+      const redirectUrl = `${window.location.origin}${window.location.pathname}#/login`;
+      const callSendMagicLink = httpsCallable(functions, 'sendCustomMagicLink');
+      await callSendMagicLink({
         email: cleanEmail,
-        token: cleanToken,
-        type: 'email'
+        firstName: data.firstName?.trim(),
+        lastName: data.lastName?.trim(),
+        companyName: data.companyName?.trim(),
+        redirectUrl,
+        ...(captchaToken ? { captchaToken } : {})
       });
 
-      if (error || !data.session) {
-        if (error?.message?.toLowerCase().includes('expired')) {
-          return { error: 'O código introduzido expirou. Por favor solicite um novo código.' };
-        }
-        return { error: 'Código de verificação incorreto ou inválido. Tente novamente.' };
-      }
-
-      setSession(data.session);
-      setUser(mapSupabaseUser(data.user));
       return { error: null };
-    } catch {
-      return { error: 'Erro ao validar o código. Por favor tente novamente.' };
+    } catch (err: any) {
+      console.error('❌ [requestMagicLink] Erro ao invocar Cloud Function:', err);
+      return {
+        error: err?.message || 'Não foi possível enviar o link de acesso. Verifique a Cloud Function sendCustomMagicLink.'
+      };
+    }
+  };
+
+  const completeMagicLinkSignIn = async (
+    emailOverride?: string
+  ): Promise<{ error: string | null; needsEmail?: boolean }> => {
+    const currentUrl = window.location.href;
+    if (!isSignInWithEmailLink(auth, currentUrl)) {
+      return { error: null };
+    }
+
+    let targetEmail = emailOverride?.trim().toLowerCase() || '';
+    if (!targetEmail) {
+      try {
+        const raw = localStorage.getItem(PENDING_AUTH_STORAGE_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw) as PendingRegistrationData;
+          targetEmail = parsed.email?.trim().toLowerCase() || '';
+        }
+      } catch {
+        targetEmail = '';
+      }
+    }
+
+    if (!targetEmail) {
+      return { error: null, needsEmail: true };
+    }
+
+    try {
+      setIsAuthLoading(true);
+      const credential = await signInWithEmailLink(auth, targetEmail, currentUrl);
+      const loadedProfile = await ensureAndLoadProfile(credential.user);
+      setUser(mapFirebaseUser(credential.user, loadedProfile));
+      window.history.replaceState({}, document.title, window.location.pathname);
+      return { error: null };
+    } catch (err: any) {
+      console.error('❌ [completeMagicLinkSignIn] Erro ao validar Magic Link:', err);
+      return { error: 'O link de acesso expirou ou já foi utilizado. Solicite um novo link.' };
+    } finally {
+      setIsAuthLoading(false);
+    }
+  };
+
+  const signInWithGoogle = async (): Promise<{ error: string | null }> => {
+    try {
+      const provider = new GoogleAuthProvider();
+      provider.setCustomParameters({ prompt: 'select_account' });
+      const credential = await signInWithPopup(auth, provider);
+      const loadedProfile = await ensureAndLoadProfile(credential.user);
+      setUser(mapFirebaseUser(credential.user, loadedProfile));
+      return { error: null };
+    } catch (err: any) {
+      if (err?.code === 'auth/popup-closed-by-user') {
+        return { error: null };
+      }
+      console.error('❌ [signInWithGoogle] Erro na autenticação Google:', err);
+      return {
+        error: err?.message || 'Não foi possível autenticar com a conta Google.'
+      };
     }
   };
 
   const refreshProfile = async (): Promise<void> => {
-    if (session?.user?.id) {
-      await loadProfile(session.user.id);
+    if (auth.currentUser) {
+      const updated = await ensureAndLoadProfile(auth.currentUser);
+      setUser(mapFirebaseUser(auth.currentUser, updated));
     }
   };
 
   const logout = async (): Promise<void> => {
-    try {
-      await supabase.auth.signOut();
-    } catch (err) {
-      console.error('Erro ao terminar sessão:', err);
-    } finally {
-      // Limpeza de chave legada caso tenha existido em versões anteriores
-      localStorage.removeItem('daterra_auth');
-      setSession(null);
-      setUser(null);
-      setProfile(null);
-    }
+    await signOut(auth);
+    localStorage.removeItem('daterra_auth');
+    setUser(null);
+    setProfile(null);
   };
-
-  const isAuthenticated = Boolean(session && user);
 
   return (
     <AuthContext.Provider
       value={{
-        session,
         user,
         profile,
-        isAuthenticated,
+        isAuthenticated: Boolean(user),
         isAuthLoading,
-        sendOtp,
-        verifyOtp,
+        requestMagicLink,
+        completeMagicLinkSignIn,
+        signInWithGoogle,
         logout,
         refreshProfile
       }}

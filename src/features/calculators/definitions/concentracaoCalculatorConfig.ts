@@ -97,7 +97,7 @@ export function calculateConcentrationPure(
 export const concentracaoCalculatorConfig: CalculatorDefinition = {
   id: 'calc_concentracao',
   version: '1.0.0',
-  title: 'Calculadora de Concentração da Calda',
+  title: 'Mistura de Calda (Concentração)',
   subtitle: 'Calcule a quantidade exata de pesticida a diluir por depósito para Planta Jovem ou Copa Adulta.',
   category: 'PULVERIZAÇÃO',
   badgeLabel: 'Ferramenta Ativa',
