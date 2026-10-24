@@ -74,7 +74,7 @@ export const CategoryAccordionCard: React.FC<CategoryAccordionCardProps> = ({
           </div>
           <div className="min-w-0">
             <span className="text-[10px] font-black uppercase tracking-wider text-[#3CA64C] block">
-              Categoria DGAV • {answeredCount}/{subIds.length} Verificados
+              Categoria Técnica • {answeredCount}/{subIds.length} Verificados
             </span>
             <h3 className="text-sm sm:text-base font-black text-slate-900 truncate">
               {category.categoria}
@@ -130,7 +130,7 @@ export const CategoryAccordionCard: React.FC<CategoryAccordionCardProps> = ({
         {showGlobalTip && (
           <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 text-xs text-slate-700 space-y-1.5 animate-fade-in">
             <p>
-              <strong className="text-slate-900">Enquadramento DGAV:</strong> {category.informacao}
+              <strong className="text-slate-900">Enquadramento Normativo:</strong> {category.informacao}
             </p>
             <div className="flex items-start gap-1.5 text-emerald-900 font-semibold">
               <Info className="w-4 h-4 text-[#3CA64C] shrink-0 mt-0.5" />

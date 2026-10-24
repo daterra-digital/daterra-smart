@@ -1,0 +1,10 @@
+export { ConcentracaoCaldaCalculator } from './ConcentracaoCaldaCalculator';
+export { ConcentracaoHeader } from './ConcentracaoHeader';
+export { ConcentracaoResultCard } from './ConcentracaoResultCard';
+export { ConcentracaoInputsPanel } from './ConcentracaoInputsPanel';
+export { ConcentracaoModeSelector } from './ConcentracaoModeSelector';
+export { ConcentracaoAdultaParams } from './ConcentracaoAdultaParams';
+export { ConcentracaoFooterBar } from './ConcentracaoFooterBar';
+export { calculateConcentracaoExtended, buildConcentracaoStructuredValues } from './concentracaoDataMapper';
+export { persistConcentracaoRecord } from './concentracaoStorage';
+export type { ConcentracaoCalculationResult, ConcentracaoUnit, ConcentracaoMode } from './concentracaoDataMapper';

@@ -1,5 +1,5 @@
-import { FORMULATIONS_BY_ID, FORMULATIONS_CATALOG } from './data';
-import type { FormulationItem, SequenceStep, MixingSequenceAnalysis } from './types';
+import { FORMULATIONS_BY_ID, FORMULATIONS_CATALOG } from './data.ts';
+import type { FormulationItem, SequenceStep, MixingSequenceAnalysis } from './types.ts';
 
 /**
  * Gera a sequência técnica rigorosa de preparação da calda no pulverizador

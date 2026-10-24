@@ -1,0 +1,77 @@
+flowchart TD
+%% =========================================================================
+%% DATERRA SMART - CONSTITUIÇÃO DO PROJETO & MAPA MENTAL SISTÉMICO (gemini.mmd)
+%% Baseado nas Diretivas Absolutas (.agents/rules/rules.md, AGENTS.md, Dexie.js v7)
+%% =========================================================================
+
+    ROOT["🌿 DATERRA Smart: Constituição do Sistema & Memória Central"]
+
+    %% RAMO 1: FONTES DE VERDADE (SOURCES OF TRUTH)
+    subgraph SOT ["🏛️ 1. FONTES DA VERDADE (Sources of Truth)"]
+        SOT_RULES[".agents/rules/rules.md\n(Diretivas Absolutas Invioláveis)"]
+        SOT_AGENTS["AGENTS.md\n(Protocolo de Gate 3 Tópicos & Blindagem 200 Linhas)"]
+        SOT_DGAV["Normas DGAV & EPPO PP 1/239\n(Expressão de Doses, LWA, TRV)"]
+        SOT_ISO["ISO 9241-210 & ISO 16122\n(Ergonomia Humana & Boletim Inspeção)"]
+        SOT_DEXIE["src/db/db.ts (DaterraSmartDB v7)\n(Contratos Canónicos & Mutation Outbox)"]
+        SOT_TYPES["src/types/calculator.ts\n(Grandezas Físicas & StructuredValue)"]
+    end
+
+    %% RAMO 2: ARQUITETURA FIRST-OFFLINE & ENGINE DE DADOS
+    subgraph OFFLINE ["⚡ 2. ARQUITETURA FIRST-OFFLINE (Zero-Latency)"]
+        OFF_SW["Service Worker (Workbox / Vite PWA)\n• CacheFirst para App Shell e Assets\n• NetworkFirst para APIs com Fallback Local"]
+        OFF_IDB[("IndexedDB: DaterraSmartDB v7\n• calculation_history_v2 (UUIDv4, syncStatus, isDeleted)\n• calibration_profiles (Perfis de Pulverizador)\n• profiles_cultures, profiles_equipment, profiles_nozzles\n• active_substances, mix_history, eppo_history")]
+        OFF_OUTBOX["Mutation Outbox Pattern\n• Estado local inicial: synced = 0 (pending_sync)\n• Transações atómicas locais imediatas (sem spinners)"]
+        OFF_SYNC["Sincronizador em Background\n• Evento window.addEventListener('online')\n• Resolução de Conflitos: Last-Write-Wins (LWW) via updatedAt\n• Limite de Quota: 20 cálculos ativos por ferramenta"]
+    end
+
+    %% RAMO 3: BOTANICAL DESIGN SYSTEM & ERGONOMIA COGNITIVA
+    subgraph DESIGN ["🎨 3. BOTANICAL DESIGN SYSTEM (ISO 9241-210)"]
+        DS_PALETTE["Paleta Cromática Botânica (WCAG 2.2 AA)\n• Primário: #114037 / #114D37 (Verde Floresta Escuro)\n• Secundário: #1D734B / #5CA64C (Verde Médio Agronómico)\n• Acento: #3CA64C (Verde Vibrante Interativo)\n• Fundo: #F2F2F2 (Cinza Claro de Alto Contraste Solar)\n• Cartões: #FFFFFF | Dark Theme via light-dark()"]
+        DS_TYPO["Tipografia & Números de Campo\n• Textos & Títulos: Plus Jakarta Sans (Bold 700 / Regular 400)\n• Visor & Dados Numéricos: JetBrains Mono (font-feature tnum)\n• Ícones: Lucide com stroke-width fixo de 2px"]
+        DS_FITTS["Ergonomia de Fitts & Campo Agrícola\n• Touch Targets mínimos de 48x48 dp (.touch-target)\n• Thumb Reach Zone: Ações primárias no terço inferior\n• Operação com uma mão em andamento (tratores e pulverizadores)"]
+    end
+
+    %% RAMO 4: MODELO CANÓNICO DE 3 CAMADAS (ANTI-POLUIÇÃO)
+    subgraph BLUEPRINT ["📐 4. MASTER BLUEPRINT DAS FERRAMENTAS (3 Camadas)"]
+        BP_LAYER1["Camada 1: Ecrã de Cálculo Limpo\n• Topo: Voltar + Badge Ferramenta Ativa\n• Cartão de Resultado Verde em destaque JetBrains Mono\n• Seletor de Modo (ex: Planta Jovem / Planta Adulta)\n• Cartão 'Valores Introduzidos' com ícones de edição\n• Barra Fixa Inferior: [Guardar] [Histórico] [Microlearning]"]
+        BP_LAYER2["Camada 2: DaterraKeypad (Bottom Sheet)\n• Teclado numérico/aritmético customizado\n• Atalhos rápidos de depósito (200L, 400L, 600L, 1000L)\n• Resultado em tempo real visível no topo sem teclado nativo intrusivo"]
+        BP_LAYER3["Camada 3: Modal de Microlearning\n• Botão padronizado 'Microlearning' (proibido 'Ajuda/Guia/Info dispersos')\n• Conteúdo pedagógico DGAV, fórmulas e FAQs completas\n• CTA para Academia DATERRA (Moodle) sem poluir os inputs"]
+    end
+
+    %% RAMO 5: REGRAS AGRONÓMICAS & TERMINOLOGIA DGAV (PT-PT)
+    subgraph AGRO ["🌾 5. REGRAS AGRONÓMICAS & COMPLIANCE SEMÂNTICA"]
+        AGRO_TERMS["Vocabulário Obrigatório PT-PT Estrito\n• 'depósito' (NUNCA 'cuba' ou 'tanque')\n• 'calda' (NUNCA 'mistura')\n• 'produto fitofarmacêutico' (NUNCA 'PF' ou 'veneno')\n• 'copa' (NUNCA 'canópia')\n• 'débito' (fluxo de bicos em L/min)"]
+        AGRO_FORMULAS["Matriz Matemática das 12 Grandezas\n• Unidade Base Interna Invariável (SI / Agronómica)\n• Concentração: Jovem Qp=(C*Cd)/100 | Adulta Qp=(Cd*C*Vr)/(Va*100)\n• Parede Foliar EPPO: LWA = (h * 2 * 10000) / r\n• Volume de Copa: TRV = (h * w * 10000) / r\n• Débito Bicos: q = (V * v * r) / 60000"]
+    end
+
+    %% RAMO 6: HUB DE INTEGRAÇÕES & FRONTEIRAS API
+    subgraph INTEGRATIONS ["🔗 6. HUB DE INTEGRAÇÕES EXTERNAS"]
+        INT_MOODLE["Academia DATERRA (Moodle)\n• SSO via OAuth2 integrado no Supabase Auth\n• REST API: core_enrol_get_users_courses\n• Funil de Vendas de Formação Técnica a partir de cada cálculo"]
+        INT_ERP["CentralGest ERPCloud B2B\n• Sincronização bidirecional de Explorações, Parcelas e Máquinas\n• Gestão de Inventário de Produtos Fitofarmacêuticos\n• Resolução de conflitos LWW via updatedAt"]
+        INT_STRIPE["Stripe Billing Gateway\n• Gestão de Planos Freemium vs. Premium\n• Gating no Client e Supabase RLS (HTTP 403 Forbidden para relatórios IA)"]
+        INT_GEMINI["Google AI Studio (Gemini 1.5 Pro)\n• Diagnósticos fitossanitários e relatórios PDF ISO 16122\n• Fallback Gracioso Offline: PDF simples com dados brutos locais"]
+    end
+
+    %% RAMO 7: GOVERNAÇÃO, TESTES & CI/CD
+    subgraph GOVERNANCE ["🛡️ 7. GOVERNAÇÃO, BLINDAGEM & CI/CD"]
+        GOV_200["Regra dos 200 Linhas:\n• Proibido componentes monolíticos\n• Ficheiros modulares isolados em src/features/"]
+        GOV_TESTS["Suite Automatizada Mandatória:\n• oxlint (linting estático ultrarrápido)\n• test/*.test.mjs (validação matemática com precisão 3 casas)\n• tsc -b (integridade de tipos TypeScript)"]
+        GOV_SECOPS["SecOps & Deploy Segregado:\n• Zero credenciais no Git (.env e chaves isoladas)\n• Testes: GitHub Pages | Produção: cPanel FTP controlado"]
+    end
+
+    %% CONEXÕES DE FLUXO E DEPENDÊNCIA
+    ROOT --> SOT
+    ROOT --> OFFLINE
+    ROOT --> DESIGN
+    ROOT --> BLUEPRINT
+    ROOT --> AGRO
+    ROOT --> INTEGRATIONS
+    ROOT --> GOVERNANCE
+
+    SOT --> OFFLINE
+    SOT --> AGRO
+    OFFLINE --> BLUEPRINT
+    DESIGN --> BLUEPRINT
+    AGRO --> BLUEPRINT
+    OFFLINE <--> INTEGRATIONS
+    BLUEPRINT --> GOVERNANCE

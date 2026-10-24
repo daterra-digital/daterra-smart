@@ -642,23 +642,54 @@ export const ExplorationView: React.FC = () => {
             <div className="pt-6 border-t border-slate-100 space-y-4">
               <h4 className="text-xs font-black uppercase tracking-wider text-[#114037]">Perfis de Cultura Registados</h4>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {cultures?.map(c => (
-                  <div key={c.id} className="p-4 bg-slate-50 border border-slate-200 rounded-2xl flex items-center justify-between shadow-xs">
-                    <div>
-                      <span className="font-extrabold text-slate-900 text-xs block">{c.name}</span>
-                      <span className="text-[11px] text-slate-500 font-mono-numbers block mt-0.5">
-                        {c.crop_type} ({c.variety || 'Standard'}) • {c.area_ha} ha • {c.phenological_stage}
-                      </span>
+                {cultures?.map(c => {
+                  const hasTelemetry = c.last_lwa_m2_ha !== undefined || c.last_trv_m3_ha !== undefined;
+                  const formattedDate = c.last_calculated_at
+                    ? new Date(c.last_calculated_at).toLocaleDateString('pt-PT', { day: '2-digit', month: '2-digit', year: 'numeric' })
+                    : null;
+
+                  return (
+                    <div key={c.id} className="p-4 bg-slate-50 border border-slate-200 rounded-2xl flex flex-col justify-between shadow-xs gap-2.5">
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <span className="font-extrabold text-slate-900 text-xs block">{c.name}</span>
+                          <span className="text-[11px] text-slate-500 font-mono-numbers block mt-0.5">
+                            {c.crop_type} ({c.variety || 'Standard'}) • {c.area_ha} ha • {c.phenological_stage || 'Não especificado'}
+                          </span>
+                        </div>
+                        <button
+                          onClick={() => c.id && db.profiles_cultures.delete(c.id)}
+                          className="p-2 text-rose-600 hover:bg-rose-100 rounded-xl transition-colors shrink-0"
+                          title="Eliminar cultura"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+
+                      {hasTelemetry && (
+                        <div className="pt-2 border-t border-slate-200/80 flex items-center justify-between flex-wrap gap-1.5 text-[11px]">
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            {c.last_lwa_m2_ha !== undefined && (
+                              <span className="px-2 py-0.5 rounded-lg font-mono font-bold bg-emerald-100/90 text-[#114037] border border-emerald-300/50">
+                                LWA: {c.last_lwa_m2_ha.toLocaleString('pt-PT')} m²/ha
+                              </span>
+                            )}
+                            {c.last_trv_m3_ha !== undefined && (
+                              <span className="px-2 py-0.5 rounded-lg font-mono font-bold bg-emerald-100/90 text-[#114037] border border-emerald-300/50">
+                                TRV: {c.last_trv_m3_ha.toLocaleString('pt-PT')} m³/ha
+                              </span>
+                            )}
+                          </div>
+                          {formattedDate && (
+                            <span className="text-[10px] text-slate-400 font-medium">
+                              Atualizado: {formattedDate}
+                            </span>
+                          )}
+                        </div>
+                      )}
                     </div>
-                    <button
-                      onClick={() => c.id && db.profiles_cultures.delete(c.id)}
-                      className="p-2 text-rose-600 hover:bg-rose-100 rounded-xl transition-colors"
-                      title="Eliminar cultura"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           </div>
@@ -1353,6 +1384,11 @@ export const ExplorationView: React.FC = () => {
                       {eq.inspection_date && (
                         <span className="text-[10px] text-[#1D734B] font-mono-numbers block mt-1">
                           Inspeção: {eq.inspection_date} • Calibração: {eq.calibration_date || 'N/A'}
+                        </span>
+                      )}
+                      {eq.efficiency_correction_factor !== undefined && (
+                        <span className="text-[10px] text-emerald-800 font-mono-numbers block mt-1 font-bold">
+                          Eficácia da Tecnologia: {eq.efficiency_correction_factor} ({Math.round(eq.efficiency_correction_factor * 100)}%)
                         </span>
                       )}
                     </div>

@@ -18,14 +18,19 @@ import { VolumeCaldaTrvCalculator } from './features/volume-calda-trv/VolumeCald
 import { DebitoTotalCalculator } from './features/debito-total/DebitoTotalCalculator';
 import { EppoCalculator } from './features/eppo/EppoCalculator';
 import { CalibracaoPulverizador } from './features/calibracao-pulverizador/CalibracaoPulverizador';
-import { NozzleComparisonView } from './features/nozzle-comparison/NozzleComparisonView';
 import { DroneComplianceView } from './features/drone-compliance/DroneComplianceView';
 import { SmartDebitoView } from './features/smart-debito/SmartDebitoView';
 import { SatelliteIntelligenceView } from './features/satellite-intelligence';
 import { MisturaView } from './views/MisturaView';
 import { PhCheckerView } from './views/PhCheckerView';
-import { EppoDoseView } from './views/EppoDoseView';
+import { EppoDoseCalculator } from './features/ajuste-dose-eppo';
+import { ConcentracaoCaldaCalculator } from './features/mistura-concentracao';
+import { DoseCaldaCalculator } from './features/mistura-dose';
+import { ConsultaPhCalculator } from './features/consulta-ph';
 import { PreInspectionView } from './views/PreInspectionView';
+import { PreInspecaoCalculator } from './features/pre-inspecao';
+import { VelocidadeTrabalhoView } from './features/calculators/velocidade-trabalho';
+import { DebitoTrabalhoView } from './features/calculators/tabelas-debito';
 import { AgriChatView } from './features/agri-chat/AgriChatView';
 import { WeatherSaasView } from './features/weather/views/WeatherSaasView';
 import { isLocalhost } from './utils/environment';
@@ -140,19 +145,53 @@ export const AppContent: React.FC = () => {
           <Route path="/dashboard" element={<DashboardView />} />
           <Route path="/ferramentas" element={<ToolsView />} />
           <Route path="/ferramentas/area-parede-foliar" element={<AreaParedeFoliarCalculator />} />
+          <Route path="/ferramentas/area-parede-foliar-lwa" element={<AreaParedeFoliarCalculator />} />
+          <Route path="/tools/area-parede-foliar-lwa" element={<AreaParedeFoliarCalculator />} />
+          <Route path="/tools/area-parede-foliar" element={<AreaParedeFoliarCalculator />} />
+          <Route path="/tools/calc_area_parede_foliar" element={<AreaParedeFoliarCalculator />} />
           <Route path="/ferramentas/volume-copa" element={<VolumeCopaCalculator />} />
+          <Route path="/ferramentas/volume-copa-trv" element={<VolumeCopaCalculator />} />
+          <Route path="/tools/volume-copa-trv" element={<VolumeCopaCalculator />} />
+          <Route path="/tools/calc_volume_copa" element={<VolumeCopaCalculator />} />
           <Route path="/ferramentas/volume-calda-trv" element={<VolumeCaldaTrvCalculator />} />
           <Route path="/ferramentas/debito-total" element={<DebitoTotalCalculator />} />
           <Route path="/ferramentas/calibracao-pulverizador" element={<CalibracaoPulverizador />} />
           <Route path="/ferramentas/eppo" element={<EppoCalculator />} />
-          <Route path="/ferramentas/comparador-bicos" element={<NozzleComparisonView />} />
+          <Route path="/ferramentas/comparador-bicos" element={<DebitoTrabalhoView />} />
+          <Route path="/ferramentas/tabelas-debito" element={<DebitoTrabalhoView />} />
+          <Route path="/tools/tabelas-debito" element={<DebitoTrabalhoView />} />
+          <Route path="/tools/comparador-bicos" element={<DebitoTrabalhoView />} />
           <Route path="/ferramentas/drone-buffer-zone" element={<DroneComplianceView />} />
           <Route path="/ferramentas/smart-debito" element={<SmartDebitoView />} />
           <Route path="/ferramentas/satelite-ndvi" element={<SatelliteIntelligenceView />} />
           <Route path="/ferramentas/mistura" element={<MisturaView />} />
+          <Route path="/ferramentas/ordem-mistura" element={<MisturaView />} />
+          <Route path="/tools/ordem-mistura" element={<MisturaView />} />
+          <Route path="/ferramentas/mistura-calda-concentracao" element={<ConcentracaoCaldaCalculator />} />
+          <Route path="/tools/mistura-calda-concentracao" element={<ConcentracaoCaldaCalculator />} />
+          <Route path="/ferramentas/concentracao-calda" element={<ConcentracaoCaldaCalculator />} />
+          <Route path="/tools/calc_concentracao" element={<ConcentracaoCaldaCalculator />} />
+          <Route path="/ferramentas/mistura-calda-dose" element={<DoseCaldaCalculator />} />
+          <Route path="/tools/mistura-calda-dose" element={<DoseCaldaCalculator />} />
+          <Route path="/ferramentas/dose" element={<DoseCaldaCalculator />} />
+          <Route path="/tools/dose" element={<DoseCaldaCalculator />} />
+          <Route path="/tools/calc_dose" element={<DoseCaldaCalculator />} />
           <Route path="/ferramentas/verificador-ph" element={<PhCheckerView />} />
-          <Route path="/ferramentas/ajuste-dose-eppo" element={<EppoDoseView />} />
-          <Route path="/ferramentas/pre-inspecao" element={<PreInspectionView />} />
+          <Route path="/ferramentas/consulta-ph" element={<ConsultaPhCalculator />} />
+          <Route path="/tools/consulta-ph" element={<ConsultaPhCalculator />} />
+          <Route path="/tools/calc_ph" element={<ConsultaPhCalculator />} />
+          <Route path="/ferramentas/ajuste-dose-eppo" element={<EppoDoseCalculator />} />
+          <Route path="/tools/ajuste-dose-eppo" element={<EppoDoseCalculator />} />
+          <Route path="/tools/ajuste_dose_eppo" element={<EppoDoseCalculator />} />
+          <Route path="/ferramentas/ajuste-dose" element={<EppoDoseCalculator />} />
+          <Route path="/ferramentas/pre-inspecao" element={<PreInspecaoCalculator />} />
+          <Route path="/tools/pre-inspecao" element={<PreInspecaoCalculator />} />
+          <Route path="/tools/calc_pre_inspecao" element={<PreInspecaoCalculator />} />
+          <Route path="/ferramentas/inspecao-detalhada" element={<PreInspectionView />} />
+          <Route path="/ferramentas/velocidade-real" element={<VelocidadeTrabalhoView />} />
+          <Route path="/ferramentas/velocidade-trabalho" element={<VelocidadeTrabalhoView />} />
+          <Route path="/tools/velocidade-trabalho" element={<VelocidadeTrabalhoView />} />
+          <Route path="/tools/calc_velocidade_real" element={<VelocidadeTrabalhoView />} />
           <Route path="/assistente" element={isLocalhost() ? <AgriChatView /> : <Navigate to="/dashboard" replace />} />
           <Route path="/meteorologia" element={<WeatherSaasView />} />
           <Route path="/ferramentas/meteorologia" element={<WeatherSaasView />} />

@@ -7,6 +7,7 @@ import {
   ShieldCheck,
   Sparkles
 } from 'lucide-react';
+import { formatDidacticText } from '../../utils/formatDidacticText';
 import { NOZZLE_MICROLEARNING_TOPICS } from './nozzleMicrolearningData';
 
 export interface NozzleMicrolearningModalProps {
@@ -83,7 +84,7 @@ export const NozzleMicrolearningModal: React.FC<NozzleMicrolearningModalProps> =
                 Academia & Guia Técnico DATERRA
               </span>
               <h2 id="microlearning-modal-title" className="text-base sm:text-lg font-black text-white leading-tight">
-                Microlearning: Pulverização & Bicos
+                Guia Técnico: Pulverização & Bicos
               </h2>
             </div>
           </div>
@@ -91,7 +92,7 @@ export const NozzleMicrolearningModal: React.FC<NozzleMicrolearningModalProps> =
           <button
             type="button"
             onClick={onClose}
-            aria-label="Fechar modal de microlearning"
+            aria-label="Fechar guia técnico"
             className="p-3 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-2xl transition-all min-h-[48px] min-w-[48px] flex items-center justify-center focus-visible:ring-2 focus-visible:ring-white focus:outline-none"
           >
             <X className="w-5 h-5" />
@@ -210,7 +211,7 @@ export const NozzleMicrolearningModal: React.FC<NozzleMicrolearningModalProps> =
                 {activeTopic.title}
               </h2>
               <p className="text-xs text-slate-600 font-medium leading-relaxed">
-                {activeTopic.summary}
+                {formatDidacticText(activeTopic.summary)}
               </p>
             </div>
 
@@ -218,7 +219,7 @@ export const NozzleMicrolearningModal: React.FC<NozzleMicrolearningModalProps> =
             <div className="space-y-3.5 text-xs text-slate-700 leading-relaxed">
               {activeTopic.content.map((p, idx) => (
                 <p key={idx} className="bg-slate-50/60 p-3.5 rounded-2xl border border-slate-100 font-normal">
-                  {p}
+                  {formatDidacticText(p)}
                 </p>
               ))}
             </div>
@@ -230,7 +231,7 @@ export const NozzleMicrolearningModal: React.FC<NozzleMicrolearningModalProps> =
                 Regra Prática de Campo DATERRA
               </span>
               <p className="text-xs text-slate-800 font-bold leading-relaxed">
-                {activeTopic.keyTakeaway}
+                {formatDidacticText(activeTopic.keyTakeaway)}
               </p>
             </div>
 

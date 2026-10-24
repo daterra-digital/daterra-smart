@@ -8,6 +8,7 @@ import {
   HelpCircle,
   CheckCircle2
 } from 'lucide-react';
+import { formatDidacticText } from '../../utils/formatDidacticText';
 import { PH_MICROLEARNING_TOPICS, PH_MICROLEARNING_QUIZZES } from './phMicrolearningData';
 
 export interface PhMicrolearningModalProps {
@@ -73,7 +74,7 @@ export const PhMicrolearningModal: React.FC<PhMicrolearningModalProps> = ({
                 Academia & Apoio à Decisão no Campo
               </span>
               <h2 id="ph-microlearning-title" className="text-base sm:text-lg font-black text-white leading-tight">
-                Microlearning: Verificador de pH
+                Guia Técnico: Verificador de pH
               </h2>
             </div>
           </div>
@@ -81,7 +82,7 @@ export const PhMicrolearningModal: React.FC<PhMicrolearningModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            aria-label="Fechar guia de microlearning"
+            aria-label="Fechar guia técnico"
             className="w-10 h-10 bg-white/10 hover:bg-white/20 text-white rounded-2xl transition-all flex items-center justify-center cursor-pointer"
           >
             <X className="w-5 h-5" />
@@ -151,7 +152,7 @@ export const PhMicrolearningModal: React.FC<PhMicrolearningModalProps> = ({
                 1. O que é? (Conceito Simples)
               </span>
               <p className="text-xs sm:text-sm text-slate-800 font-semibold leading-relaxed">
-                {activeTopic.whatIsIt}
+                {formatDidacticText(activeTopic.whatIsIt)}
               </p>
             </div>
 
@@ -162,7 +163,7 @@ export const PhMicrolearningModal: React.FC<PhMicrolearningModalProps> = ({
               </span>
               {activeTopic.whyItMatters.map((point, idx) => (
                 <p key={idx} className="text-xs text-slate-700 leading-relaxed bg-slate-50/70 p-3 rounded-xl border border-slate-100">
-                  • {point}
+                  • {formatDidacticText(point)}
                 </p>
               ))}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
@@ -172,7 +173,7 @@ export const PhMicrolearningModal: React.FC<PhMicrolearningModalProps> = ({
                     className={`p-3 rounded-2xl border text-xs space-y-1 ${rule.badgeColor || 'bg-slate-50 border-slate-200'}`}
                   >
                     <strong className="font-black block">{rule.label}</strong>
-                    <p className="text-[11px] opacity-90 leading-snug">{rule.detail}</p>
+                    <p className="text-[11px] opacity-90 leading-snug">{formatDidacticText(rule.detail)}</p>
                   </div>
                 ))}
               </div>
@@ -185,7 +186,7 @@ export const PhMicrolearningModal: React.FC<PhMicrolearningModalProps> = ({
                 <span>3. O que devo fazer agora no depósito?</span>
               </span>
               <p className="text-xs sm:text-sm text-slate-900 font-bold leading-relaxed">
-                {activeTopic.actionNow}
+                {formatDidacticText(activeTopic.actionNow)}
               </p>
             </div>
 
@@ -212,7 +213,7 @@ export const PhMicrolearningModal: React.FC<PhMicrolearningModalProps> = ({
                       {isRevealed ? (
                         <div className="pt-2 mt-1.5 border-t border-emerald-200 text-xs text-emerald-950 bg-emerald-50/70 p-2.5 rounded-xl flex items-start gap-1.5">
                           <CheckCircle2 className="w-4 h-4 text-[#3CA64C] shrink-0 mt-0.5" />
-                          <span className="font-medium leading-relaxed">{quiz.answer}</span>
+                          <span className="font-medium leading-relaxed">{formatDidacticText(quiz.answer)}</span>
                         </div>
                       ) : (
                         <span className="text-[11px] font-bold text-[#3CA64C] inline-block pt-1">

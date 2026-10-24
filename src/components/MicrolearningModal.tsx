@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { BookOpen, X, Sparkles, Scale, ExternalLink, ChevronDown, CheckCircle2, AlertTriangle, ShieldCheck, Calculator, Ruler } from 'lucide-react';
 import { db, type MicrolearningContent } from '../db/db';
 import { useLanguage } from '../context/LanguageContext';
+import { formatDidacticText } from '../utils/formatDidacticText';
 
 interface AccordionSection {
   title: string;
@@ -237,7 +238,7 @@ export const MicrolearningModal: React.FC<MicrolearningModalProps> = ({
                         >
                           <span className={`flex items-center gap-2.5 ${headerColor}`}>
                             <IconComponent className="w-4 h-4 text-daterra-accent shrink-0" />
-                            <span>{acc.title}</span>
+                            <span>{formatDidacticText(acc.title)}</span>
                           </span>
                           <ChevronDown
                             className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${
@@ -252,7 +253,7 @@ export const MicrolearningModal: React.FC<MicrolearningModalProps> = ({
                               {acc.items.map((item, itemIdx) => (
                                 <li key={itemIdx} className="flex items-start gap-2.5 text-slate-700">
                                   <span className="text-daterra-accent font-bold mt-0.5">•</span>
-                                  <span className="font-normal whitespace-pre-line">{item}</span>
+                                  <span className="font-normal whitespace-pre-line">{formatDidacticText(item)}</span>
                                 </li>
                               ))}
                             </ul>
@@ -285,7 +286,7 @@ export const MicrolearningModal: React.FC<MicrolearningModalProps> = ({
                     <span>{t('microlearning.units')}</span>
                   </div>
                   <div className="bg-slate-50 border border-slate-200 p-4 rounded-2xl text-xs sm:text-sm text-slate-700 leading-relaxed whitespace-pre-line font-medium">
-                    {unitsContent}
+                    {formatDidacticText(unitsContent)}
                   </div>
                 </div>
               )}

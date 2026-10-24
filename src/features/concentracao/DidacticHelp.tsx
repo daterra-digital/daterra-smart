@@ -1,5 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { HelpCircle, Info, X, ExternalLink, ChevronDown, BookOpen } from 'lucide-react';
+import { formatDidacticText } from '../../utils/formatDidacticText';
 
 import faqConcGeral from './ConcentracaoFAQGeral.md?raw';
 import faqConcVolumePreparar from './ConcentracaoFAQVolumePreparar.md?raw';
@@ -312,7 +313,7 @@ export const DidacticHelp: React.FC<DidacticHelpProps> = ({
                 </div>
                 <div>
                   <span className="text-[10px] uppercase font-extrabold tracking-widest text-[#3AAA35]">
-                    Microlearning DATERRA Smart
+                    Guia Técnico DATERRA Smart
                   </span>
                   <h3 id="microlearning-modal-title" className="text-base sm:text-lg font-black leading-tight text-white mt-0.5">
                     {title}
@@ -344,7 +345,7 @@ export const DidacticHelp: React.FC<DidacticHelpProps> = ({
                       >
                         <span className="flex items-center gap-2.5 text-[#114037] font-extrabold pr-2">
                           <HelpCircle className="w-4 h-4 text-[#1D734B] shrink-0" />
-                          <span>{sec.question}</span>
+                          <span>{formatDidacticText(sec.question)}</span>
                         </span>
                         <ChevronDown
                           className={`w-4 h-4 text-[#1D734B] transition-transform duration-200 shrink-0 ${
@@ -360,13 +361,13 @@ export const DidacticHelp: React.FC<DidacticHelpProps> = ({
                               return (
                                 <div key={lineIdx} className="flex items-start gap-2 pl-1">
                                   <span className="text-[#3CA64C] font-bold mt-0.5">•</span>
-                                  <span>{line.replace(/^- /, '')}</span>
+                                  <span>{formatDidacticText(line.replace(/^- /, ''))}</span>
                                 </div>
                               );
                             }
                             return (
                               <p key={lineIdx} className="font-normal leading-relaxed text-[#0D0D0D]">
-                                {line}
+                                {formatDidacticText(line)}
                               </p>
                             );
                           })}

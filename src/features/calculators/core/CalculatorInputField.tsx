@@ -80,12 +80,16 @@ export const CalculatorInputField: React.FC<CalculatorInputFieldProps> = ({
           {field.required && <span className="text-rose-500 ml-0.5">*</span>}
         </label>
 
-        {/* Microlearning específico por campo */}
+        {/* Apoio contextual por campo: ícone interativo (i) sem texto adjacente */}
         {(field.helpFile || field.helpTopic) && (
           <DidacticHelp
             faqFile={field.helpFile as FAQFileType}
             topic={field.helpTopic}
+            variant="icon"
+            iconType="info"
             buttonLabel="Ajuda"
+            className="!min-w-[36px] !min-h-[36px] !p-1.5"
+            iconClassName="w-4 h-4 text-[#1D734B]"
           />
         )}
       </div>

@@ -11,7 +11,8 @@ import {
   ChevronDown,
   ChevronUp,
   Copy,
-  CheckCircle2
+  CheckCircle2,
+  Edit3
 } from 'lucide-react';
 import type { MixingSequenceAnalysis, SequenceStep } from './types';
 import { DidacticHelp } from '../concentracao/DidacticHelp';
@@ -20,6 +21,7 @@ interface MixingSequenceDisplayProps {
   analysis: MixingSequenceAnalysis;
   tankCapacityL: number;
   onTankCapacityChange: (capacityL: number) => void;
+  onOpenKeypad?: () => void;
   onSaveToHistory: () => void;
   onOpenJarTest: () => void;
   onRemoveFormulation: (formulationId: string) => void;
@@ -32,6 +34,7 @@ export const MixingSequenceDisplay: React.FC<MixingSequenceDisplayProps> = ({
   analysis,
   tankCapacityL,
   onTankCapacityChange,
+  onOpenKeypad,
   onRemoveFormulation
 }) => {
   // Estado de checklist concluído no terreno
@@ -81,7 +84,7 @@ export const MixingSequenceDisplay: React.FC<MixingSequenceDisplayProps> = ({
           return `[Passo ${s.stepNumber}] ${s.sigla || ''} - ${s.name || s.title} (#${s.originalNumber}): ${s.instruction}`;
         }),
         `----------------------------------------`,
-        `Nota: Respeitar sempre o rótulo oficial DGAV e usar EPI completo.`
+        `Nota: Respeitar sempre as instruções do rótulo oficial e usar EPI completo.`
       ];
 
       await navigator.clipboard.writeText(lines.join('\n'));
@@ -169,12 +172,18 @@ export const MixingSequenceDisplay: React.FC<MixingSequenceDisplayProps> = ({
             >
               −
             </button>
-            <div className="text-center min-w-[120px]">
+            <button
+              type="button"
+              onClick={onOpenKeypad}
+              aria-label="Introduzir capacidade do depósito no teclado numérico"
+              className="text-center min-w-[120px] px-3 py-1 rounded-xl hover:bg-slate-200/60 active:scale-95 transition-all cursor-pointer flex items-center justify-center gap-1.5 touch-target"
+            >
               <span className="font-mono text-3xl font-black text-slate-900 tracking-tight">
                 {tankCapacityL}
               </span>
-              <span className="text-xs font-bold text-slate-500 uppercase ml-1.5">L</span>
-            </div>
+              <span className="text-xs font-bold text-slate-500 uppercase">L</span>
+              <Edit3 className="w-4 h-4 text-emerald-700 ml-1" />
+            </button>
             <button
               type="button"
               onClick={() => handleStepTankCapacity(100)}
@@ -450,10 +459,10 @@ export const MixingSequenceDisplay: React.FC<MixingSequenceDisplayProps> = ({
                           <DidacticHelp
                             faqFile={`${step.faqTopic.replace('mistura-', 'MisturaFAQ').charAt(0).toUpperCase() + step.faqTopic.replace('mistura-', 'MisturaFAQ').slice(1)}.md` as any}
                             topic={step.faqTopic}
-                            buttonLabel="Guia Técnico"
-                            variant="button"
+                            buttonLabel=""
+                            variant="icon"
                             iconType="info"
-                            className="px-2.5 py-1 !bg-slate-50 hover:!bg-slate-100 !text-[#114037] border border-slate-200 !rounded-lg !text-[11px] !font-bold"
+                            className="min-w-[28px] min-h-[28px] p-1 !bg-transparent hover:!bg-slate-200/60 rounded-lg"
                           />
                         </div>
                       )}
@@ -470,10 +479,10 @@ export const MixingSequenceDisplay: React.FC<MixingSequenceDisplayProps> = ({
       <div className="p-4 bg-slate-50 border border-slate-200 rounded-3xl text-xs text-slate-600 leading-relaxed space-y-1">
         <span className="font-extrabold text-slate-800 flex items-center gap-1.5">
           <ShieldCheck className="w-4 h-4 text-daterra-primary" />
-          Aviso Técnico DATERRA Smart • Norma DGAV
+          Aviso Técnico DATERRA Smart
         </span>
         <p>
-          Esta ferramenta fornece a ordem de preparação baseada no protocolo internacional W.A.L.E.S. de dispersão física e química de caldas. Em caso de discrepância com o rótulo oficial homologado pela DGAV, prevalecem sempre as instruções mais restritivas do rótulo.
+          Esta ferramenta fornece a ordem de preparação baseada no protocolo internacional W.A.L.E.S. de dispersão física e química de caldas. Em caso de discrepância com o rótulo oficial homologado, prevalecem sempre as instruções mais restritivas do rótulo.
         </p>
       </div>
     </div>

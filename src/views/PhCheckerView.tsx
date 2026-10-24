@@ -105,11 +105,11 @@ export const PhCheckerView: React.FC = () => {
           <button
             type="button"
             onClick={() => handleOpenMicrolearningTopic('ph-ideal')}
-            aria-label="Abrir guia de microlearning da Consulta de pH"
+            aria-label="Abrir guia da Consulta de pH"
             className="px-2.5 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-daterra-primary border border-emerald-200 rounded-lg text-xs font-bold transition-all flex items-center gap-1 shadow-xs cursor-pointer"
           >
             <GraduationCap className="w-3.5 h-3.5 text-daterra-accent" />
-            <span>Microlearning</span>
+            <span>Guia</span>
           </button>
         </div>
       </div>
@@ -212,7 +212,7 @@ export const PhCheckerView: React.FC = () => {
           Aviso Técnico DATERRA Smart
         </span>
         <p>
-          Os intervalos de pH ideal e constantes de dissociação (pKa) destinam-se a prevenir a hidrólise alcalina ou ácida da substância ativa no depósito de pulverização. Consulte sempre o rótulo oficial DGAV.
+          Os intervalos de pH ideal e constantes de dissociação (pKa) destinam-se a prevenir a hidrólise alcalina ou ácida da substância ativa no depósito de pulverização. Consulte sempre as recomendações oficiais no rótulo do produto autorizado.
         </p>
       </div>
 

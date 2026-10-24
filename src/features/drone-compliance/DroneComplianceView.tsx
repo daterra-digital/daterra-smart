@@ -132,7 +132,7 @@ export const DroneComplianceView: React.FC = () => {
           <div className="space-y-1.5">
             <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-md bg-emerald-50 text-emerald-800 text-[11px] font-bold">
               <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-              <span>Conformidade DGAV & GlobalGAP</span>
+              <span>Conformidade Legal & GlobalGAP</span>
             </div>
             <h1 className="text-2xl sm:text-3xl font-extrabold text-daterra-primary">
               Drone Buffer Zone & Legal Compliance Engine

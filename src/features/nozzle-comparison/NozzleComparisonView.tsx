@@ -176,7 +176,7 @@ export const NozzleComparisonView: React.FC = () => {
             className="px-2.5 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-daterra-primary border border-emerald-200 rounded-lg text-xs font-bold transition-all flex items-center gap-1 shadow-xs cursor-pointer"
           >
             <GraduationCap className="w-3.5 h-3.5 text-daterra-accent" />
-            <span className="hidden sm:inline">Microlearning</span>
+            <span className="hidden sm:inline">Guia</span>
           </button>
 
           <button

@@ -16,7 +16,7 @@ import { AreaParedeFoliarCalculator } from '../features/area-parede-foliar';
 import { UniversalCalculatorTemplate } from '../features/calculators/core/index.ts';
 import { doseCalculatorConfig } from '../features/calculators/definitions/doseCalculatorConfig.ts';
 import { concentracaoCalculatorConfig } from '../features/calculators/definitions/concentracaoCalculatorConfig.ts';
-import { velocidadeRealCalculatorConfig } from '../features/calculators/definitions/velocidadeRealCalculatorConfig.ts';
+import { VelocidadeTrabalhoView } from '../features/calculators/velocidade-trabalho';
 import { isToolAllowedInCurrentEnv } from '../utils/environment';
 
 export interface ToolModule {
@@ -54,7 +54,7 @@ const TOOLS_CATALOG: ToolModule[] = [
   },
   {
     id: 'gestao_caderno_campo',
-    name: 'Caderno de Campo Digital DGAV',
+    name: 'Caderno de Campo Digital',
     category: 'Gestão',
     description: 'Registo digital de tratamentos fitossanitários com verificação automática de limites SIFITO.',
     icon: ClipboardCheck
@@ -103,7 +103,7 @@ const TOOLS_CATALOG: ToolModule[] = [
     id: 'drone_buffer_zone',
     name: 'Drone Buffer Zone & Legal Compliance (SprayOps)',
     category: 'Pulverização',
-    description: 'Cálculo de zonas tampão dinâmicas, mitigação de deriva e conformidade legal (DGAV / DL 91/2016) para drones agrícolas.',
+    description: 'Cálculo de zonas tampão dinâmicas, mitigação de deriva e distâncias de segurança legais para drones agrícolas.',
     icon: Layers,
     isCore: true,
     caminho: '/ferramentas/drone-buffer-zone',
@@ -163,7 +163,7 @@ const TOOLS_CATALOG: ToolModule[] = [
     id: 'pre_inspecao_dgav',
     name: 'Pré-Inspeção',
     category: 'Calibração',
-    description: 'Diagnóstico prévio em Modo Expresso e Detalhado (ISO 16122 / DGAV) para avaliar o estado do equipamento antes da inspeção oficial.',
+    description: 'Diagnóstico prévio em Modo Expresso e Detalhado (Norma ISO 16122) para avaliar o estado do equipamento antes da inspeção oficial.',
     icon: ClipboardCheck,
     isCore: true,
     caminho: '/ferramentas/pre-inspecao',
@@ -196,6 +196,7 @@ const TOOLS_CATALOG: ToolModule[] = [
     description: 'Calcule a velocidade real do equipamento no campo para apoiar a calibração.',
     icon: Gauge,
     isCore: true,
+    caminho: '/ferramentas/velocidade-real',
     prioridade: 'alta'
   },
   {
@@ -565,12 +566,7 @@ export const ToolsView: React.FC = () => {
   }
 
   if (currentViewTool === 'calc_velocidade_real') {
-    return (
-      <UniversalCalculatorTemplate
-        definition={velocidadeRealCalculatorConfig}
-        onBack={handleBackToCatalog}
-      />
-    );
+    return <VelocidadeTrabalhoView />;
   }
 
   if (currentViewTool) {
@@ -629,7 +625,7 @@ export const ToolsView: React.FC = () => {
                   <h2 className="text-xl font-extrabold text-daterra-primary">
                     Mistura de Calda (Concentração)
                   </h2>
-                  <DidacticHelp faqFile="ConcentracaoFAQGeral.md" buttonLabel="Ajuda" />
+                  <DidacticHelp faqFile="ConcentracaoFAQGeral.md" buttonLabel="Guia" />
                 </div>
                 <p className="text-xs text-slate-500">
                   Selecione o estado vegetativo para ajustar os parâmetros de molhamento e volume.
@@ -673,7 +669,14 @@ export const ToolsView: React.FC = () => {
                   <div>
                     <div className="flex items-center justify-between mb-1.5">
                       <label className="text-xs font-bold text-slate-700">Concentração do Produto</label>
-                      <DidacticHelp faqFile="ConcentracaoFAQConcentracao.md" buttonLabel="Ajuda" />
+                      <DidacticHelp
+                        faqFile="ConcentracaoFAQConcentracao.md"
+                        variant="icon"
+                        iconType="info"
+                        buttonLabel="Ajuda"
+                        className="!min-w-[36px] !min-h-[36px] !p-1.5"
+                        iconClassName="w-4 h-4 text-[#1D734B]"
+                      />
                     </div>
                     <input
                       type="text"
@@ -697,7 +700,14 @@ export const ToolsView: React.FC = () => {
                   <div>
                     <div className="flex items-center justify-between mb-1.5">
                       <label className="text-xs font-bold text-slate-700">Volume a Preparar (L)</label>
-                      <DidacticHelp faqFile="ConcentracaoFAQVolumePreparar.md" buttonLabel="Ajuda" />
+                      <DidacticHelp
+                        faqFile="ConcentracaoFAQVolumePreparar.md"
+                        variant="icon"
+                        iconType="info"
+                        buttonLabel="Ajuda"
+                        className="!min-w-[36px] !min-h-[36px] !p-1.5"
+                        iconClassName="w-4 h-4 text-[#1D734B]"
+                      />
                     </div>
                     <input
                       type="text"
@@ -726,7 +736,14 @@ export const ToolsView: React.FC = () => {
                   <div>
                     <div className="flex items-center justify-between mb-1.5">
                       <label className="text-xs font-bold text-slate-700">Volume a Preparar (L)</label>
-                      <DidacticHelp faqFile="ConcentracaoFAQVolumePreparar.md" buttonLabel="Ajuda" />
+                      <DidacticHelp
+                        faqFile="ConcentracaoFAQVolumePreparar.md"
+                        variant="icon"
+                        iconType="info"
+                        buttonLabel="Ajuda"
+                        className="!min-w-[36px] !min-h-[36px] !p-1.5"
+                        iconClassName="w-4 h-4 text-[#1D734B]"
+                      />
                     </div>
                     <input
                       type="text"
@@ -750,7 +767,14 @@ export const ToolsView: React.FC = () => {
                   <div>
                     <div className="flex items-center justify-between mb-1.5">
                       <label className="text-xs font-bold text-slate-700">Concentração do Produto</label>
-                      <DidacticHelp faqFile="ConcentracaoFAQConcentracao.md" buttonLabel="Ajuda" />
+                      <DidacticHelp
+                        faqFile="ConcentracaoFAQConcentracao.md"
+                        variant="icon"
+                        iconType="info"
+                        buttonLabel="Ajuda"
+                        className="!min-w-[36px] !min-h-[36px] !p-1.5"
+                        iconClassName="w-4 h-4 text-[#1D734B]"
+                      />
                     </div>
                     <input
                       type="text"
@@ -774,7 +798,14 @@ export const ToolsView: React.FC = () => {
                   <div>
                     <div className="flex items-center justify-between mb-1.5">
                       <label className="text-xs font-bold text-slate-700">Volume Recomendado (L/ha)</label>
-                      <DidacticHelp faqFile="ConcentracaoFAQVolumeRecomendado.md" buttonLabel="Ajuda" />
+                      <DidacticHelp
+                        faqFile="ConcentracaoFAQVolumeRecomendado.md"
+                        variant="icon"
+                        iconType="info"
+                        buttonLabel="Ajuda"
+                        className="!min-w-[36px] !min-h-[36px] !p-1.5"
+                        iconClassName="w-4 h-4 text-[#1D734B]"
+                      />
                     </div>
                     <input
                       type="text"
@@ -798,7 +829,14 @@ export const ToolsView: React.FC = () => {
                   <div>
                     <div className="flex items-center justify-between mb-1.5">
                       <label className="text-xs font-bold text-slate-700">Volume Real Aplicado (L/ha)</label>
-                      <DidacticHelp faqFile="ConcentracaoFAQVolumeAplicado.md" buttonLabel="Ajuda" />
+                      <DidacticHelp
+                        faqFile="ConcentracaoFAQVolumeAplicado.md"
+                        variant="icon"
+                        iconType="info"
+                        buttonLabel="Ajuda"
+                        className="!min-w-[36px] !min-h-[36px] !p-1.5"
+                        iconClassName="w-4 h-4 text-[#1D734B]"
+                      />
                     </div>
                     <input
                       type="text"

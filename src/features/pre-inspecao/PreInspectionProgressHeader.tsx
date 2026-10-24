@@ -30,7 +30,7 @@ export const PreInspectionProgressHeader: React.FC<PreInspectionProgressHeaderPr
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
         <div>
           <span className="text-[10px] font-black uppercase tracking-wider text-[#3CA64C] block">
-            Ecrã 2 • Modo de Diagnóstico DGAV
+            Ecrã 2 • Modo de Diagnóstico Técnico
           </span>
           <h2 className="text-base sm:text-lg font-black text-slate-900">
             Checklist de Pré-Inspeção — {equipmentTitle}

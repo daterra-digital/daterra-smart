@@ -48,7 +48,7 @@ export const PreInspectionGuideModal: React.FC<PreInspectionGuideModalProps> = (
             </div>
             <div>
               <span className="text-[10px] font-black uppercase tracking-widest text-[#3CA64C] block">
-                Microlearning Oficial • DGAV & ISO 16122
+                Guia Oficial • Norma ISO 16122
               </span>
               <h2
                 id="pre-inspection-guide-title"

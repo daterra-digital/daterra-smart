@@ -46,6 +46,7 @@ export const CalculationHistoryCard: React.FC<CalculationHistoryCardProps> = ({
   const isVolumeCaldaTrv = record.calculatorId === 'calc_volume_calda_trv';
   const isDebitoTotal = record.calculatorId === 'calc_debito_total';
   const isEppo = record.calculatorId === 'calc_eppo';
+  const isAjusteDoseEppo = record.calculatorId === 'ajuste_dose_eppo' || record.calculatorId === 'calc_ajuste_dose_eppo';
   const isCalibracaoPulverizador = record.calculatorId === 'calc_calibracao_pulverizador';
 
   // --- CAMPOS DA DOSE ---
@@ -230,6 +231,38 @@ export const CalculationHistoryCard: React.FC<CalculationHistoryCardProps> = ({
     : null;
   const calibProdTankSubUnit = calibProdTankOut?.subUnit ?? 'g';
 
+  // --- CAMPOS ESPECÍFICOS DE AJUSTE DA DOSE EPPO ---
+  const eppoDoseProdOut = record.outputs['produtoPorDeposito'] || record.outputs['quantidade_pf'];
+  const eppoDoseProdVal = eppoDoseProdOut?.rawValue !== undefined
+    ? Number(eppoDoseProdOut.rawValue).toLocaleString('pt-PT', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+    : '-';
+  const eppoDoseProdUnit = eppoDoseProdOut?.unit ?? (record.outputs['doseAjustada']?.unit?.includes('kg') ? 'kg' : 'L');
+  const eppoDoseProdSubVal = eppoDoseProdOut?.subValue !== undefined
+    ? Number(eppoDoseProdOut.subValue).toLocaleString('pt-PT', { maximumFractionDigits: 0 })
+    : (eppoDoseProdOut?.rawValue !== undefined ? Number(Number(eppoDoseProdOut.rawValue) * 1000).toLocaleString('pt-PT', { maximumFractionDigits: 0 }) : null);
+  const eppoDoseProdSubUnit = eppoDoseProdOut?.subUnit ?? (eppoDoseProdUnit === 'kg' ? 'g' : 'mL');
+
+  const eppoDoseAjustadaOut = record.outputs['doseAjustada'];
+  const eppoDoseAjustadaVal = eppoDoseAjustadaOut?.rawValue !== undefined
+    ? Number(eppoDoseAjustadaOut.rawValue).toLocaleString('pt-PT', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+    : '-';
+  const eppoDoseAjustadaUnit = eppoDoseAjustadaOut?.unit ?? (eppoDoseProdUnit === 'kg' ? 'kg/ha' : 'L/ha');
+
+  const eppoDoseRotuloOut = record.inputs['doseRotulo'] || record.outputs['doseRotulo'];
+  const eppoDoseRotuloVal = eppoDoseRotuloOut?.rawValue !== undefined
+    ? Number(eppoDoseRotuloOut.rawValue).toLocaleString('pt-PT', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+    : null;
+
+  const eppoReducaoOut = record.outputs['reducaoPercentual'];
+  const eppoReducaoVal = eppoReducaoOut?.rawValue !== undefined
+    ? Number(eppoReducaoOut.rawValue)
+    : null;
+
+  const eppoLwaRealOut = record.outputs['lwaReal'];
+  const eppoLwaRealVal = eppoLwaRealOut?.rawValue !== undefined
+    ? Number(eppoLwaRealOut.rawValue).toLocaleString('pt-PT', { maximumFractionDigits: 0 })
+    : null;
+
   // --- RESULTADO PRINCIPAL DE PESTICIDA (COMUM A DOSE E CONCENTRAÇÃO) ---
   const pfValue = isConcentracao
     ? (record.outputs['quantidade_pf_ml']?.rawValue !== undefined
@@ -257,7 +290,9 @@ export const CalculationHistoryCard: React.FC<CalculationHistoryCardProps> = ({
     record.outputs['quantidade_pf_ml']?.subUnit ||
     record.outputs['quantidade_pf_g']?.subUnit;
 
-  const defaultTitle = isConcentracao
+  const defaultTitle = isAjusteDoseEppo
+    ? 'Ajuste da Dose (Método EPPO)'
+    : isConcentracao
     ? 'Cálculo de Concentração'
     : isVelocidade
     ? 'Velocidade Real de Trabalho'
@@ -309,6 +344,12 @@ export const CalculationHistoryCard: React.FC<CalculationHistoryCardProps> = ({
           {isEppo && (
             <span className="text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-900 border border-emerald-300/80">
               {isEppoLwa ? 'LWA' : 'TRV'}
+            </span>
+          )}
+
+          {isAjusteDoseEppo && (
+            <span className="text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-900 border border-emerald-300/80">
+              EPPO PP 1/239
             </span>
           )}
 
@@ -457,6 +498,62 @@ export const CalculationHistoryCard: React.FC<CalculationHistoryCardProps> = ({
             </div>
           </div>
         </div>
+      ) : isAjusteDoseEppo ? (
+        <div className="space-y-2">
+          <div className="bg-slate-50 p-3 rounded-xl border border-slate-100 flex items-center justify-between gap-4">
+            <div>
+              <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-500 block">
+                Pesticida Necessário
+              </span>
+              <div className="text-base sm:text-lg font-black font-mono-numbers text-daterra-primary">
+                {eppoDoseProdVal} <span className="text-xs font-bold text-daterra-accent">{eppoDoseProdUnit}</span>
+                {eppoDoseProdSubVal && (
+                  <span className="text-xs font-medium text-slate-500 ml-1.5 hidden sm:inline">
+                    ({eppoDoseProdSubVal} {eppoDoseProdSubUnit})
+                  </span>
+                )}
+              </div>
+            </div>
+
+            <div className="text-right">
+              <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-500 block">
+                Dose Ajustada
+              </span>
+              <div className="text-base sm:text-lg font-black font-mono-numbers text-daterra-primary">
+                {eppoDoseAjustadaVal} <span className="text-xs font-bold text-daterra-accent">{eppoDoseAjustadaUnit}</span>
+              </div>
+              {eppoDoseRotuloVal && (
+                <span className="text-[11px] text-slate-500 font-medium block">
+                  Rótulo: {eppoDoseRotuloVal} {eppoDoseAjustadaUnit}
+                </span>
+              )}
+            </div>
+          </div>
+
+          {/* Métrica Comparativa de Acréscimo / Poupança */}
+          {eppoReducaoVal !== null && (
+            <div className={`px-2.5 py-1.5 rounded-lg border text-xs font-bold flex items-center justify-between ${
+              eppoReducaoVal > 0
+                ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                : eppoReducaoVal === 0
+                ? 'bg-slate-50 text-slate-700 border-slate-200'
+                : 'bg-amber-50 text-amber-800 border-amber-200'
+            }`}>
+              <span>
+                {eppoReducaoVal > 0
+                  ? `Poupança: -${eppoReducaoVal}%`
+                  : eppoReducaoVal === 0
+                  ? 'Dose nominal de referência'
+                  : `Acréscimo foliar: +${Math.abs(eppoReducaoVal)}%`}
+              </span>
+              {eppoLwaRealVal && (
+                <span className="font-mono text-[11px] text-slate-600">
+                  LWA: {eppoLwaRealVal} m²/ha
+                </span>
+              )}
+            </div>
+          )}
+        </div>
       ) : (
         <div className="bg-slate-50 p-3 rounded-xl border border-slate-100 flex items-center justify-between gap-4">
           <div>
@@ -532,6 +629,19 @@ export const CalculationHistoryCard: React.FC<CalculationHistoryCardProps> = ({
           <span>Depósito: <strong className="font-bold text-slate-800">{eppoCapDepVal} {eppoCapDepUnit}</strong></span>
           <span>·</span>
           <span>Conc: <strong className="font-bold text-slate-800">{eppoConcVal} {eppoConcUnit}</strong></span>
+        </div>
+      )}
+      {isAjusteDoseEppo && (
+        <div className="text-xs font-mono-numbers text-slate-600 bg-slate-100/70 px-2.5 py-1.5 rounded-lg flex items-center justify-between flex-wrap gap-2">
+          <span>Depósito: <strong className="font-bold text-slate-800">{record.inputs['capacidadeDeposito']?.rawValue ?? '-'} L</strong></span>
+          <span>·</span>
+          <span>Calda: <strong className="font-bold text-slate-800">{record.inputs['volumeCaldaLHa']?.rawValue ?? '-'} L/ha</strong></span>
+          {record.outputs['concentracaoPor100L'] && (
+            <>
+              <span>·</span>
+              <span>Conc: <strong className="font-bold text-slate-800">{record.outputs['concentracaoPor100L'].rawValue} {record.outputs['concentracaoPor100L'].unit}</strong></span>
+            </>
+          )}
         </div>
       )}
       {isDebitoTotal && (

@@ -32,6 +32,12 @@ export interface ProfileCulture {
   canopy_height_m?: number;
   lai?: number;
   location?: string;
+
+  // Telemetria Agronómica consolidada (EPPO PP 1/239)
+  last_lwa_m2_ha?: number;
+  last_trv_m3_ha?: number;
+  last_calculated_at?: string;
+  last_phenological_stage?: string;
 }
 
 export interface ProfileEquipment {
@@ -48,6 +54,7 @@ export interface ProfileEquipment {
   has_circuit_rinse?: boolean;
   has_product_incorporator?: boolean;
   selected_nozzles?: string[];
+  efficiency_correction_factor?: number; // Fator de correção por tecnologia do pulverizador (ex: 0.9 = túnel/recuperação, 1.0 = standard, 1.1 = canhão)
 
   // Bomba e Filtros
   pump_manufacturer?: string;
@@ -172,6 +179,18 @@ export interface EppoHistoryRecord {
   results: Record<string, any>;
 }
 
+export interface MutationOutboxRecord {
+  id?: number;
+  entityId: string;
+  entityType: string;
+  operation: 'CREATE' | 'UPDATE' | 'DELETE';
+  payload: any;
+  synced: 0 | 1; // 0 = pendente de sincronização, 1 = sincronizado com sucesso
+  updatedAt: string; // ISO 8601 UTC para resolução Last-Write-Wins (LWW)
+  attempts: number;
+  lastError?: string;
+}
+
 export class DaterraDatabase extends Dexie {
   calculation_history!: Table<CalculationHistoryItem>;
   profiles_cultures!: Table<ProfileCulture>;
@@ -193,6 +212,9 @@ export class DaterraDatabase extends Dexie {
 
   // Tabela da Ferramenta Ajuste da Dose (Método EPPO)
   eppo_history!: Table<EppoHistoryRecord>;
+
+  // Tabela de Persistência First-Offline (Padrão Mutation Outbox)
+  mutation_outbox!: Table<MutationOutboxRecord, number>;
 
   constructor() {
     super('DaterraSmartDB');
@@ -264,6 +286,26 @@ export class DaterraDatabase extends Dexie {
       mix_history: '++id, date',
       active_substances: 'id, name, moa, nameEn',
       eppo_history: '++id, date'
+    });
+
+    // Versão 8: Padrão Mutation Outbox para persistência First-Offline e sincronização LWW
+    this.version(8).stores({
+      calculation_history: '++id, date, calculator_type, profile_id',
+      profiles_cultures: '++id, name, crop_type',
+      profiles_equipment: '++id, name',
+      profiles_nozzles: '++id, manufacturer, model, equipment_id',
+      profiles_calibrations: '++id, equipment_id, nozzle_id',
+      microlearning_content: '++id, &field_key',
+      installed_tools: '++id, &tool_id',
+      calculation_history_v2: '&id, userId, calculatorId, createdAt, syncStatus, isDeleted, [calculatorId+userId+isDeleted]',
+      calibration_profiles: '&id, userId, equipmentProfileId, status, syncStatus, isDeleted',
+      mix_history: '++id, date',
+      active_substances: 'id, name, moa, nameEn',
+      eppo_history: '++id, date',
+      mutation_outbox: '++id, entityId, entityType, operation, synced, updatedAt, attempts'
+    }).upgrade(async () => {
+      // Migração suave retrocompatível
+      console.log('[DaterraSmartDB] Migrado com sucesso para a Versão 8 (Mutation Outbox ativa).');
     });
   }
 }

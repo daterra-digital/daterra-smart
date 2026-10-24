@@ -46,7 +46,7 @@ export const PreInspectionHistoryModal: React.FC<PreInspectionHistoryModalProps>
             </div>
             <div>
               <span className="text-[10px] font-black uppercase tracking-wider text-[#3CA64C]">
-                Registos Guardados • Pré-Inspeção DGAV
+                Registos Guardados • Pré-Inspeção ISO 16122
               </span>
               <h3
                 id="pre-inspection-history-title"
