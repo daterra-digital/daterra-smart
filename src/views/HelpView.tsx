@@ -16,7 +16,7 @@ export const HelpView: React.FC = () => {
     },
     {
       q: 'Como contactar o suporte?',
-      a: 'Podes contactar-nos diretamente através do email suporte@daterra.com.pt para apoio técnico ou esclarecimento de dúvidas.'
+      a: 'Podes contactar-nos diretamente através do email smart@daterra.com.pt para apoio técnico ou esclarecimento de dúvidas.'
     }
   ];
 
@@ -107,7 +107,7 @@ export const HelpView: React.FC = () => {
           </div>
 
           <a
-            href="mailto:suporte@daterra.com.pt?subject=DATERRA%20Smart%20-%20Suporte%20T%C3%A9cnico"
+            href="mailto:smart@daterra.com.pt?subject=DATERRA%20Smart%20-%20Suporte%20T%C3%A9cnico"
             className="inline-flex items-center justify-center gap-2 px-5 min-h-[48px] bg-[#3CA64C] hover:bg-[#3AAA35] text-white font-bold text-xs rounded-2xl transition-all shadow-md touch-target"
           >
             <span>Reportar um problema</span>

@@ -64,8 +64,8 @@ export const Footer: React.FC = () => {
             Suporte & Contacto
           </h4>
           <p className="text-xs text-slate-300 font-medium">
-            Email: suporte@daterra.com.pt<br />
-            Telefone: +351 210 000 000<br />
+            Email: smart@daterra.com.pt<br />
+            Telefone: +351 262 145 662<br />
             Portugal
           </p>
         </div>
