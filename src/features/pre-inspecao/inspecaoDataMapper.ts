@@ -1,6 +1,7 @@
 import type { StructuredValue } from '../../types/calculator.ts';
+import type { ItemStatus, InspecaoEvaluationResult } from './types/inspecaoTypes';
 
-export type ItemStatus = 'conforme' | 'anomalia' | 'pendente';
+export type { ItemStatus, InspecaoEvaluationResult };
 
 export interface CriticalPoint {
   id: string;
@@ -18,65 +19,51 @@ export const CRITICAL_POINTS_ISO16122: CriticalPoint[] = [
     number: 1,
     title: 'Manómetro de Pressão',
     shortDesc: 'Diâmetro >= 63mm, escala legível e sem oscilação',
-    requirement: 'Diâmetro mínimo de 63 mm, ponteiro estável (amortecimento líquido), sem condensação interna e estanque a fugas.',
+    requirement: 'Diâmetro mínimo de 63 mm, ponteiro estável e sem condensação interna.',
     isoRef: 'ISO 16122-2 / 16122-3',
-    guideText: 'O manómetro é o instrumento vital de regulação de débito. A ausência de legibilidade ou ponteiro a vibrar descalibra a aplicação de calda.'
+    guideText: 'O manómetro é o instrumento vital de regulação de débito.'
   },
   {
     id: 'filtros',
     number: 2,
     title: 'Filtros do Circuito',
     shortDesc: 'Filtro de aspiração com válvula de corte e malha intacta',
-    requirement: 'Filtro de aspiração e pressão íntegros, sem fendas na malha, e válvula de corte funcional que permita limpeza com depósito cheio.',
+    requirement: 'Filtros íntegros, sem fendas na malha, e válvula de corte funcional.',
     isoRef: 'ISO 16122-2 cl. 5.3',
-    guideText: 'Filtros obstruídos provocam cavitação da bomba e perda de pressão nos bicos, além de risco de entupimento repetitivo.'
+    guideText: 'Filtros obstruídos provocam cavitação da bomba e perda de pressão nos bicos.'
   },
   {
     id: 'tubagens',
     number: 3,
     title: 'Tubagens e Mangueiras',
     shortDesc: 'Isenção total de fugas, vincos e dobras sob pressão',
-    requirement: 'Sem escorrências sob pressão máxima de trabalho, sem mangueiras ressequidas, vincos acentuados ou roçamentos no chassis.',
+    requirement: 'Sem escorrências sob pressão máxima de trabalho, sem mangueiras ressequidas.',
     isoRef: 'ISO 16122-1 cl. 4.2',
-    guideText: 'Fugas no circuito hidráulico representam desperdício de fitofármaco, contaminação ambiental e perda de pressão operacional.'
+    guideText: 'Fugas no circuito hidráulico representam desperdício de fitofármaco.'
   },
   {
     id: 'bicos',
     number: 4,
     title: 'Bicos e Antigotejo',
     shortDesc: 'Mesmo modelo/calibre e antigotejo estanque (< 1 gota / 5s)',
-    requirement: 'Todos os bicos da mesma marca, modelo e calibre na barra/arco. Dispositivos antigotejo estanques (máximo 1 gota em 5s após corte).',
+    requirement: 'Todos os bicos da mesma marca, modelo e calibre. Antigotejo estanque (< 1 gota/5s).',
     isoRef: 'ISO 16122-2 / ISO 10625',
-    guideText: 'Bicos desgastados ou misturados provocam sobredosagem severa ou subdosagem com fitotoxicidade e falhas de eficácia.'
+    guideText: 'Bicos desgastados ou misturados provocam sobredosagem severa ou subdosagem.'
   },
   {
     id: 'cardan_pto',
     number: 5,
     title: 'Veio Cardan / Proteção PTO',
     shortDesc: 'Proteção integral do veio e correntes fixas antirotação',
-    requirement: 'Cones plásticos envolventes intactos, tubo de proteção sem quebras e correntes de fixação presas a pontos fixos do trator e máquina.',
+    requirement: 'Cones plásticos envolventes intactos, tubo sem quebras e correntes acopladas.',
     isoRef: 'ISO 16122-1 cl. 4.1',
-    guideText: 'A proteção da transmissão de força é requisito crítico de segurança humana obrigatório por lei. Cardan exposto reprova a máquina de imediato.'
+    guideText: 'Proteção da transmissão de força é requisito crítico de segurança humana.'
   }
 ];
-
-export interface InspecaoEvaluationResult {
-  totalItems: number;
-  conformeCount: number;
-  anomaliaCount: number;
-  pendenteCount: number;
-  conformityPct: number;
-  status: 'aprovado' | 'reprovado' | 'atencao';
-  statusLabel: string;
-  alertLevel: 'success' | 'warning' | 'danger';
-  recommendation: string;
-  isValid: boolean;
-}
 
 export function evaluateInspecao(answers: Record<string, ItemStatus>): InspecaoEvaluationResult {
   const points = CRITICAL_POINTS_ISO16122;
   const totalItems = points.length;
-
   let conformeCount = 0;
   let anomaliaCount = 0;
   let pendenteCount = 0;
@@ -140,50 +127,41 @@ export function buildInspecaoStructuredValues(
   result: InspecaoEvaluationResult
 ): { inputs: Record<string, StructuredValue>; outputs: Record<string, StructuredValue> } {
   const inputs: Record<string, StructuredValue> = {};
-  for (const point of CRITICAL_POINTS_ISO16122) {
-    const val = answers[point.id] || 'pendente';
-    inputs[`item_${point.id}`] = {
-      canonicalKey: `inspection_item_${point.id}`,
+  for (const [key, val] of Object.entries(answers)) {
+    inputs[`item_${key}`] = {
+      canonicalKey: `inspection_item_${key}`,
       dimension: 'text',
       rawValue: val,
       unit: '',
       normalizedValue: val === 'conforme' ? 1 : 0,
       normalizedUnit: '',
       source: 'user_input',
-      label: point.title,
-      localId: `item_${point.id}`,
+      label: `Item ${key}`,
+      localId: `item_${key}`,
       calculatorId: 'calc_pre_inspecao',
-      calculatorVersion: '1.0.0'
+      calculatorVersion: '2.0.0'
     };
   }
 
+  const makeOutput = (key: string, dim: any, val: any, unit: string, label: string): StructuredValue => ({
+    canonicalKey: key,
+    dimension: dim,
+    rawValue: val,
+    unit,
+    normalizedValue: typeof val === 'number' ? val : (val === 'aprovado' ? 1 : 0),
+    normalizedUnit: unit,
+    source: 'calculated_output',
+    label,
+    localId: key,
+    calculatorId: 'calc_pre_inspecao',
+    calculatorVersion: '2.0.0'
+  });
+
   const outputs: Record<string, StructuredValue> = {
-    inspection_status: {
-      canonicalKey: 'inspection_status',
-      dimension: 'text',
-      rawValue: result.statusLabel,
-      unit: '',
-      normalizedValue: result.status === 'aprovado' ? 1 : 0,
-      normalizedUnit: '',
-      source: 'calculated_output',
-      label: 'Status de Conformidade ISO 16122',
-      localId: 'inspection_status',
-      calculatorId: 'calc_pre_inspecao',
-      calculatorVersion: '1.0.0'
-    },
-    conformity_percentage: {
-      canonicalKey: 'conformity_percentage',
-      dimension: 'percentage',
-      rawValue: result.conformityPct,
-      unit: '%',
-      normalizedValue: result.conformityPct / 100,
-      normalizedUnit: 'ratio',
-      source: 'calculated_output',
-      label: 'Percentagem de Conformidade',
-      localId: 'conformity_percentage',
-      calculatorId: 'calc_pre_inspecao',
-      calculatorVersion: '1.0.0'
-    }
+    conformity_percentage: makeOutput('pre_inspecao_conformity_pct', 'percentage', result.conformityPct, '%', 'Percentagem de Conformidade'),
+    conforme_count: makeOutput('pre_inspecao_conforme_count', 'count', result.conformeCount, 'itens', 'Itens Conformes'),
+    anomalia_count: makeOutput('pre_inspecao_anomalia_count', 'count', result.anomaliaCount, 'itens', 'Anomalias Críticas'),
+    inspection_status: makeOutput('pre_inspecao_status', 'text', result.status, '', 'Status de Auditoria')
   };
 
   return { inputs, outputs };

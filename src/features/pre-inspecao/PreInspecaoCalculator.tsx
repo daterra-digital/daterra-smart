@@ -1,14 +1,12 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CheckCircle2 } from 'lucide-react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../../db/db';
-import {
-  evaluateInspecao,
-  CRITICAL_POINTS_ISO16122,
-  type ItemStatus
-} from './inspecaoDataMapper';
+import { isDroneEquipment } from './data/equipmentConfigs';
+import { usePreInspecaoState } from './hooks/usePreInspecaoState';
 import { persistInspecaoRecord } from './inspecaoStorage';
+import { generatePreInspecaoPdf, downloadPdfBlob } from './pdf/inspecaoPdfGenerator';
 import {
   softDeleteCalculationInDb,
   clearCalculatorHistoryInDb,
@@ -20,64 +18,69 @@ import { InspecaoResultCard } from './InspecaoResultCard';
 import { InspecaoChecklistPanel } from './InspecaoChecklistPanel';
 import { InspecaoFooterBar } from './InspecaoFooterBar';
 import { InspecaoGuideModal } from './InspecaoGuideModal';
+import { EquipmentSelectorGrid } from './EquipmentSelectorGrid';
+import { EvaluationStyleSelector } from './components/EvaluationStyleSelector';
+import { DroneWarningBanner } from './components/DroneWarningBanner';
+import { PreInspectionProgressHeader } from './PreInspectionProgressHeader';
 
-// UniversalCalculatorTemplate compat: Padrão arquitetural Master Blueprint DATERRA
 export const PreInspecaoCalculator: React.FC = () => {
   const navigate = useNavigate();
-  const [answers, setAnswers] = useState<Record<string, ItemStatus>>({});
-  const [isHistoryOpen, setIsHistoryOpen] = useState<boolean>(false);
-  const [isGuideOpen, setIsGuideOpen] = useState<boolean>(false);
+  const state = usePreInspecaoState();
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+  const [isGuideOpen, setIsGuideOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
 
-  const calcResult = useMemo(() => evaluateInspecao(answers), [answers]);
-
-  const historyRecords = useLiveQuery(
-    async () => {
-      try {
-        if (!db || !db['calculation_history_v2']) return [];
-        return await db['calculation_history_v2']
-          .filter((r) => r.calculatorId === 'calc_pre_inspecao' && !r.isDeleted)
-          .reverse()
-          .sortBy('createdAt');
-      } catch {
-        return [];
-      }
-    },
-    []
-  ) ?? [];
-
-  const handleReset = useCallback(() => {
-    setAnswers({});
-  }, []);
-
-  const handleSetAnswer = (id: string, status: ItemStatus) => {
-    setAnswers((prev) => ({ ...prev, [id]: status }));
-  };
-
-  const handleMarkAllConforme = () => {
-    const allConforme: Record<string, ItemStatus> = {};
-    for (const point of CRITICAL_POINTS_ISO16122) {
-      allConforme[point.id] = 'conforme';
+  const historyRecords = useLiveQuery(async () => {
+    try {
+      if (!db || !db['calculation_history_v2']) return [];
+      return await db['calculation_history_v2']
+        .filter((r) => r.calculatorId === 'calc_pre_inspecao' && !r.isDeleted)
+        .reverse()
+        .sortBy('createdAt');
+    } catch {
+      return [];
     }
-    setAnswers(allConforme);
-    setToastMessage('Todos os 5 pontos marcados como conformes!');
-    setTimeout(() => setToastMessage(null), 3000);
-  };
+  }, []) ?? [];
 
   const handleSaveToHistory = async () => {
     try {
-      if (!calcResult.isValid) {
-        setToastMessage('Avalie pelo menos um ponto crítico antes de guardar.');
+      if (!state.calcResult.isValid) {
+        setToastMessage('Avalie pelo menos um ponto antes de guardar.');
         setTimeout(() => setToastMessage(null), 3000);
         return;
       }
-      await persistInspecaoRecord(answers, calcResult);
-      setToastMessage('Boletim de pré-inspeção gravado e enfileirado na Outbox offline!');
+      await persistInspecaoRecord(state.answers, state.calcResult, state.activeOption.title);
+      setToastMessage('Boletim gravado e enfileirado na Outbox offline!');
       setTimeout(() => setToastMessage(null), 3500);
     } catch (err) {
-      console.error('Erro ao guardar pré-inspeção:', err);
+      console.error(err);
       setToastMessage('Erro ao gravar a pré-inspeção.');
       setTimeout(() => setToastMessage(null), 3000);
+    }
+  };
+
+  const handleExportPdf = async () => {
+    try {
+      setIsGeneratingPdf(true);
+      const pdfBytes = await generatePreInspecaoPdf({
+        equipmentId: state.selectedEquipment,
+        equipmentTitle: state.activeOption.title,
+        evaluationStyle: state.evaluationStyle,
+        categories: state.categories,
+        answers: state.answers,
+        calcResult: state.calcResult
+      });
+      const fileName = `Boletim_Pre_Inspecao_${state.selectedEquipment}_${Date.now()}.pdf`;
+      downloadPdfBlob(pdfBytes, fileName);
+      setToastMessage('Boletim em PDF exportado com sucesso!');
+      setTimeout(() => setToastMessage(null), 3500);
+    } catch (err) {
+      console.error(err);
+      setToastMessage('Erro ao gerar o PDF da pré-inspeção.');
+      setTimeout(() => setToastMessage(null), 3000);
+    } finally {
+      setIsGeneratingPdf(false);
     }
   };
 
@@ -94,43 +97,71 @@ export const PreInspecaoCalculator: React.FC = () => {
         onBack={() => navigate('/ferramentas')}
         onOpenHistory={() => setIsHistoryOpen(true)}
         onOpenGuide={() => setIsGuideOpen(true)}
-        onReset={handleReset}
+        onReset={state.handleReset}
         historyCount={historyRecords.length}
+        equipmentTitle={state.activeOption.title}
       />
 
+      <EvaluationStyleSelector
+        selectedStyle={state.evaluationStyle}
+        onChangeStyle={state.setEvaluationStyle}
+      />
+
+      <EquipmentSelectorGrid
+        selectedEquipment={state.selectedEquipment}
+        onSelectEquipment={state.handleSelectEquipment}
+        isExpanded={state.isEquipGridOpen}
+        onToggleExpand={() => state.setIsEquipGridOpen((p) => !p)}
+      />
+
+      {isDroneEquipment(state.selectedEquipment) && <DroneWarningBanner />}
+
       <InspecaoResultCard
-        calculationResult={calcResult}
+        calculationResult={state.calcResult}
         onOpenGuide={() => setIsGuideOpen(true)}
+      />
+
+      <PreInspectionProgressHeader
+        mode={state.mode}
+        onChangeMode={state.setMode}
+        equipmentTitle={state.activeOption.title}
+        totalSubQuestions={state.calcResult.totalItems}
+        answeredSubQuestions={state.calcResult.conformeCount + state.calcResult.anomaliaCount}
+        conformeCount={state.calcResult.conformeCount}
+        anomaliaCount={state.calcResult.anomaliaCount}
       />
 
       <InspecaoChecklistPanel
-        answers={answers}
-        onSetAnswer={handleSetAnswer}
-        onMarkAllConforme={handleMarkAllConforme}
-        onOpenGuide={() => setIsGuideOpen(true)}
+        categories={state.categories}
+        mode={state.mode}
+        answers={state.answers}
+        openCategoryId={state.openCategoryId}
+        onToggleCategory={(id) => state.setOpenCategoryId((p) => (p === id ? null : id))}
+        onMarkCategoryAllConforme={state.handleCategoryAllConforme}
+        onOpenCategoryForAnomalies={state.handleCategoryForAnomalies}
+        onAnswerSubQuestion={state.handleAnswerSub}
       />
 
       <CalculatorHistoryDrawer
         isOpen={isHistoryOpen}
         onClose={() => setIsHistoryOpen(false)}
         calculatorId="calc_pre_inspecao"
-        calculatorTitle="Pré-Inspeção do Pulverizador"
+        calculatorTitle={`Pré-Inspeção (${state.activeOption.title})`}
         records={historyRecords}
         onDeleteRecord={async (rec) => softDeleteCalculationInDb(rec.id)}
         onClearHistory={async () => { await clearCalculatorHistoryInDb('calc_pre_inspecao', 'local-user'); }}
         onUpdateMetadata={async (id, meta) => updateCalculationMetadataInDb(id, meta)}
       />
 
-      <InspecaoGuideModal
-        isOpen={isGuideOpen}
-        onClose={() => setIsGuideOpen(false)}
-      />
+      <InspecaoGuideModal isOpen={isGuideOpen} onClose={() => setIsGuideOpen(false)} />
 
       <InspecaoFooterBar
         onSave={handleSaveToHistory}
+        onExportPdf={handleExportPdf}
         onOpenHistory={() => setIsHistoryOpen(true)}
         onOpenGuide={() => setIsGuideOpen(true)}
         historyCount={historyRecords.length}
+        isGeneratingPdf={isGeneratingPdf}
       />
     </div>
   );

@@ -1,0 +1,199 @@
+[
+  {
+    "id": "cat_pistolas_pulverizacao_0_limpeza_geral",
+    "tipoEquipamento": "pistolas_pulverizacao",
+    "categoria": "0. Limpeza Geral",
+    "perguntaGlobal": "O equipamento de pulverização manual apresenta uma limpeza interna e externa rigorosa, isento de resíduos de produtos?",
+    "informacao": "A limpeza deve abranger o interior do depósito, o circuito de pressão e todos os componentes externos (mangueiras e pistolas) para evitar riscos de contaminação ao inspetor.",
+    "dica": "Lave o depósito e acione a pistola com água limpa para purgar resíduos do circuito e filtros antes da inspeção. A limpeza é o pré-requisito para uma avaliação técnica precisa e segura.",
+    "subperguntas": [
+      {
+        "id": "cat_pistolas_pulverizacao_0_limpeza_geral_sub_1",
+        "subpergunta": "O depósito, os filtros e o circuito de mangueiras estão livres de sedimentos ou calda de tratamentos anteriores?",
+        "informacaoSub": "Resíduos internos podem obstruir o bico da pistola durante a medição de débito e contaminar o ambiente. A limpeza dos filtros é essencial para o fluxo constante.",
+        "dicaSub": "Verifique visualmente o fundo do reservatório e o estado de conservação dos elementos filtrantes.",
+        "falhas": "Sedimentos no fundo do depósito; filtros obstruídos; mangueiras com incrustações químicas."
+      },
+      {
+        "id": "cat_pistolas_pulverizacao_0_limpeza_geral_sub_2",
+        "subpergunta": "A superfície externa da pistola e das mangueiras está limpa, minimizando o risco de exposição do operador/inspetor?",
+        "informacaoSub": "Zonas contaminadas externamente aumentam o risco de exposição dérmica. A limpeza externa é um requisito primário para a segurança na aplicação fitossanitária.",
+        "dicaSub": "Limpe cuidadosamente os punhos das pistolas e as áreas de manuseio frequente das tubagens flexíveis.",
+        "falhas": "Presença de resíduos de pesticidas nas mangueiras; punhos da pistola contaminados com resíduos químicos."
+      },
+      {
+        "id": "cat_pistolas_pulverizacao_0_limpeza_geral_sub_3",
+        "subpergunta": "O interior do reservatório está devidamente lavado e totalmente isento de sedimentos ou resíduos sólidos?",
+        "informacaoSub": "Resíduos no fundo do depósito podem obstruir os filtros de linha ou o bico da pistola durante o teste de débito, invalidando a precisão da medição técnica.",
+        "dicaSub": "Inspecione visualmente o fundo e os cantos do depósito. Certifique-se de que a água de purga apresenta total limpidez.",
+        "falhas": "Presença de areia ou lodo; incrustações de produto químico seco; água de enxaguamento com cor/odor."
+      }
+    ]
+  },
+  {
+    "id": "cat_pistolas_pulverizacao_1_transmissao_e_seguranca",
+    "tipoEquipamento": "pistolas_pulverizacao",
+    "categoria": "1. Transmissão e Segurança",
+    "perguntaGlobal": "A estrutura de suporte é estável e todos os órgãos de transmissão de potência estão devidamente protegidos?",
+    "informacao": "A estrutura deve garantir a estabilidade do depósito e da bomba. Proteções em veios, correias ou correntes são obrigatórias para evitar o contacto acidental do operador.",
+    "dica": "Verifique se a bomba está firmemente fixada e se as proteções mecânicas estão fixas e não apresentam ruturas.",
+    "subperguntas": [
+      {
+        "id": "cat_pistolas_pulverizacao_1_transmissao_e_seguranca_sub_1",
+        "subpergunta": "As proteções dos órgãos de transmissão (veios de cardan, correias ou correntes) estão presentes, fixas e sem danos?",
+        "informacaoSub": "Qualquer peça em movimento deve estar inacessível durante o funcionamento. Proteções danificadas ou inexistentes são consideradas falhas críticas na segurança operacional.",
+        "dicaSub": "Inspecione tatilmente a proteção (com a máquina desligada). Esta deve apresentar rigidez estrutural e cobrir totalmente a zona de perigo.",
+        "falhas": "Proteção inexistente; perfurações ou fissuras na proteção; correias expostas; falta de anteparos."
+      },
+      {
+        "id": "cat_pistolas_pulverizacao_1_transmissao_e_seguranca_sub_2",
+        "subpergunta": "O chassis ou estrutura de suporte apresenta fissuras, corrosão profunda ou deformações que comprometam a estabilidade?",
+        "informacaoSub": "Fissuras na estrutura podem levar ao colapso do depósito ou à quebra dos suportes da bomba devido à vibração, causando fugas massivas ou acidentes mecânicos.",
+        "dicaSub": "Inspecione visualmente os pontos de soldadura e as zonas de fixação da bomba ao chassis, onde a fadiga do metal é maior.",
+        "falhas": "Soldaduras com fissuras; corrosão que perfura o metal; deformação visível do chassis; fixações soltas."
+      },
+      {
+        "id": "cat_pistolas_pulverizacao_1_transmissao_e_seguranca_sub_3",
+        "subpergunta": "As mangueiras flexíveis estão protegidas contra o desgaste por atrito e afastadas de arestas cortantes ou fontes de calor?",
+        "informacaoSub": "Mangueiras que roçam no chassis ou estão perto do escape (em motobombas) podem romper-se sob pressão. A integridade da mangueira é vital para a segurança do operador.",
+        "dicaSub": "Verifique se as mangueiras estão devidamente fixas por abraçadeiras e se não existem sinais de abrasão na malha externa.",
+        "falhas": "Mangueira com malha de reforço exposta; dobras permanentes; contacto direto com o motor/escape."
+      }
+    ]
+  },
+  {
+    "id": "cat_pistolas_pulverizacao_2_deposito_e_filtragem",
+    "tipoEquipamento": "pistolas_pulverizacao",
+    "categoria": "2. Depósito e Filtragem",
+    "perguntaGlobal": "O reservatório garante estanquidade total e o sistema de filtragem assegura a proteção da bomba e a qualidade da pulverização?",
+    "informacao": "O depósito não pode apresentar fugas que contaminem o operador ou o solo. A filtragem multi-etapa é essencial para evitar a obstrução dos bicos e danos na bomba.",
+    "dica": "Inspecione visualmente o depósito em carga e verifique a presença de todos os filtros (enchimento, linha e pistola).",
+    "subperguntas": [
+      {
+        "id": "cat_pistolas_pulverizacao_2_deposito_e_filtragem_sub_1",
+        "subpergunta": "O depósito e as suas ligações estão isentos de fugas, tanto em repouso como à pressão máxima de trabalho?",
+        "informacaoSub": "Qualquer gotejamento no reservatório ou nas tubagens de saída compromete a estabilidade da pressão. A estanquidade deve ser mantida mesmo quando o sistema está pressurizado.",
+        "dicaSub": "Encha o depósito e coloque o sistema sob pressão com a pistola fechada. Procure por humidade na base e nas juntas.",
+        "falhas": "Fissuras no reservatório; fugas nas uniões roscadas; gotejamento persistente; porosidade no material."
+      },
+      {
+        "id": "cat_pistolas_pulverizacao_2_deposito_e_filtragem_sub_2",
+        "subpergunta": "A tampa do depósito garant e o filtro de enchimento (crivo) está presente e íntegro?",
+        "informacaoSub": "A tampa deve impedir o derrame de calda para o exterior durante o manuseamento. O filtro de enchimento é a primeira barreira contra impurezas que danificam a bomba.",
+        "dicaSub": "Confirme a presença do vedante na tampa. Retire o filtro de enchimento e verifique se a malha não tem perfurações.",
+        "falhas": "Tampa sem capacidade de aperto / vedação; vedante em falta ou ressequido; filtro de enchimento com rutura ou inexistente."
+      },
+      {
+        "id": "cat_pistolas_pulverizacao_2_deposito_e_filtragem_sub_3",
+        "subpergunta": "O sistema possui filtros de aspiração ou de linha com malha adequada e em bom estado de conservação?",
+        "informacaoSub": "Os filtros de linha protegem as válvulas da bomba e os bicos. A malha deve estar limpa e ser proporcional ao débito para não causar cavitação ou perda de pressão.",
+        "dicaSub": "Desmonte o copo do filtro de linha. A rede deve estar limpa de sedimentos e não deve apresentar sinais de oxidação ou ruturas.",
+        "falhas": "Filtro colmatado (obstruído); malha metálica deformada; ausência de elemento filtrante no circuito."
+      },
+      {
+        "id": "cat_pistolas_pulverizacao_2_deposito_e_filtragem_sub_4",
+        "subpergunta": "O sistema de agitação garante uma mistura constante e homogénea da calda no interior do depósito?",
+        "informacaoSub": "A agitação (geralmente por retorno de calda) evita que o produto se deposite no fundo. Uma má mistura causa doses variáveis, comprometendo a eficácia do tratamento.",
+        "dicaSub": "Com a bomba ligada, observe se existe turbulência visível no interior do depósito sem formação de espuma.",
+        "falhas": "Agitação inexistente; sedimentação visível no fundo; retorno de calda obstruído ou desligado."
+      },
+      {
+        "id": "cat_pistolas_pulverizacao_2_deposito_e_filtragem_sub_5",
+        "subpergunta": "O indicador de nível é perfeitamente visível e legível a partir do posto de trabalho e de enchimento?",
+        "informacaoSub": "O operador deve poder controlar a quantidade de calda restante. A escala deve ser clara para evitar erros na preparação da mistura e o esgotamento da bomba.",
+        "dicaSub": "Verifique se o tubo de nível ou a escala moldada no depósito estão limpos e se a leitura corresponde à realidade.",
+        "falhas": "Escala apagada; tubo de nível opaco ou sujo; ausência de escala graduada; falta de flutuador."
+      },
+      {
+        "id": "cat_pistolas_pulverizacao_2_deposito_e_filtragem_sub_6",
+        "subpergunta": "Existe um dispositivo de drenagem que permita o esvaziamento total do depósito de forma segura?",
+        "informacaoSub": "O depósito deve ter um ponto de purga no local mais baixo. Isto permite a limpeza total e evita que fiquem resíduos de calda acumulados entre utilizações.",
+        "dicaSub": "Identifique a válvula ou tampão de drenagem na base do depósito e confirme se é operável sem ferramentas.",
+        "falhas": "Ausência de bujão de drenagem; válvula de purga inacessível; fuga persistente no fecho."
+      }
+    ]
+  },
+  {
+    "id": "cat_pistolas_pulverizacao_3_circuito_hidraulico_e_pressao",
+    "tipoEquipamento": "pistolas_pulverizacao",
+    "categoria": "3. Circuito Hidráulico e Pressão",
+    "perguntaGlobal": "A bomba e o circuito mantêm-se estanques sob pressão, o manómetro é estável e a regulação permite um controlo preciso e constante?",
+    "informacao": "Fugas no circuito causam perda de débito e contaminação. O manómetro deve ser estável e a pressão deve recuperar rapidamente após cada acionamento do gatilho.",
+    "dica": "Coloque o sistema à pressão máxima com a pistola fechada para detetar fugas. Verifique se o ponteiro não oscila excessivamente em trabalho.",
+    "subperguntas": [
+      {
+        "id": "cat_pistolas_pulverizacao_3_circuito_hidraulico_e_pressao_sub_1",
+        "subpergunta": "A bomba apresenta estanquidade total (sem fugas de calda ou óleo) quando sujeita à pressão máxima de exercício?",
+        "informacaoSub": "Fugas nos retentores ou membranas da bomba comprometem a pressão e podem contaminar o solo. A bomba deve ser capaz de atingir a pressão nominal sem perdas.",
+        "dicaSub": "Inspecione visualmente o corpo da bomba e a zona do cárter enquanto o sistema está sob carga máxima.",
+        "falhas": "Gotejamento de calda; fugas de óleo; perda de pressão súbita; ruídos metálicos anormais."
+      },
+      {
+        "id": "cat_pistolas_pulverizacao_3_circuito_hidraulico_e_pressao_sub_2",
+        "subpergunta": "O manómetro é perfeitamente legível, possui escala adequada e o ponteiro permanece estável durante a pulverização?",
+        "informacaoSub": "O manómetro deve ter um diâmetro mínimo de 63 mm. A divisão da escala deve ser de 1 bar (para pressões até 20 bar) ou de 2 bar (para pressões superiores a 20 bar). O ponteiro estável indica um bom funcionamento do acumulador.",
+        "dicaSub": "Confirme se o diâmetro do manómetro permite a leitura a 1 metro de distância. O ponteiro não deve vibrar.",
+        "falhas": "Escala ilegível; vidro com rutura; ponteiro com vibração excessiva; diâmetro inferior a 63 mm; divisão de escala superior ao limite normativo; erro de leitura superior a 10%."
+      },
+      {
+        "id": "cat_pistolas_pulverizacao_3_circuito_hidraulico_e_pressao_sub_3",
+        "subpergunta": "As tubagens flexíveis e uniões estão livres de fissuras, estrangulamentos ou sinais de desgaste excessivo?",
+        "informacaoSub": "As mangueiras de alta pressão para pistolas sofrem muito desgaste por arrasto. Fissuras ou deformações estruturais na borracha indicam risco iminente de rutura sob pressão.",
+        "dicaSub": "Verifique toda a extensão da mangueira, especialmente junto às ligações à bomba e ao punho da pistola.",
+        "falhas": "Mangueiras com malha exposta; fugas nas abraçadeiras; dobras permanentes; fissuras na borracha."
+      },
+      {
+        "id": "cat_pistolas_pulverizacao_3_circuito_hidraulico_e_pressao_sub_4",
+        "subpergunta": "A pressão de trabalho mantém-se estável e recupera o valor definido imediatamente após a reabertura do gatilho?",
+        "informacaoSub": "Ao fechar e abrir a pistola, o sistema deve recuperar a pressão alvo quase instantaneamente. Oscilações lentas indicam problemas na válvula reguladora ou na bomba.",
+        "dicaSub": "Acione o gatilho repetidamente e observe o manómetro. A pressão deve recuperar instantaneamente para o valor de trabalho fixado.",
+        "falhas": "Queda de pressão lenta; impossibilidade de manter a pressão constante; válvula de regulação bloqueada."
+      }
+    ]
+  },
+  {
+    "id": "cat_pistolas_pulverizacao_4_pistolas_manuais",
+    "tipoEquipamento": "pistolas_pulverizacao",
+    "categoria": "4. Pistolas Manuais",
+    "perguntaGlobal": "As pistolas de pulverização funcionam de forma rápida e estanque, permitindo o corte total do fluxo e a regulação adequada do jato?",
+    "informacao": "O gatilho deve permitir um corte imediato e estanque. O sistema deve garantir a ausência total de gotejamento na posição 'off' e, se existente, a regulação do débito e do ângulo deve ser funcional.",
+    "dica": "Sob pressão de trabalho, feche o gatilho e observe o bico durante 5 segundos. Não deve ocorrer gotejamento contínuo.",
+    "subperguntas": [
+      {
+        "id": "cat_pistolas_pulverizacao_4_pistolas_manuais_sub_1",
+        "subpergunta": "O gatilho da pistola permite a abertura e o fecho do fluxo de forma rápida, segura e sem esforço excessivo?",
+        "informacaoSub": "O mecanismo de acionamento deve ser fluido. Um gatilho encravado ou com elevada resistência mecânica impede o controlo preciso da aplicação e aumenta a fadiga do operador.",
+        "dicaSub": "Teste o movimento do gatilho várias vezes. Verifique se existe um fecho de segurança que impeça o acionamento acidental.",
+        "falhas": "Gatilho bloqueado; mola de retorno danificada; dificuldade em interromper o fluxo; comando danificado / inoperacional."
+      },
+      {
+        "id": "cat_pistolas_pulverizacao_4_pistolas_manuais_sub_2",
+        "subpergunta": "O sistema garante a ausência de gotejamento (estanquidade) no bico da pistola quando o gatilho está na posição \"off\"?",
+        "informacaoSub": "Após o fecho, o bico não deve apresentar gotejamento. A perda de calda em posição de repouso é sinal de desgaste nas válvulas internas da pistola e causa contaminação do solo e do operador.",
+        "dicaSub": "Se a pistola continuar a pingar após o fecho, verifique o estado do vedante interno ou a presença de impurezas na sede da válvula.",
+        "falhas": "Gotejamento persistente após fecho; perda de líquido pelo corpo da pistola; vedantes gastos."
+      },
+      {
+        "id": "cat_pistolas_pulverizacao_4_pistolas_manuais_sub_3",
+        "subpergunta": "O sistema de regulação do débito e do ângulo do jato (se presente) funciona de forma precisa e mantém a posição definida?",
+        "informacaoSub": "Muitas pistolas permitem ajustar o cone de gotas finas para jato contínuo. Esta regulação deve ser estável para garantir que a dose e o alcance se mantêm constantes.",
+        "dicaSub": "Rode o bico regulável durante a pulverização. O padrão de jato deve alterar-se de forma suave e não deve desregular-se com a vibração.",
+        "falhas": "Sistema de regulação bloqueado; jato assimétrico ou irregular; alteração espontânea do ângulo do jato."
+      },
+      {
+        "id": "cat_pistolas_pulverizacao_4_pistolas_manuais_sub_4",
+        "subpergunta": "O punho e o corpo da pistola estão isentos de fugas de calda que possam contaminar as mãos do operador?",
+        "informacaoSub": "Fugas no punho da pistola são falhas críticas de segurança, pois provocam a exposição dérmica direta do operador ao produto fitofarmacêutico durante todo o trabalho.",
+        "dicaSub": "Verifique se a união entre a mangueira e a pistola está seca e se não sai líquido pelas juntas do gatilho ou corpo.",
+        "falhas": "Fuga de líquido pelo punho; fissuras no corpo da pistola; uniões roscadas a pingar."
+      },
+      {
+        "id": "cat_pistolas_pulverizacao_4_pistolas_manuais_sub_5",
+        "subpergunta": "O bico da pistola produz um padrão de pulverização uniforme, simétrico e sem estrias de água?",
+        "informacaoSub": "O padrão do jato define a cobertura da cultura. Bicos gastos ou deformados criam zonas de sobredosagem ou falhas, o que resulta num tratamento ineficaz.",
+        "dicaSub": "Pulverize contra uma superfície plana. O rasto de humidade deve ser contínuo e sem linhas de água mais densas (estrias).",
+        "falhas": "Jato assimétrico; presença de linhas de água grossas; bico com desgaste visível no orifício."
+      }
+    ]
+  }
+]

@@ -1,0 +1,303 @@
+[
+  {
+    "id": "cat_drones_uas_0_limpeza_geral",
+    "tipoEquipamento": "drones_uas",
+    "categoria": "0. Limpeza Geral",
+    "perguntaGlobal": "O drone e o seu sistema de pulverização estão rigorosamente limpos, sem restos de químicos ou sujidade no corpo e nos sensores?",
+    "informacao": "A limpeza evita que resíduos de calda sequem e bloqueiem o sistema. Além disso, sensores sujos (radares e câmaras) podem falhar, causando acidentes graves durante o voo.",
+    "dica": "Lave o depósito e o circuito com água limpa após cada uso. Use um pano húmido para limpar o corpo do drone e os sensores.",
+    "subperguntas": [
+      {
+        "id": "cat_drones_uas_0_limpeza_geral_sub_1",
+        "subpergunta": "O depósito e os tubos internos foram lavados e estão livres de restos de calda ou sedimentos?",
+        "informacaoSub": "Como os drones usam bicos muito pequenos ou discos rotativos, qualquer grão de sujidade interrompe a aplicação. Resíduos secos podem também danificar a pequena bomba.",
+        "dicaSub": "Faça circular água limpa pelo sistema até que o líquido pulverizado apresente total limpidez. Verifique se o filtro de linha está limpo.",
+        "falhas": "Depósito com manchas coloridas; bicos obstruídos; tubos com resíduos viscosos no interior."
+      },
+      {
+        "id": "cat_drones_uas_0_limpeza_geral_sub_2",
+        "subpergunta": "Os sensores de voo (radares, câmaras e sensores de obstáculos) estão perfeitamente limpos e desimpedidos?",
+        "informacaoSub": "A capacidade de navegação autónoma depende destes sensores. Poeira ou sujidade criam falsos positivos no radar ou bloqueiam o sistema de desvio de obstáculos.",
+        "dicaSub": "Limpe as lentes e radares com um pano de microfibras suave. Nunca use produtos abrasivos que possam riscar os sensores.",
+        "falhas": "Lentes com condensação ou exsudação; radares com incrustações de terra; sensores de altura obstruídos."
+      },
+      {
+        "id": "cat_drones_uas_0_limpeza_geral_sub_3",
+        "subpergunta": "Os contactos elétricos e o encaixe das baterias estão secos e sem sinais de corrosão química?",
+        "informacaoSub": "Os produtos químicos são corrosivos. Se entrarem nos contactos da bateria, podem causar curto-circuitos ou perda de potência em pleno voo, provocando a queda do drone.",
+        "dicaSub": "Inspecione os pinos de ligação. Se notar resíduos, use um spray de limpeza de contactos elétricos e um pincel seco e macio.",
+        "falhas": "Verdete (corrosão) nos pinos; líquido pegajoso no encaixe da bateria; contactos escurecidos."
+      },
+      {
+        "id": "cat_drones_uas_0_limpeza_geral_sub_4",
+        "subpergunta": "As hélices e os braços do drone estão limpos e sem acumulação de detritos ou resíduos de pulverização?",
+        "informacaoSub": "Sujidade nas hélices altera o equilíbrio e o peso, forçando mais os motores. Resíduos nos braços podem esconder fissuras ou danos estruturais importantes.",
+        "dicaSub": "Limpe as hélices com um pano húmido após o trabalho. Verifique se não há fios ou ervas enrolados nos motores.",
+        "falhas": "Hélices contaminadas com resíduos; braços cobertos de pó químico; motores com sujidade visível nas fendas."
+      }
+    ]
+  },
+  {
+    "id": "cat_drones_uas_1_estrutura_e_seguranca_de_voo",
+    "tipoEquipamento": "drones_uas",
+    "categoria": "1. Estrutura e Segurança de Voo",
+    "perguntaGlobal": "A estrutura do drone está em perfeitas condições e os sistemas de propulsão (motores e hélices) garantem a estabilidade e segurança do voo?",
+    "informacao": "Qualquer falha na estrutura ou nos motores pode levar à queda do drone. Hélices danificadas causam vibrações que interferem com a telemetria dos sensores e podem partir-se em pleno voo.",
+    "dica": "Inspecione o drone ao nível dos olhos numa superfície plana. Verifique se todos os braços estão alinhados e se não há folgas nos motores.",
+    "subperguntas": [
+      {
+        "id": "cat_drones_uas_1_estrutura_e_seguranca_de_voo_sub_1",
+        "subpergunta": "As hélices estão isentas de fissuras, cortes, dobras ou desgaste excessivo nas extremidades?",
+        "informacaoSub": "As hélices giram a velocidades altíssimas. Um pequeno entalhe ou corte no bordo de ataque da hélice cria um desequilíbrio dinâmico que força o motor e pode fazer o drone cair subitamente.",
+        "dicaSub": "Inspecione tatilmente o bordo de ataque da hélice para detetar microfissuras ou irregularidades. Se encontrar qualquer lasca ou rachadela, substitua a hélice imediatamente.",
+        "falhas": "Hélices com desgaste estrutural nas extremidades; fissuras visíveis; hélices com perda de rigidez estrutural ou deformadas."
+      },
+      {
+        "id": "cat_drones_uas_1_estrutura_e_seguranca_de_voo_sub_2",
+        "subpergunta": "Os motores rodam de forma suave, sem ruídos metálicos e estão firmemente apertados aos braços?",
+        "informacaoSub": "Folgas nos rolamentos dos motores causam vibrações que aquecem os componentes e prejudicam a precisão da pulverização. O motor deve garantir rigidez estrutural, sem apresentar qualquer folga axial ou radial.",
+        "dicaSub": "Com o drone desligado, rode os motores à mão. Devem rodar livremente, sem prender nem apresentar ruído de fricção interna ou rolamentos gastos.",
+        "falhas": "Motores com folga lateral; parafusos de fixação soltos; ruído de fricção ao rodar à mão."
+      },
+      {
+        "id": "cat_drones_uas_1_estrutura_e_seguranca_de_voo_sub_3",
+        "subpergunta": "Os braços e o corpo do drone estão direitos e sem sinais de fadiga ou fendas na fibra de carbono?",
+        "informacaoSub": "A estrutura (chassis) deve ser rígida. Braços com deformação geométrica ou com microfissuras estruturais podem ceder com o peso do depósito cheio ou durante manobras de travagem brusca.",
+        "dicaSub": "Aplique uma ligeira força nos braços para cima e para baixo. Se detetar crepitações mecânicas ou deflexão excessiva, pode haver uma falha estrutural interna",
+        "falhas": "Fissuras na fibra de carbono; braços desalinhados; mecanismos de fecho dos braços com folga."
+      },
+      {
+        "id": "cat_drones_uas_1_estrutura_e_seguranca_de_voo_sub_4",
+        "subpergunta": "O sistema de fixação da bateria está operacional e a bateria não apresenta sinais de dilatação térmica?",
+        "informacaoSub": "Uma bateria mal fixa pode soltar-se ou mudar o centro de gravidade. Baterias inchadas são um risco de incêndio e podem perder potência de repente em pleno voo.",
+        "dicaSub": "Confirme se a bateria aciona o bloqueio mecânico de segurança ao acoplar. Olhe para a bateria de lado para verificar se as faces estão perfeitamente planas.",
+        "falhas": "Bateria com dilatação térmica visível; fecho de segurança danificado ou sem tensão; pinos de contacto dobrados."
+      },
+      {
+        "id": "cat_drones_uas_1_estrutura_e_seguranca_de_voo_sub_5",
+        "subpergunta": "O trem de pouso (pernas do drone) está estável e sem danos que possam afetar a descolagem ou a aterragem?",
+        "informacaoSub": "Componentes danificados ou frágeis podem causar o desequilíbrio estrutural do drone ao aterrar, levando as hélices a colidir com o solo, destruindo os motores e o sistema de pulverização.",
+        "dicaSub": "Submeta o trem de pouso a uma carga de compressão estática e verifique a integridade dos suportes. Verifique as pontas de borracha ou plástico.",
+        "falhas": "Componentes com reparações provisórias (ex: fita adesiva); estrutura de pouso deformada."
+      }
+    ]
+  },
+  {
+    "id": "cat_drones_uas_2_deposito_e_sistema_de_pulverizacao",
+    "tipoEquipamento": "drones_uas",
+    "categoria": "2. Depósito e Sistema de Pulverização",
+    "perguntaGlobal": "O depósito e o circuito de pulverização estão estanques, com filtros limpos e garantem uma mistura homogénea da calda?",
+    "informacao": "O sistema deve estar livre de fugas para proteger a eletrónica e o ambiente. A filtragem rigorosa e a agitação são vitais para evitar a obstrução dos bicos de precisão.",
+    "dica": "Encha o depósito com água e ligue a bomba no solo. Verifique se existem gotas nas uniões e se a água se move dentro do tanque.",
+    "subperguntas": [
+      {
+        "id": "cat_drones_uas_2_deposito_e_sistema_de_pulverizacao_sub_1",
+        "subpergunta": "O depósito está firmemente fixado ao corpo do drone e não apresenta qualquer fuga de líquido?",
+        "informacaoSub": "Um depósito solto altera o centro de gravidade e pode desequilibrar o voo. Fugas de químicos concentrados podem corroer o chassis ou causar curto-circuitos fatais.",
+        "dicaSub": "Verifique os encaixes rápidos ou parafusos de fixação. Se o depósito for removível, confirme se o sistema de retenção o imobiliza totalmente.",
+        "falhas": "Gotejamento na base do tanque; fixação deficiente do depósito; fissuras no polímero ou chassis; fecho rápido solto."
+      },
+      {
+        "id": "cat_drones_uas_2_deposito_e_sistema_de_pulverizacao_sub_2",
+        "subpergunta": "O sistema de filtragem (no bocal de enchimento e na linha) está completo, limpo e com as malhas em bom estado?",
+        "informacaoSub": "Os bicos dos drones são minúsculos. Sem filtros perfeitos, o sistema entope instantaneamente. O filtro de bocal impede a entrada de detritos logo no abastecimento.",
+        "dicaSub": "Nunca abasteça o drone sem o filtro de cesto no bocal. Limpe o filtro de linha após cada dia de trabalho.",
+        "falhas": "Filtro de bocal em falta; malha do filtro de linha danificada ou obstruída por partículas; filtros colmatados."
+      },
+      {
+        "id": "cat_drones_uas_2_deposito_e_sistema_de_pulverizacao_sub_3",
+        "subpergunta": "O indicador de nível (físico ou digital na app) é preciso e permite saber exatamente quanta calda resta?",
+        "informacaoSub": "Saber o nível real evita que a bomba trabalhe em seco e aspire ar. O erro entre o volume registado pela aplicação e o que está no depósito deve ser mínimo.",
+        "dicaSub": "Compare as marcas da escala física do depósito com a leitura apresentada no comando do drone. Os valores devem coincidir.",
+        "falhas": "Escala do depósito apagada; sensor de nível bloqueado; erro de telemetria no comando."
+      },
+      {
+        "id": "cat_drones_uas_2_deposito_e_sistema_de_pulverizacao_sub_4",
+        "subpergunta": "O sistema de agitação ou retorno de calda mantém o produto bem misturado no interior do depósito?",
+        "informacaoSub": "Os produtos para drones são densos. Se a calda não for agitada, o produto deposita-se no fundo, causando uma aplicação desigual e possíveis obstruções.",
+        "dicaSub": "Com a bomba ligada, observe se a água regressa ao depósito com força suficiente para criar movimento.",
+        "falhas": "Produto acumulado no fundo; falta de movimento interno da calda; tubos de retorno soltos."
+      },
+      {
+        "id": "cat_drones_uas_2_deposito_e_sistema_de_pulverizacao_sub_5",
+        "subpergunta": "As tubagens e mangueiras estão isentas de dobras, bolhas de ar ou sinais de desgaste por vibração?",
+        "informacaoSub": "Tubos dobrados ou vincados restringem o fluxo hidráulico e provocam sobrecarga térmica na bomba. Bolhas de ar persistentes indicam entradas falsas de ar que impedem uma pulverização constante.",
+        "dicaSub": "Inspecione os tubos nos braços do drone. Garanta que as abraçadeiras estão apertadas e os tubos sem vincos.",
+        "falhas": "Tubos vincados; bolhas de ar no circuito; mangueiras a roçar na estrutura; fugas nas uniões."
+      }
+    ]
+  },
+  {
+    "id": "cat_drones_uas_3_bomba_e_regulacao_de_debito",
+    "tipoEquipamento": "drones_uas",
+    "categoria": "3. Bomba e Regulação de Débito",
+    "perguntaGlobal": "A bomba funciona sem fugas e o sistema eletrónico regula o débito de forma precisa e automática?",
+    "informacao": "A bomba deve manter a pressão sem oscilações. O sistema deve ajustar o fluxo de calda automaticamente conforme o drone acelera ou abranda para garantir a dose certa.",
+    "dica": "Utilize a aplicação de controlo no solo para fazer um teste de fluxo com água. Verifique se a bomba reage de imediato.",
+    "subperguntas": [
+      {
+        "id": "cat_drones_uas_3_bomba_e_regulacao_de_debito_sub_1",
+        "subpergunta": "A bomba de pulverização apresenta estanquidade total e funciona sem ruídos metálicos ou vibrações estranhas?",
+        "informacaoSub": "Fugas na bomba podem molhar os componentes elétricos por baixo dela. Ruídos anormais indicam que a bomba apresenta falha iminente ou a presença de detritos no interior.",
+        "dicaSub": "Ligue a bomba no modo de purga por 30 segundos. Passe um papel absorvente por baixo para confirmar que não existe qualquer exsudação ou gotejamento.",
+        "falhas": "Gotejamento na bomba; vibração que induz oscilação nas tubagens; falha no arranque inicial da bomba elétrica."
+      },
+      {
+        "id": "cat_drones_uas_3_bomba_e_regulacao_de_debito_sub_2",
+        "subpergunta": "O medidor de débito (fluxómetro) está limpo e fornece leituras precisas que correspondem ao líquido gasto?",
+        "informacaoSub": "O sensor de fluxo transmite ao controlador de voo o volume de líquido debitado. Se estiver sujo ou mal calibrado, o controlador de voo registará uma aplicação incorreta, resultando em sobredosagem ou subdosagem no terreno.",
+        "dicaSub": "Após o teste, verifique se a quantidade de água introduzida no depósito coincide com o volume gasto registado pela aplicação.",
+        "falhas": "Aviso de \"erro de fluxo\" no comando; leitura de débito instável; sensor com resíduos visíveis."
+      },
+      {
+        "id": "cat_drones_uas_3_bomba_e_regulacao_de_debito_sub_3",
+        "subpergunta": "O sistema de regulação altera o fluxo de calda de forma visível quando se altera a velocidade de voo simulada?",
+        "informacaoSub": "Se o drone voar mais rápido, a bomba tem de acelerar para manter a dose. Se este ajuste falhar, o drone aplicará menos produto do que o necessário nas zonas rápidas.",
+        "dicaSub": "No modo manual, tente variar a velocidade de voo e observe se o jato dos bicos fica mais forte ou mais fraco de imediato.",
+        "falhas": "Débito fixo (não muda); resposta lenta do sistema; interrupção anómala do fluxo nos bicos."
+      },
+      {
+        "id": "cat_drones_uas_3_bomba_e_regulacao_de_debito_sub_4",
+        "subpergunta": "As ligações elétricas da bomba e dos sensores estão protegidas contra a humidade e sem sinais de corrosão?",
+        "informacaoSub": "As fichas elétricas da bomba estão expostas a vibrações e humidade. Contactos sujos ou corroídos podem fazer com que a bomba pare subitamente durante o voo.",
+        "dicaSub": "Verifique se as fichas estão bem encaixadas e se as borrachas de proteção (vedantes) não estão cortadas.",
+        "falhas": "Fichas soltas; sinais de verdete (corrosão) nos pinos; cabos com isolamento cortado ou gasto."
+      },
+      {
+        "id": "cat_drones_uas_3_bomba_e_regulacao_de_debito_sub_5",
+        "subpergunta": "O sistema de purga de ar do circuito funciona corretamente e elimina todas as bolhas antes do voo?",
+        "informacaoSub": "A presença de ar no circuito provoca uma pulverização descontínua ou pulsante. O sistema deve ser capaz de expulsar todo o ar rapidamente para a pulverização ser constante.",
+        "dicaSub": "Execute o ciclo de purga do ar através da aplicação. Confirme a continuidade do fluxo hidráulico antes da descolagem.",
+        "falhas": "Bolhas de ar bloqueadas nos tubos; bicos que demoram a começar; fluxo de calda descontínuo."
+      }
+    ]
+  },
+  {
+    "id": "cat_drones_uas_4_orgaos_de_distribuicao",
+    "tipoEquipamento": "drones_uas",
+    "categoria": "4. Órgãos de Distribuição",
+    "perguntaGlobal": "Os bicos ou discos rotativos estão em bom estado, são todos idênticos e garantem uma aplicação uniforme sem gotejamento?",
+    "informacao": "A qualidade da cobertura depende do estado dos bicos. Como o drone usa pouca água, qualquer bico gasto ou sujo altera a dose e deixa zonas da cultura sem proteção.",
+    "dica": "Ligue a pulverização com o drone a baixa altura e observe se o padrão de pulverização de todos os bicos é homogéneo.",
+    "subperguntas": [
+      {
+        "id": "cat_drones_uas_4_orgaos_de_distribuicao_sub_1",
+        "subpergunta": "Todos os bicos ou discos instalados no drone são do mesmo modelo, tamanho e marca?",
+        "informacaoSub": "Misturar bicos de diferentes tamanhos faz com que um lado do drone aplique mais líquido que o outro, provocando uma distribuição desigual e ineficaz no campo.",
+        "dicaSub": "Confirme a cor e os códigos gravados em cada bico. Se usar discos rotativos, verifique se são todos do mesmo tipo.",
+        "falhas": "Bicos de cores diferentes; modelos misturados; bicos de materiais distintos (ex: cerâmica e polímero)."
+      },
+      {
+        "id": "cat_drones_uas_4_orgaos_de_distribuicao_sub_2",
+        "subpergunta": "Os bicos ou discos estão perfeitamente limpos e o padrão do jato é uniforme e isento de concentrações anómalas (estrias)?",
+        "informacaoSub": "Bicos parcialmente obstruídos ou gastos criam jatos assimétricos ou com concentrações anómalas de líquido (estrias), o que resulta numa má cobertura das folhas e desperdício.",
+        "dicaSub": "Limpe os bicos apenas com uma escova de cerdas macias ou ar comprimido. Nunca use agulhas ou arames que riscam o bico.",
+        "falhas": "Jato deformado; presença de estrias no leque; bico obstruído."
+      },
+      {
+        "id": "cat_drones_uas_4_orgaos_de_distribuicao_sub_3",
+        "subpergunta": "O sistema de corte (antigota) funciona em todos os bicos, parando o fluxo de imediato após desligar a bomba?",
+        "informacaoSub": "Drones transportam caldas muito fortes. Se o bico pingar ao parar ou ao mudar de linha, pode causar fitotoxicidade localizada na cultura ou contaminar zonas onde o drone descola e aterra.",
+        "dicaSub": "Ao desligar a pulverização, a saída de água deve parar no segundo seguinte. Não deve ver gotas a cair durante 5 segundos.",
+        "falhas": "Gotejamento persistente; membranas degradadas ou perfuradas; sujidade na válvula; válvulas bloqueadas; sistema inexistente."
+      },
+      {
+        "id": "cat_drones_uas_4_orgaos_de_distribuicao_sub_4",
+        "subpergunta": "Nos sistemas com discos rotativos, estes giram de forma suave, à mesma velocidade e sem vibrações?",
+        "informacaoSub": "O disco deve girar muito rápido para criar gotas finas. Se um disco estiver mais lento ou vibrar, as gotas serão demasiado grandes e a calda não cobrirá bem a planta.",
+        "dicaSub": "Avalie o ruído mecânico dos pequenos motores dos discos durante o teste. O som de rotação deve ser contínuo, agudo e homogéneo em todos os braços do drone.",
+        "falhas": "Disco que gira devagar; vibração que induz oscilação do braço do drone; ruído de rolamentos gastos no disco."
+      },
+      {
+        "id": "cat_drones_uas_4_orgaos_de_distribuicao_sub_5",
+        "subpergunta": "Os bicos estão orientados corretamente para baixo e protegidos contra impactos durante o transporte?",
+        "informacaoSub": "Um bico torto envia a calda para fora da zona de voo do drone. Sendo peças frágeis e expostas, devem estar bem alinhadas e sem danos provocados por pancadas.",
+        "dicaSub": "Olhe para o drone de frente e confirme que todos os bicos apontam exatamente para o mesmo ângulo vertical.",
+        "falhas": "Bicos visivelmente desalinhados; suportes de bico danificados ou mecanicamente deformados; bicos soltos."
+      }
+    ]
+  },
+  {
+    "id": "cat_drones_uas_5_controlo_e_navegacao",
+    "tipoEquipamento": "drones_uas",
+    "categoria": "5. Controlo e Navegação",
+    "perguntaGlobal": "O comando, o sistema de posicionamento e as baterias garantem o controlo total, a segurança e a precisão do voo planeado?",
+    "informacao": "A segurança do voo e a precisão da dose dependem da ligação entre o comando e o drone. Erros no mapa ou falhas no GPS podem levar a aplicação para fora do local desejado.",
+    "dica": "Calibre a bússola e o RTK num local aberto e sem metais. Confirme se o mapa no ecrã corresponde à realidade do terreno.",
+    "subperguntas": [
+      {
+        "id": "cat_drones_uas_5_controlo_e_navegacao_sub_1",
+        "subpergunta": "O comando (rádio controlo) está em bom estado, com os manípulos a responderem suavemente e o ecrã perfeitamente legível?",
+        "informacaoSub": "O comando é o seu único elo com o drone. Manípulos que prendem ou ecrãs riscados e sujos impedem reações rápidas em caso de emergência ou de obstáculos inesperados.",
+        "dicaSub": "Limpe o ecrã e teste os botões de \"Paragem de Emergência\" e \"Regresso a Casa\" (RTH) antes de iniciar cada missão.",
+        "falhas": "Manípulos sem retorno à posição neutra; botões danificados; ecrã com manchas ou pouca luminosidade."
+      },
+      {
+        "id": "cat_drones_uas_5_controlo_e_navegacao_sub_2",
+        "subpergunta": "O sistema de posicionamento (GPS e Antena RTK) obtém uma ligação estável e precisa antes da descolagem?",
+        "informacaoSub": "O RTK permite que o drone saiba onde está com precisão de centímetros. Sem esta precisão, o drone pode falhar as linhas de pulverização ou bater em árvores e postes.",
+        "dicaSub": "Verifique na aplicação se o estado do sinal diz \"FIX\". Nunca voe com sinal fraco ou instável perto de obstáculos.",
+        "falhas": "Perda constante de sinal; erro de posicionamento no mapa; antena com danos físicos visíveis."
+      },
+      {
+        "id": "cat_drones_uas_5_controlo_e_navegacao_sub_3",
+        "subpergunta": "As baterias do drone e do comando têm autonomia suficiente e não apresentam sinais de desgaste ou erros de voltagem?",
+        "informacaoSub": "Baterias com elevado nível de degradação (ciclos) podem sofrer quedas de tensão abruptas sob carga máxima. O sistema de energia deve garantir que o drone tem sempre reserva para voltar e aterrar.",
+        "dicaSub": "Use a aplicação para verificar o estado de degradação (State of Health - SoH) da bateria. Se houver um aviso de diferença de voltagem entre células, não voe.",
+        "falhas": "Bateria com perda anómala de capacidade de carga; aviso de sobreaquecimento; conectores com sinais de queimado."
+      },
+      {
+        "id": "cat_drones_uas_5_controlo_e_navegacao_sub_4",
+        "subpergunta": "O planeamento de voo e o mapa estão corretos, com os limites da parcela e os obstáculos (postes/árvores) bem assinalados?",
+        "informacaoSub": "Um erro no desenho do mapa pode fazer o drone pulverizar o vizinho ou chocar com um poste. O plano de voo deve garantir a sobreposição correta entre passagens.",
+        "dicaSub": "Antes de iniciar a missão automática, confirme se o sistema identificou e integrou os obstáculos demarcados no plano de voo.",
+        "falhas": "Mapa desalinhado com o terreno; limites da parcela mal definidos; obstáculos não assinalados."
+      },
+      {
+        "id": "cat_drones_uas_5_controlo_e_navegacao_sub_5",
+        "subpergunta": "Os sensores de deteção de obstáculos e o radar de seguimento de terreno estão ativos e a reagir corretamente?",
+        "informacaoSub": "O radar mantém o drone à altura certa da cultura. Se falhar, o drone pode elevar-se excessivamente ou colidir com a cultura ou o terreno.",
+        "dicaSub": "Faça um voo de teste a baixa velocidade e verifique se o drone sobe e desce acompanhando as variações do terreno.",
+        "falhas": "Drone não mantém a altura constante; sensores ignoram obstáculos; avisos de erro no radar."
+      }
+    ]
+  },
+  {
+    "id": "cat_drones_uas_6_seguranca_complementar",
+    "tipoEquipamento": "drones_uas",
+    "categoria": "6. Segurança Complementar",
+    "perguntaGlobal": "O drone está devidamente identificado, possui avisos luminosos funcionais e o local de operação garante a segurança do operador?",
+    "informacao": "A identificação clara e os avisos luminosos são essenciais para a segurança no espaço aéreo. No solo, o operador deve ter meios para se descontaminar em caso de acidente.",
+    "dica": "Verifique se as luzes de estado são visíveis mesmo com sol forte. Garanta que a placa de registo está adequadamente fixada.",
+    "subperguntas": [
+      {
+        "id": "cat_drones_uas_6_seguranca_complementar_sub_1",
+        "subpergunta": "O drone possui a placa de identificação (registo) de operador e equipamento fixada de forma permanente e legível?",
+        "informacaoSub": "Todo o drone de aplicação deve estar identificado. Isto permite a responsabilização em caso de incidente e ajuda na gestão de frotas e manutenções programadas.",
+        "dicaSub": "A placa deve ser resistente à corrosão dos químicos e estar num local do chassis que não sofra muito calor.",
+        "falhas": "Ausência de número de registo; placa ilegível ou tapada; identificação errada."
+      },
+      {
+        "id": "cat_drones_uas_6_seguranca_complementar_sub_2",
+        "subpergunta": "As luzes de estado (LEDs de navegação e aviso) estão funcionais e permitem identificar a orientação do drone à distância?",
+        "informacaoSub": "As luzes indicam se o drone está pronto a voar, se tem erros ou se a bateria está fraca. Em voo, ajudam o operador a identificar rapidamente a orientação de voo (heading) do equipamento à distância.",
+        "dicaSub": "Ligue o drone e confirme se os LEDs verdes/vermelhos/azuis acendem sem falhas e se as proteções de plástico não estão baças.",
+        "falhas": "LEDs inoperacionais; luzes com pouca intensidade; aviso de erro de luzes no comando."
+      },
+      {
+        "id": "cat_drones_uas_6_seguranca_complementar_sub_3",
+        "subpergunta": "As grelhas de ventilação e os dissipadores de calor dos motores e da eletrónica estão desimpedidos?",
+        "informacaoSub": "O esforço de voar com carga gera muito calor. Se o sistema de arrefecimento estiver tapado com pó ou resíduos, o drone pode desligar-se em pleno voo para evitar sobreaquecimento severo (thermal runaway).",
+        "dicaSub": "Use um pincel seco para retirar o pó das aberturas de ar dos braços e do corpo do drone. Nunca tape estas entradas com fitas.",
+        "falhas": "Entradas de ar obstruídas; acumulação de resíduos de calda; ventoinhas de arrefecimento bloqueadas."
+      },
+      {
+        "id": "cat_drones_uas_6_seguranca_complementar_sub_4",
+        "subpergunta": "Existe um kit de água limpa e lava-olhos disponível junto à estação de carregamento e mistura de calda?",
+        "informacaoSub": "Como os drones aplicam produto muito concentrado, qualquer salpico na pele ou olhos é perigoso. A água limpa deve estar imediatamente ao lado do operador.",
+        "dicaSub": "Tenha sempre um bidão de pelo menos 15 litros de água limpa e sabão neutro na carrinha ou no reboque de apoio ao drone.",
+        "falhas": "Ausência de água limpa na zona de trabalho; sabão ou lava-olhos em falta; água contaminada."
+      }
+    ]
+  }
+]

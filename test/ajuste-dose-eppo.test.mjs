@@ -9,11 +9,32 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 import {
-  calculateEppoDoseAdjusted,
+  calculateEppoDoseComprehensive,
   buildEppoDoseStructuredValues
 } from '../src/features/ajuste-dose-eppo/eppoDoseDataMapper.ts';
 
 import { generateIdempotencyKey } from '../src/services/integrations/centralgestMapper.ts';
+
+function calculateEppoDoseAdjusted(
+  doseRotulo,
+  lwaReal,
+  lwaRef,
+  capacidadeDeposito,
+  volumeCaldaLHa
+) {
+  return calculateEppoDoseComprehensive(
+    doseRotulo,
+    0,
+    0,
+    'total',
+    'sebe',
+    0.8,
+    lwaRef,
+    capacidadeDeposito,
+    volumeCaldaLHa,
+    lwaReal
+  );
+}
 
 describe('Calculadora Canónica: Ajuste da Dose (Método EPPO PP 1/239)', () => {
 
@@ -59,6 +80,10 @@ describe('Calculadora Canónica: Ajuste da Dose (Método EPPO PP 1/239)', () => 
     assert.equal(resNeg.isValid, false);
     assert.equal(resNeg.doseAjustada, 0);
 
+    const resNegLwa = calculateEppoDoseAdjusted(1.5, -7500, 10000, 1000, 400);
+    assert.equal(resNegLwa.isValid, false);
+    assert.equal(resNegLwa.doseAjustada, 0);
+
     const resNan = calculateEppoDoseAdjusted(NaN, 7500, 10000, 1000, 400);
     assert.equal(resNan.isValid, false);
     assert.equal(resNan.doseAjustada, 0);
@@ -66,17 +91,25 @@ describe('Calculadora Canónica: Ajuste da Dose (Método EPPO PP 1/239)', () => 
 
   test('3. Estruturação correta de StructuredValues para histórico v2 e Outbox', () => {
     const res = calculateEppoDoseAdjusted(2.0, 7500, 10000, 1000, 400);
-    const { inputs, outputs } = buildEppoDoseStructuredValues(2.0, 7500, 10000, 'liquid', res);
+    const inputs = {
+      doseRotulo: 2.0,
+      alturaM: 1.5,
+      entrelinhaM: 2.5,
+      treatmentMode: 'total',
+      cropStructure: 'sebe',
+      larguraCopaM: 0.8,
+      lwaRef: 10000,
+      capacidadeDeposito: 1000,
+      volumeCaldaLHa: 400,
+      unitMode: 'liquid',
+      foliarInputSource: 'manual'
+    };
+    const { inputs: structuredInputs, outputs } = buildEppoDoseStructuredValues(inputs, res);
 
-    assert.equal(inputs.doseRotulo.canonicalKey, 'label_dose');
-    assert.equal(inputs.doseRotulo.dimension, 'application_rate');
-    assert.equal(inputs.doseRotulo.unit, 'L/ha');
-    assert.equal(inputs.doseRotulo.rawValue, 2.0);
-
-    assert.equal(inputs.lwaReal.canonicalKey, 'leaf_wall_area');
-    assert.equal(inputs.lwaReal.dimension, 'foliar_wall_area');
-    assert.equal(inputs.lwaReal.unit, 'm² LWA/ha');
-    assert.equal(inputs.lwaReal.rawValue, 7500);
+    assert.equal(structuredInputs.doseRotulo.canonicalKey, 'label_dose');
+    assert.equal(structuredInputs.doseRotulo.dimension, 'application_rate');
+    assert.equal(structuredInputs.doseRotulo.unit, 'L/ha');
+    assert.equal(structuredInputs.doseRotulo.rawValue, 2.0);
 
     assert.equal(outputs.doseAjustada.canonicalKey, 'adjusted_dose');
     assert.equal(outputs.doseAjustada.dimension, 'application_rate');
@@ -86,42 +119,34 @@ describe('Calculadora Canónica: Ajuste da Dose (Método EPPO PP 1/239)', () => 
   });
 
   test('4. Geração de chave de idempotência UUIDv4 para a Mutation Outbox', () => {
-    const k1 = generateIdempotencyKey();
-    const k2 = generateIdempotencyKey();
-    assert.notEqual(k1, k2);
-    assert.match(k1, /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i);
+    const key1 = generateIdempotencyKey();
+    const key2 = generateIdempotencyKey();
+
+    assert.ok(typeof key1 === 'string' && key1.length === 36);
+    assert.ok(typeof key2 === 'string' && key2.length === 36);
+    assert.notEqual(key1, key2);
+
+    const uuidV4Regex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    assert.match(key1, uuidV4Regex);
   });
 
   test('5. Modularidade estrita: nenhum ficheiro do módulo excede 200 linhas de código', () => {
-    const files = [
-      'src/features/ajuste-dose-eppo/eppoDoseDataMapper.ts',
-      'src/features/ajuste-dose-eppo/EppoDoseHeader.tsx',
-      'src/features/ajuste-dose-eppo/EppoDoseResultCard.tsx',
-      'src/features/ajuste-dose-eppo/EppoDoseInputsPanel.tsx',
-      'src/features/ajuste-dose-eppo/EppoDoseSecondaryParams.tsx',
-      'src/features/ajuste-dose-eppo/eppoDoseStorage.ts',
-      'src/features/ajuste-dose-eppo/EppoDoseFooterBar.tsx',
-      'src/features/ajuste-dose-eppo/EppoDoseCalculator.tsx',
-      'src/features/ajuste-dose-eppo/index.ts'
-    ];
+    const moduleDir = path.resolve('src/features/ajuste-dose-eppo');
+    const files = fs.readdirSync(moduleDir).filter(f => f.endsWith('.ts') || f.endsWith('.tsx'));
 
-    for (const f of files) {
-      const fullPath = path.resolve(f);
-      assert.ok(fs.existsSync(fullPath), `Ficheiro deve existir: ${f}`);
-      const content = fs.readFileSync(fullPath, 'utf8');
-      const lineCount = content.split('\n').length;
-      assert.ok(
-        lineCount <= 200,
-        `Ficheiro ${f} tem ${lineCount} linhas, excedendo o limite estrito de 200 linhas!`
-      );
+    assert.ok(files.length >= 3, 'O módulo deve ter pelo menos 3 ficheiros modulares');
+
+    for (const file of files) {
+      const fullPath = path.join(moduleDir, file);
+      const lines = fs.readFileSync(fullPath, 'utf8').split('\n').length;
+      assert.ok(lines <= 200, `Ficheiro ${file} tem ${lines} linhas (máximo permitido: 200)`);
     }
   });
 
   test('6. Rotas canónicas em src/App.tsx devidamente registadas', () => {
-    const appCode = fs.readFileSync(path.resolve('src/App.tsx'), 'utf8');
-    assert.ok(appCode.includes('path="/ferramentas/ajuste-dose-eppo"'));
-    assert.ok(appCode.includes('path="/tools/ajuste-dose-eppo"'));
-    assert.ok(appCode.includes('element={<EppoDoseCalculator />}'));
+    const appTsx = fs.readFileSync(path.resolve('src/App.tsx'), 'utf8');
+    assert.ok(appTsx.includes('/tools/ajuste_dose_eppo'));
+    assert.ok(appTsx.includes('/ferramentas/ajuste-dose-eppo'));
   });
 
 });

@@ -1,0 +1,185 @@
+[
+  {
+    "id": "cat_polvilhador_0_limpeza_geral",
+    "tipoEquipamento": "polvilhador",
+    "categoria": "0. Limpeza Geral",
+    "perguntaGlobal": "O equipamento apresenta uma limpeza rigorosa e o interior do reservatório está totalmente seco?",
+    "informacao": "A humidade no reservatório ou tubos provoca a aglomeração do pó, bloqueando o sistema de dosagem. A limpeza evita a contaminação e garante a fluidez do produto.",
+    "dica": "Inspecione o fundo do depósito e os tubos. Se lavar a máquina, use ar comprimido para garantir secagem absoluta.",
+    "subperguntas": [
+      {
+        "id": "cat_polvilhador_0_limpeza_geral_sub_1",
+        "subpergunta": "O reservatório está isento de resíduos endurecidos ou aglomerados de pó de utilizações anteriores?",
+        "informacaoSub": "Restos de pó antigo que absorveram humidade endurecem e podem danificar o agitador mecânico ou obstruir a saída, causando uma aplicação irregular e falhas mecânicas.",
+        "dicaSub": "Remova todo o pó residual após cada utilização. Use uma espátula de plástico para verificar se há incrustações no fundo.",
+        "falhas": "Pó compactado ou solidificado no fundo; agitador bloqueado; resíduos químicos de cores diferentes (mistura)."
+      },
+      {
+        "id": "cat_polvilhador_0_limpeza_geral_sub_2",
+        "subpergunta": "O exterior da máquina está livre de acumulações de pó que possam contaminar o operador?",
+        "informacaoSub": "O pó fino deposita-se facilmente no chassis e comandos. A limpeza exterior é vital para a saúde do operador e para evitar a corrosão das partes metálicas.",
+        "dicaSub": "Limpe o exterior preferencialmente por aspiração ou pano húmido, evitando a formação de nuvens de pó fitofarmacêutico em suspensão.",
+        "falhas": "Camadas espessas de pó no chassis; comandos poeirentos; depósitos de pó nas articulações."
+      }
+    ]
+  },
+  {
+    "id": "cat_polvilhador_1_transmissao_e_ventilacao",
+    "tipoEquipamento": "polvilhador",
+    "categoria": "1. Transmissão e Ventilação",
+    "perguntaGlobal": "Os componentes de transmissão estão devidamente protegidos e o ventilador opera sem danos ou vibrações?",
+    "informacao": "Proteções íntegras no cardan evitam acidentes graves. O ventilador deve estar equilibrado e com todas as pás para evitar vibrações que danifiquem a estrutura.",
+    "dica": "Inspecione visualmente as proteções do cardan e das pás. Ligue a máquina e verifique se existem ruídos ou vibrações anormais.",
+    "subperguntas": [
+      {
+        "id": "cat_polvilhador_1_transmissao_e_ventilacao_sub_1",
+        "subpergunta": "O cardan e as juntas universais possuem proteções adequadas, fixas e sem danos?",
+        "informacaoSub": "O veio de transmissão e as juntas devem estar totalmente cobertos por proteções funcionais para impedir o contacto acidental com o operador.",
+        "dicaSub": "Verifique se a proteção não roda com o veio e se os cones de proteção cobrem as juntas nas extremidades.",
+        "falhas": "Proteção do cardan danificada; falta de correntes de fixação; juntas universais expostas."
+      },
+      {
+        "id": "cat_polvilhador_1_transmissao_e_ventilacao_sub_2",
+        "subpergunta": "As pás do ventilador estão todas presentes, limpas e sem deformações mecânicas?",
+        "informacaoSub": "A falta ou deformação de uma única pá causa desequilíbrio dinâmico. Isto gera vibrações que podem levar à rutura da carcaça ou do eixo.",
+        "dicaSub": "Com o motor desligado, limpe e conte as pás. Verifique se existem sinais de corrosão profunda ou impactos.",
+        "falhas": "Pás em falta ou danificadas; acumulação de pó endurecido; vibração excessiva em funcionamento."
+      },
+      {
+        "id": "cat_polvilhador_1_transmissao_e_ventilacao_sub_3",
+        "subpergunta": "Existe uma embraiagem funcional para desligar o ventilador independentemente de outras partes?",
+        "informacaoSub": "Se presente, a embraiagem deve permitir parar o fluxo de ar mantendo outros sistemas ativos. É um componente essencial para manobras e segurança.",
+        "dicaSub": "Teste o acionamento da alavanca ou comando. O ventilador deve desligar de forma suave e completa.",
+        "falhas": "Embraiagem com deslizamento mecânico excessivo; comando bloqueado; impossibilidade de desligar o ventilador."
+      },
+      {
+        "id": "cat_polvilhador_1_transmissao_e_ventilacao_sub_4",
+        "subpergunta": "As partes dobráveis ou articuladas possuem sistemas de bloqueio funcionais?",
+        "informacaoSub": "Se o polvilhador tiver braços ou partes dobráveis, os bloqueios de segurança devem funcionar sem defeitos para evitar aberturas acidentais.",
+        "dicaSub": "Teste manualmente os pinos ou manípulos de bloqueio, garantindo que fixam a peça de forma rígida.",
+        "falhas": "Dispositivos de bloqueio danificados; folgas mecânicas; impossibilidade de bloqueio mecânico."
+      }
+    ]
+  },
+  {
+    "id": "cat_polvilhador_2_deposito_e_agitacao_de_po",
+    "tipoEquipamento": "polvilhador",
+    "categoria": "2. Depósito e Agitação de Pó",
+    "perguntaGlobal": "O reservatório garante estanquidade total e o sistema de agitação assegura a fluidez constante do pó?",
+    "informacao": "O depósito deve ser estanque para evitar perdas. A agitação é vital para evitar a compactação do pó; em modelos pneumáticos, a tampa deve ser hermética pois é pressurizada.",
+    "dica": "Teste o fecho da tampa e procure fugas de ar ou pó. Verifique se o agitador impede a compactação do produto no fundo.",
+    "subperguntas": [
+      {
+        "id": "cat_polvilhador_2_deposito_e_agitacao_de_po_sub_1",
+        "subpergunta": "O sistema de agitação (mecânico ou por fluxo de ar) funciona corretamente sem permitir a acumulação de pó?",
+        "informacaoSub": "O agitador deve manter o pó solto. Falhas aqui levam a uma distribuição irregular ou ao bloqueio total da saída por compactação do produto químico.",
+        "dicaSub": "Observe o movimento do agitador mecânico ou a turbulência do ar sem usar pó durante a verificação.",
+        "falhas": "Agitador bloqueado ou danificado; ausência de fluxo de ar interno; acumulação de pó endurecido."
+      },
+      {
+        "id": "cat_polvilhador_2_deposito_e_agitacao_de_po_sub_2",
+        "subpergunta": "A tampa do depósito garante a estanquicidade e possui um sistema que impede a sua abertura acidental?",
+        "informacaoSub": "A tampa deve estar bem selada para evitar a dispersão de pó para o ambiente. Nos polvilhadores pneumáticos, qualquer fuga de ar na tampa compromete a pressurização.",
+        "dicaSub": "Inspecione visualmente o vedante e o mecanismo de fecho. Use um anemómetro para detetar fugas de ar junto à tampa.",
+        "falhas": "Vedante da tampa danificado; fecho instável; fugas de ar detetáveis; pó visível nas bordas externas."
+      },
+      {
+        "id": "cat_polvilhador_2_deposito_e_agitacao_de_po_sub_3",
+        "subpergunta": "O bocal de enchimento tem dimensões que permitem a introdução do pó de forma fácil e segura?",
+        "informacaoSub": "O diâmetro do bocal deve ser suficiente para evitar derrames durante o abastecimento, minimizando a exposição do operador ao pó fitossanitário.",
+        "dicaSub": "Verifique se a abertura permite o uso de acessórios de enchimento sem obstruções ou riscos de queda de pó.",
+        "falhas": "Bocal demasiado estreito; deformações que dificultam o enchimento; arestas cortantes no bocal."
+      },
+      {
+        "id": "cat_polvilhador_2_deposito_e_agitacao_de_po_sub_4",
+        "subpergunta": "O depósito mantém a pressurização correta sem fugas de ar pelas juntas ou tampa?",
+        "informacaoSub": "Nos polvilhadores pneumáticos, o depósito é pressurizado. Qualquer fuga de ar impede a correta extração e transporte do pó para os bicos distribuidores.",
+        "dicaSub": "Com a máquina ligada, use um anemómetro ou solução detetora de fugas (água com sabão) junto às juntas para detetar fugas de ar.",
+        "falhas": "Perda de pressão audível; junta da tampa ressequida (sem elasticidade); depósito com fissuras de ar."
+      }
+    ]
+  },
+  {
+    "id": "cat_polvilhador_3_regulacao_e_condutas",
+    "tipoEquipamento": "polvilhador",
+    "categoria": "3. Regulação e Condutas",
+    "perguntaGlobal": "As condutas de fluxo estão isentas de fugas e os sistemas de regulação permitem um controlo preciso, estável e seguro do débito?",
+    "informacao": "Não podem existir fugas de ar nas tubagens ou mangueiras. O sistema de regulação deve ser bloqueável, possuir \"posição zero\" e permitir o corte independente de cada lado.",
+    "dica": "Com o ventilador ligado, inspecione tatilmente as uniões das tubagens para detetar fugas de ar. Teste se a alavanca de débito se imobiliza de forma segura.",
+    "subperguntas": [
+      {
+        "id": "cat_polvilhador_3_regulacao_e_condutas_sub_1",
+        "subpergunta": "As tubagens e mangueiras de extração e distribuição estão isentas de perfurações, fissuras ou fugas de ar nas uniões?",
+        "informacaoSub": "Fugas de ar nas condutas reduzem a velocidade de transporte do pó, causando deposição prematura dentro dos tubos e uma distribuição irregular nas saídas.",
+        "dicaSub": "Inspecione visualmente toda a extensão dos tubos. Verifique se as abraçadeiras estão apertadas e sem folgas.",
+        "falhas": "Perfurações ou ruturas nas mangueiras; tubagens com perda de elasticidade; fugas de ar audíveis; abraçadeiras soltas."
+      },
+      {
+        "id": "cat_polvilhador_3_regulacao_e_condutas_sub_2",
+        "subpergunta": "O dispositivo de regulação de débito possui uma \"posição zero\" funcional e é bloqueável na dose pretendida?",
+        "informacaoSub": "A \"posição zero\" deve garantir o corte total do pó. O comando tem de ser bloqueável para que a vibração da máquina não altere a dose durante o trabalho.",
+        "dicaSub": "Mova o comando para o zero e confirme que a saída de pó para os bicos fecha totalmente. Verifique o aperto do manípulo.",
+        "falhas": "Ausência de posição de corte total; alavanca de regulação solta; impossibilidade de fixar a dose."
+      },
+      {
+        "id": "cat_polvilhador_3_regulacao_e_condutas_sub_3",
+        "subpergunta": "O sistema permite interromper a distribuição de pó de um dos lados de forma independente?",
+        "informacaoSub": "O equipamento deve permitir tratar apenas de um lado. Isto é essencial para evitar a deriva em bordaduras ou no início/fim das linhas de cultura.",
+        "dicaSub": "Acione os comandos de corte lateral. Verifique se o fluxo de ar/pó para o lado fechado é interrompido.",
+        "falhas": "Comandos de corte bloqueados; impossibilidade de fechar apenas um lado; fugas no sistema de corte."
+      },
+      {
+        "id": "cat_polvilhador_3_regulacao_e_condutas_sub_4",
+        "subpergunta": "As marcas da escala de regulação são legíveis e o comando é operável a partir do posto de condução?",
+        "informacaoSub": "As marcas da escala de regulação de débito devem ser perfeitamente legíveis. O operador deve conseguir ler a escala e ajustar o débito sem abandonar o trator.  Marcas claras são fundamentais para garantir a dose correta de enxofre.",
+        "dicaSub": "Posicione-se no posto de operação e confirme a visibilidade da escala e se alcança o manípulo de regulação.",
+        "falhas": "Escala graduada ilegível ou apagada; comando inacessível; falta de indicadores de posição."
+      }
+    ]
+  },
+  {
+    "id": "cat_polvilhador_4_ventilador",
+    "tipoEquipamento": "polvilhador",
+    "categoria": "4. Ventilador",
+    "perguntaGlobal": "O fluxo de ar apresenta simetria entre os lados e velocidade suficiente para garantir o transporte eficaz do pó?",
+    "informacao": "A simetria de ar garante que ambos os lados da cultura recebem a mesma dose. Velocidades de ar adequadas são fundamentais para manter o pó em suspensão até ao alvo.",
+    "dica": "Utilize um anemómetro para medir a velocidade à saída de cada bico. Compare a média do lado esquerdo com a do lado direito.",
+    "subperguntas": [
+      {
+        "id": "cat_polvilhador_4_ventilador_sub_1",
+        "subpergunta": "A diferença de velocidade média do ar entre o lado esquerdo e o direito é inferior a 15%?",
+        "informacaoSub": "Uma assimetria superior a 15% indica desequilíbrio na distribuição. Isto resulta numa aplicação heterogénea, comprometendo a eficácia do tratamento fitossanitário.",
+        "dicaSub": "Se houver assimetria, verifique se as condutas internas estão obstruídas ou se os bicos de um dos lados estão deformados.",
+        "falhas": "Diferença de fluxo superior a 15%; um lado com ar insuficiente; bicos com débitos opostos."
+      },
+      {
+        "id": "cat_polvilhador_4_ventilador_sub_2",
+        "subpergunta": "A velocidade do ar em cada saída é suficiente para evitar a deposição de pó nas condutas?",
+        "informacaoSub": "Velocidades de ar baixas não conseguem manter o pó em suspensão. O produto acaba por acumular-se nas curvas das mangueiras, provocando bloqueios e descargas irregulares ou intermitentes de pó.",
+        "dicaSub": "Acelere o motor até à rotação de trabalho e verifique se o fluxo de ar é constante e vigoroso em todos os bicos.",
+        "falhas": "Velocidade de ar insuficiente; acumulação de pó visível nos tubos; fluxo de ar intermitente."
+      },
+      {
+        "id": "cat_polvilhador_4_ventilador_sub_3",
+        "subpergunta": "Os bicos e defletores de ar estão orientados de forma a cobrir uniformemente a zona alvo?",
+        "informacaoSub": "A orientação correta maximiza a deposição na folhagem e minimiza a deriva. Bicos desalinhados desperdiçam produto e podem causar contaminação de áreas vizinhas.",
+        "dicaSub": "Ajuste os bicos para a altura média da cultura. Garanta que os fluxos de ar se cruzam no centro da massa vegetal.",
+        "falhas": "Bicos direcionados em ângulos extremos (verticalidade); defletores soltos; falta de alinhamento entre bicos opostos."
+      },
+      {
+        "id": "cat_polvilhador_4_ventilador_sub_4",
+        "subpergunta": "O equipamento possui uma corrente ou dispositivo de descarga à terra funcional para evitar a ignição do pó?",
+        "informacaoSub": "O atrito do pó nos tubos gera eletricidade estática. Sem uma descarga à terra (corrente metálica em contacto com o solo), existe risco de ignição por descarga eletrostática.",
+        "dicaSub": "Confirme se a corrente metálica está bem fixada ao chassis e se tem comprimento suficiente para manter contacto contínuo com o solo.",
+        "falhas": "Ausência de corrente de terra; corrente com oxidação severa ou comprimento insuficiente; falta de continuidade elétrica."
+      },
+      {
+        "id": "cat_polvilhador_4_ventilador_sub_5",
+        "subpergunta": "A velocidade de rotação do ventilador é estável e está conforme as especificações?",
+        "informacaoSub": "A velocidade não deve diferir mais de ±10% do valor indicado pelo fabricante. Não deve haver fricção entre o ventilador e a carcaça, nem vibrações por desequilíbrio.",
+        "dicaSub": "Utilize um tacómetro (opcional) para medir as rotações no eixo. Ouça atentamente se existem ruídos metálicos de atrito.",
+        "falhas": "Rotação fora do intervalo; vibração excessiva; ruído de fricção interna; pás desalinhadas."
+      }
+    ]
+  }
+]

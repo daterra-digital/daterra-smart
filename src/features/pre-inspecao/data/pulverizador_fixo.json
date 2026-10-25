@@ -1,0 +1,248 @@
+[
+  {
+    "id": "cat_pulverizador_fixo_0_limpeza_geral",
+    "tipoEquipamento": "pulverizador_fixo",
+    "categoria": "0. Limpeza Geral",
+    "perguntaGlobal": "O equipamento e toda a rede de distribuição estão rigorosamente limpos, isentos de resíduos externos e de sedimentos internos?",
+    "informacao": "A limpeza é a base da segurança. Resíduos na rede fixa ou nos bicos impedem a correta avaliação da pressão e podem ocultar fugas ou causar obstruções nos ensaios.",
+    "dica": "Lave o circuito até que a água apresente total limpidez nos bicos mais distantes da estufa. Limpe bem os manómetros para leitura.",
+    "subperguntas": [
+      {
+        "id": "cat_pulverizador_fixo_0_limpeza_geral_sub_1",
+        "subpergunta": "As superfícies externas da unidade de bombagem, dos painéis de comando e das mangueiras estão limpas e livres de depósitos?",
+        "informacaoSub": "Em ambientes fechados, resíduos químicos nos comandos aumentam o risco de exposição do operador. A limpeza externa permite manusear as válvulas com segurança.",
+        "dicaSub": "Dê especial atenção à limpeza dos manípulos das válvulas de setor e ao mostrador do manómetro de pressão.",
+        "falhas": "Comandos contaminados com resíduos; incrustações de produto na bomba; mangueiras sujas; escala do manómetro baça."
+      },
+      {
+        "id": "cat_pulverizador_fixo_0_limpeza_geral_sub_2",
+        "subpergunta": "O interior do reservatório e os filtros de linha estão lavados e isentos de sedimentos ou partículas sólidas?",
+        "informacaoSub": "Sedimentos no fundo do reservatório podem ser arrastados para a rede de tubagens, obstruindo bicos e alterando as medições de uniformidade do fluxo em toda a estufa.",
+        "dicaSub": "Inspecione visualmente o fundo do reservatório. Verifique se as redes dos filtros não retêm resíduos secos.",
+        "falhas": "Sedimentos no reservatório; filtros colmatados; presença de areias ou lamas; água de purga turva."
+      },
+      {
+        "id": "cat_pulverizador_fixo_0_limpeza_geral_sub_3",
+        "subpergunta": "A rede de tubagens foi devidamente purgada e os bicos estão livres de incrustações ou obstruções visíveis?",
+        "informacaoSub": "Devido à grande extensão da rede, o produto pode decantar nas zonas de menor fluxo. A purga garante que o sistema está desobstruído em todos os pontos de saída.",
+        "dicaSub": "Acione todos os setores de rega/tratamento. Confirme se o padrão de pulverização é imediato e sem falhas por sujidade.",
+        "falhas": "Bicos obstruídos; resíduos de fertilizantes nas saídas; linhas de tubagem com fluxo intermitente."
+      }
+    ]
+  },
+  {
+    "id": "cat_pulverizador_fixo_1_transmissao_e_seguranca",
+    "tipoEquipamento": "pulverizador_fixo",
+    "categoria": "1. Transmissão e Segurança",
+    "perguntaGlobal": "A unidade de bombagem está devidamente protegida e a estrutura de suporte é estável e segura?",
+    "informacao": "Todos os componentes móveis devem estar inacessíveis para evitar acidentes. A estrutura deve suportar as vibrações da bomba sem apresentar fadiga, fissuras ou instabilidade.",
+    "dica": "Verifique a fixação dos suportes ao solo ou parede. Confirme se as grelhas de proteção do motor e correias estão firmes.",
+    "subperguntas": [
+      {
+        "id": "cat_pulverizador_fixo_1_transmissao_e_seguranca_sub_1",
+        "subpergunta": "As proteções das partes móveis (veios, correias, polias ou ventiladores de arrefecimento) estão presentes e em bom estado?",
+        "informacaoSub": "Peças rotativas expostas representam um risco elevado de aprisionamento. As proteções devem cobrir totalmente os pontos de perigo e estar fixas de forma rígida.",
+        "dicaSub": "Inspecione as distâncias de segurança; o acesso manual aos órgãos móveis deve estar fisicamente bloqueado sem remover a proteção.",
+        "falhas": "Proteção em falta; fissuras no material; fixação instável; grelhas com aberturas excessivas."
+      },
+      {
+        "id": "cat_pulverizador_fixo_1_transmissao_e_seguranca_sub_2",
+        "subpergunta": "O chassis ou suporte da unidade de bombagem apresenta fissuras, corrosão profunda ou deformações?",
+        "informacaoSub": "A estrutura deve manter-se íntegra para evitar desalinhamentos entre o motor e a bomba, que causam vibrações excessivas e podem levar à rutura total do conjunto.",
+        "dicaSub": "Observe os pontos de soldadura e as zonas de contacto entre a bomba e a base. Procure sinais de oxidação severa que evidenciem fadiga do material.",
+        "falhas": "Fissuras nas soldaduras; deformação visível do suporte; oxidação que compromete a resistência."
+      },
+      {
+        "id": "cat_pulverizador_fixo_1_transmissao_e_seguranca_sub_3",
+        "subpergunta": "Existe um reservatório de água limpa para lavagem de mãos/olhos acessível junto à unidade de bombagem?",
+        "informacaoSub": "Este dispositivo é essencial para permitir a descontaminação rápida do operador em caso de contacto acidental com o produto concentrado durante a preparação.",
+        "dicaSub": "Verifique se o depósito está abastecido à capacidade máxima com água limpa e se a torneira funciona sem esforço e sem fugas.",
+        "falhas": "Ausência de depósito; água suja ou estagnada; torneira danificada ou obstruída."
+      },
+      {
+        "id": "cat_pulverizador_fixo_1_transmissao_e_seguranca_sub_4",
+        "subpergunta": "No caso de motores elétricos, as cablagens e caixas de terminais estão devidamente isoladas e protegidas contra a humidade?",
+        "informacaoSub": "Dada a elevada humidade nas estufas e o uso de água, o isolamento elétrico é crítico para evitar curtos-circuitos e garantir a proteção contra contactos indiretos.",
+        "dicaSub": "Confirme se os cabos não têm o isolamento cortado e se as caixas de derivação estão bem vedadas e sem sinais de água.",
+        "falhas": "Cabos com isolamento danificado; caixas elétricas abertas; sinais de sobreaquecimento ou corrosão elétrica."
+      },
+      {
+        "id": "cat_pulverizador_fixo_1_transmissao_e_seguranca_sub_5",
+        "subpergunta": "O sistema de propulsão das unidades autónomas (rodas, motor, bateria) está em bom estado e operacional?",
+        "informacaoSub": "O sistema de acionamento de unidades móveis autónomas deve estar em boas condições de conservação para garantir o movimento regular e seguro durante a aplicação em áreas fechadas.",
+        "dicaSub": "Verifique o estado de carga e integridade das baterias, bem como o desgaste das rodas ou lagartas de tração.",
+        "falhas": "Motor de tração com ruídos; baterias com fugas ou oxidação; rodas soltas ou danificadas."
+      }
+    ]
+  },
+  {
+    "id": "cat_pulverizador_fixo_2_deposito_e_filtragem",
+    "tipoEquipamento": "pulverizador_fixo",
+    "categoria": "2. Depósito e Filtragem",
+    "perguntaGlobal": "O reservatório garante estanquidade total, possui filtragem adequada e assegura a homogeneidade da calda através de uma agitação eficaz?",
+    "informacao": "O depósito deve estar isento de fugas e possuir tampa estanque. A agitação mantém o produto misturado e a filtragem protege a rede de distribuição contra obstruções.",
+    "dica": "Verifique as juntas da tampa e procure sinais de gotejamento na base. Teste a agitação com o depósito parcialmente cheio.",
+    "subperguntas": [
+      {
+        "id": "cat_pulverizador_fixo_2_deposito_e_filtragem_sub_1",
+        "subpergunta": "O reservatório e as respetivas ligações estão isentos de fugas e a tampa garante a estanquicidade?",
+        "informacaoSub": "Qualquer fuga de calda representa um desperdício e risco ambiental. A tampa deve impedir salpicos e fechar de forma segura para manter a integridade da mistura.",
+        "dicaSub": "Inspecione visualmente as soldaduras ou juntas do reservatório sob carga. Verifique se o vedante da tampa apresenta elasticidade e ausência de fissuras.",
+        "falhas": "Fugas nas junções; tampa sem vedante; gotejamento constante; porosidade no material do depósito."
+      },
+      {
+        "id": "cat_pulverizador_fixo_2_deposito_e_filtragem_sub_2",
+        "subpergunta": "O sistema de agitação assegura uma mistura contínua e uniforme do produto no interior do depósito?",
+        "informacaoSub": "Uma agitação ineficaz leva à decantação do produto, resultando em concentrações variáveis durante a aplicação e possível obstrução da rede de tubagens.",
+        "dicaSub": "Ligue a bomba e verifique se existe movimento de circulação visível ou turbulência no fundo do reservatório sem promover a cavitação ou a formação excessiva de espuma.",
+        "falhas": "Ausência de fluxo de retorno; sedimentação visível no fundo; sistema de agitação obstruído."
+      },
+      {
+        "id": "cat_pulverizador_fixo_2_deposito_e_filtragem_sub_3",
+        "subpergunta": "Os filtros (aspiração e linha) estão presentes, limpos e com a malha em bom estado de conservação?",
+        "informacaoSub": "Os filtros protegem a bomba e evitam que partículas cheguem aos bicos na estufa. Devem ser de fácil acesso e ter uma malha adequada ao tipo de bicos instalados.",
+        "dicaSub": "Desmonte os copos dos filtros e verifique se a rede não tem perfurações ou deformações. Verifique se existe uma válvula que permita limpar o filtro sem esvaziar o depósito.",
+        "falhas": "Filtro de enchimento em falta; rede do filtro de linha com rutura; filtro de aspiração colmatado."
+      },
+      {
+        "id": "cat_pulverizador_fixo_2_deposito_e_filtragem_sub_4",
+        "subpergunta": "O indicador de nível de calda é perfeitamente visível e as marcações são legíveis a partir do ponto de enchimento?",
+        "informacaoSub": "O operador deve conseguir monitorizar o volume restante para garantir a preparação correta da calda e evitar o funcionamento da bomba em vazio.",
+        "dicaSub": "Limpe o exterior do tubo de nível ou da escala graduada. Verifique se a leitura do nível corresponde ao volume real no interior.",
+        "falhas": "Escala graduada apagada; tubo de nível opaco ou sujo; impossibilidade de ler o nível de fora."
+      },
+      {
+        "id": "cat_pulverizador_fixo_2_deposito_e_filtragem_sub_5",
+        "subpergunta": "O reservatório possui um sistema que permita o esvaziamento total do conteúdo de forma segura?",
+        "informacaoSub": "O ponto de drenagem deve permitir retirar toda a calda e águas de lavagem, evitando a acumulação de resíduos químicos no fundo do depósito entre utilizações.",
+        "dicaSub": "Localize a válvula de dreno no ponto mais baixo e confirme se o manuseamento é fácil e sem perdas.",
+        "falhas": "Ausência de bujão de drenagem; válvula bloqueada; fuga persistente no sistema de fecho."
+      },
+      {
+        "id": "cat_pulverizador_fixo_2_deposito_e_filtragem_sub_6",
+        "subpergunta": "É possível limpar os filtros com o depósito cheio sem ocorrer derrame de calda para o exterior?",
+        "informacaoSub": "O sistema deve possuir válvulas de isolamento que permitam a manutenção e limpeza dos elementos filtrantes sem a perda do conteúdo do reservatório principal.",
+        "dicaSub": "Verifique se as válvulas de corte antes e depois do filtro de linha garantem a estanquicidade.",
+        "falhas": "Impossibilidade de isolar o filtro; derrame de líquido durante a abertura do copo do filtro."
+      },
+      {
+        "id": "cat_pulverizador_fixo_2_deposito_e_filtragem_sub_7",
+        "subpergunta": "O incorporador de produtos (se existente) funciona corretamente e impede a entrada de objetos com diâmetro superior a 20 mm?",
+        "informacaoSub": "O incorporador deve permitir a introdução segura de produtos químicos e possuir uma grelha de proteção para evitar a entrada de contaminantes sólidos de grandes dimensões no reservatório.",
+        "dicaSub": "Teste o fluxo de água do incorporador e meça a malha da grelha de proteção.",
+        "falhas": "Grelha de proteção inexistente ou com perfurações largas; fugas nas válvulas do incorporador."
+      }
+    ]
+  },
+  {
+    "id": "cat_pulverizador_fixo_3_circuito_hidraulico_e_pressao",
+    "tipoEquipamento": "pulverizador_fixo",
+    "categoria": "3. Circuito Hidráulico e Pressão",
+    "perguntaGlobal": "A rede hidráulica e a unidade de bombagem garantem estanquidade total sob pressão, com um sistema de controlo e medição preciso e estável?",
+    "informacao": "A bomba deve atingir a pressão nominal sem fugas. O manómetro e as válvulas de regulação devem permitir manter um fluxo constante em todos os setores da rede fixa.",
+    "dica": "Coloque o sistema à pressão máxima de trabalho e percorra as linhas da estufa para detetar fugas ou vibrações na tubagem.",
+    "subperguntas": [
+      {
+        "id": "cat_pulverizador_fixo_3_circuito_hidraulico_e_pressao_sub_1",
+        "subpergunta": "A bomba apresenta estanquidade total e funciona sem vibrações ou ruídos anormais à pressão máxima de exercício?",
+        "informacaoSub": "Fugas nos vedantes ou membranas da bomba causam perda de rendimento e contaminação. Ruídos anormais podem indicar cavitação ou desgaste iminente dos componentes.",
+        "dicaSub": "Observe o corpo da bomba e as ligações de entrada/saída durante o funcionamento. O fluxo deve ser contínuo e suave.",
+        "falhas": "Gotejamento de calda; fugas de óleo; vibração excessiva da unidade; ruídos metálicos anormais."
+      },
+      {
+        "id": "cat_pulverizador_fixo_3_circuito_hidraulico_e_pressao_sub_2",
+        "subpergunta": "O manómetro central é perfeitamente legível, possui uma escala adequada e o seu ponteiro mantém-se estável em trabalho?",
+        "informacaoSub": "O manómetro deve permitir leituras claras de pequenas variações de pressão. Um ponteiro que vibra impede a regulação precisa e indica falhas no amortecimento do sistema.",
+        "dicaSub": "Verifique se o diâmetro do manómetro é suficiente para ser lido à distância de operação e se a escala é adequada.",
+        "falhas": "Ponteiro instável; escala com divisões muito largas; vidro opaco ou danificado; erro de leitura > 10%."
+      },
+      {
+        "id": "cat_pulverizador_fixo_3_circuito_hidraulico_e_pressao_sub_3",
+        "subpergunta": "As tubagens fixas e as mangueiras flexíveis estão isentas de fugas, fissuras, estrangulamentos ou sinais de desgaste?",
+        "informacaoSub": "Dada a extensão da rede em estufas, as uniões são pontos críticos de fuga. As mangueiras flexíveis não devem ter dobras que restrinjam o fluxo para os bicos.",
+        "dicaSub": "Inspecione visualmente as abraçadeiras e as junções entre tubos rígidos e flexíveis enquanto o sistema está ligado.",
+        "falhas": "Fugas nas uniões da rede; mangueiras apresentam deformações estruturais ou fissura; estrangulamentos na tubagem fixa."
+      },
+      {
+        "id": "cat_pulverizador_fixo_3_circuito_hidraulico_e_pressao_sub_4",
+        "subpergunta": "O dispositivo de regulação mantém a pressão constante e reage de forma rápida e estável à abertura ou fecho de setores?",
+        "informacaoSub": "Ao desligar um setor da estufa, a pressão nos restantes não deve oscilar significativamente. O sistema deve recuperar o valor definido de forma quase instantânea.",
+        "dicaSub": "Simule o corte de uma linha de pulverização e observe se o manómetro central estabiliza rapidamente no valor alvo.",
+        "falhas": "Demora na recuperação da pressão; flutuações constantes; válvula de regulação bloqueada."
+      },
+      {
+        "id": "cat_pulverizador_fixo_3_circuito_hidraulico_e_pressao_sub_5",
+        "subpergunta": "A queda de pressão entre a unidade de bombagem e os bicos mais distantes da rede é mínima e não compromete a aplicação?",
+        "informacaoSub": "Em redes fixas longas, a fricção interna reduz a pressão final. Uma queda excessiva causa subdosagem nos bicos terminais em comparação com os iniciais.",
+        "dicaSub": "Se possível, utilize um manómetro portátil para comparar a pressão na saída da bomba com a pressão no último bico da rede.",
+        "falhas": "Diferença visível de pulverização entre setores; pressão insuficiente nas extremidades da rede."
+      },
+      {
+        "id": "cat_pulverizador_fixo_3_circuito_hidraulico_e_pressao_sub_6",
+        "subpergunta": "As pulsações de pressão no sistema são inferiores a ±10% da pressão de trabalho?",
+        "informacaoSub": "Variações bruscas de pressão comprometem a uniformidade da dose. Se existir um amortecedor de pulsações (câmara de ar), a sua membrana deve estar íntegra e com a pressão correta.",
+        "dicaSub": "Observe o ponteiro do manómetro; se este oscilar rapidamente, verifique a pressão de ar no acumulador da bomba.",
+        "falhas": "Oscilação do ponteiro superior a 10%; presença de líquido na válvula de ar do amortecedor."
+      }
+    ]
+  },
+  {
+    "id": "cat_pulverizador_fixo_4_sistema_fixo_e_semi_movel",
+    "tipoEquipamento": "pulverizador_fixo",
+    "categoria": "4. Sistema Fixo e Semi-Móvel",
+    "perguntaGlobal": "Os órgãos de distribuição estão fixados de forma estável, asseguram uma aplicação uniforme e o corte de fluxo é estanque em todos os bicos?",
+    "informacao": "A estabilidade das linhas de bicos e a uniformidade dos componentes garantem que a dose é aplicada corretamente. O sistema de corte evita o gotejamento após o uso.",
+    "dica": "Verifique se as linhas de bicos não oscilam com a pressão. Observe se todos os bicos param de pulverizar em simultâneo ao fechar a válvula.",
+    "subperguntas": [
+      {
+        "id": "cat_pulverizador_fixo_4_sistema_fixo_e_semi_movel_sub_1",
+        "subpergunta": "As linhas de bicos e barras de pulverização estão fixadas de forma rígida e mantêm o alinhamento correto durante o trabalho?",
+        "informacaoSub": "Linhas soltas ou desalinhadas provocam uma distribuição irregular da calda, resultando em zonas com excesso de produto e outras com cobertura insuficiente.",
+        "dicaSub": "Inspecione os suportes e abraçadeiras de fixação da tubagem à estrutura da estufa. Garanta que a distância entre bicos e cultura é constante.",
+        "falhas": "Fixações soltas; tubagens fletidas ou deformadas; oscilação excessiva durante a pulverização."
+      },
+      {
+        "id": "cat_pulverizador_fixo_4_sistema_fixo_e_semi_movel_sub_2",
+        "subpergunta": "Todos os bicos possuem dispositivos antigota funcionais que interrompem totalmente o fluxo após o corte da pressão?",
+        "informacaoSub": "O sistema antigota evita a perda de produto e a contaminação localizada do solo ou das plantas por gotejamento persistente após a paragem do sistema.",
+        "dicaSub": "Após desligar a bomba ou o setor, verifique se o gotejamento em cada bico para num intervalo máximo de 5 segundos.",
+        "falhas": "Bicos com gotejamento contínuo; válvulas antigota obstruídas ou inexistentes; membranas gastas."
+      },
+      {
+        "id": "cat_pulverizador_fixo_4_sistema_fixo_e_semi_movel_sub_3",
+        "subpergunta": "Todos os bicos instalados na mesma linha ou setor são do mesmo tipo, tamanho e material?",
+        "informacaoSub": "A mistura de diferentes tipos de bicos causa uma aplicação heterogénea. Todos os bicos num setor devem ter o mesmo débito nominal para garantir a dose.",
+        "dicaSub": "Confirme as cores e os códigos gravados nos bicos. Substitua bicos que apresentem padrões de jato diferentes dos restantes.",
+        "falhas": "Bicos de modelos diferentes na mesma linha; jatos visivelmente desiguais; bicos deformados."
+      },
+      {
+        "id": "cat_pulverizador_fixo_4_sistema_fixo_e_semi_movel_sub_4",
+        "subpergunta": "O padrão de pulverização de cada bico é uniforme, sem estrias de água ou zonas de falha visíveis?",
+        "informacaoSub": "Bicos gastos ou danificados produzem jatos assimétricos ou com linhas de água mais densas, o que compromete a eficácia do tratamento e a proteção da cultura.",
+        "dicaSub": "Observe o jato contra uma superfície de cor uniforme. Procure por \"riscos\" ou falhas no leque de pulverização de cada unidade.",
+        "falhas": "Jato de pulverização deformado; presença de estrias (linhas) de água; bicos obstruídos."
+      },
+      {
+        "id": "cat_pulverizador_fixo_4_sistema_fixo_e_semi_movel_sub_5",
+        "subpergunta": "Os bicos estão orientados corretamente para o alvo e protegidos contra danos mecânicos em zonas de passagem?",
+        "informacaoSub": "A orientação errada desperdiça produto. Em zonas de circulação de pessoas ou máquinas, os bicos devem estar protegidos para evitar impactos que os desviem.",
+        "dicaSub": "Ajuste o ângulo dos bicos para cobrir a área de forma cruzada. Verifique se existem proteções nos bicos expostos.",
+        "falhas": "Bicos virados para zonas sem cultura; bicos danificados por impactos; desalinhamento do padrão."
+      },
+      {
+        "id": "cat_pulverizador_fixo_4_sistema_fixo_e_semi_movel_sub_6",
+        "subpergunta": "A barra de pulverização está bem alinhada e perfeitamente direita em toda a sua extensão?",
+        "informacaoSub": "Uma barra com deformação geométrica faz com que os bicos apliquem o produto fora do sítio certo, causando falhas no tratamento ou excesso de químicos num só local.",
+        "dicaSub": "Estique um fio do centro até à ponta da barra para detetar deformações no alinhamento. O desvio na ponta não deve ser maior que 2,5 cm por cada metro.",
+        "falhas": "Barra com deformação visível; suportes de fixação empenados; desalinhamento dos bicos."
+      },
+      {
+        "id": "cat_pulverizador_fixo_4_sistema_fixo_e_semi_movel_sub_7",
+        "subpergunta": "A velocidade de deslocação dos robôs de pulverização desvia-se menos de ±10% da velocidade programada?",
+        "informacaoSub": "Como o débito é calculado em função da velocidade, qualquer variação no movimento do robô altera diretamente a dose aplicada por metro quadrado.",
+        "dicaSub": "Cronometre a passagem do robô numa distância marcada e calcule a velocidade real para comparar com o visor.",
+        "falhas": "Velocidade instável; erro de avanço superior a 10%."
+      }
+    ]
+  }
+]

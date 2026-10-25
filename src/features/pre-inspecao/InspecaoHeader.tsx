@@ -7,6 +7,7 @@ interface InspecaoHeaderProps {
   onOpenGuide: () => void;
   onReset: () => void;
   historyCount: number;
+  equipmentTitle?: string;
 }
 
 export const InspecaoHeader: React.FC<InspecaoHeaderProps> = ({
@@ -14,7 +15,8 @@ export const InspecaoHeader: React.FC<InspecaoHeaderProps> = ({
   onOpenHistory,
   onOpenGuide,
   onReset,
-  historyCount
+  historyCount,
+  equipmentTitle
 }) => {
   return (
     <header className="bg-white px-4 py-3 rounded-2xl border border-slate-200 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -39,7 +41,7 @@ export const InspecaoHeader: React.FC<InspecaoHeaderProps> = ({
             </span>
           </div>
           <p className="text-xs text-slate-500 font-medium">
-            Verificação prévia dos 5 pontos críticos antes da inspeção oficial IPP
+            {equipmentTitle ? `Auditoria prévia oficial • ${equipmentTitle}` : 'Verificação prévia antes da inspeção oficial IPP'}
           </p>
         </div>
       </div>
@@ -48,7 +50,7 @@ export const InspecaoHeader: React.FC<InspecaoHeaderProps> = ({
         <button
           type="button"
           onClick={onOpenGuide}
-          aria-label="Abrir guia técnico da norma ISO 16122"
+          aria-label="Abrir guia técnico e normativo"
           className="min-h-[48px] px-3.5 py-2.5 bg-emerald-50 hover:bg-emerald-100 text-[#114037] border border-emerald-200 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shadow-xs cursor-pointer touch-target"
         >
           <BookOpen className="w-4 h-4 text-[#3CA64C]" />

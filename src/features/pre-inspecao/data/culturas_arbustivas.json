@@ -1,0 +1,213 @@
+[
+  {
+    "id": "cat_culturas_arbustivas_0_limpeza_geral",
+    "tipoEquipamento": "culturas_arbustivas",
+    "categoria": "0. Limpeza Geral",
+    "perguntaGlobal": "O pulverizador está perfeitamente lavado (interior e exterior)?",
+    "informacao": "A limpeza profunda do equipamento é fundamental. Resíduos de calda e sujidade impedem a deteção de fugas no circuito e fissuras na estrutura, essenciais para garantir a eficácia operacional e segurança.",
+    "dica": "Efetue a tripla lavagem e limpe o exterior. A ausência de resíduos de produto ou lama é uma condição prévia obrigatória para iniciar a inspeção.",
+    "subperguntas": [
+      {
+        "id": "cat_culturas_arbustivas_0_limpeza_geral_sub_1",
+        "subpergunta": "O exterior da máquina está livre de resíduos de produtos, terra ou massas?",
+        "informacaoSub": "A limpeza permite detetar fissuras no chassis e fugas escondidas por lama ou químicos. Sujidade acumulada degrada componentes e contamina o operador e o ambiente.",
+        "dicaSub": "Lave com água sob pressão e desengordurante. Foque-se nas articulações e zonas de lubrificação para detetar fugas.",
+        "falhas": "Incrustações de químicos; lama seca a tapar soldaduras; acumulação de massa e óleo nos pontos articulados."
+      },
+      {
+        "id": "cat_culturas_arbustivas_0_limpeza_geral_sub_2",
+        "subpergunta": "O interior do depósito foi lavado e está isento de sedimentos?",
+        "informacaoSub": "Sedimentos no interior obstruem filtros e bicos, comprometendo a pulverização. A limpeza é crucial para evitar reações químicas indesejadas entre tratamentos.",
+        "dicaSub": "Utilize o bocal de lavagem interna se disponível. Verifique os cantos e o fundo do depósito, onde o produto decanta.",
+        "falhas": "Incrustações de produto seco; lama ou areia no fundo; água de lavagem turva; resíduos de tratamentos anteriores."
+      }
+    ]
+  },
+  {
+    "id": "cat_culturas_arbustivas_1_transmissao_e_seguranca",
+    "tipoEquipamento": "culturas_arbustivas",
+    "categoria": "1. Transmissão e Segurança",
+    "perguntaGlobal": "As proteções estão intactas e a estrutura sem fissuras?",
+    "informacao": "Proteções de veio e ventilador evitam acidentes graves. Fissuras na estrutura comprometem a estabilidade e a segurança operacional, podendo causar falhas mecânicas.",
+    "dica": "Verifique a proteção do cardan e grelhas do ventilador. Procure fissuras em soldaduras e pontos de aperto do chassis.",
+    "subperguntas": [
+      {
+        "id": "cat_culturas_arbustivas_1_transmissao_e_seguranca_sub_1",
+        "subpergunta": "As proteções do cardan e veios estão inteiras e com correntes de retenção bloqueadas?",
+        "informacaoSub": "A proteção do cardan deve cobrir o veio totalmente e as correntes impedem que esta rode. Um cardan sem proteção acarreta um risco extremo de ferimentos fatais ou acidentes severos em campo.",
+        "dicaSub": "Verifique se a proteção gira livremente com o motor desligado e se as correntes estão bloqueadas a pontos fixos.",
+        "falhas": "Proteção danificada ou curta; falta de correntes; tubo exposto; cones de proteção danificados."
+      },
+      {
+        "id": "cat_culturas_arbustivas_1_transmissao_e_seguranca_sub_2",
+        "subpergunta": "Existem fissuras visíveis no chassis ou grelhas de ventilador danificadas?",
+        "informacaoSub": "Fissuras no chassis afetam a integridade estrutural. Grelhas danificadas são perigosas, pois falham na prevenção do contacto acidental com as pás do ventilador em rotação.",
+        "dicaSub": "Use uma lanterna para ver soldaduras e a fixação da turbina. Garanta que a grelha está firme e não permite a passagem da mão.",
+        "falhas": "Soldaduras com fissuras; grelhas com malhas largas ou em falta; pás do ventilador expostas; suportes danificados."
+      },
+      {
+        "id": "cat_culturas_arbustivas_1_transmissao_e_seguranca_sub_3",
+        "subpergunta": "O multiplicador (caixa de velocidades) apresenta fugas de óleo ou ruídos anormais?",
+        "informacaoSub": "O multiplicador transmite potência ao ventilador. Fugas de óleo ou ruídos metálicos indicam desgaste severo, podendo levar à rutura mecânica severa da turbina em serviço.",
+        "dicaSub": "Verifique o nível de óleo e limpe a caixa para detetar exsudação ou gotejamento. Com a máquina ligada, verifique a presença de ruídos mecânicos anómalos.",
+        "falhas": "Fugas ativas de óleo; ruído de rolamentos gripados; vibração excessiva na carcaça da turbina."
+      },
+      {
+        "id": "cat_culturas_arbustivas_1_transmissao_e_seguranca_sub_4",
+        "subpergunta": "É possível desengatar o ventilador de forma independente da bomba?",
+        "informacaoSub": "O equipamento tem de permitir desligar a turbina mantendo a bomba a funcionar. Isto é vital para fazer a agitação da calda ou limpeza sem projeção inadvertida do fluxo de ar.",
+        "dicaSub": "Teste a alavanca de desengate. A ventoinha deve parar completamente enquanto o cardan continua a acionar a bomba.",
+        "falhas": "Alavanca bloqueada ou danificada; ventilador sempre ligado; impossibilidade de desengate manual."
+      }
+    ]
+  },
+  {
+    "id": "cat_culturas_arbustivas_2_deposito_e_filtragem",
+    "tipoEquipamento": "culturas_arbustivas",
+    "categoria": "2. Depósito e Filtragem",
+    "perguntaGlobal": "O depósito garante estanquidade total, os filtros estão íntegros e a agitação é eficaz?",
+    "informacao": "Fugas no depósito poluem o solo. Filtros íntegros evitam a obstrução dos bicos, e a agitação garante que a calda se mantém homogénea em todo o tratamento.",
+    "dica": "Teste a estanquidade com água e inspecione a malha dos filtros. Confirme se a agitação cria turbulência visível no tanque.",
+    "subperguntas": [
+      {
+        "id": "cat_culturas_arbustivas_2_deposito_e_filtragem_sub_1",
+        "subpergunta": "O depósito, a tampa e os respetivos vedantes garantem a estanquidade total?",
+        "informacaoSub": "Qualquer fuga no depósito ou tampa compromete o tratamento e a segurança ambiental. A estanquidade é obrigatória para proteger o ambiente e o operador de salpicos de calda química.",
+        "dicaSub": "Inspecione o vedante da tampa e aperte as ligações das mangueiras. Encha o depósito e procure marcas de humidade.",
+        "falhas": "Fissuras no reservatório; vedante da tampa seccionado/fissurado ou inexistente; fugas nas juntas das tubagens."
+      },
+      {
+        "id": "cat_culturas_arbustivas_2_deposito_e_filtragem_sub_2",
+        "subpergunta": "A malha de todos os filtros está perfeitamente íntegra e isenta de resíduos?",
+        "informacaoSub": "Filtros danificados permitem a passagem de impurezas que desgastam a bomba e obstruem os bicos. A integridade da malha é obrigatória para uma aplicação uniforme.",
+        "dicaSub": "Limpe os filtros de aspiração e de pressão. Use uma escova macia para não danificar a malha ao remover detritos.",
+        "falhas": "Malha com rutura ou deformada; cartucho de filtro em falta; acumulação de resíduos químicos secos."
+      },
+      {
+        "id": "cat_culturas_arbustivas_2_deposito_e_filtragem_sub_3",
+        "subpergunta": "O sistema de agitação garante uma homogeneização vigorosa e contínua da calda?",
+        "informacaoSub": "A agitação evita a decantação de produtos no fundo. A mistura deve ser homogénea para garantir a dose correta em todo o tratamento fitossanitário.",
+        "dicaSub": "Encha o depósito a meio e ative a bomba. Verifique se existe turbulência forte e contínua no fundo do tanque.",
+        "falhas": "Agitador obstruído; tubos soltos ou danificados; falta de turbulência visível; caudal insuficiente."
+      },
+      {
+        "id": "cat_culturas_arbustivas_2_deposito_e_filtragem_sub_4",
+        "subpergunta": "O indicador de nível é claramente visível do posto de condução e da zona de enchimento?",
+        "informacaoSub": "O operador deve controlar o volume de calda sem sair do trator ou subir à máquina. A escala deve estar limpa e ser precisa para evitar erros de dosagem ou derrames.",
+        "dicaSub": "Limpe o tubo transparente ou a escala graduada. Se o nível for eletrónico, confirme se o visor não falha.",
+        "falhas": "Tubo de nível escurecido ou opaco; escala graduada ilegível; flutuador interno bloqueado."
+      },
+      {
+        "id": "cat_culturas_arbustivas_2_deposito_e_filtragem_sub_5",
+        "subpergunta": "O depósito de água limpa para lavagem das mãos está presente e funcional?",
+        "informacaoSub": "É um item de segurança obrigatório. Deve conter apenas água limpa para que o operador possa lavar-se em caso de contacto acidental com produtos químicos.",
+        "dicaSub": "Verifique se o depósito está abastecido e se a torneira funciona sem fugas e com caudal suficiente.",
+        "falhas": "Depósito inexistente; torneira danificada ou obstruída; água contaminada ou com lodo."
+      },
+      {
+        "id": "cat_culturas_arbustivas_2_deposito_e_filtragem_sub_6",
+        "subpergunta": "O dispositivo de esvaziamento (purga) permite recolher o líquido sem contaminar o solo?",
+        "informacaoSub": "A válvula de drenagem no fundo do depósito deve ser estanque e permitir o escoamento total da calda para um recipiente, prevenindo a poluição direta do solo e águas.",
+        "dicaSub": "Teste a abertura da válvula ou tampão de purga. Certifique-se de que o vedante está em bom estado e não goteja.",
+        "falhas": "Válvula de descarga com fuga; rosca do tampão danificada / com desgaste; impossibilidade de esvaziamento total."
+      },
+      {
+        "id": "cat_culturas_arbustivas_2_deposito_e_filtragem_sub_7",
+        "subpergunta": "O sistema de enchimento possui um dispositivo anti-retorno para evitar a contaminação da fonte de água?",
+        "informacaoSub": "Deve ser evitado o contacto direto da mangueira de enchimento com a água do depósito. Deve existir um sistema que impeça o refluxo da calda para a rede pública ou poço.",
+        "dicaSub": "Garanta que a mangueira de enchimento fica fixa acima do nível máximo do depósito (intervalo de ar).",
+        "falhas": "Ausência de válvula anti-retorno; mangueira de enchimento mergulhada na calda; fugas no bocal."
+      }
+    ]
+  },
+  {
+    "id": "cat_culturas_arbustivas_3_circuito_hidraulico_e_pressao",
+    "tipoEquipamento": "culturas_arbustivas",
+    "categoria": "3. Circuito Hidráulico e Pressão",
+    "perguntaGlobal": "A bomba mantém-se estanque, o manómetro é estável e a regulação de pressão é precisa?",
+    "informacao": "A bomba e o manómetro são componentes críticos da dinâmica de fluidos. Fugas na bomba desperdiçam produto e manómetros instáveis impedem o controlo da dose, comprometendo a eficácia da aplicação.",
+    "dica": "Ligue a TDF e procure fugas na bomba. Verifique se o ponteiro do manómetro se mantém estável durante o trabalho.",
+    "subperguntas": [
+      {
+        "id": "cat_culturas_arbustivas_3_circuito_hidraulico_e_pressao_sub_1",
+        "subpergunta": "A bomba e as tubagens principais estão isentas de fugas de óleo, calda ou sinais de fadiga?",
+        "informacaoSub": "As fugas na bomba ou mangueiras fissuradas causam perda de pressão e contaminação. A estanquidade total é um requisito crítico para a eficiência hidráulica e proteção ambiental.",
+        "dicaSub": "Limpe a bomba antes de ligar. Procure gotas de óleo no chão ou exsudação nas mangueiras, o que indica porosidade estrutural.",
+        "falhas": "Fugas nos retentores; membranas com rutura; mangueiras fissuradas ou deformadas; braçadeiras soltas."
+      },
+      {
+        "id": "cat_culturas_arbustivas_3_circuito_hidraulico_e_pressao_sub_2",
+        "subpergunta": "O manómetro é perfeitamente legível, possui a escala adequada e o ponteiro é estável?",
+        "informacaoSub": "O manómetro deve ter um diâmetro mínimo de 63 mm. Para pressões de trabalho entre 5 e 20 bar, a divisão da escala deve ser de, pelo menos, 1 bar. A estabilidade do ponteiro garante que a pressão lida corresponde à pressão real nos bicos.",
+        "dicaSub": "Com a bomba ligada, o ponteiro deve estar firme. Se oscilar, verifique a carga de ar no acumulador da bomba.",
+        "falhas": "Escala ilegível; vidro danificado; ponteiro com vibração excessiva; não regressa ao zero parado; diâmetro inferior a 63 mm; divisão de escala superior a 1 bar."
+      },
+      {
+        "id": "cat_culturas_arbustivas_3_circuito_hidraulico_e_pressao_sub_3",
+        "subpergunta": "O comando de regulação permite ajustar e estabilizar a pressão de trabalho de forma constante?",
+        "informacaoSub": "A válvula de regulação garante a dose exata de aplicação. É exigido tecnicamente que, uma vez definida, a pressão se mantenha estável para assegurar uma distribuição uniforme.",
+        "dicaSub": "Rode o manípulo em todo o seu curso. Fixe uma pressão (ex: 10 bar) e verifique se o ponteiro não oscila nem desce sozinho.",
+        "falhas": "Manípulo bloqueado ou oxidado; pressão a cair; mola interna danificada; fugas no corpo da válvula."
+      },
+      {
+        "id": "cat_culturas_arbustivas_3_circuito_hidraulico_e_pressao_sub_4",
+        "subpergunta": "O amortecedor de pulsações (acumulador) apresenta a pressão de carga adequada para absorver as pulsações da bomba?",
+        "informacaoSub": "O acumulador estabiliza o fluxo. Sem a pressão de ar correta, o ponteiro do manómetro oscila violentamente e as mangueiras vibram, causando desgaste precoce no circuito.",
+        "dicaSub": "Com a máquina parada, use um manómetro de pressão de ar na válvula do acumulador. A pressão deve ser cerca de 1/3 da de trabalho.",
+        "falhas": "Ponteiro do manómetro instável; mangueiras com vibração excessiva; membrana do amortecedor perfurada; ausência de pressão de ar."
+      },
+      {
+        "id": "cat_culturas_arbustivas_3_circuito_hidraulico_e_pressao_sub_5",
+        "subpergunta": "As válvulas de corte das secções (lado esquerdo e direito) funcionam de forma estanque e independente?",
+        "informacaoSub": "Em culturas arbustivas, é vital fechar um dos lados para evitar a deriva em bordaduras. O corte deve ser total e imediato, sem afetar a pressão do lado oposto.",
+        "dicaSub": "Ligue a pulverização e feche um dos lados no comando. Os bicos desse arco devem interromper a pulverização imediatamente.",
+        "falhas": "Válvulas que não garantam a estanquicidade; comandos bloqueados; gotejamento constante num dos lados após o corte."
+      }
+    ]
+  },
+  {
+    "id": "cat_culturas_arbustivas_4_distribuicao_e_ventilador",
+    "tipoEquipamento": "culturas_arbustivas",
+    "categoria": "4. Distribuição e Ventilador",
+    "perguntaGlobal": "O ventilador trabalha sem vibrações, os bicos são simétricos e o sistema antigota é eficaz?",
+    "informacao": "A turbina deve gerar um fluxo de ar estável e equilibrado. Bicos idênticos e um sistema antigota que atue em menos de 5s são cruciais para evitar desperdícios e derivas.",
+    "dica": "Ligue a turbina progressivamente e verifique se existe vibração excessiva no chassis. Confirme se os bicos têm a mesma cor e marca.",
+    "subperguntas": [
+      {
+        "id": "cat_culturas_arbustivas_4_distribuicao_e_ventilador_sub_1",
+        "subpergunta": "As pás do ventilador estão íntegras e a turbina roda sem vibrações excessivas?",
+        "informacaoSub": "Pás danificadas desequilibram a turbina, causando vibrações que provocam desgaste prematuro nos rolamentos. A integridade total é vital para um fluxo de ar simétrico e seguro.",
+        "dicaSub": "Rode a turbina à mão (motor desligado) para detetar anomalias estruturais. Ligue a TDF e verifique se o chassis apresenta oscilação ou se há ruídos metálicos.",
+        "falhas": "Pás danificadas ou em falta; vibração forte no chassis; folgas no eixo; ruído de rolamentos gastos."
+      },
+      {
+        "id": "cat_culturas_arbustivas_4_distribuicao_e_ventilador_sub_2",
+        "subpergunta": "Existe simetria total no número, tipo e orientação dos bicos entre o lado esquerdo e o direito?",
+        "informacaoSub": "A aplicação deve ser igual em ambos os lados para um tratamento homogéneo. Diferenças no número ou tipo de bicos causam erros de dose e comprometem a eficácia.",
+        "dicaSub": "Conte os bicos de cada lado e confirme se as cores coincidem. Verifique se estão orientados para a massa vegetal de forma idêntica.",
+        "falhas": "Número de bicos desigual; modelos diferentes entre lados; bicos fechados apenas num lado; orientação assimétrica."
+      },
+      {
+        "id": "cat_culturas_arbustivas_4_distribuicao_e_ventilador_sub_3",
+        "subpergunta": "O sistema antigota interrompe totalmente o fluxo nos bicos em menos de 5 segundos após o corte?",
+        "informacaoSub": "O sistema antigota é obrigatório. O corte total em menos de 5s é fundamental para evitar contaminação do solo e desperdício de calda em cabeceiras e manobras.",
+        "dicaSub": "Ative o corte em pressão de trabalho. Se gotejar, desmonte o porta-bico e limpe ou substitua a membrana interna.",
+        "falhas": "Gotejamento persistente; membranas ressequidas (sem elasticidade) ou com rutura; sujidade na válvula; sistema inexistente."
+      },
+      {
+        "id": "cat_culturas_arbustivas_4_distribuicao_e_ventilador_sub_4",
+        "subpergunta": "Existem defletores ou chapas de orientação de ar para evitar a projeção vertical (deriva)?",
+        "informacaoSub": "Defletores são essenciais para direcionar o ar apenas para a copa das plantas. Sem eles, parte da calda é projetada para cima, causando desperdício e deriva ambiental.",
+        "dicaSub": "Verifique se a turbina tem chapas reguláveis no topo. Devem estar ajustadas para que o ar não ultrapasse a cultura.",
+        "falhas": "Falta de defletores; chapas de orientação danificadas ou bloqueadas; fluxo de ar disperso verticalmente."
+      },
+      {
+        "id": "cat_culturas_arbustivas_4_distribuicao_e_ventilador_sub_5",
+        "subpergunta": "A grelha de proteção do ventilador está limpa e permite a entrada livre de ar?",
+        "informacaoSub": "Folhas ou sujidade na grelha reduzem o caudal de ar, causando uma aplicação irregular. A grelha deve estar desimpedida para garantir a máxima eficiência da turbina.",
+        "dicaSub": "Limpe restos de folhas ou ramos acumulados na rede de proteção. Confirme se a rede não está deformada ou obstruída.",
+        "falhas": "Grelha obstruída com detritos; malha demasiado fina; redução visível da aspiração de ar."
+      }
+    ]
+  }
+]

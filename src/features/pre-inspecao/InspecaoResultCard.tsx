@@ -1,6 +1,6 @@
 import React from 'react';
 import { ShieldCheck, AlertTriangle, ShieldAlert, CheckCircle2, HelpCircle } from 'lucide-react';
-import type { InspecaoEvaluationResult } from './inspecaoDataMapper';
+import type { InspecaoEvaluationResult } from './types/inspecaoTypes';
 
 interface InspecaoResultCardProps {
   calculationResult: InspecaoEvaluationResult;
@@ -15,12 +15,19 @@ export const InspecaoResultCard: React.FC<InspecaoResultCardProps> = ({
     conformityPct,
     conformeCount,
     anomaliaCount,
+    pendenteCount,
     totalItems,
     status,
     statusLabel,
     alertLevel,
-    recommendation
+    recommendation,
+    evaluationStyle
   } = calculationResult;
+
+  const styleBadgeText =
+    evaluationStyle === 'dgav_oficial'
+      ? 'Inspeção Oficial DGAV • DL 26/2017'
+      : 'Boletim de Pré-Inspeção • Norma ISO 16122';
 
   return (
     <section
@@ -37,19 +44,19 @@ export const InspecaoResultCard: React.FC<InspecaoResultCardProps> = ({
               Resultado Oficial
             </span>
             <span className="text-xs text-slate-200 font-semibold">
-              Boletim de Pré-Inspeção • Norma ISO 16122
+              {styleBadgeText}
             </span>
           </div>
         </div>
 
         <div className="flex items-center gap-2">
           <span className="text-[11px] font-mono text-slate-300 bg-white/5 px-2.5 py-1 rounded-lg border border-white/10">
-            {conformeCount} Conformes • {anomaliaCount} Anomalias
+            {conformeCount} Conformes • {anomaliaCount} Anomalias / Falhas
           </span>
           <button
             type="button"
             onClick={onOpenGuide}
-            aria-label="Abrir guia da norma ISO 16122"
+            aria-label="Abrir guia técnico e normativo"
             className="text-slate-300 hover:text-white transition-colors cursor-pointer"
           >
             <HelpCircle className="w-4 h-4" />
@@ -59,11 +66,14 @@ export const InspecaoResultCard: React.FC<InspecaoResultCardProps> = ({
 
       <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-4">
         <div>
-          <div className="flex items-baseline gap-2">
+          <div className="flex items-baseline gap-2 flex-wrap">
             <span className="font-mono text-4xl sm:text-5xl font-black tracking-tight text-white">
               {conformityPct}
             </span>
             <span className="text-xl sm:text-2xl font-bold text-[#3AAA35]">%</span>
+            <span className="text-xs font-black uppercase tracking-wider text-[#8ffa94] ml-1">
+              Conformidade Global
+            </span>
             <div className="ml-2 inline-flex">
               {status === 'aprovado' && (
                 <span className="px-2.5 py-1 rounded-xl text-xs font-black bg-emerald-500/20 text-[#8ffa94] border border-emerald-500/40 inline-flex items-center gap-1.5">
@@ -86,7 +96,7 @@ export const InspecaoResultCard: React.FC<InspecaoResultCardProps> = ({
             </div>
           </div>
           <p className="text-xs text-slate-300 font-medium mt-1">
-            {statusLabel} ({conformeCount} de {totalItems} pontos críticos em conformidade)
+            {statusLabel} ({conformeCount} validados de {totalItems} requisitos • {pendenteCount} pendentes • {anomaliaCount} anomalias)
           </p>
         </div>
 
@@ -105,6 +115,9 @@ export const InspecaoResultCard: React.FC<InspecaoResultCardProps> = ({
           </div>
           <p className="text-xs sm:text-sm font-bold text-white leading-snug">
             {recommendation}
+          </p>
+          <p className="text-[10px] text-slate-300/80 font-mono">
+            Taxa de aprovação: {conformityPct}% com base no universo total de {totalItems} requisitos.
           </p>
         </div>
       </div>

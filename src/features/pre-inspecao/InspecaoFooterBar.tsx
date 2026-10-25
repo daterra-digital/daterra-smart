@@ -1,18 +1,22 @@
 import React from 'react';
-import { BookmarkCheck, History, BookOpen } from 'lucide-react';
+import { BookmarkCheck, History, BookOpen, FileDown } from 'lucide-react';
 
 interface InspecaoFooterBarProps {
   onSave: () => void;
+  onExportPdf?: () => void;
   onOpenHistory: () => void;
   onOpenGuide: () => void;
   historyCount: number;
+  isGeneratingPdf?: boolean;
 }
 
 export const InspecaoFooterBar: React.FC<InspecaoFooterBarProps> = ({
   onSave,
+  onExportPdf,
   onOpenHistory,
   onOpenGuide,
-  historyCount
+  historyCount,
+  isGeneratingPdf
 }) => {
   return (
     <nav
@@ -24,11 +28,25 @@ export const InspecaoFooterBar: React.FC<InspecaoFooterBarProps> = ({
           type="button"
           onClick={onSave}
           aria-label="Guardar boletim de pré-inspeção no histórico local"
-          className="min-h-[48px] flex-1 bg-[#114037] hover:bg-[#1a5c50] text-white font-bold text-xs sm:text-sm py-3 px-4 rounded-2xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer touch-target"
+          className="min-h-[48px] flex-1 bg-[#114037] hover:bg-[#1a5c50] text-white font-black text-xs sm:text-sm py-3 px-3 sm:px-4 rounded-2xl shadow-md transition-all flex items-center justify-center gap-1.5 sm:gap-2 cursor-pointer touch-target"
         >
           <BookmarkCheck className="w-4 h-4 text-[#8ffa94]" />
-          <span>Guardar Histórico</span>
+          <span>Guardar</span>
         </button>
+
+        {onExportPdf && (
+          <button
+            type="button"
+            onClick={onExportPdf}
+            disabled={isGeneratingPdf}
+            aria-label="Exportar boletim oficial em PDF"
+            className="min-h-[48px] px-3 sm:px-4 py-2.5 bg-emerald-50 hover:bg-emerald-100 text-[#114037] border border-emerald-200 rounded-2xl text-xs sm:text-sm font-black transition-all flex items-center gap-1.5 shadow-xs cursor-pointer touch-target shrink-0"
+          >
+            <FileDown className="w-4 h-4 text-[#3CA64C]" />
+            <span className="hidden sm:inline">Exportar PDF</span>
+            <span className="sm:hidden">PDF</span>
+          </button>
+        )}
 
         <button
           type="button"

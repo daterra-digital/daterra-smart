@@ -1,0 +1,206 @@
+[
+  {
+    "id": "cat_barras_horizontais_0_limpeza_geral",
+    "tipoEquipamento": "barras_horizontais",
+    "categoria": "0. Limpeza Geral",
+    "perguntaGlobal": "O pulverizador está perfeitamente lavado (interior e exterior)?",
+    "informacao": "A limpeza rigorosa é obrigatória. Sujidade e resíduos químicos ocultam fugas no circuito e fissuras estruturais, impedindo a inspeção e os testes técnicos.",
+    "dica": "Efetue a tripla lavagem do depósito e lave o chassis. Equipamentos com restos de calda ou lama impedem a realização da inspeção e comprometem os testes hidráulicos.",
+    "subperguntas": [
+      {
+        "id": "cat_barras_horizontais_0_limpeza_geral_sub_1",
+        "subpergunta": "O exterior da máquina está livre de resíduos de produtos, terra ou massas lubrificantes?",
+        "informacaoSub": "A inscrustação de sujidade ou químicos oculta fissuras estruturais no chassis e desgaste nas mangueiras, impedindo a inspeção visual e camuflando fugas ativas.",
+        "dicaSub": "Efetue a limpeza imediata após a aplicação. Utilize desengordurantes para remover resíduos de óleo e massa lubrificante.",
+        "falhas": "Lama acumulada; incrustações de químicos no chassis; excesso de óleo e massa lubrificante nas articulações."
+      },
+      {
+        "id": "cat_barras_horizontais_0_limpeza_geral_sub_2",
+        "subpergunta": "O interior do depósito foi lavado e está isento de sedimentos?",
+        "informacaoSub": "Resíduos cristalizados obstruem filtros e bicos. O depósito deve estar totalmente limpo para garantir que não existem reações químicas e que os testes usam apenas água limpa.",
+        "dicaSub": "Execute a tripla lavagem após cada uso. Remova e lave o crivo de enchimento para evitar a acumulação de sedimentos.",
+        "falhas": "Depósitos de sedimentos no fundo; Odor intenso a produto fitofarmacêutico; Presença de espuma na água de teste."
+      }
+    ]
+  },
+  {
+    "id": "cat_barras_horizontais_1_transmissao_e_seguranca",
+    "tipoEquipamento": "barras_horizontais",
+    "categoria": "1. Transmissão e Segurança",
+    "perguntaGlobal": "As proteções estão intactas e a estrutura sem fissuras?",
+    "informacao": "Proteções danificadas na tomada de força apresentam um risco crítico de segurança, podendo resultar em lesões severas. Fissuras no chassis afetam a estabilidade mecânica e a segurança.",
+    "dica": "Verifique o copo do cardan, bainha e correntes. Inspecione as principais soldaduras e o engate ao trator.",
+    "subperguntas": [
+      {
+        "id": "cat_barras_horizontais_1_transmissao_e_seguranca_sub_1",
+        "subpergunta": "As proteções do cardan e veios estão inteiras e com correntes de retenção acopladas?",
+        "informacaoSub": "As proteções completas na tomada de força são essenciais para evitar acidentes graves. Veios em rotação expostos representam um perigo extremo de segurança.",
+        "dicaSub": "Fixe as correntes a pontos estáticos da máquina e trator. O copo e a bainha devem cobrir a cruzeta.",
+        "falhas": "Copo do cardan danificado; bainha plástica danificada; correntes ausentes ou danificadas; veio exposto."
+      },
+      {
+        "id": "cat_barras_horizontais_1_transmissao_e_seguranca_sub_2",
+        "subpergunta": "Existem fissuras visíveis no chassis ou grelhas de ventilador danificadas?",
+        "informacaoSub": "Fissuras no chassis afetam a estabilidade e segurança. Em barras com assistência de ar, grelhas de proteção danificada não evitam o contacto com peças móveis.",
+        "dicaSub": "Inspecione as soldaduras principais e o engate. Substitua grelhas danificadas para garantir a proteção do operador.",
+        "falhas": "Soldaduras com fissuras no chassis; engates deformados; malha da grelha com rutura ou inexistente."
+      },
+      {
+        "id": "cat_barras_horizontais_1_transmissao_e_seguranca_sub_3",
+        "subpergunta": "O sistema de bloqueio das barras dobráveis (para transporte) está funcional e seguro?",
+        "informacaoSub": "O bloqueio seguro das barras recolhidas é obrigatório para prevenir aberturas acidentais durante o transporte na via pública, evitando acidentes graves.",
+        "dicaSub": "Teste os trincos mecânicos ou hidráulicos e garanta que a barra não abre nem oscila livremente quando está fechada.",
+        "falhas": "Trincos mecânicos inoperacionais; pinos de segurança ausentes; folga excessiva nos suportes."
+      }
+    ]
+  },
+  {
+    "id": "cat_barras_horizontais_2_deposito_e_filtragem",
+    "tipoEquipamento": "barras_horizontais",
+    "categoria": "2. Depósito e Filtragem",
+    "perguntaGlobal": "O depósito garante estanquidade, os filtros estão íntegros e a calda é agitada?",
+    "informacao": "Fugas no depósito causam contaminação ambiental e inviabilizam a estabilidade do circuito hidráulico. Filtros danificados obstruem bicos, e a agitação é vital para manter a calda homogénea e sem falhas.",
+    "dica": "Encha o depósito com água para testar a agitação e procurar gotejamento. Inspecione as malhas de todos os filtros.",
+    "subperguntas": [
+      {
+        "id": "cat_barras_horizontais_2_deposito_e_filtragem_sub_1",
+        "subpergunta": "O depósito, tampa ou juntas apresentam fugas de líquido?",
+        "informacaoSub": "Qualquer fuga no depósito ou na tampa compromete a segurança e contamina o ambiente. A estanquidade total do sistema é um requisito fundamental para evitar o desperdício.",
+        "dicaSub": "Encha o depósito com água até à sua capacidade máxima e simule o movimento dinâmico. Verifique o vedante da tampa e a válvula de purga.",
+        "falhas": "Fissuras no polímero do depósito; vedante da tampa com perda de elasticidade ou ausente; gotejamento na purga."
+      },
+      {
+        "id": "cat_barras_horizontais_2_deposito_e_filtragem_sub_2",
+        "subpergunta": "Os elementos filtrantes estão limpos e sem ruturas na malha?",
+        "informacaoSub": "Malhas com ruturas permitem a passagem de impurezas que obstruem os bicos e desgastam a bomba, alterando a distribuição da calda. Filtros perfeitamente íntegros são vitais para a eficácia.",
+        "dicaSub": "Desmonte e lave os filtros de aspiração e de linha. Substitua imediatamente as malhas com perfurações.",
+        "falhas": "Malha com rutura ou colapsada; cartucho inexistente; sujidade extrema acumulada no copo do filtro."
+      },
+      {
+        "id": "cat_barras_horizontais_2_deposito_e_filtragem_sub_3",
+        "subpergunta": "A agitação da calda é vigorosa e visível no interior do tanque?",
+        "informacaoSub": "A agitação é vital para manter a calda homogénea. É tecnicamente necessário que a turbulência seja visível, evitando a decantação.",
+        "dicaSub": "Encha o depósito a meio e ative a agitação. Observe pelo bocal se existe turbulência forte e contínua no fundo.",
+        "falhas": "Agitador hidráulico obstruído; tubo solto ou perfurado; falta de turbulência; caudal da bomba fraco."
+      },
+      {
+        "id": "cat_barras_horizontais_2_deposito_e_filtragem_sub_4",
+        "subpergunta": "O indicador de nível do depósito está legível a partir do ponto de comando ou zona de enchimento?",
+        "informacaoSub": "O operador tem de conseguir ler claramente o volume de calda para evitar derrames no enchimento e controlar a aplicação, conforme as melhores práticas de pulverização.",
+        "dicaSub": "Limpe a escala graduada e verifique se o flutuador interno (se existir) não está bloqueado.",
+        "falhas": "Escala do nível opaca / suja; tubo transparente com rutura ou escurecido; flutuador bloqueado / imobilizado."
+      },
+      {
+        "id": "cat_barras_horizontais_2_deposito_e_filtragem_sub_5",
+        "subpergunta": "É possível limpar o filtro de aspiração com o depósito cheio sem derramar calda?",
+        "informacaoSub": "O sistema deve possuir uma válvula de isolamento funcional no filtro de aspiração. Retirar o cartucho com o depósito cheio não pode resultar em fuga de líquido.",
+        "dicaSub": "Encha o depósito com água limpa, feche a válvula de isolamento e abra o copo do filtro para testar.",
+        "falhas": "Válvula de isolamento inoperacional / bloqueado; o-ring da tampa com fuga; derramamento de calda."
+      },
+      {
+        "id": "cat_barras_horizontais_2_deposito_e_filtragem_sub_6",
+        "subpergunta": "A válvula de esvaziamento do depósito funciona e permite recolher a calda com segurança?",
+        "informacaoSub": "O depósito tem de possuir um sistema de descarga segura que encaminhe o líquido para um recipiente, evitando a contaminação direta do solo.",
+        "dicaSub": "Teste a abertura e fecho do tampão ou válvula de purga, garantindo que a água flui sem escorrer pelo chassis.",
+        "falhas": "Tampão oxidado / gripado; rosca danificada; gotejamento constante na válvula de descarga do fundo."
+      }
+    ]
+  },
+  {
+    "id": "cat_barras_horizontais_3_circuito_hidraulico_e_pressao",
+    "tipoEquipamento": "barras_horizontais",
+    "categoria": "3. Circuito Hidráulico e Pressão",
+    "perguntaGlobal": "A bomba não tem fugas, o manómetro está estável e reage aos comandos?",
+    "informacao": "Fugas no circuito sob pressão inviabilizam a estabilidade do sistema e desperdiçam calda. A bomba deve garantir fluxo constante e o manómetro tem de estar perfeitamente estável para uma leitura exata.",
+    "dica": "Teste o sistema com água limpa à pressão máxima. Se o ponteiro do manómetro apresentar instabilidade ou vibração excessiva, ajuste a pressão de ar do amortecedor da bomba.",
+    "subperguntas": [
+      {
+        "id": "cat_barras_horizontais_3_circuito_hidraulico_e_pressao_sub_1",
+        "subpergunta": "A bomba apresenta fugas de óleo/calda ou mangueiras fissuradas?",
+        "informacaoSub": "Fugas na bomba ou tubagens sob pressão comprometem a eficácia do tratamento e a estabilidade do sistema. Membranas perfuradas / com rutura misturam calda com óleo, e mangueiras fissuradas podem sofrer rutura sob pressão.",
+        "dicaSub": "Verifique se o óleo da bomba apresenta aspeto leitoso (indica água). Inspecione as mangueiras com a máquina na pressão máxima.",
+        "falhas": "Bomba a gotejar; óleo com aspeto leitoso (emulsão por água); mangueiras fissuradas ou esmagadas."
+      },
+      {
+        "id": "cat_barras_horizontais_3_circuito_hidraulico_e_pressao_sub_2",
+        "subpergunta": "O manómetro está funcional e a leitura é legível e estável?",
+        "informacaoSub": "O manómetro garante a dose correta de aplicação. O mostrador deve ter um diâmetro mínimo de 63 mm. Para pressões de trabalho inferiores a 5 bar, a divisão da escala deve ser de, pelo menos, 0,2 bar. O vidro deve estar limpo e o ponteiro totalmente estável, sem oscilações.",
+        "dicaSub": "Ligue a máquina à pressão de trabalho. Se o ponteiro apresentar vibração excessiva, ajuste a pressão de ar do amortecedor da bomba.",
+        "falhas": "Vidro baço ou danificado; ponteiro com oscilação excessiva ou bloqueado; falta de glicerina; diâmetro inferior a 63 mm; divisão de escala superior a 0,2 bar."
+      },
+      {
+        "id": "cat_barras_horizontais_3_circuito_hidraulico_e_pressao_sub_3",
+        "subpergunta": "O comando de regulação está funcional permite estabilizar a pressão desejada?",
+        "informacaoSub": "O regulador de pressão define a dose exata de aplicação. A pressão deve manter-se constante, sem quebras ou picos, garantindo um caudal uniforme.",
+        "dicaSub": "Teste rodar o manípulo em todo o seu curso. Fixe numa pressão e verifique se o ponteiro do manómetro não desce.",
+        "falhas": "Manípulo bloqueado ou oxidado; pressão a cair gradualmente; mola interna danificada; fugas no corpo do regulador."
+      },
+      {
+        "id": "cat_barras_horizontais_3_circuito_hidraulico_e_pressao_sub_4",
+        "subpergunta": "O comando de corte geral e as válvulas de secção fecham o fluxo instantaneamente?",
+        "informacaoSub": "O corte rápido é exigido para evitar sobreposições excessivas e contaminação nas cabeceiras. O fecho da calda tem de ser absoluto e quase imediato.",
+        "dicaSub": "Com a máquina a pulverizar, acione o corte geral e depois cada secção. O fluxo nos bicos tem de ser interrompido imediatamente.",
+        "falhas": "Demora no fecho; válvulas oxidadas; gotejamento após o corte; motores elétricos avariados."
+      },
+      {
+        "id": "cat_barras_horizontais_3_circuito_hidraulico_e_pressao_sub_5",
+        "subpergunta": "Ao fechar uma ou mais secções da barra, a pressão no manómetro mantém-se inalterada?",
+        "informacaoSub": "A pressão não deve variar mais de 10% ao fechar secções (compensação de retorno). Variações maiores alteram a dose nas secções que ficam abertas.",
+        "dicaSub": "Com as secções todas abertas, registe a pressão base. Feche uma secção e verifique se o ponteiro se mantém estável na mesma posição.",
+        "falhas": "Retornos desregulados; falta de compensação; aumento súbito de pressão ao cortar secções."
+      }
+    ]
+  },
+  {
+    "id": "cat_barras_horizontais_4_barra_e_distribuicao",
+    "tipoEquipamento": "barras_horizontais",
+    "categoria": "4. Barra e Distribuição",
+    "perguntaGlobal": "A barra está nivelada, com bicos uniformes e o sistema antigota é eficaz?",
+    "informacao": "Barras desniveladas e bicos diferentes alteram a dose aplicada. O sistema antigota é obrigatório e tem de cortar o fluxo em menos de 5s para evitar contaminação.",
+    "dica": "Abra as barras e verifique o alinhamento visual. Confirme se os bicos são iguais e teste o corte (máx. 5 segundos).",
+    "subperguntas": [
+      {
+        "id": "cat_barras_horizontais_4_barra_e_distribuicao_sub_1",
+        "subpergunta": "A estrutura da barra está alinhada, nivelada e mecanicamente estável?",
+        "informacaoSub": "Barras desniveladas ou a oscilar alteram a distância ao alvo, causando falhas ou excesso de produto. A estabilidade e o paralelismo em relação ao solo são essenciais.",
+        "dicaSub": "Abra as barras num piso plano. Verifique visualmente o alinhamento e teste as molas do sistema de amortecimento.",
+        "falhas": "Secções empenadas; barra com deflexão nas extremidades; folgas nas articulações; molas de retorno danificadas."
+      },
+      {
+        "id": "cat_barras_horizontais_4_barra_e_distribuicao_sub_2",
+        "subpergunta": "Os bicos são idênticos em toda a barra e o jato é visualmente uniforme?",
+        "informacaoSub": "Todos os bicos na barra devem ser do mesmo tipo, tamanho, material e fabricante. Jatos deformados indicam obstrução ou desgaste, afetando a distribuição da calda.",
+        "dicaSub": "Verifique a cor e a marca gravada em cada bico. Substitua bicos com jatos assimétricos, com estrias ou falhas no padrão.",
+        "falhas": "Bicos de cores / marcas diferentes; jatos assimétricos ou com estrias; bicos obstruídos ou gastos."
+      },
+      {
+        "id": "cat_barras_horizontais_4_barra_e_distribuicao_sub_3",
+        "subpergunta": "O fluxo nos bicos é interrompido totalmente em menos de 5 segundos?",
+        "informacaoSub": "O sistema antigota é um mecanismo crítico. O fluxo deve parar em menos de 5 segundos para evitar o desperdício de calda e a contaminação do solo em paragens e manobras.",
+        "dicaSub": "Limpe e lubrifique a mola da válvula antigota. Substitua membranas ressequidas ou deformadas para garantir o corte.",
+        "falhas": "Gotejamento persistente (>5s); membranas perfuradas ou contaminadas; válvulas antigota bloqueadas ou ausentes."
+      },
+      {
+        "id": "cat_barras_horizontais_4_barra_e_distribuicao_sub_4",
+        "subpergunta": "O espaçamento entre bicos e a altura da barra são constantes e adequados?",
+        "informacaoSub": "O espaçamento (geralmente 50cm) e a altura devem garantir a sobreposição dos jatos. É necessária uma uniformidade total para evitar falhas ou excessos de dose no alvo.",
+        "dicaSub": "Verifique se os bicos estão todos à mesma distância. A altura ideal da barra é, habitualmente, 50cm acima do alvo.",
+        "falhas": "Espaçamento irregular; barra demasiado alta (deriva) ou baixa (má cobertura); falta de sobreposição."
+      },
+      {
+        "id": "cat_barras_horizontais_4_barra_e_distribuicao_sub_5",
+        "subpergunta": "Os bicos estão corretamente orientados e sem obstruções no jato?",
+        "informacaoSub": "Os bicos devem estar alinhados para que os jatos não colidam entre si nem intersetem a estrutura da barra. A cortina de pulverização deve ser contínua e sem interferências.",
+        "dicaSub": "Incline ligeiramente os bicos (5º-10º) em relação ao eixo da barra para evitar que os jatos vizinhos intersetem.",
+        "falhas": "Bicos desalinhados; jato a intersetar a estrutura da barra; bicos obstruídos; interferência entre jatos vizinhos."
+      },
+      {
+        "id": "cat_barras_horizontais_4_barra_e_distribuicao_sub_6",
+        "subpergunta": "Os bicos das extremidades têm arcos de proteção ou a barra possui um sistema de segurança contra impactos?",
+        "informacaoSub": "Os bicos das pontas estão expostos. Recomenda-se o uso de arcos metálicos ou sistemas que permitam o recuo da barra em caso de choque, protegendo a estrutura e os bicos.",
+        "dicaSub": "Confirme se existem arcos protetores ou se a ponta da barra articula para trás ao encontrar um obstáculo.",
+        "falhas": "Bicos danificados; falta de arcos; sistema de segurança contra impactos bloqueado ou inexistente."
+      }
+    ]
+  }
+]

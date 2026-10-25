@@ -1,22 +1,14 @@
-export {
-  EQUIPMENT_OPTIONS,
-  PRE_INSPECTION_CATEGORIES,
-  PRE_INSPECTION_MOCK_CATEGORIES,
-  getCategoriesByEquipment,
-  type EquipmentTypeId,
-  type EvaluationMode,
-  type SubQuestionAnswer,
-  type PreInspectionCsvRow,
-  type PreInspectionSubQuestion,
-  type PreInspectionCategory,
-  type EquipmentOption
-} from './preInspectionData';
+export * from './types/inspecaoTypes';
+export * from './data/equipmentConfigs';
+export * from './data/inspectionDataLoader';
+export * from './engine/inspecaoEvaluator';
+export * from './pdf/inspecaoPdfGenerator';
+export * from './hooks/usePreInspecaoState';
 
 export {
   loadPreInspectionHistory,
   savePreInspectionRecord,
-  deletePreInspectionRecord,
-  type PreInspectionSavedRecord
+  deletePreInspectionRecord
 } from './preInspectionStorage';
 
 export { EquipmentSelectorGrid } from './EquipmentSelectorGrid';

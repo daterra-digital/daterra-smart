@@ -1,18 +1,8 @@
-import type { EquipmentTypeId, SubQuestionAnswer } from './preInspectionData';
+import type { PreInspectionSavedRecord } from './types/inspecaoTypes';
+
+export type { PreInspectionSavedRecord };
 
 const STORAGE_KEY = 'daterra_pre_inspection_history_v1';
-
-export interface PreInspectionSavedRecord {
-  id: string;
-  dateIso: string;
-  equipmentId: EquipmentTypeId;
-  equipmentTitle: string;
-  conformityPct: number;
-  conformeCount: number;
-  anomaliaCount: number;
-  totalSubQuestions: number;
-  answers: Record<string, SubQuestionAnswer>;
-}
 
 export function loadPreInspectionHistory(): PreInspectionSavedRecord[] {
   try {
