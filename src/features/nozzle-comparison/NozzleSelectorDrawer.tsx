@@ -7,7 +7,7 @@ import type { Nozzle } from './nozzleComparison.types';
 export interface NozzleSelectorDrawerProps {
   isOpen: boolean;
   onClose: () => void;
-  side: 'A' | 'B';
+  side: 'A' | 'B' | 'REF';
   currentNozzleId: string;
   onSelectNozzle: (nozzleId: string) => void;
 }
@@ -195,7 +195,7 @@ export const NozzleSelectorDrawer: React.FC<NozzleSelectorDrawerProps> = ({
               Catálogo de Bicos
             </span>
             <h3 className="text-base font-black text-slate-900 leading-tight">
-              {side === 'A' ? 'Selecionar Bico A' : 'Selecionar Bico B'}
+              {side === 'A' ? 'Selecionar Bico A' : (side === 'REF' ? 'Selecionar Bico de Referência' : 'Selecionar Bico B')}
             </h3>
           </div>
           <button

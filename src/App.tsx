@@ -30,7 +30,7 @@ import { ConsultaPhCalculator } from './features/consulta-ph';
 import { PreInspectionView } from './views/PreInspectionView';
 import { PreInspecaoCalculator } from './features/pre-inspecao';
 import { VelocidadeTrabalhoView } from './features/calculators/velocidade-trabalho';
-import { DebitoTrabalhoView } from './features/calculators/tabelas-debito';
+import { TabelasDebitoHubView, DebitoTrabalhoView } from './features/calculators/tabelas-debito';
 import { AgriChatView } from './features/agri-chat/AgriChatView';
 import { WeatherSaasView } from './features/weather/views/WeatherSaasView';
 import { isLocalhost } from './utils/environment';
@@ -157,10 +157,11 @@ export const AppContent: React.FC = () => {
           <Route path="/ferramentas/debito-total" element={<DebitoTotalCalculator />} />
           <Route path="/ferramentas/calibracao-pulverizador" element={<CalibracaoPulverizador />} />
           <Route path="/ferramentas/eppo" element={<EppoCalculator />} />
-          <Route path="/ferramentas/comparador-bicos" element={<DebitoTrabalhoView />} />
-          <Route path="/ferramentas/tabelas-debito" element={<DebitoTrabalhoView />} />
-          <Route path="/tools/tabelas-debito" element={<DebitoTrabalhoView />} />
-          <Route path="/tools/comparador-bicos" element={<DebitoTrabalhoView />} />
+          <Route path="/ferramentas/comparador-bicos" element={<TabelasDebitoHubView />} />
+          <Route path="/ferramentas/tabelas-debito" element={<TabelasDebitoHubView />} />
+          <Route path="/tools/tabelas-debito" element={<TabelasDebitoHubView />} />
+          <Route path="/tools/comparador-bicos" element={<TabelasDebitoHubView />} />
+          <Route path="/tools/debito-trabalho-iso" element={<DebitoTrabalhoView />} />
           <Route path="/ferramentas/drone-buffer-zone" element={<DroneComplianceView />} />
           <Route path="/ferramentas/smart-debito" element={<SmartDebitoView />} />
           <Route path="/ferramentas/satelite-ndvi" element={<SatelliteIntelligenceView />} />

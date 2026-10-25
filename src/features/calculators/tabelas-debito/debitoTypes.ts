@@ -70,6 +70,72 @@ export function calculateIsoFlow(nominalFlow3Bar: number, pressureBar: number): 
   };
 }
 
+export type DebitoHubMode = 'unitario' | 'comparador' | 'alternativas';
+
+export interface DebitoDeltaComparison {
+  deltaFlowLMin: number;
+  deltaPercent: number;
+  leadingSide: 'A' | 'B' | 'EQUAL';
+  labelPt: string;
+}
+
+export function calculateDebitoDelta(flowA: number, flowB: number): DebitoDeltaComparison {
+  if (flowA <= 0 && flowB <= 0) {
+    return { deltaFlowLMin: 0, deltaPercent: 0, leadingSide: 'EQUAL', labelPt: '0,0%' };
+  }
+  const diff = flowB - flowA;
+  if (Math.abs(diff) < 0.001) {
+    return { deltaFlowLMin: 0, deltaPercent: 0, leadingSide: 'EQUAL', labelPt: 'Débitos idênticos (Δ 0%)' };
+  }
+  if (flowA > flowB) {
+    const diffA = flowA - flowB;
+    const pctA = flowB > 0 ? (diffA / flowB) * 100 : 0;
+    return {
+      deltaFlowLMin: Number(diffA.toFixed(2)),
+      deltaPercent: Number(pctA.toFixed(1)),
+      leadingSide: 'A',
+      labelPt: `+${Number(pctA.toFixed(1))}% no Bico A`
+    };
+  }
+  const pctB = flowA > 0 ? (diff / flowA) * 100 : 0;
+  return {
+    deltaFlowLMin: Number(diff.toFixed(2)),
+    deltaPercent: Number(pctB.toFixed(1)),
+    leadingSide: 'B',
+    labelPt: `+${Number(pctB.toFixed(1))}% no Bico B`
+  };
+}
+
+export function isDriftRiskDroplets(dv10Microns?: number | null): boolean {
+  return typeof dv10Microns === 'number' && dv10Microns > 0 && dv10Microns < 100;
+}
+
+export function checkPressureRange(
+  pressureBar: number,
+  minBar?: number,
+  maxBar?: number
+): { isOutOfRange: boolean; warningMessage?: string } {
+  if (minBar !== undefined && maxBar !== undefined) {
+    if (pressureBar < minBar || pressureBar > maxBar) {
+      return {
+        isOutOfRange: true,
+        warningMessage: `Fora do intervalo recomendado: ${minBar.toFixed(1)}–${maxBar.toFixed(1)} bar`
+      };
+    }
+  } else if (minBar !== undefined && pressureBar < minBar) {
+    return {
+      isOutOfRange: true,
+      warningMessage: `Abaixo da pressão recomendada: min ${minBar.toFixed(1)} bar`
+    };
+  } else if (maxBar !== undefined && pressureBar > maxBar) {
+    return {
+      isOutOfRange: true,
+      warningMessage: `Acima da pressão recomendada: max ${maxBar.toFixed(1)} bar`
+    };
+  }
+  return { isOutOfRange: false };
+}
+
 export function buildDebitoStructuredValues(
   isoNozzle: IsoNozzleColor,
   pressureBar: number,

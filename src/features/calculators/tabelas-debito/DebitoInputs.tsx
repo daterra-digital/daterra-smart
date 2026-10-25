@@ -13,7 +13,7 @@ export const DebitoInputs: React.FC<DebitoInputsProps> = ({
   onOpenKeypad,
   onSelectPresetPressure
 }) => {
-  const pressurePresets = [1.5, 2.0, 2.5, 3.0, 4.0, 5.0];
+  const pressurePresets = [2.0, 3.0, 4.0, 5.0, 8.0, 10.0, 15.0, 20.0];
 
   return (
     <section
@@ -60,6 +60,33 @@ export const DebitoInputs: React.FC<DebitoInputsProps> = ({
             <Edit2 className="w-3.5 h-3.5" />
           </div>
         </button>
+
+        {/* Slider de Pressão 1.0 a 30.0 bar com Snapping de 0.5 bar */}
+        <div className="space-y-1 pt-1">
+          <div className="relative flex items-center h-10">
+            <input
+              type="range"
+              min="1.0"
+              max="30.0"
+              step="0.5"
+              value={pressureBar}
+              onChange={(e) => {
+                const raw = parseFloat(e.target.value);
+                const snapped = Math.round(raw * 2) / 2;
+                onSelectPresetPressure(snapped);
+              }}
+              aria-label="Slider de ajuste de pressão"
+              className="w-full h-3 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-[#114037] focus:outline-none focus:ring-2 focus:ring-[#3CA64C]"
+            />
+          </div>
+          <div className="flex justify-between text-[10px] font-bold text-slate-400 px-1 font-mono">
+            <span>1.0 bar</span>
+            <span>5.0 bar</span>
+            <span>10.0 bar</span>
+            <span>20.0 bar</span>
+            <span>30.0 bar</span>
+          </div>
+        </div>
 
         {/* Atalhos Rápidos de Pressão */}
         <div className="flex items-center gap-1.5 flex-wrap pt-1">
