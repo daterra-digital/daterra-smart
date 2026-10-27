@@ -3,17 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import { CheckCircle2 } from 'lucide-react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../../../db/db';
-import { ISO_NOZZLE_COLORS, calculateIsoFlow, buildDebitoStructuredValues } from './debitoTypes';
+import { ISO_NOZZLE_COLORS, calculateIsoFlow } from './debitoTypes';
 import {
-  buildCalculationRecord,
-  saveCalculationToDb,
   softDeleteCalculationInDb,
   clearCalculatorHistoryInDb,
   updateCalculationMetadataInDb
 } from '../core/historyService';
 import { CalculatorHistoryDrawer } from '../history/CalculatorHistoryDrawer';
-import { enqueueMutation } from '../../../services/outbox/outboxService';
-import { generateIdempotencyKey } from '../../../services/integrations/centralgestMapper';
 import { DaterraKeypadModal } from '../../../components/DaterraKeypad';
 import { NozzleMicrolearningModal } from '../../nozzle-comparison/NozzleMicrolearningModal';
 import { DebitoHeader } from './DebitoHeader';
@@ -21,6 +17,7 @@ import { DebitoResultCard } from './DebitoResultCard';
 import { DebitoIsoSelector } from './DebitoIsoSelector';
 import { DebitoInputs } from './DebitoInputs';
 import { DebitoFooterBar } from './DebitoFooterBar';
+import { useDebitoSaveHistory } from './services/useDebitoSaveHistory';
 
 export const DebitoTrabalhoView: React.FC = () => {
   const navigate = useNavigate();
@@ -29,7 +26,7 @@ export const DebitoTrabalhoView: React.FC = () => {
   const [isKeypadOpen, setIsKeypadOpen] = useState<boolean>(false);
   const [isGuideOpen, setIsGuideOpen] = useState<boolean>(false);
   const [isHistoryOpen, setIsHistoryOpen] = useState<boolean>(false);
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const { toastMessage, saveToHistory } = useDebitoSaveHistory();
 
   const selectedNozzle = useMemo(
     () => ISO_NOZZLE_COLORS.find((n) => n.code === selectedCode) || ISO_NOZZLE_COLORS[2],
@@ -61,53 +58,8 @@ export const DebitoTrabalhoView: React.FC = () => {
     setPressureBar(3.0);
   }, []);
 
-  const handleSaveToHistory = async () => {
-    try {
-      if (!flowResult.isValid) {
-        setToastMessage('Insira valores válidos de pressão antes de gravar.');
-        setTimeout(() => setToastMessage(null), 3000);
-        return;
-      }
-
-      // 1. Criação do registo estruturado para calculation_history_v2
-      const { inputs, outputs } = buildDebitoStructuredValues(selectedNozzle, pressureBar, flowResult);
-      const record = buildCalculationRecord({
-        userId: 'local-user',
-        calculatorId: 'calc_tabelas_debito',
-        calculatorVersion: '1.0.0',
-        name: `Bico ISO ${selectedNozzle.code} (${selectedNozzle.namePt}): ${flowResult.flowLMin} L/min @ ${pressureBar} bar`,
-        inputs,
-        outputs
-      });
-
-      await saveCalculationToDb(record);
-
-      // 2. Persistência atómica na Mutation Outbox (Dexie v8) com idempotência UUIDv4
-      await enqueueMutation({
-        entityId: generateIdempotencyKey(),
-        entityType: 'calculation',
-        operation: 'CREATE',
-        payload: {
-          calculationId: record.id,
-          calculatorId: 'calc_tabelas_debito',
-          isoCode: selectedNozzle.code,
-          colorName: selectedNozzle.namePt,
-          nominalFlow3Bar: selectedNozzle.nominalFlow3Bar,
-          pressureBar,
-          flowLMin: flowResult.flowLMin,
-          flowMinLMin: flowResult.flowMinLMin,
-          flowMaxLMin: flowResult.flowMaxLMin,
-          timestamp: new Date().toISOString()
-        }
-      });
-
-      setToastMessage('Calibração de bico gravada e enfileirada na Outbox offline!');
-      setTimeout(() => setToastMessage(null), 3500);
-    } catch (err) {
-      console.error('Erro ao gravar calibração de bico:', err);
-      setToastMessage('Erro ao gravar a calibração.');
-      setTimeout(() => setToastMessage(null), 3000);
-    }
+  const handleSaveToHistory = () => {
+    saveToHistory(selectedNozzle, pressureBar, flowResult);
   };
 
   return (

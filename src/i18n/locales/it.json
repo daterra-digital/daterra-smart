@@ -8,7 +8,15 @@
     "ndvi": "Mappe NDVI",
     "academy": "Accademia",
     "parcels": "Parcelle",
-    "settings": "Impostazioni"
+    "settings": "Impostazioni",
+    "mobileAriaLabel": "Navegação móvel principal",
+    "assistant": "Assistente",
+    "openMobileMenu": "Abrir Menu",
+    "closeMobileMenu": "Fechar Menu",
+    "accessPlatform": "Aceder à Plataforma",
+    "bannerAcademia": "Formação e capacitação contínua para profissionais agrícolas: Conheça a Academia DATERRA",
+    "about": "Sobre",
+    "login": "Login"
   },
   "dashboard": {
     "title": "Pannello Generale dell'Azienda",
@@ -243,7 +251,11 @@
     "commonShortcuts": "Valori Comuni (Scorciatoie)",
     "clearButton": "C (Cancella)",
     "confirmButton": "OK (Conferma)",
-    "disabledConfirm": "OK (Conferma)"
+    "disabledConfirm": "OK (Conferma)",
+    "openKeypad": "Abrir Teclado DATERRA",
+    "minValue": "Valor mínimo: {{value}}",
+    "maxValue": "Valor máximo: {{value}}",
+    "valueDefault": "Valor"
   },
   "microlearning": {
     "capsuleTitle": "Capsula di Conoscenza DATERRA Smart",
@@ -810,5 +822,128 @@
       "manufacturerReferenceLabel": "Riferimento del costruttore:",
       "technicalCatalogDisclaimer": "Le portate indicate sono valori tabulati dal costruttore. Verificare la compatibilità dell'ugello, la pressione e la qualità dell'irrorazione prima dell'applicazione."
     }
+  },
+  "gating": {
+    "badge_pro": "PRO",
+    "exclusive_tier": "Exclusivo {{tier}}",
+    "modal": {
+      "badge": "DATERRA PRO",
+      "current_plan_free": "Plano Atual: Gratuito",
+      "current_plan_pro": "Modo PRO Ativo",
+      "title_feature": "Acesso Restrito: {{feature}}",
+      "title_default": "Desbloqueie o Potencial Máximo com o Plano PRO",
+      "subtitle": "Metodologias agronómicas avançadas, calibração profissional e telemetria de campo contínua.",
+      "benefit_1_title": "Modelos 3D Avançados (LWA & TRV)",
+      "benefit_1_desc": "Cálculo de dosagens adaptadas à copa e área foliar real segundo EPPO PP 1/239.",
+      "benefit_2_title": "Telemetria e Eficácia da Máquina",
+      "benefit_2_desc": "Gravação direta de LWA/TRV nos perfis de cultura e eficiência percentual no equipamento.",
+      "benefit_3_title": "Inspeção Prévia e Bicos Específicos",
+      "benefit_3_desc": "Comparador de bicos ISO, débitos de trabalho e auditoria técnica de pulverizadores.",
+      "btn_activate_pro": "Ativar Modo PRO (Simulação Imediata)",
+      "btn_keep_pro": "Manter Modo PRO Ativo",
+      "btn_reset_free": "Voltar ao Modo Gratuito (Free)",
+      "btn_continue_free": "Continuar no Plano Gratuito",
+      "close_aria": "Fechar"
+    },
+    "locked_card": {
+      "title_feature": "Acesso Restrito: {{feature}}",
+      "title_default": "Funcionalidade Reservada ao Plano PRO",
+      "description": "Esta funcionalidade agronómica requer o nível {{tier}} para aceder a algoritmos avançados, modelos de calibração e telemetria de perfis.",
+      "btn_back": "Voltar ao Catálogo",
+      "btn_unlock": "Desbloquear com PRO"
+    },
+    "tiers": {
+      "free": {
+        "label": "Gratuito",
+        "description": "Ferramentas essenciais de campo e consulta básica."
+      },
+      "pro": {
+        "label": "PRO",
+        "description": "Modelos avançados EPPO, calibração, LWA/TRV e telemetria de perfis."
+      },
+      "ultra": {
+        "label": "Ultra (IA)",
+        "description": "Diagnóstico visual e relatórios preditivos por Inteligência Artificial."
+      },
+      "corporate": {
+        "label": "Corporate",
+        "description": "Multi-exploração, API CentralGest ERP e relatórios personalizados."
+      }
+    }
+  },
+  "footer": {
+    "description": "Ferramentas digitais práticas e capacitação técnica para o setor agroalimentar e proteção das culturas.",
+    "fundingTitle": "Financiamento",
+    "fundingLine1": "Projeto AgroSmart DATERRA",
+    "fundingLine2": "Projeto n.º 23703",
+    "fundingLine3": "Apoiado pelo PRR — Plano de Recuperação e Resiliência",
+    "viewProjectDetails": "Ver detalhes do projeto",
+    "toolsTitle": "Ferramentas & Recursos",
+    "toolsItem1": "Calculadoras Agrícolas de Precisão",
+    "toolsItem2": "Informação e Acompanhamento Técnico",
+    "toolsItem3": "Academia DATERRA",
+    "toolsItem4": "Preparação e Calibração de Caldas",
+    "supportTitle": "Suporte & Contacto",
+    "supportEmail": "Email: smart@daterra.com.pt",
+    "supportPhone": "Telefone: +351 262 145 662",
+    "supportCountry": "Portugal",
+    "allRightsReserved": "© {{year}} DATERRA Smart. Todos os direitos reservados."
+  },
+  "common": {
+    "actions": {
+      "save": "Guardar",
+      "saved": "Guardado com sucesso",
+      "cancel": "Cancelar",
+      "confirm": "Confirmar",
+      "back": "Voltar",
+      "edit": "Editar",
+      "delete": "Eliminar",
+      "close": "Fechar",
+      "calculate": "Calcular",
+      "exportPdf": "Exportar Relatório PDF",
+      "reset": "Repor Valores",
+      "load": "Carregar"
+    },
+    "states": {
+      "loading": "A carregar...",
+      "saving": "A guardar...",
+      "saved": "Guardado com sucesso",
+      "offline": "Modo Sem Rede (Offline)",
+      "synced": "Sincronizado",
+      "validating_session": "A validar sessão..."
+    },
+    "labels": {
+      "guide": "Guia",
+      "help": "Ajuda",
+      "parameters": "Valores Introduzidos",
+      "activeTool": "Ferramenta Ativa",
+      "results": "Resultados de Cálculo",
+      "history": "Histórico",
+      "notes": "Avisos de Validação"
+    },
+    "back": "Voltar",
+    "backToTools": "Voltar às Ferramentas",
+    "activeTool": "Ferramenta Ativa",
+    "guide": "Guia",
+    "help": "Ajuda",
+    "edit": "Editar",
+    "hide": "Ocultar",
+    "enteredValues": "Valores Introduzidos",
+    "tapToEdit": "Toque para editar medidas com teclado tátil",
+    "shortcuts": "Atalhos:",
+    "clearSearch": "Limpar pesquisa",
+    "openGuide": "Abrir guia",
+    "closeGuide": "Fechar guia",
+    "user": "Utilizador",
+    "selectOption": "Selecione uma opção...",
+    "equivalent": "Equivalente:",
+    "resultUnavailable": "Resultado indisponível. Verifique se todos os campos foram preenchidos corretamente.",
+    "setPreset": "Definir {{value}} {{unit}}",
+    "helpAbout": "Ajuda sobre {{label}}",
+    "offlineIndexedDb": "Modo Offline (IndexedDB Ativo)",
+    "onlinePwa": "Online (PWA)",
+    "logout": "Terminar Sessão",
+    "activeSession": "Sessão Ativa",
+    "openMobileMenu": "Abrir Menu Mobile"
   }
 }

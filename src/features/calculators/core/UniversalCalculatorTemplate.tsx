@@ -811,7 +811,7 @@ export const UniversalCalculatorTemplate: React.FC<UniversalCalculatorTemplatePr
             normalizedValue: 0,
             dimension: 'text',
             canonicalKey: 'training_system',
-            label: 'Modo de Condução',
+            label: t('calibracao.conductionMode', 'Modo de Condução'),
             source: 'user_input',
             localId: 'conductionId',
             calculatorId: definition.id,
@@ -825,7 +825,7 @@ export const UniversalCalculatorTemplate: React.FC<UniversalCalculatorTemplatePr
             normalizedValue: 0,
             dimension: 'text',
             canonicalKey: 'phenology_stage',
-            label: 'Estado Fenológico',
+            label: t('calibracao.phenologyStage', 'Estado Fenológico'),
             source: 'user_input',
             localId: 'phenologyId',
             calculatorId: definition.id,
@@ -867,7 +867,7 @@ export const UniversalCalculatorTemplate: React.FC<UniversalCalculatorTemplatePr
             normalizedValue: 0,
             dimension: 'text',
             canonicalKey: 'phenology_interval',
-            label: 'Intervalo Fenológico',
+            label: t('calibracao.phenologyInterval', 'Intervalo Fenológico'),
             source: 'user_input',
             localId: 'phenologyStage',
             calculatorId: definition.id,
@@ -881,7 +881,7 @@ export const UniversalCalculatorTemplate: React.FC<UniversalCalculatorTemplatePr
             normalizedValue: 1,
             dimension: 'text',
             canonicalKey: 'lwa_manual_volume_override',
-            label: 'Usar Volume Adotado Manual',
+            label: t('calibracao.useManualAdoptedVolume', 'Usar Volume Adotado Manual'),
             source: 'user_input',
             localId: 'useManualAdoptedVolumeInLwa',
             calculatorId: definition.id,
@@ -897,7 +897,7 @@ export const UniversalCalculatorTemplate: React.FC<UniversalCalculatorTemplatePr
           normalizedValue: 0,
           dimension: 'text',
           canonicalKey: 'calculator_mode',
-          label: 'Modo de Operação Vegetativa',
+          label: t('calibracao.vegetativeMode', 'Modo de Operação Vegetativa'),
           source: 'user_input',
           localId: 'mode',
           calculatorId: definition.id,
@@ -1128,7 +1128,7 @@ export const UniversalCalculatorTemplate: React.FC<UniversalCalculatorTemplatePr
         normalizedValue: 0,
         dimension: 'text',
         canonicalKey: 'calculator_mode',
-        label: 'Modo de Operação Vegetativa',
+        label: t('calibracao.vegetativeMode', 'Modo de Operação Vegetativa'),
         source: 'user_input',
         localId: 'mode',
         calculatorId: definition.id,
@@ -1158,7 +1158,7 @@ export const UniversalCalculatorTemplate: React.FC<UniversalCalculatorTemplatePr
           normalizedValue: 0,
           dimension: 'text',
           canonicalKey: 'training_system',
-          label: 'Modo de Condução',
+          label: t('calibracao.conductionMode', 'Modo de Condução'),
           source: 'user_input',
           localId: 'conductionId',
           calculatorId: definition.id,
@@ -1172,7 +1172,7 @@ export const UniversalCalculatorTemplate: React.FC<UniversalCalculatorTemplatePr
           normalizedValue: 0,
           dimension: 'text',
           canonicalKey: 'phenology_stage',
-          label: 'Estado Fenológico',
+          label: t('calibracao.phenologyStage', 'Estado Fenológico'),
           source: 'user_input',
           localId: 'phenologyId',
           calculatorId: definition.id,
@@ -1186,7 +1186,7 @@ export const UniversalCalculatorTemplate: React.FC<UniversalCalculatorTemplatePr
           normalizedValue: 0,
           dimension: 'text',
           canonicalKey: 'canopy_density',
-          label: 'Densidade Foliar',
+          label: t('calibracao.canopyDensity', 'Densidade Foliar'),
           source: 'user_input',
           localId: 'canopyDensity',
           calculatorId: definition.id,
@@ -1200,7 +1200,7 @@ export const UniversalCalculatorTemplate: React.FC<UniversalCalculatorTemplatePr
           normalizedValue: 0,
           dimension: 'text',
           canonicalKey: 'canopy_thickness',
-          label: 'Espessura da Sebe',
+          label: t('calibracao.canopyThickness', 'Espessura da Sebe'),
           source: 'user_input',
           localId: 'canopyThickness',
           calculatorId: definition.id,
@@ -1214,7 +1214,7 @@ export const UniversalCalculatorTemplate: React.FC<UniversalCalculatorTemplatePr
           normalizedValue: 0,
           dimension: 'text',
           canonicalKey: 'phenology_interval',
-          label: 'Intervalo Fenológico',
+          label: t('calibracao.phenologyInterval', 'Intervalo Fenológico'),
           source: 'user_input',
           localId: 'phenologyStage',
           calculatorId: definition.id,
@@ -1403,7 +1403,7 @@ export const UniversalCalculatorTemplate: React.FC<UniversalCalculatorTemplatePr
   const handleSave = async () => {
     if (!validation.isValid) {
       setToastInfo({
-        msg: 'Corrija os erros de validação antes de guardar o cálculo.',
+        msg: t('common.fixValidationErrors', 'Corrija os erros de validação antes de guardar o cálculo.'),
         type: 'error'
       });
       return;
@@ -1417,10 +1417,16 @@ export const UniversalCalculatorTemplate: React.FC<UniversalCalculatorTemplatePr
           inputs: structuredInputs,
           outputs: structuredOutputs
         });
-        setToastInfo({ msg: 'Cálculo guardado com sucesso no histórico.', type: 'success' });
+        setToastInfo({
+          msg: t('common.calculationSaved', 'Cálculo guardado com sucesso no histórico.'),
+          type: 'success'
+        });
       } catch (err) {
         console.error('Erro ao guardar o cálculo via onSaveCalculation:', err);
-        setToastInfo({ msg: 'Não foi possível guardar o cálculo. Tente novamente.', type: 'error' });
+        setToastInfo({
+          msg: t('common.calculationSaveError', 'Não foi possível guardar o cálculo. Tente novamente.'),
+          type: 'error'
+        });
       } finally {
         setIsSaving(false);
       }
@@ -1430,7 +1436,10 @@ export const UniversalCalculatorTemplate: React.FC<UniversalCalculatorTemplatePr
     // Fluxo padrão para calculadoras migradas para calculation_history_v2 (ex: calc_dose, calc_concentracao, calc_velocidade_real)
     if (!effectiveUserId) {
       setToastInfo({
-        msg: 'Não foi possível guardar o cálculo. É necessária uma sessão com início prévio para associar os cálculos.',
+        msg: t(
+          'common.authRequiredToSave',
+          'Não foi possível guardar o cálculo. É necessária uma sessão com início prévio para associar os cálculos.'
+        ),
         type: 'error'
       });
       return;
@@ -1455,10 +1464,16 @@ export const UniversalCalculatorTemplate: React.FC<UniversalCalculatorTemplatePr
       });
 
       await saveCalculationToDb(record);
-      setToastInfo({ msg: 'Cálculo guardado com sucesso no histórico.', type: 'success' });
+      setToastInfo({
+        msg: t('common.calculationSaved', 'Cálculo guardado com sucesso no histórico.'),
+        type: 'success'
+      });
     } catch (err) {
       console.error('Erro ao guardar o cálculo:', err);
-      setToastInfo({ msg: 'Não foi possível guardar o cálculo. Tente novamente.', type: 'error' });
+      setToastInfo({
+        msg: t('common.calculationSaveError', 'Não foi possível guardar o cálculo. Tente novamente.'),
+        type: 'error'
+      });
     } finally {
       setIsSaving(false);
     }
@@ -1482,10 +1497,16 @@ export const UniversalCalculatorTemplate: React.FC<UniversalCalculatorTemplatePr
 
       setIsLimitModalOpen(false);
       setPendingCalculation(null);
-      setToastInfo({ msg: 'Cálculo guardado com sucesso no histórico.', type: 'success' });
+      setToastInfo({
+        msg: t('common.calculationSaved', 'Cálculo guardado com sucesso no histórico.'),
+        type: 'success'
+      });
     } catch (err) {
       console.error('Erro ao gerir limite de histórico:', err);
-      setToastInfo({ msg: 'Não foi possível guardar o cálculo. Tente novamente.', type: 'error' });
+      setToastInfo({
+        msg: t('common.calculationSaveError', 'Não foi possível guardar o cálculo. Tente novamente.'),
+        type: 'error'
+      });
     } finally {
       setIsSaving(false);
     }
@@ -1493,13 +1514,19 @@ export const UniversalCalculatorTemplate: React.FC<UniversalCalculatorTemplatePr
 
   const handleDeleteHistoryRecord = async (record: CalculationHistoryRecord) => {
     await softDeleteCalculationInDb(record.id);
-    setToastInfo({ msg: 'Cálculo eliminado do histórico.', type: 'success' });
+    setToastInfo({
+      msg: t('common.calculationDeleted', 'Cálculo eliminado do histórico.'),
+      type: 'success'
+    });
   };
 
   const handleClearCalculatorHistory = async () => {
     if (!effectiveUserId) return;
     await clearCalculatorHistoryInDb(definition.id, effectiveUserId);
-    setToastInfo({ msg: 'Histórico desta calculadora limpo.', type: 'success' });
+    setToastInfo({
+      msg: t('common.historyCleared', 'Histórico desta calculadora limpo.'),
+      type: 'success'
+    });
   };
 
   const handleUpdateMetadata = async (
@@ -1507,7 +1534,10 @@ export const UniversalCalculatorTemplate: React.FC<UniversalCalculatorTemplatePr
     metadata: { name?: string; notes?: string; tags?: string[] }
   ) => {
     await updateCalculationMetadataInDb(id, metadata);
-    setToastInfo({ msg: 'Informações do cálculo atualizadas.', type: 'success' });
+    setToastInfo({
+      msg: t('common.calculationUpdated', 'Informações do cálculo atualizadas.'),
+      type: 'success'
+    });
   };
 
   // Determina o rótulo do modo ativo para o badge do resultado
@@ -1519,7 +1549,7 @@ export const UniversalCalculatorTemplate: React.FC<UniversalCalculatorTemplatePr
       <CalculatorHeader
         title={definition.title}
         category={definition.category}
-        badgeLabel={definition.badgeLabel ?? 'Ferramenta Ativa'}
+        badgeLabel={definition.badgeLabel ?? t('common.activeTool', 'Ferramenta Ativa')}
         onBack={onBack}
       />
 

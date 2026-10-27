@@ -43,7 +43,7 @@ export const DebitoFooterBar: React.FC<DebitoFooterBarProps> = ({
         <button
           type="button"
           onClick={onOpenGuide}
-          aria-label="Abrir guia agronómico e normas DGAV/ISO"
+          aria-label="Abrir guia agronómico e normas técnicas ISO"
           className="h-12 bg-slate-100 hover:bg-slate-200 text-[#114037] rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-colors cursor-pointer touch-target"
         >
           <BookOpen className="w-4 h-4 text-[#3CA64C]" />

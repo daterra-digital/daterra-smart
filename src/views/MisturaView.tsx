@@ -3,9 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { CheckCircle2 } from 'lucide-react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../db/db';
-import { enqueueMutation } from '../services/outbox/outboxService';
-import { generateIdempotencyKey } from '../services/integrations/centralgestMapper';
 import { DaterraKeypad } from '../components/DaterraKeypad';
+import { useTranslation } from '../context/LanguageContext';
 import {
   FormulationSelector,
   MixingSequenceDisplay,
@@ -16,15 +15,17 @@ import {
 import { MisturaHeader } from '../features/mistura/MisturaHeader';
 import { MisturaResultCard } from '../features/mistura/MisturaResultCard';
 import { MisturaFooterBar } from '../features/mistura/MisturaFooterBar';
+import { useMisturaSaveHistory } from '../features/mistura/useMisturaSaveHistory';
 
 export const MisturaView: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [selectedIds, setSelectedIds] = useState<string[]>(['PH', 'WG', 'SC', 'EC', 'MOL']);
   const [tankCapacityL, setTankCapacityL] = useState<number>(1000);
   const [isJarTestOpen, setIsJarTestOpen] = useState<boolean>(false);
   const [isHistoryOpen, setIsHistoryOpen] = useState<boolean>(false);
   const [isKeypadOpen, setIsKeypadOpen] = useState<boolean>(false);
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const { toastMessage, saveToHistory } = useMisturaSaveHistory();
 
   const historyCount =
     useLiveQuery(async () => {
@@ -49,45 +50,8 @@ export const MisturaView: React.FC = () => {
   };
 
   // Submissão com Persistência First-Offline (Outbox Dexie v8)
-  const handleSaveToHistory = async () => {
-    try {
-      if (selectedIds.length === 0) {
-        setToastMessage('Selecione pelo menos uma formulação antes de gravar.');
-        setTimeout(() => setToastMessage(null), 3000);
-        return;
-      }
-
-      // 1. Gravação no histórico local imediato
-      await db.mix_history.add({
-        date: new Date().toISOString(),
-        title: `Calda ${tankCapacityL} L (${selectedIds.length} produtos)`,
-        selected_formulation_ids: selectedIds,
-        tank_capacity_l: tankCapacityL,
-        water_initial_l: sequenceAnalysis.waterInitialL,
-        water_final_l: sequenceAnalysis.waterFinalL
-      });
-
-      // 2. Persistência atómica na Mutation Outbox (Dexie v8) com idempotência UUIDv4
-      await enqueueMutation({
-        entityId: generateIdempotencyKey(),
-        entityType: 'mixture',
-        operation: 'CREATE',
-        payload: {
-          tankCapacityL,
-          selectedFormulationIds: selectedIds,
-          waterInitialL: sequenceAnalysis.waterInitialL,
-          waterFinalL: sequenceAnalysis.waterFinalL,
-          productsCount: selectedIds.length
-        }
-      });
-
-      setToastMessage('Receita gravada e enfileirada na Outbox offline!');
-      setTimeout(() => setToastMessage(null), 3500);
-    } catch (err) {
-      console.error('Erro ao guardar mistura na outbox:', err);
-      setToastMessage('Erro ao gravar no histórico.');
-      setTimeout(() => setToastMessage(null), 3000);
-    }
+  const handleSaveToHistory = () => {
+    saveToHistory(selectedIds, tankCapacityL, sequenceAnalysis);
   };
 
   return (
@@ -158,7 +122,7 @@ export const MisturaView: React.FC = () => {
         initialUnit="L"
         availableUnits={['L']}
         commonValues={[400, 600, 800, 1000, 1500, 2000, 3000]}
-        label="Capacidade do Depósito"
+        label={t('mistura.tankCapacity', 'Capacidade do Depósito')}
         validationRules={{
           required: true,
           min: 100,

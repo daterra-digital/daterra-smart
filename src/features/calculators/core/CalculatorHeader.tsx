@@ -10,6 +10,7 @@
 
 import React from 'react';
 import { ChevronLeft, CheckCircle2 } from 'lucide-react';
+import { useLanguage } from '../../../context/LanguageContext.tsx';
 
 export interface CalculatorHeaderProps {
   /** Título principal da calculadora (ex: 'Calculadora de Dose por Hectare') */
@@ -25,9 +26,12 @@ export interface CalculatorHeaderProps {
 export const CalculatorHeader: React.FC<CalculatorHeaderProps> = ({
   title,
   category,
-  badgeLabel = 'Ferramenta Ativa',
+  badgeLabel,
   onBack
 }) => {
+  const { t } = useLanguage();
+  const activeLabel = badgeLabel ?? t('common.activeTool', 'Ferramenta Ativa');
+
   return (
     <header className="bg-white p-3 sm:p-3.5 rounded-2xl md:rounded-3xl border border-slate-200/90 shadow-soft flex items-center justify-between gap-3">
       {/* Lado Esquerdo: Botão Voltar + Categoria e Título */}
@@ -37,11 +41,11 @@ export const CalculatorHeader: React.FC<CalculatorHeaderProps> = ({
             type="button"
             onClick={onBack}
             className="p-2 sm:p-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl transition-all flex items-center gap-1.5 text-xs font-bold touch-target active:scale-95 cursor-pointer focus-visible:outline-2 focus-visible:outline-[#114037] shrink-0"
-            aria-label="Voltar ao catálogo de ferramentas"
+            aria-label={t('common.backToTools', 'Voltar ao catálogo de ferramentas')}
           >
             <ChevronLeft className="w-4 h-4 text-daterra-primary" />
-            <span className="hidden sm:inline">Voltar às Ferramentas</span>
-            <span className="sm:hidden">Voltar</span>
+            <span className="hidden sm:inline">{t('common.backToTools', 'Voltar às Ferramentas')}</span>
+            <span className="sm:hidden">{t('common.back', 'Voltar')}</span>
           </button>
         )}
         <div className="flex flex-col min-w-0">
@@ -55,10 +59,10 @@ export const CalculatorHeader: React.FC<CalculatorHeaderProps> = ({
       </div>
 
       {/* Lado Direito: Badge Ferramenta Ativa */}
-      {badgeLabel && (
+      {activeLabel && (
         <div className="px-3 py-1 bg-emerald-100 text-emerald-800 text-xs font-extrabold rounded-full flex items-center gap-1.5 shrink-0">
           <CheckCircle2 className="w-3.5 h-3.5 text-emerald-700" />
-          <span>{badgeLabel}</span>
+          <span>{activeLabel}</span>
         </div>
       )}
     </header>

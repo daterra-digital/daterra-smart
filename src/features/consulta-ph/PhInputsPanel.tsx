@@ -1,5 +1,6 @@
 import React from 'react';
 import { Pencil, Droplets, ShieldCheck } from 'lucide-react';
+import { useTranslation } from '../../context/LanguageContext';
 import type { TipoCalda } from './phDataMapper';
 import { TIPO_CALDA_CONFIG } from './phDataMapper';
 import { DidacticHelp } from '../concentracao/DidacticHelp';
@@ -19,6 +20,7 @@ export const PhInputsPanel: React.FC<PhInputsPanelProps> = ({
   onOpenKeypad,
   onSelectPresetPh
 }) => {
+  const { t } = useTranslation();
   const tipos: TipoCalda[] = ['geral', 'sensivel', 'cupricos', 'sulfonilureias'];
 
   return (
@@ -27,7 +29,7 @@ export const PhInputsPanel: React.FC<PhInputsPanelProps> = ({
       <div>
         <div className="flex items-center justify-between mb-2">
           <label className="text-[11px] font-black uppercase tracking-wider text-slate-500 block">
-            Família Química / Tipo de Calda
+            {t('calculators.ph.familyType', 'Família Química / Tipo de Calda')}
           </label>
           <DidacticHelp
             faqFile="MisturaFAQpH.md"
@@ -70,7 +72,7 @@ export const PhInputsPanel: React.FC<PhInputsPanelProps> = ({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1.5">
             <span className="text-xs font-bold text-slate-700">
-              pH Medido da Água de Abastecimento
+              {t('calculators.ph.measuredPh', 'pH Medido da Água de Abastecimento')}
             </span>
             <DidacticHelp
               faqFile="MisturaFAQpH.md"
@@ -83,7 +85,7 @@ export const PhInputsPanel: React.FC<PhInputsPanelProps> = ({
           <button
             type="button"
             onClick={onOpenKeypad}
-            aria-label="Editar pH da água no teclado tátil"
+            aria-label={t('calculators.ph.editPhAria', 'Editar pH da água no teclado tátil')}
             className="min-h-[48px] px-3.5 py-1.5 bg-white border border-slate-300 hover:border-emerald-500 rounded-xl flex items-center gap-2 shadow-xs cursor-pointer touch-target group"
           >
             <span className="font-mono text-base font-black text-slate-800 group-hover:text-emerald-700">
@@ -115,7 +117,7 @@ export const PhInputsPanel: React.FC<PhInputsPanelProps> = ({
       {/* 3. Rodapé de Notação Técnica */}
       <div className="p-3 bg-emerald-50/50 border border-emerald-100 rounded-2xl flex items-center gap-2 text-xs text-emerald-900 font-medium">
         <ShieldCheck className="w-4 h-4 text-emerald-700 shrink-0" />
-        <span>Meça e corrija o pH da água no depósito antes de despejar os fitofármacos.</span>
+        <span>{t('calculators.ph.measureNotice', 'Meça e corrija o pH da água no depósito antes de despejar os fitofármacos.')}</span>
       </div>
     </div>
   );

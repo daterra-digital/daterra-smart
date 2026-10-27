@@ -30,6 +30,7 @@
 
 import React, { useReducer, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from '../../context/LanguageContext';
 import {
   ArrowLeft,
   GraduationCap,
@@ -58,6 +59,7 @@ import {
 } from './services/smartDebitoPdfExport';
 
 export const SmartDebitoView: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   // 1. Gestão de Estado Normalizado com useReducer
@@ -91,7 +93,10 @@ export const SmartDebitoView: React.FC = () => {
       if (!isOnline) {
         setPdfToast({
           type: 'error',
-          text: 'Exportação bloqueada: Sem ligação à internet. A emissão de relatórios oficiais requer conectividade ativa.'
+          text: t(
+            'smartDebito.offlineBlock',
+            'Exportação bloqueada: Sem ligação à internet. A emissão de relatórios oficiais requer conectividade ativa.'
+          )
         });
         setIsExportingPdf(false);
         return;
@@ -113,13 +118,13 @@ export const SmartDebitoView: React.FC = () => {
       setPdfToast({
         type: 'success',
         text: isPremiumExport
-          ? 'Relatório Premium emitido com sucesso (com Co-Branding oficial).'
-          : 'Relatório emitido em modo Freemium com marca de água.'
+          ? t('smartDebito.premiumSuccess', 'Relatório Premium emitido com sucesso (com Co-Branding oficial).')
+          : t('smartDebito.freemiumSuccess', 'Relatório emitido em modo Freemium com marca de água.')
       });
     } catch (err: any) {
       setPdfToast({
         type: 'error',
-        text: err?.message || 'Ocorreu um erro ao gerar o relatório PDF.'
+        text: err?.message || t('smartDebito.exportError', 'Ocorreu um erro ao gerar o relatório PDF.')
       });
     } finally {
       setIsExportingPdf(false);
@@ -197,7 +202,7 @@ export const SmartDebitoView: React.FC = () => {
               type="button"
               onClick={() => navigate('/ferramentas')}
               className="p-1.5 bg-white/10 hover:bg-white/20 rounded-xl transition-colors text-white cursor-pointer"
-              title="Voltar às ferramentas"
+              title={t('common.backToTools', 'Voltar às ferramentas')}
             >
               <ArrowLeft className="w-4 h-4" />
             </button>
@@ -208,11 +213,11 @@ export const SmartDebitoView: React.FC = () => {
                   ISO 16122
                 </span>
                 <h1 className="text-sm sm:text-base font-extrabold tracking-tight">
-                  Smart Débito (ISO 16122)
+                  {t('smartDebito.title', 'Smart Débito (ISO 16122)')}
                 </h1>
               </div>
               <p className="text-[10px] text-slate-300 hidden sm:block">
-                Auditoria de Pulverizadores · Validação de Débitos e Simetria Bilateral
+                {t('smartDebito.subtitle', 'Auditoria de Pulverizadores · Validação de Débitos e Simetria Bilateral')}
               </p>
             </div>
           </div>
@@ -237,22 +242,22 @@ export const SmartDebitoView: React.FC = () => {
               )}
               <span>
                 {verdict.overallVerdict === 'CONFORME_ISO_16122'
-                  ? 'Conforme ISO'
+                  ? t('smartDebito.isoCompliant', 'Conforme ISO')
                   : verdict.overallVerdict === 'NAO_CONFORME_ISO_16122'
-                  ? 'Não Conforme'
-                  : 'Pendente'}
+                  ? t('smartDebito.isoNonCompliant', 'Não Conforme')
+                  : t('common.pending', 'Pendente')}
               </span>
             </div>
 
-            {/* Botão de Ajuda Técnico / Microlearning */}
+            {/* Botão de Ajuda Técnico / Guia */}
             <button
               type="button"
               onClick={() => setIsHelpOpen(true)}
-              className="py-1.5 px-2.5 bg-daterra-accent hover:bg-emerald-600 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer"
+              className="py-1.5 px-2.5 bg-daterra-accent hover:bg-emerald-600 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer touch-target"
             >
               <GraduationCap className="w-4 h-4" />
-              <span className="hidden sm:inline">Ajuda & Microlearning</span>
-              <span className="sm:hidden">Ajuda</span>
+              <span className="hidden sm:inline">{t('common.guide', 'Guia Técnico')}</span>
+              <span className="sm:hidden">{t('common.guideShort', 'Guia')}</span>
             </button>
           </div>
         </div>
@@ -342,14 +347,14 @@ export const SmartDebitoView: React.FC = () => {
               {/* Contadores e Botões de Ação no Cabeçalho */}
               <div className="flex flex-wrap items-center gap-2 sm:gap-2.5 text-xs w-full sm:w-auto justify-start sm:justify-end">
                 <div className="flex items-center gap-1.5 bg-slate-100 px-2.5 py-1 rounded-lg text-slate-700 font-semibold border border-slate-200 text-[11px]">
-                  <span>Medição:</span>
+                  <span>{t('smartDebito.measurement', 'Medição:')}</span>
                   <span className="font-bold text-slate-900 font-mono">
-                    {verdict.measuredNozzleCount} / {verdict.activeNozzleCount} bicos
+                    {verdict.measuredNozzleCount} / {verdict.activeNozzleCount} {t('common.nozzles', 'bicos')}
                   </span>
                 </div>
 
                 <div className="flex items-center gap-1.5 bg-emerald-50 px-2.5 py-1 rounded-lg text-emerald-800 font-semibold border border-emerald-200 text-[11px]">
-                  <span>Total:</span>
+                  <span>{t('common.total', 'Total:')}</span>
                   <span className="font-bold text-emerald-950 font-mono">
                     {verdict.totalMeasured} l/min
                   </span>
@@ -361,11 +366,11 @@ export const SmartDebitoView: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => dispatch({ type: 'CLEAR_MEASUREMENTS' })}
-                  title="Limpar todos os débitos medidos"
+                  title={t('smartDebito.clearAllTooltip', 'Limpar todos os débitos medidos')}
                   className="h-8 px-2.5 text-xs font-bold bg-white hover:bg-rose-50 border border-slate-200 hover:border-rose-200 text-slate-600 hover:text-rose-700 rounded-lg flex items-center gap-1.5 shadow-2xs transition-all cursor-pointer"
                 >
                   <RotateCcw className="w-3.5 h-3.5 text-slate-500" />
-                  <span>Limpar</span>
+                  <span>{t('common.clear', 'Limpar')}</span>
                 </button>
 
                 {/* Botão Emitir Relatório PDF */}
@@ -373,18 +378,18 @@ export const SmartDebitoView: React.FC = () => {
                   type="button"
                   onClick={handleExportPdf}
                   disabled={isExportingPdf}
-                  title="Emitir relatório pericial oficial em PDF"
+                  title={t('smartDebito.exportPdfTooltip', 'Emitir relatório pericial oficial em PDF')}
                   className="h-8 px-3 text-xs font-black bg-[#114037] hover:bg-daterra-primary-hover text-white rounded-lg flex items-center gap-1.5 shadow-2xs transition-all cursor-pointer disabled:opacity-60"
                 >
                   {isExportingPdf ? (
                     <>
                       <Loader2 className="w-3.5 h-3.5 animate-spin text-emerald-300" />
-                      <span>A emitir...</span>
+                      <span>{t('smartDebito.exporting', 'A emitir...')}</span>
                     </>
                   ) : (
                     <>
                       <FileText className="w-3.5 h-3.5 text-white" />
-                      <span>Emitir Relatório PDF</span>
+                      <span>{t('smartDebito.exportPdf', 'Emitir Relatório PDF')}</span>
                     </>
                   )}
                 </button>

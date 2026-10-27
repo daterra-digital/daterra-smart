@@ -14,9 +14,16 @@ import {
   CheckCircle2
 } from 'lucide-react';
 import { useWeather } from '../hooks/useWeather';
+import { useLanguage } from '../../../context/LanguageContext';
 import { WeatherLocationSearchDropdown } from './WeatherLocationSearchDropdown';
+import {
+  getLocalizedSprayBadge,
+  getLocalizedWeatherCondition,
+  getLocalizedDayLabel
+} from './weatherI18n';
 
 export const DashboardWeatherCard: React.FC = () => {
+  const { t, language } = useLanguage();
   const {
     data,
     isLoading,
@@ -49,18 +56,18 @@ export const DashboardWeatherCard: React.FC = () => {
         <Link
           to="/meteorologia"
           className="group flex items-center gap-3 transition-all cursor-pointer select-none"
-          title="Abrir Análise Bioclimática & Janelas de Decisão (SaaS)"
+          title={t('weather.openBioclimatic', 'Abrir Análise Bioclimática & Janelas de Decisão (SaaS)')}
         >
           <div className="w-10 h-10 rounded-2xl bg-amber-50 group-hover:bg-amber-100 text-amber-600 flex items-center justify-center font-bold transition-colors shrink-0">
             <Sun className="w-6 h-6" />
           </div>
           <div>
             <div className="flex items-center gap-1.5 font-extrabold text-daterra-primary text-base group-hover:text-daterra-accent transition-colors">
-              <span>Meteorologia</span>
+              <span>{t('weather.title', 'Meteorologia')}</span>
               <ArrowRight className="w-4 h-4 opacity-40 group-hover:opacity-100 group-hover:translate-x-1 transition-all text-daterra-accent" />
             </div>
             <span className="text-[11px] text-slate-500 font-semibold block">
-              Previsão & Decisão de Pulverização • Toque para abrir
+              {t('weather.subtitle', 'Previsão & Decisão de Pulverização • Toque para abrir')}
             </span>
           </div>
         </Link>
@@ -88,7 +95,7 @@ export const DashboardWeatherCard: React.FC = () => {
               </span>
             </div>
             <span className="text-xs font-bold text-slate-700 block">
-              {cur?.weatherLabel ?? 'Céu Limpo'} • Hoje
+              {getLocalizedWeatherCondition(cur?.weatherCode, cur?.weatherLabel, t)} • {t('weather.today', 'Hoje')}
             </span>
           </div>
         </div>
@@ -98,13 +105,13 @@ export const DashboardWeatherCard: React.FC = () => {
           <div className="flex items-center gap-2">
             <Wind className="w-4 h-4 text-slate-400" />
             <span>
-              Vento: <strong>{cur?.windSpeedKmh ?? 12} km/h ({cur?.windDirectionText ?? 'NNE'})</strong>
+              {t('weather.wind', 'Vento')}: <strong>{cur?.windSpeedKmh ?? 12} km/h ({cur?.windDirectionText ?? 'NNE'})</strong>
             </span>
           </div>
           <div className="flex items-center gap-2">
             <CloudRain className="w-4 h-4 text-slate-400" />
             <span>
-              Humidade: <strong>{cur?.humidityPercent ?? 62}%</strong>
+              {t('weather.humidity', 'Humidade')}: <strong>{cur?.humidityPercent ?? 62}%</strong>
             </span>
           </div>
         </div>
@@ -131,14 +138,14 @@ export const DashboardWeatherCard: React.FC = () => {
             ) : (
               <Thermometer className="w-4 h-4 text-rose-600" />
             )}
-            <span>Janela de Pulverização</span>
+            <span>{t('weather.sprayWindow', 'Janela de Pulverização')}</span>
           </div>
           <span
             className={`text-[11px] font-semibold mt-0.5 ${
               isOptimal ? 'text-emerald-700' : isMarginal ? 'text-amber-700' : 'text-rose-700'
             }`}
           >
-            {spray?.badgeLabel || 'Risco de Deriva Baixo (Ótimo)'}
+            {getLocalizedSprayBadge(spray?.badgeLabel, t)}
           </span>
           <span className="text-[10px] text-slate-500 font-mono-numbers mt-0.5">
             ΔT = {cur?.deltaT ?? 4.2}°C
@@ -157,13 +164,15 @@ export const DashboardWeatherCard: React.FC = () => {
                 : 'bg-slate-50 border-slate-200 hover:border-slate-300'
             }`}
           >
-            <span className="text-[11px] font-extrabold text-slate-800">{item.dayLabel}</span>
+            <span className="text-[11px] font-extrabold text-slate-800">
+              {getLocalizedDayLabel(item.dateIso, index, item.dayLabel, language, t)}
+            </span>
             <div className="my-1.5">{getWeatherIcon(item.weatherCode)}</div>
             <div className="text-xs font-black text-slate-900 font-mono-numbers">
               {item.maxTempC}°C
             </div>
             <span className="text-[10px] text-slate-500 font-medium block truncate max-w-full">
-              {item.weatherLabel}
+              {getLocalizedWeatherCondition(item.weatherCode, item.weatherLabel, t)}
             </span>
           </div>
         ))}

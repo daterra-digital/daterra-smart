@@ -3,32 +3,31 @@ import { useNavigate } from 'react-router-dom';
 import { CheckCircle2 } from 'lucide-react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../../db/db';
-import { calculateTrvExtended, buildTrvStructuredValues } from './trvDataMapper';
+import { calculateTrvExtended } from './trvDataMapper';
 import {
-  buildCalculationRecord,
-  saveCalculationToDb,
   softDeleteCalculationInDb,
   clearCalculatorHistoryInDb,
   updateCalculationMetadataInDb
 } from '../calculators/core/historyService';
 import { CalculatorHistoryDrawer } from '../calculators/history/CalculatorHistoryDrawer';
-import { enqueueMutation } from '../../services/outbox/outboxService';
-import { generateIdempotencyKey } from '../../services/integrations/centralgestMapper';
 import { DaterraKeypadModal } from '../../components/DaterraKeypad';
 import { TrvHeader } from './TrvHeader';
 import { TrvResultCard } from './TrvResultCard';
 import { TrvInputsPanel } from './TrvInputsPanel';
 import { TrvFooterBar } from './TrvFooterBar';
+import { useTrvSaveHistory } from './useTrvSaveHistory';
+import { useLanguage } from '../../context/LanguageContext';
 
 // UniversalCalculatorTemplate compat: Padrão arquitetural Master Blueprint DATERRA
 export const VolumeCopaCalculator: React.FC = () => {
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const [alturaCopa, setAlturaCopa] = useState<number>(2.5);
   const [larguraCopa, setLarguraCopa] = useState<number>(1.0);
   const [distanciaEntrelinhas, setDistanciaEntrelinhas] = useState<number>(3.0);
   const [activeKeypadField, setActiveKeypadField] = useState<'altura' | 'largura' | 'entrelinha' | null>(null);
   const [isHistoryOpen, setIsHistoryOpen] = useState<boolean>(false);
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const { toastMessage, saveToHistory } = useTrvSaveHistory();
 
   const trvResult = useMemo(
     () => calculateTrvExtended(alturaCopa, larguraCopa, distanciaEntrelinhas),
@@ -56,62 +55,37 @@ export const VolumeCopaCalculator: React.FC = () => {
     setDistanciaEntrelinhas(3.0);
   }, []);
 
-  const handleSaveToHistory = async () => {
-    try {
-      if (!trvResult.isValid) {
-        setToastMessage('Insira medidas válidas superiores a zero antes de gravar.');
-        setTimeout(() => setToastMessage(null), 3000);
-        return;
-      }
-
-      // 1. Gravação em calculation_history_v2
-      const { inputs, outputs } = buildTrvStructuredValues(alturaCopa, larguraCopa, distanciaEntrelinhas, trvResult.volume_copa);
-      const record = buildCalculationRecord({
-        userId: 'local-user',
-        calculatorId: 'calc_volume_copa',
-        calculatorVersion: '1.0.0',
-        name: `TRV ${trvResult.volume_copa} m³/ha (h:${alturaCopa}m, w:${larguraCopa}m, r:${distanciaEntrelinhas}m)`,
-        inputs,
-        outputs
-      });
-
-      await saveCalculationToDb(record);
-
-      // 2. Persistência atómica na Mutation Outbox (Dexie v8) com idempotência UUIDv4
-      await enqueueMutation({
-        entityId: generateIdempotencyKey(),
-        entityType: 'calculation',
-        operation: 'CREATE',
-        payload: {
-          calculationId: record.id,
-          calculatorId: 'calc_volume_copa',
-          alturaCopa,
-          larguraCopa,
-          distanciaEntrelinhas,
-          volumeCopa: trvResult.volume_copa,
-          caldaReferenciaLHa: trvResult.caldaReferenciaLHa,
-          timestamp: new Date().toISOString()
-        }
-      });
-
-      setToastMessage('Medição de TRV gravada e enfileirada na Outbox offline!');
-      setTimeout(() => setToastMessage(null), 3500);
-    } catch (err) {
-      console.error('Erro ao gravar medição de TRV:', err);
-      setToastMessage('Erro ao gravar a medição.');
-      setTimeout(() => setToastMessage(null), 3000);
-    }
+  const handleSaveToHistory = () => {
+    saveToHistory(alturaCopa, larguraCopa, distanciaEntrelinhas, trvResult);
   };
 
   const keypadConfig = useMemo(() => {
     if (activeKeypadField === 'altura') {
-      return { label: 'Altura da Copa (h)', initial: alturaCopa, common: [1.5, 2.5, 3.5, 4.5], min: 0.5, max: 6.0 };
+      return {
+        label: t('volumeCopa.canopyHeight', 'Altura da Copa (h)'),
+        initial: alturaCopa,
+        common: [1.5, 2.5, 3.5, 4.5],
+        min: 0.5,
+        max: 6.0
+      };
     }
     if (activeKeypadField === 'largura') {
-      return { label: 'Largura da Copa (w)', initial: larguraCopa, common: [0.5, 1.0, 1.5, 2.0], min: 0.2, max: 5.0 };
+      return {
+        label: t('volumeCopa.canopyWidth', 'Largura da Copa (w)'),
+        initial: larguraCopa,
+        common: [0.5, 1.0, 1.5, 2.0],
+        min: 0.2,
+        max: 5.0
+      };
     }
-    return { label: 'Distância Entrelinhas (r)', initial: distanciaEntrelinhas, common: [2.0, 3.0, 4.0, 5.0], min: 1.0, max: 10.0 };
-  }, [activeKeypadField, alturaCopa, larguraCopa, distanciaEntrelinhas]);
+    return {
+      label: t('volumeCopa.rowSpacing', 'Distância Entrelinhas (r)'),
+      initial: distanciaEntrelinhas,
+      common: [2.0, 3.0, 4.0, 5.0],
+      min: 1.0,
+      max: 10.0
+    };
+  }, [activeKeypadField, alturaCopa, larguraCopa, distanciaEntrelinhas, t]);
 
   return (
     <div className="space-y-4 pb-28 md:pb-24 animate-fade-in font-sans max-w-4xl mx-auto">
@@ -169,7 +143,7 @@ export const VolumeCopaCalculator: React.FC = () => {
         isOpen={isHistoryOpen}
         onClose={() => setIsHistoryOpen(false)}
         calculatorId="calc_volume_copa"
-        calculatorTitle="Volume de Copa (TRV)"
+        calculatorTitle={t('volumeCopa.title', 'Volume de Copa (TRV)')}
         records={historyRecords}
         onDeleteRecord={async (rec) => softDeleteCalculationInDb(rec.id)}
         onClearHistory={async () => {

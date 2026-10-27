@@ -3,20 +3,23 @@ import {
   HelpCircle, MessageSquare, BookOpen, 
   Mail, ExternalLink
 } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext';
 
 export const HelpView: React.FC = () => {
+  const { t } = useLanguage();
+
   const faqs = [
     {
-      q: 'O que é a DATERRA Smart?',
-      a: 'A DATERRA Smart é uma plataforma digital para agricultura de precisão, que inclui calculadoras agrícolas, gestão de perfis e ferramentas para profissionais do setor.'
+      q: t('help.faq1.q', 'O que é a DATERRA Smart?'),
+      a: t('help.faq1.a', 'A DATERRA Smart é uma plataforma digital para agricultura de precisão, que inclui calculadoras agrícolas, gestão de perfis e ferramentas para profissionais do setor.')
     },
     {
-      q: 'Como alterar o meu perfil?',
-      a: 'Acede a Definições > Perfil do Utilizador e edita os teus dados. As alterações são guardadas automaticamente no Supabase após clicares em "Guardar Alterações".'
+      q: t('help.faq2.q', 'Como alterar o meu perfil?'),
+      a: t('help.faq2.a', 'Acede a Definições > Perfil do Utilizador e edita os teus dados. As alterações são guardadas automaticamente no Supabase após clicares em "Guardar Alterações".')
     },
     {
-      q: 'Como contactar o suporte?',
-      a: 'Podes contactar-nos diretamente através do email smart@daterra.com.pt para apoio técnico ou esclarecimento de dúvidas.'
+      q: t('help.faq3.q', 'Como contactar o suporte?'),
+      a: t('help.faq3.a', 'Podes contactar-nos diretamente através do email smart@daterra.com.pt para apoio técnico ou esclarecimento de dúvidas.')
     }
   ];
 
@@ -26,13 +29,13 @@ export const HelpView: React.FC = () => {
       <div className="bg-white p-6 sm:p-8 rounded-3xl shadow-soft border border-slate-200">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 text-[#1D734B] text-xs font-bold mb-3 border border-emerald-100">
           <HelpCircle className="w-4 h-4 text-[#3CA64C]" />
-          <span>Centro de Ajuda</span>
+          <span>{t('help.badge', 'Centro de Ajuda')}</span>
         </div>
         <h1 className="text-2xl sm:text-3xl font-black text-[#114037]">
-          Ajuda & Suporte
+          {t('help.title', 'Ajuda & Suporte')}
         </h1>
         <p className="text-sm text-slate-500 font-medium mt-1">
-          Perguntas frequentes, guias práticos e canais de assistência técnica.
+          {t('help.subtitle', 'Perguntas frequentes, guias práticos e canais de assistência técnica.')}
         </p>
       </div>
 
@@ -41,7 +44,7 @@ export const HelpView: React.FC = () => {
         <div className="flex items-center gap-3 border-b border-slate-100 pb-4">
           <MessageSquare className="w-5 h-5 text-[#1D734B]" />
           <h2 className="text-lg font-black text-[#114037]">
-            Perguntas Frequentes (FAQ)
+            {t('help.faqTitle', 'Perguntas Frequentes (FAQ)')}
           </h2>
         </div>
 
@@ -74,10 +77,10 @@ export const HelpView: React.FC = () => {
               <BookOpen className="w-5 h-5" />
             </div>
             <h3 className="text-base font-black text-[#114037]">
-              Documentação e Guias
+              {t('help.docsTitle', 'Documentação e Guias')}
             </h3>
             <p className="text-xs text-slate-600 leading-relaxed font-medium">
-              Consulte os manuais técnicos, boas práticas fitossanitárias da DGAV/EPPO e tutoriais passo a passo.
+              {t('help.docsDesc', 'Consulte os manuais técnicos, boas práticas fitossanitárias e tutoriais passo a passo.')}
             </p>
           </div>
 
@@ -87,7 +90,7 @@ export const HelpView: React.FC = () => {
             rel="noopener noreferrer"
             className="inline-flex items-center justify-center gap-2 px-5 min-h-[48px] bg-[#114037] hover:bg-[#175348] text-white font-bold text-xs rounded-2xl transition-all shadow-md touch-target"
           >
-            <span>Consultar guia de utilização</span>
+            <span>{t('help.openGuide', 'Consultar guia de utilização')}</span>
             <ExternalLink className="w-4 h-4 text-[#3CA64C]" />
           </a>
         </div>
@@ -99,10 +102,10 @@ export const HelpView: React.FC = () => {
               <Mail className="w-5 h-5" />
             </div>
             <h3 className="text-base font-black text-[#114037]">
-              Apoio Técnico Direto
+              {t('help.directSupportTitle', 'Apoio Técnico Direto')}
             </h3>
             <p className="text-xs text-slate-600 leading-relaxed font-medium">
-              Encontrou alguma anomalia ou precisa de apoio operacional no terreno? A nossa equipa técnica está disponível.
+              {t('help.directSupportDesc', 'Encontrou alguma anomalia ou precisa de apoio operacional no terreno? A nossa equipa técnica está disponível.')}
             </p>
           </div>
 
@@ -110,7 +113,7 @@ export const HelpView: React.FC = () => {
             href="mailto:smart@daterra.com.pt?subject=DATERRA%20Smart%20-%20Suporte%20T%C3%A9cnico"
             className="inline-flex items-center justify-center gap-2 px-5 min-h-[48px] bg-[#3CA64C] hover:bg-[#3AAA35] text-white font-bold text-xs rounded-2xl transition-all shadow-md touch-target"
           >
-            <span>Reportar um problema</span>
+            <span>{t('help.reportProblem', 'Reportar um problema')}</span>
             <Mail className="w-4 h-4" />
           </a>
         </div>
@@ -118,7 +121,7 @@ export const HelpView: React.FC = () => {
 
       {/* Versão */}
       <div className="p-4 bg-slate-100 rounded-2xl border border-slate-200 text-center text-xs font-mono-numbers text-slate-500 font-bold">
-        Versão: 1.0.0 (DATERRA Smart PWA)
+        {t('help.version', 'Versão: 1.0.0 (DATERRA Smart PWA)')}
       </div>
     </div>
   );

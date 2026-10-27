@@ -3,8 +3,11 @@ import { Link, Outlet, useLocation } from 'react-router-dom';
 import { LogIn, GraduationCap, ExternalLink, Menu, X } from 'lucide-react';
 import daterraLogo from '../assets/daterra-logo.svg';
 import { Footer } from './Footer';
+import { HeaderLanguageDropdown } from './layout/HeaderLanguageDropdown';
+import { useTranslation } from '../context/LanguageContext';
 
 export const PublicLayout: React.FC = () => {
+  const { t } = useTranslation();
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -23,10 +26,10 @@ export const PublicLayout: React.FC = () => {
           >
             <GraduationCap className="w-4 h-4 text-[#3CA64C] shrink-0 group-hover:scale-110 transition-transform" />
             <span className="text-[11px] sm:text-xs">
-              Formação e capacitação contínua para profissionais agrícolas: Conheça a{' '}
-              <strong className="text-white font-bold underline decoration-[#3CA64C] decoration-2 underline-offset-2">
-                Academia DATERRA
-              </strong>
+              {t(
+                'nav.bannerAcademia',
+                'Formação e capacitação contínua para profissionais agrícolas: Conheça a Academia DATERRA'
+              )}
             </span>
             <ExternalLink className="w-3.5 h-3.5 text-slate-300 group-hover:text-[#3CA64C] shrink-0 ml-0.5" />
           </a>
@@ -51,13 +54,13 @@ export const PublicLayout: React.FC = () => {
               to="/"
               className={`transition-colors ${isActive('/') ? 'text-daterra-accent font-bold' : 'text-slate-700 hover:text-daterra-primary'}`}
             >
-              Início
+              {t('nav.home', 'Início')}
             </Link>
             <Link
               to="/sobre"
               className={`transition-colors ${isActive('/sobre') ? 'text-daterra-accent font-bold' : 'text-slate-700 hover:text-daterra-primary'}`}
             >
-              Sobre
+              {t('nav.about', 'Sobre')}
             </Link>
             <a
               href="https://academia.daterra.com.pt"
@@ -65,25 +68,32 @@ export const PublicLayout: React.FC = () => {
               rel="noopener noreferrer"
               className="text-slate-700 hover:text-daterra-primary transition-colors"
             >
-              Academia
+              {t('nav.academy', 'Academia')}
             </a>
+
+            {/* Seletor de Idioma Público (Desktop) */}
+            <HeaderLanguageDropdown variant="light" />
+
             <Link
               to="/login"
               className="px-5 py-2.5 bg-daterra-primary hover:bg-daterra-primary-hover text-white rounded-xl font-bold flex items-center gap-2 transition-all shadow-md active:scale-95 touch-target"
             >
               <LogIn className="w-4 h-4 text-daterra-accent" />
-              <span>Login</span>
+              <span>{t('nav.login', 'Login')}</span>
             </Link>
           </nav>
 
-          {/* Botão Menu Mobile */}
-          <button
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden p-2 text-slate-700 hover:text-daterra-primary touch-target flex items-center justify-center"
-            aria-label="Abrir Menu"
-          >
-            {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-          </button>
+          {/* Controles Mobile */}
+          <div className="flex md:hidden items-center gap-2">
+            <HeaderLanguageDropdown variant="light" />
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="p-2 text-slate-700 hover:text-daterra-primary touch-target flex items-center justify-center cursor-pointer"
+              aria-label={mobileMenuOpen ? t('nav.closeMobileMenu', 'Fechar Menu') : t('nav.openMobileMenu', 'Abrir Menu')}
+            >
+              {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            </button>
+          </div>
         </div>
 
         {/* Menu Drawer Mobile */}
@@ -94,14 +104,14 @@ export const PublicLayout: React.FC = () => {
               onClick={() => setMobileMenuOpen(false)}
               className="block py-2.5 px-4 rounded-xl text-base font-bold text-slate-800 hover:bg-slate-100"
             >
-              Início
+              {t('nav.home', 'Início')}
             </Link>
             <Link
               to="/sobre"
               onClick={() => setMobileMenuOpen(false)}
               className="block py-2.5 px-4 rounded-xl text-base font-semibold text-slate-700 hover:bg-slate-100"
             >
-              Sobre
+              {t('nav.about', 'Sobre')}
             </Link>
             <a
               href="https://academia.daterra.com.pt"
@@ -110,7 +120,7 @@ export const PublicLayout: React.FC = () => {
               onClick={() => setMobileMenuOpen(false)}
               className="block py-2.5 px-4 rounded-xl text-base font-semibold text-slate-700 hover:bg-slate-100"
             >
-              Academia DATERRA
+              {t('nav.academy', 'Academia DATERRA')}
             </a>
             <Link
               to="/login"
@@ -118,7 +128,7 @@ export const PublicLayout: React.FC = () => {
               className="w-full py-3 bg-daterra-primary text-white text-center font-bold rounded-xl flex items-center justify-center gap-2 shadow-md touch-target"
             >
               <LogIn className="w-5 h-5 text-daterra-accent" />
-              <span>Aceder à Plataforma</span>
+              <span>{t('nav.accessPlatform', 'Aceder à Plataforma')}</span>
             </Link>
           </div>
         )}

@@ -1,5 +1,6 @@
 import React from 'react';
 import { FlaskConical, MapPin } from 'lucide-react';
+import { useTranslation } from '../../context/LanguageContext';
 import type { DoseCalculationResult, DoseUnitMode } from './doseDataMapper';
 import { DidacticHelp } from '../concentracao/DidacticHelp';
 
@@ -18,6 +19,7 @@ export const DoseResultCard: React.FC<DoseResultCardProps> = ({
   unitMode,
   volCalda
 }) => {
+  const { t } = useTranslation();
   const {
     primaryValue,
     primaryUnit,
@@ -31,7 +33,7 @@ export const DoseResultCard: React.FC<DoseResultCardProps> = ({
 
   return (
     <section
-      aria-label="Resultado da quantidade de produto a introduzir no depósito"
+      aria-label={t('calculators.dose.resultAria', 'Resultado da quantidade de produto a introduzir no depósito')}
       className="bg-[#114037] text-white rounded-3xl p-5 sm:p-7 shadow-xl border border-[#1D734B] space-y-4"
     >
       <div className="flex items-center justify-between gap-2 border-b border-white/10 pb-3 flex-wrap">
@@ -77,7 +79,7 @@ export const DoseResultCard: React.FC<DoseResultCardProps> = ({
             )}
           </div>
           <p className="text-xs text-slate-300 font-medium mt-1">
-            Produto comercial a introduzir no depósito de {volPreparar} Litros
+            {t('calculators.dose.productIntro', 'Produto comercial a introduzir no depósito de {{litres}} Litros', { litres: volPreparar })}
           </p>
         </div>
 
@@ -86,7 +88,7 @@ export const DoseResultCard: React.FC<DoseResultCardProps> = ({
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-1.5 text-emerald-200 text-xs font-bold">
               <MapPin className="w-4 h-4 text-[#3AAA35] shrink-0" />
-              <span>Área Tratada por Depósito</span>
+              <span>{t('calculators.dose.areaPerTank', 'Área Tratada por Depósito')}</span>
             </div>
             <DidacticHelp
               faqFile="DoseFAQAreaTratada.md"
@@ -100,7 +102,7 @@ export const DoseResultCard: React.FC<DoseResultCardProps> = ({
             {isValid && area_tratada_ha > 0 ? `${area_tratada_ha.toFixed(2)} ha` : '--'}
           </div>
           <p className="text-[10px] text-emerald-300/80 leading-tight">
-            Depósito {volPreparar} L a debitar {volCalda} L/ha
+            {t('calculators.dose.tankCoverageInfo', 'Depósito {{tank}} L a debitar {{spray}} L/ha', { tank: volPreparar, spray: volCalda })}
           </p>
         </div>
       </div>

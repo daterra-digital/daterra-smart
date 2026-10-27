@@ -13,6 +13,7 @@ import React from 'react';
 import { HelpCircle, AlertCircle } from 'lucide-react';
 import type { CalculatorResultDefinition } from './types.ts';
 import { DidacticHelp, type FAQFileType } from '../../concentracao/DidacticHelp.tsx';
+import { useLanguage } from '../../../context/LanguageContext.tsx';
 
 export interface CalculatorResultCardProps {
   /** Definição declarativa do resultado */
@@ -46,10 +47,13 @@ export const CalculatorResultCard: React.FC<CalculatorResultCardProps> = ({
   isInvalid = false,
   invalidMessage
 }) => {
-  // Formatação pt-PT de valores numéricos
-  const formatPt = (val: number | string, decimals = resultDef.formatDecimals ?? 2) => {
+  const { t, language } = useLanguage();
+  const locale = language === 'en-GB' ? 'en-GB' : 'pt-PT';
+
+  // Formatação de valores numéricos de acordo com o idioma ativo
+  const formatNum = (val: number | string, decimals = resultDef.formatDecimals ?? 2) => {
     if (typeof val === 'number') {
-      return val.toLocaleString('pt-PT', {
+      return val.toLocaleString(locale, {
         minimumFractionDigits: decimals,
         maximumFractionDigits: decimals
       });
@@ -58,7 +62,7 @@ export const CalculatorResultCard: React.FC<CalculatorResultCardProps> = ({
   };
 
   const isPrimary = resultDef.isPrimary;
-  const formattedValue = formatPt(value);
+  const formattedValue = formatNum(value);
 
   return (
     <div
@@ -80,16 +84,16 @@ export const CalculatorResultCard: React.FC<CalculatorResultCardProps> = ({
             variant="icon"
             iconType="help"
             iconClassName="w-3.5 h-3.5 text-daterra-accent group-hover:text-white transition-colors"
-            buttonLabel={`Ajuda sobre ${resultDef.label}`}
+            buttonLabel={t('common.helpAbout', 'Ajuda sobre {{label}}', { label: resultDef.label })}
             className="min-w-[48px] min-h-[48px] p-2.5 text-daterra-accent hover:text-white bg-white/10 hover:bg-white/20 rounded-xl border border-white/10 transition-colors group touch-target -mr-2 -mt-1 flex items-center justify-center shrink-0"
           />
         ) : (hasHelp || onOpenResultHelp) ? (
           <button
             type="button"
             onClick={() => onOpenResultHelp?.(resultDef.id)}
-            className="min-w-[48px] min-h-[48px] p-2.5 text-daterra-accent hover:text-white bg-white/10 hover:bg-white/20 rounded-xl border border-white/10 transition-colors touch-target -mr-2 -mt-1 flex items-center justify-center shrink-0"
-            title={`Ajuda sobre ${resultDef.label}`}
-            aria-label={`Ajuda pedagógica sobre ${resultDef.label}`}
+            className="min-w-[48px] min-h-[48px] p-2.5 text-daterra-accent hover:text-white bg-white/10 hover:bg-white/20 rounded-xl border border-white/10 transition-colors touch-target -mr-2 -mt-1 flex items-center justify-center shrink-0 cursor-pointer"
+            title={t('common.helpAbout', 'Ajuda sobre {{label}}', { label: resultDef.label })}
+            aria-label={t('common.helpAbout', 'Ajuda sobre {{label}}', { label: resultDef.label })}
           >
             <HelpCircle className="w-3.5 h-3.5 text-daterra-accent" />
           </button>
@@ -101,7 +105,7 @@ export const CalculatorResultCard: React.FC<CalculatorResultCardProps> = ({
         {isInvalid ? (
           <div className="p-2.5 bg-black/30 rounded-lg border border-amber-400/40 text-amber-200 text-xs font-semibold leading-snug flex items-start gap-2">
             <AlertCircle className="w-3.5 h-3.5 shrink-0 text-amber-400 mt-0.5" />
-            <span>{invalidMessage || 'Resultado indisponível. Verifique se todos os campos foram preenchidos corretamente.'}</span>
+            <span>{invalidMessage || t('common.resultUnavailable', 'Resultado indisponível. Verifique se todos os campos foram preenchidos corretamente.')}</span>
           </div>
         ) : isPrimary ? (
           <div className="flex flex-col">
@@ -116,8 +120,8 @@ export const CalculatorResultCard: React.FC<CalculatorResultCardProps> = ({
             )}
             {subValue !== undefined && typeof value !== 'string' && (
               <div className="text-xs font-semibold font-mono-numbers text-daterra-accent mt-0.5">
-                {subUnit === 'm/s' && <span className="text-slate-300 font-medium mr-1">Equivalente:</span>}
-                {formatPt(subValue, resultDef.formatDecimals ?? (subUnit === 'L' || subUnit === 'kg' ? 2 : 0))} {subUnit || ''}
+                {subUnit === 'm/s' && <span className="text-slate-300 font-medium mr-1">{t('common.equivalent', 'Equivalente:')}</span>}
+                {formatNum(subValue, resultDef.formatDecimals ?? (subUnit === 'L' || subUnit === 'kg' ? 2 : 0))} {subUnit || ''}
               </div>
             )}
           </div>

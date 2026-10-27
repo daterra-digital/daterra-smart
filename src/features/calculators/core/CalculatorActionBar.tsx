@@ -57,7 +57,7 @@ export const CalculatorActionBar: React.FC<CalculatorActionBarProps> = ({
 
   return (
     <aside
-      aria-label="Ações da calculadora"
+      aria-label={t('calculatorActionBar.ariaLabel', 'Ações da calculadora')} /* aria-label="Ações da calculadora" */
       className={`calculator-action-bar-position bg-white/95 backdrop-blur-md border-t border-slate-200/80 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] ${className}`}
     >
       <div className="max-w-7xl mx-auto px-2.5 sm:px-4 py-2 flex items-center gap-1.5 sm:gap-3 w-full">

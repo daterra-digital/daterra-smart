@@ -18,6 +18,8 @@ import { doseCalculatorConfig } from '../features/calculators/definitions/doseCa
 import { concentracaoCalculatorConfig } from '../features/calculators/definitions/concentracaoCalculatorConfig.ts';
 import { VelocidadeTrabalhoView } from '../features/calculators/velocidade-trabalho';
 import { isToolAllowedInCurrentEnv } from '../utils/environment';
+import { useSubscription } from '../context/SubscriptionContext';
+import { PRO_TOOL_IDS } from '../types/subscription';
 
 export interface ToolModule {
   id: string;
@@ -283,6 +285,7 @@ export const getSmartFormattedResult = (
 export const ToolsView: React.FC = () => {
   const { t } = useLanguage();
   const navigate = useNavigate();
+  const { isPro, openUpgradeModal } = useSubscription();
   const [searchParams, setSearchParams] = useSearchParams();
   const currentViewTool = searchParams.get('tool'); // ferramenta em execução (ex: calc_concentracao, calc_dose)
 
@@ -322,6 +325,10 @@ export const ToolsView: React.FC = () => {
   // Instalação de uma nova Ferramenta / Funcionalidade
 
   const handleInstallTool = async (tool: ToolModule) => {
+    if (PRO_TOOL_IDS.has(tool.id) && !isPro) {
+      openUpgradeModal(tool.name);
+      return;
+    }
     setInstallingToolId(tool.id);
     setTimeout(async () => {
       try {
@@ -354,6 +361,11 @@ export const ToolsView: React.FC = () => {
 
   // Abrir uma Ferramenta / Funcionalidade
   const handleOpenTool = (toolId: string) => {
+    if (PRO_TOOL_IDS.has(toolId) && !isPro) {
+      const toolName = TOOLS_CATALOG.find(t => t.id === toolId)?.name || t('gating.tiers.pro.label', 'PRO');
+      openUpgradeModal(toolName);
+      return;
+    }
     if (toolId === 'geometria_trv_copa' || toolId === 'calc_volume_copa') {
       navigate('/ferramentas/volume-copa');
       return;
@@ -479,7 +491,7 @@ export const ToolsView: React.FC = () => {
           result: { quantidade_pf: res.quantidade_pf, unit_pf: res.unit_pf, area_tratada_ha: res.area_tratada_ha }
         });
       }
-      setSaveSuccessMsg('Cálculo guardado com sucesso no Histórico!');
+      setSaveSuccessMsg(t('common.calculationSaved', 'Cálculo guardado com sucesso no Histórico!'));
       setTimeout(() => setSaveSuccessMsg(''), 3000);
     } catch (err) {
       console.error('Erro ao guardar no histórico:', err);
@@ -587,15 +599,15 @@ export const ToolsView: React.FC = () => {
               className="p-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-2xl transition-all flex items-center gap-1.5 text-xs font-bold touch-target"
             >
               <ChevronLeft className="w-4 h-4 text-[#114037]" />
-              <span>Voltar às Ferramentas</span>
+              <span>{t('common.backToTools', 'Voltar às Ferramentas')}</span>
             </button>
             <div className="h-6 w-[1px] bg-slate-200 hidden sm:block" />
             <div>
               <span className="text-[10px] font-extrabold uppercase tracking-widest text-daterra-accent">
-                {currentToolData?.category || 'Funcionalidade Agronómica'}
+                {currentToolData?.category || t('tools.agronomicFeature', 'Funcionalidade Agronómica')}
               </span>
               <h1 className="text-base sm:text-lg font-black text-daterra-primary leading-tight">
-                {currentToolData?.name || 'Ferramenta DATERRA Smart'}
+                {currentToolData?.name || t('tools.defaultToolName', 'Ferramenta DATERRA Smart')}
               </h1>
             </div>
           </div>
@@ -603,7 +615,7 @@ export const ToolsView: React.FC = () => {
           <div className="flex items-center gap-2">
             <span className="px-3 py-1 bg-emerald-100 text-emerald-800 text-xs font-extrabold rounded-full flex items-center gap-1">
               <CheckCircle2 className="w-3.5 h-3.5" />
-              <span>Ferramenta Ativa</span>
+              <span>{t('common.activeTool', 'Ferramenta Ativa')}</span>
             </span>
           </div>
         </div>
@@ -623,12 +635,12 @@ export const ToolsView: React.FC = () => {
               <div>
                 <div className="flex items-center gap-2 mb-1">
                   <h2 className="text-xl font-extrabold text-daterra-primary">
-                    Mistura de Calda (Concentração)
+                    {t('tools.mixtureConcentration', 'Mistura de Calda (Concentração)')}
                   </h2>
                   <DidacticHelp faqFile="ConcentracaoFAQGeral.md" buttonLabel="Guia" />
                 </div>
                 <p className="text-xs text-slate-500">
-                  Selecione o estado vegetativo para ajustar os parâmetros de molhamento e volume.
+                  {t('tools.vegetativeStageDesc', 'Selecione o estado vegetativo para ajustar os parâmetros de molhamento e volume.')}
                 </p>
               </div>
 
@@ -668,7 +680,9 @@ export const ToolsView: React.FC = () => {
                 <div className="space-y-4">
                   <div>
                     <div className="flex items-center justify-between mb-1.5">
-                      <label className="text-xs font-bold text-slate-700">Concentração do Produto</label>
+                      <label className="text-xs font-bold text-slate-700">
+                        {t('tools.productConcentration', 'Concentração do Produto')}
+                      </label>
                       <DidacticHelp
                         faqFile="ConcentracaoFAQConcentracao.md"
                         variant="icon"
@@ -685,7 +699,7 @@ export const ToolsView: React.FC = () => {
                       onClick={() =>
                         openKeypad({
                           key: 'concValue',
-                          label: 'Concentração do Produto',
+                          label: t('tools.productConcentration', 'Concentração do Produto'),
                           value: concValue,
                           unit: concUnit,
                           availableUnits: ['mL/hL', 'g/hL', '%', 'L/hL', 'kg/hL'],
@@ -766,7 +780,9 @@ export const ToolsView: React.FC = () => {
 
                   <div>
                     <div className="flex items-center justify-between mb-1.5">
-                      <label className="text-xs font-bold text-slate-700">Concentração do Produto</label>
+                      <label className="text-xs font-bold text-slate-700">
+                        {t('tools.productConcentration', 'Concentração do Produto')}
+                      </label>
                       <DidacticHelp
                         faqFile="ConcentracaoFAQConcentracao.md"
                         variant="icon"
@@ -783,7 +799,7 @@ export const ToolsView: React.FC = () => {
                       onClick={() =>
                         openKeypad({
                           key: 'concValue',
-                          label: 'Concentração do Produto',
+                          label: t('tools.productConcentration', 'Concentração do Produto'),
                           value: concValue,
                           unit: concUnit,
                           availableUnits: ['mL/hL', 'g/hL', '%', 'L/hL', 'kg/hL'],
@@ -865,16 +881,16 @@ export const ToolsView: React.FC = () => {
               <div className="bg-gradient-to-br from-daterra-primary via-[#175348] to-daterra-secondary text-white p-6 sm:p-8 rounded-3xl shadow-floating border border-white/10 space-y-6">
                 <div className="flex items-center justify-between border-b border-white/15 pb-4">
                   <span className="text-xs font-bold uppercase tracking-wider text-daterra-accent">
-                    Resultado do Cálculo de Concentração
+                    {t('tools.concentrationResult', 'Resultado do Cálculo de Concentração')}
                   </span>
                   <span className="px-3 py-1 bg-white/10 rounded-full text-xs font-bold">
-                    {concMode === 'jovem' ? 'Planta Jovem' : 'Planta Adulta'}
+                    {concMode === 'jovem' ? t('tools.youngPlant', 'Planta Jovem') : t('tools.adultPlant', 'Planta Adulta')}
                   </span>
                 </div>
 
                 <div>
                   <span className="text-xs text-slate-300 block mb-1 font-semibold uppercase tracking-wider">
-                    Quantidade necessária de pesticida:
+                    {t('tools.requiredPesticideAmount', 'Quantidade necessária de pesticida:')}
                   </span>
                   <div className="flex flex-col">
                     <div className="text-4xl sm:text-5xl font-black font-mono-numbers text-white tracking-tight">
@@ -891,7 +907,7 @@ export const ToolsView: React.FC = () => {
                   className="w-full py-4 bg-daterra-accent hover:bg-daterra-accent/90 text-white font-extrabold text-sm rounded-2xl transition-all shadow-xl shadow-daterra-accent/30 flex items-center justify-center gap-2 active:scale-95 touch-target"
                 >
                   <Save className="w-5 h-5" />
-                  <span>Guardar Cálculo no Histórico (IndexedDB)</span>
+                  <span>{t('tools.saveCalculationHistory', 'Guardar Cálculo no Histórico (IndexedDB)')}</span>
                 </button>
               </div>
             </div>
@@ -906,7 +922,7 @@ export const ToolsView: React.FC = () => {
             </div>
             <div>
               <span className="text-xs font-extrabold uppercase tracking-widest text-[#3CA64C]">
-                {currentToolData?.category || 'Módulo Ativo'}
+                {currentToolData?.category || t('tools.activeModule', 'Módulo Ativo')}
               </span>
               <h2 className="text-xl font-extrabold text-slate-900 mt-1">
                 {currentToolData?.name}
@@ -916,13 +932,13 @@ export const ToolsView: React.FC = () => {
               </p>
             </div>
             <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl text-xs text-slate-700 font-medium leading-relaxed">
-              Esta funcionalidade está ativa e sincronizada com o seu perfil da exploração. Os parâmetros hidráulicos e regulatórios SIFITO/DGAV encontram-se carregados.
+              {t('tools.syncedProfileNotice', 'Esta funcionalidade está ativa e sincronizada com o seu perfil da exploração. Os parâmetros operacionais e regulatórios oficiais encontram-se carregados.')}
             </div>
             <button
               onClick={handleBackToCatalog}
               className="px-6 py-3 bg-[#114037] text-white text-xs font-extrabold rounded-2xl hover:bg-[#1D734B] transition-all shadow-md touch-target"
             >
-              Voltar ao Catálogo de Ferramentas
+              {t('tools.backToCatalog', 'Voltar ao Catálogo de Ferramentas')}
             </button>
           </div>
         )}
@@ -963,11 +979,11 @@ export const ToolsView: React.FC = () => {
               {t('tools.title')}
             </h1>
             <span className="px-3 py-1 bg-[#114037]/10 text-[#114037] text-xs font-extrabold rounded-full">
-              {activeInstalledCount} de {visibleCatalog.length} ativas
+              {t('tools.activeCountDesc', '{{active}} de {{total}} ativas', { active: activeInstalledCount, total: visibleCatalog.length })}
             </span>
           </div>
           <p className="text-xs text-slate-500 font-medium mt-1">
-            Catálogo operacional de ferramentas e funcionalidades agronómicas da DATERRA Smart.
+            {t('tools.subtitle', 'Catálogo operacional de ferramentas e funcionalidades agronómicas da DATERRA Smart.')}
           </p>
         </div>
       </div>
@@ -1001,7 +1017,7 @@ export const ToolsView: React.FC = () => {
         <div className="flex items-center justify-between">
           <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
             <SlidersHorizontal className="w-3.5 h-3.5" />
-            <span>Categorias de Funcionalidades</span>
+            <span>{t('tools.categoryTitle', 'Categorias de Funcionalidades')}</span>
           </span>
         </div>
 
@@ -1009,6 +1025,13 @@ export const ToolsView: React.FC = () => {
         <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none touch-pan-x">
           {(['Todas', 'Calibração', 'Pulverização', 'Gestão', 'Clima'] as CategoryFilter[]).map((cat) => {
             const isSelected = selectedCategory === cat;
+            const categoryLabel =
+              cat === 'Todas' ? t('tools.allCategories', 'Todas') :
+              cat === 'Calibração' ? t('tools.catCalibration', 'Calibração') :
+              cat === 'Pulverização' ? t('tools.catSpraying', 'Pulverização') :
+              cat === 'Gestão' ? t('tools.catManagement', 'Gestão') :
+              cat === 'Clima' ? t('tools.catWeather', 'Clima') : cat;
+
             return (
               <button
                 key={cat}
@@ -1020,7 +1043,7 @@ export const ToolsView: React.FC = () => {
                     : 'bg-white text-slate-600 hover:text-slate-900 border border-slate-200 hover:bg-slate-50'
                 }`}
               >
-                <span>{cat}</span>
+                <span>{categoryLabel}</span>
                 {isSelected && <span className="w-1.5 h-1.5 rounded-full bg-[#3AAA35]" />}
               </button>
             );
@@ -1031,24 +1054,33 @@ export const ToolsView: React.FC = () => {
       {/* 4. GRELHA DE RESULTADOS (CARTÕES DE FERRAMENTAS) */}
       <div className="space-y-3">
         <div className="flex items-center justify-between text-xs text-slate-500 font-semibold px-1">
-          <span>A mostrar {filteredTools.length} {filteredTools.length === 1 ? 'ferramenta' : 'ferramentas'}</span>
+          <span>
+            {t('tools.showingCount', 'A mostrar {{count}} {{item}}', {
+              count: filteredTools.length,
+              item: filteredTools.length === 1 ? t('tools.showingItemOne', 'ferramenta') : t('tools.showingItemOther', 'ferramentas')
+            })}
+          </span>
           {selectedCategory !== 'Todas' && (
-            <span className="text-[#1D734B] font-bold">Filtro: {selectedCategory}</span>
+            <span className="text-[#1D734B] font-bold">
+              {t('tools.filterCategoryActive', 'Filtro: {{category}}', { category: selectedCategory })}
+            </span>
           )}
         </div>
 
         {filteredTools.length === 0 ? (
           <div className="bg-white p-8 rounded-3xl border border-slate-200 text-center space-y-3">
             <AlertCircle className="w-10 h-10 text-slate-400 mx-auto" />
-            <h3 className="text-sm font-extrabold text-slate-800">Nenhuma ferramenta encontrada</h3>
+            <h3 className="text-sm font-extrabold text-slate-800">
+              {t('tools.noToolsFound', 'Nenhuma ferramenta encontrada')}
+            </h3>
             <p className="text-xs text-slate-500 max-w-sm mx-auto">
-              Não foram encontradas funcionalidades para o termo "{searchQuery}". Tente pesquisar por outro nome ou limpar o filtro.
+              {t('tools.noToolsFoundDesc', 'Não foram encontradas funcionalidades para o termo pesquisado. Tente pesquisar por outro nome ou limpar o filtro.')}
             </p>
             <button
               onClick={() => { setSearchQuery(''); setSelectedCategory('Todas'); }}
-              className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition-colors"
+              className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition-colors touch-target"
             >
-              Ver Todas as Ferramentas
+              {t('tools.clearFilter', 'Limpar Pesquisa e Filtros')}
             </button>
           </div>
         ) : (
@@ -1089,6 +1121,13 @@ export const ToolsView: React.FC = () => {
                           </h3>
                         </div>
                       </div>
+
+                      {PRO_TOOL_IDS.has(tool.id) && (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-[#114037] text-[#3CA64C] border border-[#3CA64C]/30 shadow-xs shrink-0">
+                          <Sparkles className="w-3 h-3 text-[#3CA64C]" />
+                          <span>{t('gating.badge_pro', 'PRO')}</span>
+                        </span>
+                      )}
                     </div>
 
                     {/* Descrição Breve de 1 ou 2 Linhas */}
@@ -1105,18 +1144,18 @@ export const ToolsView: React.FC = () => {
                         isInstalled ? (
                           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-emerald-100/90 text-emerald-800 text-[10px] font-extrabold rounded-full">
                             <CheckCircle2 className="w-3 h-3 text-emerald-600" />
-                            <span>Ativa</span>
+                            <span>{t('tools.active', 'Ativa')}</span>
                           </span>
                         ) : (
                           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-slate-200/80 text-slate-600 text-[10px] font-extrabold rounded-full">
                             <Download className="w-3 h-3 text-slate-500" />
-                            <span>Disponível</span>
+                            <span>{t('tools.available', 'Disponível')}</span>
                           </span>
                         )
                       ) : (
                         <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-amber-50 text-amber-800 border border-amber-200/80 text-[10px] font-extrabold rounded-full">
                           <Sparkles className="w-3 h-3 text-amber-600" />
-                          <span>Em Breve</span>
+                          <span>{t('tools.comingSoonBadge', 'Em Breve')}</span>
                         </span>
                       )}
                     </div>
@@ -1130,10 +1169,10 @@ export const ToolsView: React.FC = () => {
                               type="button"
                               onClick={() => handleUninstallTool(tool.id, tool.name)}
                               className="px-3 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-bold rounded-xl transition-all active:scale-95 touch-target flex items-center gap-1"
-                              title="Desinstalar funcionalidade"
+                              title={t('tools.uninstallTooltip', 'Desinstalar funcionalidade')}
                             >
                               <Trash2 className="w-3.5 h-3.5" />
-                              <span className="hidden sm:inline">Desinstalar</span>
+                              <span className="hidden sm:inline">{t('tools.uninstall', 'Desinstalar')}</span>
                             </button>
 
                             <button
@@ -1141,7 +1180,7 @@ export const ToolsView: React.FC = () => {
                               onClick={() => handleOpenTool(tool.id)}
                               className="px-4 py-2 bg-[#114037] hover:bg-[#1D734B] text-white text-xs font-extrabold rounded-xl transition-all shadow-md flex items-center gap-1.5 active:scale-95 touch-target"
                             >
-                              <span>Abrir</span>
+                              <span>{t('tools.open', 'Abrir')}</span>
                               <ArrowRight className="w-3.5 h-3.5" />
                             </button>
                           </>
@@ -1155,18 +1194,18 @@ export const ToolsView: React.FC = () => {
                             }`}
                           >
                             {isInstalling ? (
-                              <span>A instalar...</span>
+                              <span>{t('tools.installing', 'A instalar...')}</span>
                             ) : (
                               <>
                                 <Plus className="w-3.5 h-3.5" />
-                                <span>Instalar</span>
+                                <span>{t('tools.install', 'Instalar')}</span>
                               </>
                             )}
                           </button>
                         )
                       ) : (
                         <span className="text-[11px] font-bold text-slate-400 italic">
-                          Lançamento em breve
+                          {t('tools.comingSoonRelease', 'Lançamento em breve')}
                         </span>
                       )}
                     </div>

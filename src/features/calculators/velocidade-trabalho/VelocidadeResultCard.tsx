@@ -1,6 +1,7 @@
 import React from 'react';
 import { Gauge, CheckCircle2, AlertTriangle, Info } from 'lucide-react';
 import type { PureWorkSpeedResult } from '../definitions/velocidadeRealCalculatorConfig';
+import { useLanguage } from '../../../context/LanguageContext';
 
 interface VelocidadeResultCardProps {
   speedResult: PureWorkSpeedResult;
@@ -13,33 +14,34 @@ export const VelocidadeResultCard: React.FC<VelocidadeResultCardProps> = ({
   distanciaMeters,
   tempoSeconds
 }) => {
+  const { t } = useLanguage();
   const { velocidade_kmh, velocidade_ms, isValid } = speedResult;
 
   // Classificação agronómica da velocidade operacional (EPPO / DGAV)
   const getSpeedClassification = () => {
     if (!isValid || velocidade_kmh <= 0) {
       return {
-        label: 'Aguardando valores válidos',
+        label: t('velocidadeReal.classifications.awaiting', 'Aguardando valores válidos'),
         color: 'bg-slate-800 text-slate-300 border-slate-700',
         icon: Info
       };
     }
     if (velocidade_kmh < 4.0) {
       return {
-        label: 'Velocidade Lenta — Alto volume / copas densas',
+        label: t('velocidadeReal.classifications.slow', 'Velocidade Lenta — Alto volume / copas densas'),
         color: 'bg-amber-950/60 text-amber-200 border-amber-800/80',
         icon: AlertTriangle
       };
     }
     if (velocidade_kmh <= 8.0) {
       return {
-        label: 'Velocidade Recomendada — Faixa padrão EPPO/DGAV',
+        label: t('velocidadeReal.classifications.recommended', 'Velocidade Recomendada — Faixa padrão de trabalho'),
         color: 'bg-emerald-900/60 text-emerald-200 border-emerald-700/80',
         icon: CheckCircle2
       };
     }
     return {
-      label: 'Velocidade Elevada — Risco de deriva ou oscilação de barras',
+      label: t('velocidadeReal.classifications.high', 'Velocidade Elevada — Risco de deriva ou oscilação de barras'),
       color: 'bg-rose-950/60 text-rose-200 border-rose-800/80',
       icon: AlertTriangle
     };
@@ -50,7 +52,7 @@ export const VelocidadeResultCard: React.FC<VelocidadeResultCardProps> = ({
 
   return (
     <section
-      aria-label="Resultado da velocidade calculada"
+      aria-label={t('velocidadeReal.resultLabel', 'Resultado da velocidade calculada')}
       className="bg-[#114037] text-white rounded-3xl p-5 sm:p-7 shadow-xl border border-[#1D734B] space-y-4"
     >
       <div className="flex items-center justify-between gap-2 border-b border-white/10 pb-3">
@@ -60,10 +62,10 @@ export const VelocidadeResultCard: React.FC<VelocidadeResultCardProps> = ({
           </div>
           <div>
             <span className="text-[10px] uppercase font-black tracking-widest text-[#3AAA35] block">
-              Resultado Oficial
+              {t('velocidadeReal.resultBadge', 'Resultado Oficial')}
             </span>
             <span className="text-xs text-slate-200 font-semibold">
-              Velocidade Real de Avanço
+              {t('velocidadeReal.resultLabel', 'Velocidade Real de Avanço')}
             </span>
           </div>
         </div>
@@ -81,7 +83,7 @@ export const VelocidadeResultCard: React.FC<VelocidadeResultCardProps> = ({
             <span className="text-xl sm:text-2xl font-bold text-[#3AAA35]">km/h</span>
           </div>
           <p className="text-xs text-slate-300 font-medium mt-1">
-            Velocidade equivalente:{' '}
+            {t('velocidadeReal.equivalentSpeed', 'Velocidade equivalente:')}{' '}
             <strong className="font-mono text-white font-bold">
               {isValid ? velocidade_ms.toFixed(1) : '--'} m/s
             </strong>

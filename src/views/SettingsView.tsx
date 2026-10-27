@@ -1,10 +1,10 @@
 import React, { useState, useEffect, type FormEvent } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { 
-  User, Bell, Database, HelpCircle, Info, 
+  User, Info, 
   Download, Upload, CheckCircle2, 
-  AlertTriangle, Globe, ShieldAlert,
-  Building2, Palette, Image as ImageIcon, Map
+  AlertTriangle, ShieldAlert,
+  Building2, Palette, Image as ImageIcon
 } from 'lucide-react';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from '../db/db';
@@ -14,6 +14,7 @@ import { useLanguage, LANGUAGE_OPTIONS, type SupportedLanguage } from '../contex
 import { MicrolearningModal } from '../components/MicrolearningModal';
 import { HelpView } from './HelpView';
 import { AboutView } from './AboutView';
+import { SettingsSubmenuNav, type SettingsSubmenu } from '../features/settings/SettingsSubmenuNav';
 import type { Profile } from '../types/profile';
 import type { CoBrandingConfig } from '../features/smart-debito/types';
 import {
@@ -21,8 +22,6 @@ import {
   saveStoredCoBrandingConfig,
   PRESET_CO_BRANDING_PALETTES
 } from '../features/smart-debito/coBrandingStorage';
-
-type SettingsSubmenu = 'perfil' | 'preferencias' | 'notificacoes' | 'gestao_dados' | 'ajuda' | 'sobre';
 
 export const SettingsView: React.FC = () => {
   const navigate = useNavigate();
@@ -150,11 +149,13 @@ export const SettingsView: React.FC = () => {
         );
       }
 
-      setCoBrandingFeedback('Configuração de Co-Branding guardada e sincronizada com sucesso! Aplicada aos relatórios e ferramentas.');
+      setCoBrandingFeedback(
+        t('settings.coBrandingSynced', 'Configuração de Co-Branding guardada e sincronizada com sucesso! Aplicada aos relatórios e ferramentas.')
+      );
       setTimeout(() => setCoBrandingFeedback(null), 5000);
     } catch (err) {
       console.error('[SettingsView] Erro ao sincronizar Co-Branding no Firestore:', err);
-      setCoBrandingFeedback('Configuração de Co-Branding guardada localmente.');
+      setCoBrandingFeedback(t('settings.coBrandingSavedLocal', 'Configuração de Co-Branding guardada localmente.'));
       setTimeout(() => setCoBrandingFeedback(null), 5000);
     } finally {
       setIsSavingCoBranding(false);
@@ -299,7 +300,7 @@ export const SettingsView: React.FC = () => {
     e.preventDefault();
 
     if (!user?.id) {
-      setErrorMessage('Utilizador não autenticado.');
+      setErrorMessage(t('common.userNotAuthenticated', 'Utilizador não autenticado.'));
       return;
     }
 
@@ -341,68 +342,68 @@ export const SettingsView: React.FC = () => {
         await refreshProfile();
       }
 
-      setFeedbackMsg('Perfil de Utilizador atualizado com sucesso!');
+      setFeedbackMsg(t('settings.profile.success', 'Perfil de Utilizador atualizado com sucesso!'));
       setTimeout(() => setFeedbackMsg(''), 3500);
       setIsSaving(false);
 
     } catch {
-      setErrorMessage('Erro de ligação ao guardar o perfil.');
+      setErrorMessage(t('settings.profile.connectionError', 'Erro de ligação ao guardar o perfil.'));
       setIsSaving(false);
     }
   };
 
   const handleSavePreferences = (e: React.FormEvent) => {
     e.preventDefault();
-    setFeedbackMsg('Preferências e Unidades Padrão guardadas!');
+    setFeedbackMsg(t('settings.preferencesSaved', 'Preferências e Unidades Padrão guardadas!'));
     setTimeout(() => setFeedbackMsg(''), 3500);
   };
 
   const handleSaveNotifications = (e: React.FormEvent) => {
     e.preventDefault();
-    setFeedbackMsg('Preferências de Notificação guardadas com sucesso!');
+    setFeedbackMsg(t('settings.notificationsSaved', 'Preferências de Notificação guardadas com sucesso!'));
     setTimeout(() => setFeedbackMsg(''), 3500);
   };
 
   // ZONA DE PERIGO - Ações Destrutivas
   const handleDeleteCultures = async () => {
-    if (window.confirm('Tem a certeza que deseja apagar TODOS os perfis de cultura? Esta ação é irreversível.')) {
+    if (window.confirm(t('settings.confirmDeleteCultures', 'Tem a certeza que deseja apagar TODOS os perfis de cultura? Esta ação é irreversível.'))) {
       await db.profiles_cultures.clear();
-      setFeedbackMsg('Perfis de cultura eliminados com sucesso.');
+      setFeedbackMsg(t('settings.culturesDeleted', 'Perfis de cultura eliminados com sucesso.'));
       setTimeout(() => setFeedbackMsg(''), 3500);
     }
   };
 
   const handleDeleteEquipments = async () => {
-    if (window.confirm('Tem a certeza que deseja apagar TODOS os perfis de equipamento? Esta ação é irreversível.')) {
+    if (window.confirm(t('settings.confirmDeleteEquipments', 'Tem a certeza que deseja apagar TODOS os perfis de equipamento? Esta ação é irreversível.'))) {
       await db.profiles_equipment.clear();
-      setFeedbackMsg('Perfis de equipamento eliminados com sucesso.');
+      setFeedbackMsg(t('settings.equipmentsDeleted', 'Perfis de equipamento eliminados com sucesso.'));
       setTimeout(() => setFeedbackMsg(''), 3500);
     }
   };
 
   const handleDeleteNozzles = async () => {
-    if (window.confirm('Tem a certeza que deseja apagar TODOS os bicos guardados? Esta ação é irreversível.')) {
+    if (window.confirm(t('settings.confirmDeleteNozzles', 'Tem a certeza que deseja apagar TODOS os bicos guardados? Esta ação é irreversível.'))) {
       await db.profiles_nozzles.clear();
-      setFeedbackMsg('Perfis de bicos eliminados com sucesso.');
+      setFeedbackMsg(t('settings.nozzlesDeleted', 'Perfis de bicos eliminados com sucesso.'));
       setTimeout(() => setFeedbackMsg(''), 3500);
     }
   };
 
   const handleDeleteCalibrations = async () => {
-    if (window.confirm('Tem a certeza que deseja apagar TODAS as fichas de calibração? Esta ação é irreversível.')) {
+    if (window.confirm(t('settings.confirmDeleteCalibrations', 'Tem a certeza que deseja apagar TODAS as fichas de calibração? Esta ação é irreversível.'))) {
       await db.profiles_calibrations.clear();
-      setFeedbackMsg('Fichas de calibração eliminadas com sucesso.');
+      setFeedbackMsg(t('settings.calibrationsDeleted', 'Fichas de calibração eliminadas com sucesso.'));
       setTimeout(() => setFeedbackMsg(''), 3500);
     }
   };
 
   const handleDeleteAllData = async () => {
-    if (window.confirm('ATENÇÃO CRÍTICA: Deseja apagar TODOS os dados da exploração do IndexedDB? Esta ação não pode ser desfeita!')) {
+    if (window.confirm(t('settings.confirmDeleteAllData', 'ATENÇÃO CRÍTICA: Deseja apagar TODOS os dados da exploração do IndexedDB? Esta ação não pode ser desfeita!'))) {
       await db.profiles_cultures.clear();
       await db.profiles_equipment.clear();
       await db.profiles_nozzles.clear();
       await db.profiles_calibrations.clear();
-      setFeedbackMsg('Todos os dados da plataforma foram eliminados do IndexedDB local.');
+      setFeedbackMsg(t('settings.allDataDeleted', 'Todos os dados da plataforma foram eliminados do IndexedDB local.'));
       setTimeout(() => setFeedbackMsg(''), 3500);
     }
   };
@@ -439,98 +440,16 @@ export const SettingsView: React.FC = () => {
       )}
 
       {/* NAVEGAÇÃO REVELAÇÃO PROGRESSIVA: SUB-MENUS (Mobile-First 48px Touch Targets) */}
-      <div className="flex items-center gap-2.5 border-b border-slate-200 pb-3 overflow-x-auto scrollbar-none">
-        <button
-          onClick={() => setActiveSubmenu('perfil')}
-          className={`px-4 min-h-[48px] rounded-2xl font-extrabold text-xs transition-all flex items-center gap-2 shrink-0 touch-target ${
-            activeSubmenu === 'perfil'
-              ? 'bg-[#114037] text-white shadow-md'
-              : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
-          }`}
-        >
-          <User className="w-4 h-4 text-[#3CA64C]" />
-          <span>{t('settings.tabs.profile')}</span>
-        </button>
-
-        <button
-          onClick={() => setActiveSubmenu('preferencias')}
-          className={`px-4 min-h-[48px] rounded-2xl font-extrabold text-xs transition-all flex items-center gap-2 shrink-0 touch-target ${
-            activeSubmenu === 'preferencias'
-              ? 'bg-[#114037] text-white shadow-md'
-              : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
-          }`}
-        >
-          <Globe className="w-4 h-4 text-[#3CA64C]" />
-          <span>{t('settings.tabs.preferences')}</span>
-        </button>
-
-        <button
-          onClick={() => setActiveSubmenu('notificacoes')}
-          className={`px-4 min-h-[48px] rounded-2xl font-extrabold text-xs transition-all flex items-center gap-2 shrink-0 touch-target ${
-            activeSubmenu === 'notificacoes'
-              ? 'bg-[#114037] text-white shadow-md'
-              : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
-          }`}
-        >
-          <Bell className="w-4 h-4 text-[#3CA64C]" />
-          <span>{t('settings.tabs.notifications')}</span>
-        </button>
-
-        <button
-          onClick={() => setActiveSubmenu('gestao_dados')}
-          className={`px-4 min-h-[48px] rounded-2xl font-extrabold text-xs transition-all flex items-center gap-2 shrink-0 touch-target ${
-            activeSubmenu === 'gestao_dados'
-              ? 'bg-[#114037] text-white shadow-md'
-              : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
-          }`}
-        >
-          <Database className="w-4 h-4 text-[#3CA64C]" />
-          <span>{t('settings.tabs.dataManagement')}</span>
-        </button>
-
-        <button
-          onClick={() => navigate('/exploracao')}
-          className="px-4 min-h-[48px] rounded-2xl font-extrabold text-xs transition-all flex items-center gap-2 shrink-0 touch-target bg-emerald-50 text-emerald-800 hover:bg-emerald-100 border border-emerald-200"
-          title="Gerir Culturas, Pulverizadores, Bicos e Calibrações"
-        >
-          <Map className="w-4 h-4 text-[#3CA64C]" />
-          <span>Exploração Agrícola</span>
-        </button>
-
-        <button
-          onClick={() => {
-            setActiveSubmenu('ajuda');
-            if (location.pathname !== '/definicoes') {
-              navigate('/definicoes');
-            }
-          }}
-          className={`px-4 min-h-[48px] rounded-2xl font-extrabold text-xs transition-all flex items-center gap-2 shrink-0 touch-target ${
-            activeSubmenu === 'ajuda'
-              ? 'bg-[#114037] text-white shadow-md'
-              : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
-          }`}
-        >
-          <HelpCircle className="w-4 h-4 text-[#3CA64C]" />
-          <span>{t('settings.tabs.help')}</span>
-        </button>
-
-        <button
-          onClick={() => {
-            setActiveSubmenu('sobre');
-            if (location.pathname !== '/definicoes') {
-              navigate('/definicoes');
-            }
-          }}
-          className={`px-4 min-h-[48px] rounded-2xl font-extrabold text-xs transition-all flex items-center gap-2 shrink-0 touch-target ${
-            activeSubmenu === 'sobre'
-              ? 'bg-[#114037] text-white shadow-md'
-              : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
-          }`}
-        >
-          <Info className="w-4 h-4 text-[#3CA64C]" />
-          <span>{t('settings.tabs.about')}</span>
-        </button>
-      </div>
+      <SettingsSubmenuNav
+        activeSubmenu={activeSubmenu}
+        onSelectSubmenu={(sub) => {
+          setActiveSubmenu(sub);
+          if ((sub === 'ajuda' || sub === 'sobre') && location.pathname !== '/definicoes') {
+            navigate('/definicoes');
+          }
+        }}
+        onNavigateExploration={() => navigate('/exploracao')}
+      />
 
 
       {/* ========================================================================= */}
@@ -540,13 +459,13 @@ export const SettingsView: React.FC = () => {
         <div className="space-y-6 animate-fade-in">
           <div className="bg-white p-6 sm:p-8 rounded-3xl shadow-soft border border-slate-200 space-y-8">
             <h2 className="text-fluid-subtitle font-black text-[#114037] border-b border-slate-100 pb-4">
-              Definições — Perfil do Utilizador
+              {t('settings.profileTitle', 'Definições — Perfil do Utilizador')}
             </h2>
 
             {/* Indicadores de Loading / Erro */}
             {isLoadingProfile && (
               <div className="p-4 bg-blue-50 border border-blue-200 rounded-2xl text-xs font-bold text-blue-800 animate-pulse">
-                A carregar perfil…
+                {t('settings.loadingProfile', 'A carregar perfil…')}
               </div>
             )}
 
@@ -560,11 +479,13 @@ export const SettingsView: React.FC = () => {
               {/* CARTÃO 1: Dados Pessoais */}
               <div className="bg-slate-50/80 p-5 rounded-2xl border border-slate-200 space-y-4">
                 <h3 className="text-xs font-black uppercase tracking-wider text-[#1D734B]">
-                  Dados do Perfil do Utilizador
+                  {t('settings.profile.personalData', 'Dados do Perfil do Utilizador')}
                 </h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1.5">Nome Próprio</label>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                      {t('settings.profile.firstName', 'Nome Próprio')}
+                    </label>
                     <input
                       type="text"
                       value={firstName}
@@ -574,7 +495,9 @@ export const SettingsView: React.FC = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1.5">Apelido</label>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                      {t('settings.profile.lastName', 'Apelido')}
+                    </label>
                     <input
                       type="text"
                       value={lastName}
@@ -584,7 +507,9 @@ export const SettingsView: React.FC = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1.5">Endereço de E-mail</label>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                      {t('settings.profile.email', 'Endereço de E-mail')}
+                    </label>
                     <input
                       type="email"
                       value={email}
@@ -593,11 +518,13 @@ export const SettingsView: React.FC = () => {
                       className="w-full min-h-[48px] px-4 py-2.5 bg-slate-100 border border-slate-300 rounded-xl text-xs font-semibold text-slate-500 cursor-not-allowed outline-none"
                     />
                     <p className="text-[11px] text-slate-500 font-medium mt-1 leading-snug">
-                      O endereço de email está associado à sua autenticação segura e não pode ser alterado diretamente aqui.
+                      {t('settings.profile.emailNote', 'O endereço de email está associado à sua autenticação segura e não pode ser alterado diretamente aqui.')}
                     </p>
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1.5">Telemóvel</label>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                      {t('settings.profile.mobile', 'Telemóvel')}
+                    </label>
                     <input
                       type="text"
                       value={mobile}
@@ -612,11 +539,13 @@ export const SettingsView: React.FC = () => {
               {/* CARTÃO 2: Informação Profissional e Morada */}
               <div className="bg-slate-50/80 p-5 rounded-2xl border border-slate-200 space-y-4">
                 <h3 className="text-xs font-black uppercase tracking-wider text-[#1D734B]">
-                  Informação Profissional e Morada
+                  {t('settings.profile.professionalInfo', 'Informação Profissional e Morada')}
                 </h3>
                 <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1.5">Empresa</label>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                      {t('settings.profile.company', 'Empresa')}
+                    </label>
                     <input
                       type="text"
                       value={company}
@@ -626,7 +555,9 @@ export const SettingsView: React.FC = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1.5">Função</label>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                      {t('settings.profile.role', 'Função')}
+                    </label>
                     <input
                       type="text"
                       value={role}
@@ -636,7 +567,9 @@ export const SettingsView: React.FC = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1.5">Cargo</label>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                      {t('settings.profile.jobTitle', 'Cargo')}
+                    </label>
                     <input
                       type="text"
                       value={jobTitle}
@@ -646,7 +579,9 @@ export const SettingsView: React.FC = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1.5">NIF</label>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                      {t('settings.profile.nif', 'NIF')}
+                    </label>
                     <input
                       type="text"
                       value={nif}
@@ -659,7 +594,9 @@ export const SettingsView: React.FC = () => {
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-1">
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1.5">Morada</label>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                      {t('settings.profile.address', 'Morada')}
+                    </label>
                     <input
                       type="text"
                       value={address}
@@ -669,7 +606,9 @@ export const SettingsView: React.FC = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1.5">Código-Postal</label>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                      {t('settings.profile.postalCode', 'Código-Postal')}
+                    </label>
                     <input
                       type="text"
                       value={postalCode}
@@ -679,7 +618,9 @@ export const SettingsView: React.FC = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1.5">Localidade</label>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                      {t('settings.profile.city', 'Localidade')}
+                    </label>
                     <input
                       type="text"
                       value={city}
@@ -712,7 +653,7 @@ export const SettingsView: React.FC = () => {
                   disabled={isSaving || isLoadingProfile}
                   className="w-full sm:w-auto px-6 min-h-[48px] border border-slate-300 rounded-2xl font-bold text-xs text-slate-700 hover:bg-slate-100 disabled:opacity-50 transition-all touch-target"
                 >
-                  Cancelar
+                  {t('settings.profile.cancel', 'Cancelar')}
                 </button>
 
                 <button
@@ -720,7 +661,11 @@ export const SettingsView: React.FC = () => {
                   disabled={isSaving || isLoadingProfile}
                   className="w-full sm:w-auto px-8 min-h-[48px] bg-[#3CA64C] hover:bg-[#359445] text-white font-black text-xs rounded-2xl shadow-md flex items-center justify-center gap-2 transition-all active:scale-95 disabled:opacity-50 touch-target"
                 >
-                  <span>{isSaving ? 'A guardar…' : 'Guardar Alterações do Perfil'}</span>
+                  <span>
+                    {isSaving
+                      ? t('settings.profile.saving', 'A guardar…')
+                      : t('settings.profile.save', 'Guardar Alterações do Perfil')}
+                  </span>
                 </button>
               </div>
             </form>
@@ -813,7 +758,9 @@ export const SettingsView: React.FC = () => {
                         ) : (
                           <div className="flex items-center gap-1.5 text-slate-400">
                             <Building2 className="w-6 h-6 text-slate-400" />
-                            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Logótipo</span>
+                            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                              {t('settings.branding.logo', 'Logótipo')}
+                            </span>
                           </div>
                         )}
                       </div>
@@ -882,7 +829,9 @@ export const SettingsView: React.FC = () => {
                       ) : (
                         <div className="flex items-center gap-1.5 text-slate-400">
                           <ImageIcon className="w-5 h-5" />
-                          <span className="text-[10px] font-bold uppercase tracking-wider">Sem Logo</span>
+                          <span className="text-[10px] font-bold uppercase tracking-wider">
+                            {t('settings.branding.noLogo', 'Sem Logo')}
+                          </span>
                         </div>
                       )}
                     </div>
@@ -890,7 +839,7 @@ export const SettingsView: React.FC = () => {
                     <div className="flex flex-col gap-2">
                       <label className="min-h-[44px] px-4 py-2 bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 rounded-xl font-bold text-xs flex items-center gap-2 cursor-pointer transition-colors shadow-xs touch-target">
                         <Upload className="w-4 h-4 text-[#1D734B]" />
-                        <span>Carregar Ficheiro de Logotipo</span>
+                        <span>{t('settings.branding.uploadLogo', 'Carregar Ficheiro de Logotipo')}</span>
                         <input
                           type="file"
                           accept="image/png,image/jpeg,image/svg+xml,image/webp"
@@ -903,7 +852,7 @@ export const SettingsView: React.FC = () => {
                         <button
                           type="button"
                           onClick={() => setCoBranding((prev) => ({ ...prev, logoUrl: null }))}
-                          className="text-xs text-rose-600 hover:text-rose-800 font-bold text-left hover:underline px-1"
+                          className="text-xs text-rose-600 hover:text-rose-800 font-bold text-left hover:underline px-1 cursor-pointer"
                         >
                           Remover Logotipo Atual
                         </button>
@@ -923,7 +872,9 @@ export const SettingsView: React.FC = () => {
 
                   <div className="grid grid-cols-3 gap-3">
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-1.5">Cor Primária</label>
+                      <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                        {t('settings.branding.primaryColor', 'Cor Primária')}
+                      </label>
                       <div className="flex items-center gap-2">
                         <input
                           type="color"
@@ -938,11 +889,15 @@ export const SettingsView: React.FC = () => {
                           className="w-full min-h-[40px] px-2 py-1 bg-white border border-slate-300 rounded-lg text-xs font-mono font-bold uppercase"
                         />
                       </div>
-                      <span className="text-[10px] text-slate-500 mt-1 block">Fundo do Banner</span>
+                      <span className="text-[10px] text-slate-500 mt-1 block">
+                        {t('settings.branding.bannerBackground', 'Fundo do Banner')}
+                      </span>
                     </div>
 
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-1.5">Cor Secundária</label>
+                      <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                        {t('settings.branding.secondaryColor', 'Cor Secundária')}
+                      </label>
                       <div className="flex items-center gap-2">
                         <input
                           type="color"
@@ -957,11 +912,15 @@ export const SettingsView: React.FC = () => {
                           className="w-full min-h-[40px] px-2 py-1 bg-white border border-slate-300 rounded-lg text-xs font-mono font-bold uppercase"
                         />
                       </div>
-                      <span className="text-[10px] text-slate-500 mt-1 block">Frisos e Selo</span>
+                      <span className="text-[10px] text-slate-500 mt-1 block">
+                        {t('settings.branding.trimsAndSeal', 'Frisos e Selo')}
+                      </span>
                     </div>
 
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-1.5">Cor do Texto</label>
+                      <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                        {t('settings.branding.textColor', 'Cor do Texto')}
+                      </label>
                       <div className="flex items-center gap-2">
                         <input
                           type="color"
@@ -976,7 +935,9 @@ export const SettingsView: React.FC = () => {
                           className="w-full min-h-[40px] px-2 py-1 bg-white border border-slate-300 rounded-lg text-xs font-mono font-bold uppercase"
                         />
                       </div>
-                      <span className="text-[10px] text-slate-500 mt-1 block">Texto do Banner</span>
+                      <span className="text-[10px] text-slate-500 mt-1 block">
+                        {t('settings.branding.bannerText', 'Texto do Banner')}
+                      </span>
                     </div>
                   </div>
 
@@ -1018,48 +979,56 @@ export const SettingsView: React.FC = () => {
                   <button
                     type="button"
                     onClick={handleFillFromProfile}
-                    className="text-xs font-bold text-[#1D734B] hover:text-[#114037] hover:underline flex items-center gap-1.5 self-start sm:self-auto"
+                    className="text-xs font-bold text-[#1D734B] hover:text-[#114037] hover:underline flex items-center gap-1.5 self-start sm:self-auto cursor-pointer"
                   >
-                    <span>Preencher com dados do Perfil de Utilizador</span>
+                    <span>{t('settings.branding.fillFromProfile', 'Preencher com dados do Perfil de Utilizador')}</span>
                   </button>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   <div className="sm:col-span-2 lg:col-span-1">
-                    <label className="block text-xs font-bold text-slate-700 mb-1.5">Nome da Empresa</label>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                      {t('settings.branding.companyName', 'Nome da Empresa')}
+                    </label>
                     <input
                       type="text"
                       value={coBranding.companyName}
                       onChange={(e) => setCoBranding((prev) => ({ ...prev, companyName: e.target.value }))}
-                      placeholder="Ex: AgroTec Serviços Lda"
+                      placeholder={t('settings.branding.companyNamePlaceholder', 'Ex: AgroTec Serviços Lda')}
                       className="w-full min-h-[48px] px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-semibold outline-none focus:border-[#3CA64C]"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1.5">Morada</label>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                      {t('settings.branding.companyAddress', 'Morada')}
+                    </label>
                     <input
                       type="text"
                       value={coBranding.address}
                       onChange={(e) => setCoBranding((prev) => ({ ...prev, address: e.target.value }))}
-                      placeholder="Ex: Zona Industrial Lote 14"
+                      placeholder={t('settings.branding.companyAddressPlaceholder', 'Ex: Zona Industrial Lote 14')}
                       className="w-full min-h-[48px] px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-semibold outline-none focus:border-[#3CA64C]"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1.5">Código-Postal e Localidade</label>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                      {t('settings.branding.postalCodeCity', 'Código-Postal e Localidade')}
+                    </label>
                     <input
                       type="text"
                       value={coBranding.postalCode}
                       onChange={(e) => setCoBranding((prev) => ({ ...prev, postalCode: e.target.value }))}
-                      placeholder="Ex: 2000-001 Santarém"
+                      placeholder={t('settings.branding.postalCodePlaceholder', 'Ex: 2000-001 Santarém')}
                       className="w-full min-h-[48px] px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-semibold outline-none focus:border-[#3CA64C]"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1.5">Telefone de Contacto</label>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                      {t('settings.branding.contactPhone', 'Telefone de Contacto')}
+                    </label>
                     <input
                       type="text"
                       value={coBranding.phone}
@@ -1070,7 +1039,9 @@ export const SettingsView: React.FC = () => {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1.5">E-mail Institucional</label>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                      {t('settings.branding.institutionalEmail', 'E-mail Institucional')}
+                    </label>
                     <input
                       type="email"
                       value={coBranding.email}
@@ -1081,7 +1052,9 @@ export const SettingsView: React.FC = () => {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1.5">Website</label>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                      {t('settings.branding.website', 'Website')}
+                    </label>
                     <input
                       type="text"
                       value={coBranding.website}
@@ -1101,7 +1074,7 @@ export const SettingsView: React.FC = () => {
                   disabled={isSavingCoBranding}
                   className="w-full sm:w-auto px-6 min-h-[48px] border border-slate-300 rounded-2xl font-bold text-xs text-slate-700 hover:bg-slate-100 disabled:opacity-50 transition-all touch-target"
                 >
-                  Cancelar
+                  {t('common.cancel', 'Cancelar')}
                 </button>
 
                 <button
@@ -1109,7 +1082,7 @@ export const SettingsView: React.FC = () => {
                   disabled={isSavingCoBranding}
                   className="w-full sm:w-auto px-8 min-h-[48px] bg-[#3CA64C] hover:bg-[#359445] text-white font-black text-xs rounded-2xl shadow-md flex items-center justify-center gap-2 transition-all active:scale-95 disabled:opacity-50 touch-target"
                 >
-                  <span>{isSavingCoBranding ? 'A guardar…' : 'Guardar Configuração de Co-Branding'}</span>
+                  <span>{isSavingCoBranding ? t('common.saving', 'A guardar…') : t('settings.branding.saveConfig', 'Guardar Configuração de Co-Branding')}</span>
                 </button>
               </div>
             </form>
@@ -1132,11 +1105,11 @@ export const SettingsView: React.FC = () => {
               <button
                 type="button"
                 onClick={() => openMicro('preferencias_unidades')}
-                className="px-3.5 min-h-[44px] bg-[#3CA64C]/10 hover:bg-[#3CA64C]/20 text-[#114037] font-extrabold text-xs rounded-xl transition-all flex items-center gap-1.5 touch-target"
-                title="Microlearning: Unidades Padrão"
+                className="px-3.5 min-h-[44px] bg-[#3CA64C]/10 hover:bg-[#3CA64C]/20 text-[#114037] font-extrabold text-xs rounded-xl transition-all flex items-center gap-1.5 touch-target cursor-pointer"
+                title={t('common.guide', 'Guia')}
               >
                 <Info className="w-4 h-4 text-[#3CA64C]" />
-                <span>Ajuda</span>
+                <span>{t('common.help', 'Ajuda')}</span>
               </button>
             </div>
 
@@ -1167,14 +1140,14 @@ export const SettingsView: React.FC = () => {
                 <div>
                   <div className="flex items-center gap-2">
                     <h3 className="text-xs font-black uppercase tracking-wider text-[#1D734B]">
-                      Ícones da Aplicação Móvel (PWA & Ecrã de Início)
+                      {t('settings.preferencesTab.appIconsTitle', 'Ícones da Aplicação Móvel (PWA & Ecrã de Início)')}
                     </h3>
                     <span className="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full">
-                      Exclusivo Mobile
+                      {t('settings.preferencesTab.mobileExclusive', 'Exclusivo Mobile')}
                     </span>
                   </div>
                   <p className="text-xs text-slate-500 font-medium mt-1">
-                    Estes ícones são exclusivos para a aplicação instalada em smartphones e tablets. Nos navegadores web, o ícone de separador é fixo através do favicon oficial DATERRA.
+                    {t('settings.preferencesTab.appIconsNote', 'Estes ícones são exclusivos para a aplicação instalada em smartphones e tablets. Nos navegadores web, o ícone de separador é fixo através do favicon oficial DATERRA.')}
                   </p>
                 </div>
 
@@ -1191,11 +1164,15 @@ export const SettingsView: React.FC = () => {
                     <img src="./icon-daterra-mono.png" alt="Ícone Monocromático" className="w-12 h-12 rounded-xl shadow-sm object-contain" />
                     <div>
                       <div className="flex items-center justify-center gap-1.5">
-                        <span className="font-extrabold text-slate-900 text-xs">Monocromático</span>
-                        <span className="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-1.5 py-0.5 rounded">Padrão</span>
+                        <span className="font-extrabold text-slate-900 text-xs">
+                          {t('settings.preferencesTab.monoTheme', 'Monocromático')}
+                        </span>
+                        <span className="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-1.5 py-0.5 rounded">
+                          {t('settings.preferencesTab.defaultBadge', 'Padrão')}
+                        </span>
                       </div>
                       <p className="text-[11px] text-slate-500 font-medium mt-1">
-                        Ícone neutro monocromático oficial (Ativo por defeito).
+                        {t('settings.preferencesTab.monoNote', 'Ícone neutro monocromático oficial (Ativo por defeito).')}
                       </p>
                     </div>
                   </div>
@@ -1211,9 +1188,11 @@ export const SettingsView: React.FC = () => {
                   >
                     <img src="./icon-daterra-light.png" alt="Ícone Modo Claro" className="w-12 h-12 rounded-xl shadow-sm object-contain" />
                     <div>
-                      <span className="font-extrabold text-slate-900 text-xs">Modo Claro (Light)</span>
+                      <span className="font-extrabold text-slate-900 text-xs">
+                        {t('settings.preferencesTab.lightTheme', 'Modo Claro (Light)')}
+                      </span>
                       <p className="text-[11px] text-slate-500 font-medium mt-1">
-                        Alto contraste diurno para leitura no campo sob sol intenso.
+                        {t('settings.preferencesTab.lightNote', 'Alto contraste diurno para leitura no campo sob sol intenso.')}
                       </p>
                     </div>
                   </div>
@@ -1229,9 +1208,11 @@ export const SettingsView: React.FC = () => {
                   >
                     <img src="./icon-daterra-dark.png" alt="Ícone Modo Escuro" className="w-12 h-12 rounded-xl shadow-sm object-contain" />
                     <div>
-                      <span className="font-extrabold text-slate-900 text-xs">Modo Escuro (Dark)</span>
+                      <span className="font-extrabold text-slate-900 text-xs">
+                        {t('settings.preferencesTab.darkTheme', 'Modo Escuro (Dark)')}
+                      </span>
                       <p className="text-[11px] text-slate-500 font-medium mt-1">
-                        Otimizado para operações agronómicas noturnas na cabine.
+                        {t('settings.preferencesTab.darkNote', 'Otimizado para operações agronómicas noturnas na cabine.')}
                       </p>
                     </div>
                   </div>
@@ -1241,7 +1222,7 @@ export const SettingsView: React.FC = () => {
               {/* OS 4 PERFIS DE UNIDADES PADRÃO (Com Dica de UI de 3-4 unidades em cinzento) */}
               <div className="space-y-4">
                 <h3 className="text-xs font-black uppercase tracking-wider text-[#1D734B]">
-                  Perfis de Unidades de Medida Padrão
+                  {t('settings.unitsProfilesTitle', 'Perfis de Unidades de Medida Padrão')}
                 </h3>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -1256,7 +1237,9 @@ export const SettingsView: React.FC = () => {
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <span className="font-extrabold text-slate-900 text-xs">Sistema Métrico Internacional (SI)</span>
+                        <span className="font-extrabold text-slate-900 text-xs">
+                          {t('settings.units.si', 'Sistema Métrico Internacional (SI)')}
+                        </span>
                         <span className="text-xs text-slate-600 font-mono-numbers">(ha, kg, L, bar)</span>
                       </div>
                       <input
@@ -1283,7 +1266,9 @@ export const SettingsView: React.FC = () => {
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <span className="font-extrabold text-slate-900 text-xs">Sistema Imperial / Americano (US)</span>
+                        <span className="font-extrabold text-slate-900 text-xs">
+                          {t('settings.units.us', 'Sistema Imperial / Americano (US)')}
+                        </span>
                         <span className="text-xs text-slate-600 font-mono-numbers">(ac, bu, gal, psi)</span>
                       </div>
                       <input
@@ -1310,7 +1295,9 @@ export const SettingsView: React.FC = () => {
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <span className="font-extrabold text-slate-900 text-xs">Sistema Misto Anglo-Saxónico (UK / CA / AU)</span>
+                        <span className="font-extrabold text-slate-900 text-xs">
+                          {t('settings.units.uk', 'Sistema Misto Anglo-Saxónico (UK / CA / AU)')}
+                        </span>
                         <span className="text-xs text-slate-600 font-mono-numbers">(ha, L, bu, lb)</span>
                       </div>
                       <input
@@ -1337,7 +1324,9 @@ export const SettingsView: React.FC = () => {
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <span className="font-extrabold text-slate-900 text-xs">Sistema Regional Tradicional (Ibérico / LatAm)</span>
+                        <span className="font-extrabold text-slate-900 text-xs">
+                          {t('settings.units.trad', 'Sistema Regional Tradicional (Ibérico / LatAm)')}
+                        </span>
                         <span className="text-xs text-slate-600 font-mono-numbers">(alq, @, qtl)</span>
                       </div>
                       <input
@@ -1358,9 +1347,9 @@ export const SettingsView: React.FC = () => {
               {/* Botão de Ação Principal (Verde Destaque #3CA64C) */}
               <button
                 type="submit"
-                className="w-full min-h-[48px] bg-[#3CA64C] hover:bg-[#3AAA35] text-white font-black text-xs rounded-2xl shadow-md flex items-center justify-center gap-2 transition-all active:scale-95 touch-target"
+                className="w-full min-h-[48px] bg-[#3CA64C] hover:bg-[#3AAA35] text-white font-black text-xs rounded-2xl shadow-md flex items-center justify-center gap-2 transition-all active:scale-95 touch-target cursor-pointer"
               >
-                <span>Guardar Preferências e Unidades Padrão</span>
+                <span>{t('settings.preferencesTab.save', 'Guardar Preferências e Unidades Padrão')}</span>
               </button>
             </form>
           </div>
@@ -1374,7 +1363,7 @@ export const SettingsView: React.FC = () => {
         <div className="space-y-8 animate-fade-in">
           <div className="bg-white p-6 sm:p-8 rounded-3xl shadow-soft border border-slate-200 space-y-8">
             <h2 className="text-fluid-subtitle font-black text-[#114037] border-b border-slate-100 pb-4">
-              Definições — Gestão de Dados e Cópia de Segurança
+              {t('settings.dataManagement.title', 'Definições — Gestão de Dados e Cópia de Segurança')}
             </h2>
 
             {/* Exportar e Importar */}
@@ -1382,17 +1371,17 @@ export const SettingsView: React.FC = () => {
               <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200 space-y-3">
                 <h3 className="text-xs font-black uppercase tracking-wider text-[#1D734B] flex items-center gap-2">
                   <Download className="w-4 h-4 text-[#3CA64C]" />
-                  <span>Exportar Dados da Exploração</span>
+                  <span>{t('settings.dataManagement.exportTitle', 'Exportar Dados da Exploração')}</span>
                 </h3>
                 <p className="text-xs text-slate-500">
-                  Descarregue uma cópia de segurança completa em JSON ou exporte relatórios em CSV.
+                  {t('settings.dataManagement.exportDesc', 'Descarregue uma cópia de segurança completa em JSON ou exporte relatórios em CSV.')}
                 </p>
                 <div className="flex flex-wrap gap-2 pt-2">
                   <button className="px-4 min-h-[44px] bg-[#114037] hover:bg-[#0d332c] text-white font-bold text-xs rounded-xl transition-all touch-target">
-                    Exportar JSON
+                    {t('settings.dataManagement.exportJson', 'Exportar JSON')}
                   </button>
                   <button className="px-4 min-h-[44px] bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold text-xs rounded-xl transition-all touch-target">
-                    Exportar CSV
+                    {t('settings.dataManagement.exportCsv', 'Exportar CSV')}
                   </button>
                 </div>
               </div>
@@ -1400,13 +1389,13 @@ export const SettingsView: React.FC = () => {
               <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200 space-y-3">
                 <h3 className="text-xs font-black uppercase tracking-wider text-[#1D734B] flex items-center gap-2">
                   <Upload className="w-4 h-4 text-[#3CA64C]" />
-                  <span>Importar Ficheiro de Perfis</span>
+                  <span>{t('settings.dataManagement.importTitle', 'Importar Ficheiro de Perfis')}</span>
                 </h3>
                 <p className="text-xs text-slate-500">
-                  Restaure os seus perfis de cultura, atomizadores e bicos através de um ficheiro prévio.
+                  {t('settings.dataManagement.importDesc', 'Restaure os seus perfis de cultura, atomizadores e bicos através de um ficheiro prévio.')}
                 </p>
                 <button className="px-4 min-h-[44px] bg-[#3CA64C] hover:bg-[#3AAA35] text-white font-bold text-xs rounded-xl transition-all touch-target">
-                  Selecionar Ficheiro JSON
+                  {t('settings.dataManagement.selectJson', 'Selecionar Ficheiro JSON')}
                 </button>
               </div>
             </div>
@@ -1419,10 +1408,10 @@ export const SettingsView: React.FC = () => {
                 </div>
                 <div>
                   <h3 className="text-base font-black text-rose-900 flex items-center gap-2">
-                    <span>Zona de Perigo — Ações Destrutivas Irreversíveis</span>
+                    <span>{t('settings.dangerZone.title', 'Zona de Perigo — Ações Destrutivas Irreversíveis')}</span>
                   </h3>
                   <p className="text-xs text-rose-700 font-semibold mt-0.5">
-                    As operações abaixo eliminam dados do armazenamento local IndexedDB sem possibilidade de recuperação.
+                    {t('settings.dangerZone.subtitle', 'As operações abaixo eliminam dados do armazenamento local IndexedDB sem possibilidade de recuperação.')}
                   </p>
                 </div>
               </div>
@@ -1431,37 +1420,53 @@ export const SettingsView: React.FC = () => {
                 <button
                   type="button"
                   onClick={handleDeleteCultures}
-                  className="p-4 bg-white border border-rose-200 hover:border-rose-400 rounded-2xl text-left transition-all hover:bg-rose-50/50 touch-target"
+                  className="p-4 bg-white border border-rose-200 hover:border-rose-400 rounded-2xl text-left transition-all hover:bg-rose-50/50 touch-target cursor-pointer"
                 >
-                  <span className="font-extrabold text-rose-900 text-xs block">Apagar Perfis de Cultura</span>
-                  <span className="text-[11px] text-rose-600 block mt-1 font-medium">Remove todas as parcelas</span>
+                  <span className="font-extrabold text-rose-900 text-xs block">
+                    {t('settings.dangerZone.deleteCultures', 'Apagar Perfis de Cultura')}
+                  </span>
+                  <span className="text-[11px] text-rose-600 block mt-1 font-medium">
+                    {t('settings.dangerZone.deleteCulturesSub', 'Remove todas as parcelas')}
+                  </span>
                 </button>
 
                 <button
                   type="button"
                   onClick={handleDeleteEquipments}
-                  className="p-4 bg-white border border-rose-200 hover:border-rose-400 rounded-2xl text-left transition-all hover:bg-rose-50/50 touch-target"
+                  className="p-4 bg-white border border-rose-200 hover:border-rose-400 rounded-2xl text-left transition-all hover:bg-rose-50/50 touch-target cursor-pointer"
                 >
-                  <span className="font-extrabold text-rose-900 text-xs block">Apagar Equipamentos</span>
-                  <span className="text-[11px] text-rose-600 block mt-1 font-medium">Remove atomizadores ISO</span>
+                  <span className="font-extrabold text-rose-900 text-xs block">
+                    {t('settings.dangerZone.deleteEquipments', 'Apagar Equipamentos')}
+                  </span>
+                  <span className="text-[11px] text-rose-600 block mt-1 font-medium">
+                    {t('settings.dangerZone.deleteEquipmentsSub', 'Remove atomizadores ISO')}
+                  </span>
                 </button>
 
                 <button
                   type="button"
                   onClick={handleDeleteNozzles}
-                  className="p-4 bg-white border border-rose-200 hover:border-rose-400 rounded-2xl text-left transition-all hover:bg-rose-50/50 touch-target"
+                  className="p-4 bg-white border border-rose-200 hover:border-rose-400 rounded-2xl text-left transition-all hover:bg-rose-50/50 touch-target cursor-pointer"
                 >
-                  <span className="font-extrabold text-rose-900 text-xs block">Apagar Perfis de Bicos</span>
-                  <span className="text-[11px] text-rose-600 block mt-1 font-medium">Remove os bicos de jato</span>
+                  <span className="font-extrabold text-rose-900 text-xs block">
+                    {t('settings.dangerZone.deleteNozzles', 'Apagar Perfis de Bicos')}
+                  </span>
+                  <span className="text-[11px] text-rose-600 block mt-1 font-medium">
+                    {t('settings.dangerZone.deleteNozzlesSub', 'Remove os bicos de jato')}
+                  </span>
                 </button>
 
                 <button
                   type="button"
                   onClick={handleDeleteCalibrations}
-                  className="p-4 bg-white border border-rose-200 hover:border-rose-400 rounded-2xl text-left transition-all hover:bg-rose-50/50 touch-target"
+                  className="p-4 bg-white border border-rose-200 hover:border-rose-400 rounded-2xl text-left transition-all hover:bg-rose-50/50 touch-target cursor-pointer"
                 >
-                  <span className="font-extrabold text-rose-900 text-xs block">Apagar Calibrações</span>
-                  <span className="text-[11px] text-rose-600 block mt-1 font-medium">Remove ensaios hidráulicos</span>
+                  <span className="font-extrabold text-rose-900 text-xs block">
+                    {t('settings.dangerZone.deleteCalibrations', 'Apagar Calibrações')}
+                  </span>
+                  <span className="text-[11px] text-rose-600 block mt-1 font-medium">
+                    {t('settings.dangerZone.deleteCalibrationsSub', 'Remove ensaios hidráulicos')}
+                  </span>
                 </button>
               </div>
 
@@ -1470,10 +1475,10 @@ export const SettingsView: React.FC = () => {
                 <button
                   type="button"
                   onClick={handleDeleteAllData}
-                  className="w-full sm:w-auto px-6 min-h-[48px] bg-rose-600 hover:bg-rose-700 text-white font-black text-xs rounded-2xl shadow-md flex items-center justify-center gap-2 transition-all active:scale-95 touch-target"
+                  className="w-full sm:w-auto px-6 min-h-[48px] bg-rose-600 hover:bg-rose-700 text-white font-black text-xs rounded-2xl shadow-md flex items-center justify-center gap-2 transition-all active:scale-95 touch-target cursor-pointer"
                 >
                   <AlertTriangle className="w-4 h-4 text-white" />
-                  <span>APAGAR TODOS OS DADOS DA EXPLORAÇÃO (RESET TOTAL)</span>
+                  <span>{t('settings.dangerZone.deleteAll', 'APAGAR TODOS OS DADOS DA EXPLORAÇÃO (RESET TOTAL)')}</span>
                 </button>
               </div>
             </div>
@@ -1485,18 +1490,22 @@ export const SettingsView: React.FC = () => {
       {activeSubmenu === 'notificacoes' && (
         <div className="bg-white p-6 sm:p-8 rounded-3xl shadow-soft border border-slate-200 space-y-6 animate-fade-in">
           <h2 className="text-fluid-subtitle font-black text-[#114037] border-b border-slate-100 pb-4">
-            Definições — Preferências de Notificações
+            {t('settings.notificationsTab.title', 'Definições — Preferências de Notificações')}
           </h2>
           <form onSubmit={handleSaveNotifications} className="space-y-6">
             <div className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-200">
               <div>
-                <span className="font-extrabold text-slate-900 text-xs block">Notificações da Plataforma</span>
-                <span className="text-xs text-slate-500">Receber alertas operacionais no telemóvel e email</span>
+                <span className="font-extrabold text-slate-900 text-xs block">
+                  {t('settings.notificationsTab.platformAlerts', 'Notificações da Plataforma')}
+                </span>
+                <span className="text-xs text-slate-500">
+                  {t('settings.notificationsTab.platformAlertsDesc', 'Receber alertas operacionais no telemóvel e email')}
+                </span>
               </div>
               <input type="checkbox" checked={masterNotifications} onChange={(e) => setMasterNotifications(e.target.checked)} className="w-5 h-5 accent-[#3CA64C]" />
             </div>
-            <button type="submit" className="w-full min-h-[48px] bg-[#3CA64C] text-white font-black text-xs rounded-2xl shadow-md touch-target">
-              Guardar Definições de Notificações
+            <button type="submit" className="w-full min-h-[48px] bg-[#3CA64C] text-white font-black text-xs rounded-2xl shadow-md touch-target cursor-pointer">
+              {t('settings.notificationsTab.save', 'Guardar Definições de Notificações')}
             </button>
           </form>
         </div>

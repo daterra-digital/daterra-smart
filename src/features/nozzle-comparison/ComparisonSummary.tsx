@@ -2,17 +2,14 @@ import React from 'react';
 import {
   Scale,
   ArrowUpRight,
-  Droplets,
-  Wind,
   Gauge,
-  Compass,
   AlertCircle,
-  ShieldCheck,
   CheckCircle2,
   AlertTriangle
 } from 'lucide-react';
 import type { ComparisonSummaryResult } from './nozzleComparison.types';
 import { formatPt } from './nozzleComparison.calculations';
+import { ComparisonDifferentialSynthesis } from './ComparisonDifferentialSynthesis';
 
 export interface ComparisonSummaryProps {
   comparison: ComparisonSummaryResult;
@@ -151,29 +148,13 @@ export const ComparisonSummary: React.FC<ComparisonSummaryProps> = ({
         )}
       </div>
 
-      {/* 4. SÍNTESE DIFERENCIAL */}
-      <div className="p-4 bg-slate-50/70 rounded-2xl border border-slate-100 space-y-2.5 text-xs text-slate-700">
-        <div className="flex items-start gap-2.5">
-          <Droplets className="w-4 h-4 text-daterra-primary shrink-0 mt-0.5" />
-          <p className="font-semibold leading-relaxed">
-            {flowComparisonText}
-          </p>
-        </div>
-
-        <div className="flex items-start gap-2.5">
-          <Wind className="w-4 h-4 text-daterra-primary shrink-0 mt-0.5" />
-          <p className="font-semibold leading-relaxed">
-            {driftComparisonText}
-          </p>
-        </div>
-
-        <div className="flex items-start gap-2.5">
-          <Compass className="w-4 h-4 text-daterra-primary shrink-0 mt-0.5" />
-          <p className="font-semibold leading-relaxed">
-            {dropletComparisonText}
-          </p>
-        </div>
-      </div>
+      {/* 4 e 6. SÍNTESE DIFERENCIAL & PROCEDIMENTO OBRIGATÓRIO */}
+      <ComparisonDifferentialSynthesis
+        flowComparisonText={flowComparisonText}
+        driftComparisonText={driftComparisonText}
+        dropletComparisonText={dropletComparisonText}
+        disclaimer={disclaimer}
+      />
 
       {/* 5. INTERPRETAÇÃO TÉCNICA ORIENTADORA */}
       <div className="p-4 sm:p-5 bg-gradient-to-r from-emerald-50 to-teal-50/60 border border-emerald-200 rounded-2xl space-y-2">
@@ -183,17 +164,6 @@ export const ComparisonSummary: React.FC<ComparisonSummaryProps> = ({
         </span>
         <p className="text-xs text-slate-800 font-bold leading-relaxed">
           {generalRecommendation}
-        </p>
-      </div>
-
-      {/* 6. AVISO E DISCLAIMER REGULAMENTAR DE CALIBRAÇÃO */}
-      <div className="p-3.5 bg-slate-50 border border-slate-200/80 rounded-2xl text-[11px] text-slate-500 leading-relaxed space-y-1">
-        <span className="font-extrabold text-slate-700 flex items-center gap-1">
-          <ShieldCheck className="w-3.5 h-3.5 text-daterra-primary" />
-          Procedimento de Campo Obrigatório
-        </span>
-        <p>
-          {disclaimer}
         </p>
       </div>
     </div>

@@ -2,14 +2,6 @@
  * DATERRA Smart - Motor Universal de Calculadoras
  * Componente: CalculatorInputField
  * Fase 2 - Componentes Atómicos do Template Oficial
- * 
- * Campo de entrada universal:
- * - Label semântico associado com htmlFor
- * - Botão de microlearning DidacticHelp contextual
- * - Input táctil com tipografia mono-numbers (JetBrains Mono)
- * - Atalhos rápidos horizontais (presets)
- * - Suporte a teclado DaterraKeypad em mobile e digitação física em desktop
- * - Espaço para erros e validações agronómicas
  */
 
 import React from 'react';
@@ -18,21 +10,16 @@ import { useLanguage } from '../../../context/LanguageContext.tsx';
 import type { CalculatorFieldDefinition } from './types.ts';
 import { DidacticHelp, type FAQFileType } from '../../concentracao/DidacticHelp.tsx';
 import { resolveFriendlyValidationMessage } from '../../calibracao-pulverizador/calibracaoPulverizadorValidationFallback.ts';
+import { CalculatorSelectField } from './CalculatorSelectField.tsx';
+import { CalculatorPresetsBar } from './CalculatorPresetsBar.tsx';
 
 export interface CalculatorInputFieldProps {
-  /** Definição declarativa do campo */
   field: CalculatorFieldDefinition;
-  /** Valor atual numérico ou texto */
   value: number | string;
-  /** Unidade ativa selecionada */
   unit: string;
-  /** Callback ao alterar valor diretamente ou via atalhos */
   onChange: (newValue: number | string, newUnit: string) => void;
-  /** Callback ao clicar para abrir o DaterraKeypad */
   onOpenKeypad: (field: CalculatorFieldDefinition) => void;
-  /** Mensagem de erro de validação (se aplicável) */
   error?: string;
-  /** Mensagem de aviso de limite agronómico (se aplicável) */
   warning?: string;
 }
 
@@ -45,12 +32,12 @@ export const CalculatorInputField: React.FC<CalculatorInputFieldProps> = ({
   error,
   warning
 }) => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const locale = language === 'en-GB' ? 'en-GB' : 'pt-PT';
 
-  // Formatação amigável para exibição pt-PT
   const formatDisplayValue = (val: number | string) => {
     if (typeof val === 'number') {
-      return val.toLocaleString('pt-PT', { maximumFractionDigits: 3 });
+      return val.toLocaleString(locale, { maximumFractionDigits: 3 });
     }
     return val;
   };
@@ -70,7 +57,7 @@ export const CalculatorInputField: React.FC<CalculatorInputFieldProps> = ({
 
   return (
     <div className="space-y-1">
-      {/* 1. Cabeçalho do Campo: Rótulo semântico + Botão de Microlearning Contextual */}
+      {/* 1. Cabeçalho do Campo: Rótulo semântico + Botão de Ajuda Contextual */}
       <div className="flex items-center justify-between">
         <label
           htmlFor={field.id}
@@ -80,14 +67,13 @@ export const CalculatorInputField: React.FC<CalculatorInputFieldProps> = ({
           {field.required && <span className="text-rose-500 ml-0.5">*</span>}
         </label>
 
-        {/* Apoio contextual por campo: ícone interativo (i) sem texto adjacente */}
         {(field.helpFile || field.helpTopic) && (
           <DidacticHelp
             faqFile={field.helpFile as FAQFileType}
             topic={field.helpTopic}
             variant="icon"
             iconType="info"
-            buttonLabel="Ajuda"
+            buttonLabel={t('common.help', 'Ajuda')}
             className="!min-w-[36px] !min-h-[36px] !p-1.5"
             iconClassName="w-4 h-4 text-[#1D734B]"
           />
@@ -96,59 +82,14 @@ export const CalculatorInputField: React.FC<CalculatorInputFieldProps> = ({
 
       {/* 2. Campo de Entrada Táctil/Físico OU Seletor Estruturado */}
       {field.type === 'select' ? (
-        <div className="space-y-1.5">
-          <div className="relative">
-            <select
-              id={field.id}
-              name={field.id}
-              value={value !== undefined && value !== null ? String(value) : ''}
-              onChange={(e) => onChange(e.target.value, '')}
-              className={`w-full px-3 py-2 bg-slate-50 border rounded-xl text-xs sm:text-sm font-bold text-slate-800 cursor-pointer hover:border-daterra-accent outline-none transition-all touch-target focus:ring-2 focus:ring-daterra-accent/30 focus:border-daterra-accent ${
-                error
-                  ? 'border-rose-400 bg-rose-50/20 text-rose-900'
-                  : warning
-                  ? 'border-amber-400 bg-amber-50/20 text-amber-900'
-                  : 'border-slate-300'
-              }`}
-              aria-invalid={!!error}
-              aria-describedby={selectDescribedByIds}
-            >
-              <option value="" disabled>
-                Selecione uma opção...
-              </option>
-              {field.options?.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Descrição contextual da opção ativa */}
-          {selectedOption?.description && (
-            <div
-              id={`${field.id}-option-desc`}
-              className="p-2.5 bg-slate-100/80 rounded-xl text-xs text-slate-600 leading-relaxed border border-slate-200/60"
-            >
-              <strong className="font-bold text-slate-800 block mb-0.5">
-                {selectedOption.label}:
-              </strong>
-              {selectedOption.description}
-            </div>
-          )}
-
-          {/* Aviso contextual informativo (ex: Linhas Alternadas em row_spacing) */}
-          {selectedOption?.contextualWarning && (
-            <div
-              id={`${field.id}-contextual-warning`}
-              role="status"
-              className="p-2.5 bg-amber-50/90 border border-amber-200/80 rounded-xl text-xs text-amber-900 leading-relaxed flex items-start gap-2 animate-fade-in"
-            >
-              <AlertTriangle className="w-4 h-4 shrink-0 text-amber-600 mt-0.5" />
-              <span>{selectedOption.contextualWarning}</span>
-            </div>
-          )}
-        </div>
+        <CalculatorSelectField
+          field={field}
+          value={value}
+          error={error}
+          warning={warning}
+          selectDescribedByIds={selectDescribedByIds}
+          onChange={onChange}
+        />
       ) : (
         <div className="relative">
           <input
@@ -189,26 +130,13 @@ export const CalculatorInputField: React.FC<CalculatorInputFieldProps> = ({
 
       {/* 3. Pílulas de Atalhos Rápidos (Presets) */}
       {field.presets && field.presets.length > 0 && (
-        <div className="flex items-center gap-1.5 pt-0.5 flex-wrap">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 shrink-0 mr-0.5">
-            Atalhos:
-          </span>
-          {field.presets.slice(0, 4).map((preset) => (
-            <button
-              key={preset}
-              type="button"
-              onClick={() => onChange(preset, unit)}
-              className={`px-2 py-0.5 text-xs font-bold rounded-lg transition-all font-mono-numbers shrink-0 cursor-pointer active:scale-95 ${
-                Number(value) === preset
-                  ? 'bg-daterra-primary text-white shadow-xs'
-                  : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
-              }`}
-              title={`Definir ${formatDisplayValue(preset)} ${unit}`}
-            >
-              {formatDisplayValue(preset)}
-            </button>
-          ))}
-        </div>
+        <CalculatorPresetsBar
+          presets={field.presets}
+          value={value}
+          unit={unit}
+          formatDisplayValue={formatDisplayValue}
+          onChange={(presetVal, presetUnit) => onChange(presetVal, presetUnit)}
+        />
       )}
 
       {/* 4. Nota técnica permanente (se declarada no campo) */}
@@ -229,7 +157,7 @@ export const CalculatorInputField: React.FC<CalculatorInputFieldProps> = ({
         </p>
       )}
       {!error && warning && (
-        <p id={`${field.id}-warning`} className="text-xs font-semibold text-amber-600 flex items-center gap-1 mt-1 animate-fade-in">
+        <p id={`${field.id}-warning`} role="status" className="text-xs font-semibold text-amber-600 flex items-center gap-1 mt-1 animate-fade-in">
           <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
           <span>{resolveFriendlyValidationMessage(warning, t)}</span>
         </p>

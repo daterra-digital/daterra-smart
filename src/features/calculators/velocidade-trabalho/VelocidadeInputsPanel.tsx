@@ -1,6 +1,7 @@
 import React from 'react';
 import { Edit2, AlertCircle, Ruler, Clock } from 'lucide-react';
 import { DidacticHelp } from '../../concentracao/DidacticHelp';
+import { useLanguage } from '../../../context/LanguageContext';
 
 interface VelocidadeInputsPanelProps {
   distanciaMeters: number;
@@ -17,20 +18,21 @@ export const VelocidadeInputsPanel: React.FC<VelocidadeInputsPanelProps> = ({
   onSelectPresetDistancia,
   onSelectPresetTempo
 }) => {
+  const { t } = useLanguage();
   const distanciaPresets = [50, 100, 200, 300];
   const tempoPresets = [30, 45, 60, 90];
 
   return (
     <section
-      aria-label="Valores introduzidos para o cálculo"
+      aria-label={t('velocidadeReal.inputs.title', 'Valores introduzidos para o cálculo')}
       className="bg-white rounded-3xl p-5 sm:p-6 border border-slate-200 shadow-xs space-y-4"
     >
       <div className="flex items-center justify-between border-b border-slate-100 pb-3">
         <h2 className="text-sm font-black uppercase tracking-wider text-[#114037]">
-          Valores Introduzidos
+          {t('velocidadeReal.inputs.title', 'Valores Introduzidos')}
         </h2>
         <span className="text-[11px] text-slate-400 font-medium">
-          Toque para editar com teclado tátil
+          {t('velocidadeReal.inputs.tapToEdit', 'Toque para editar com teclado tátil')}
         </span>
       </div>
 
@@ -40,7 +42,9 @@ export const VelocidadeInputsPanel: React.FC<VelocidadeInputsPanelProps> = ({
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Ruler className="w-4 h-4 text-[#1D734B]" />
-              <span className="text-xs font-bold text-slate-800">Distância do percurso</span>
+              <span className="text-xs font-bold text-slate-800">
+                {t('velocidadeReal.inputs.distanceLabel', 'Distância do percurso')}
+              </span>
             </div>
             <DidacticHelp
               faqFile="VelocidadeRealFAQDistancia.md"
@@ -54,7 +58,7 @@ export const VelocidadeInputsPanel: React.FC<VelocidadeInputsPanelProps> = ({
           <button
             type="button"
             onClick={() => onOpenKeypad('distancia')}
-            aria-label={`Editar distância do percurso: ${distanciaMeters} metros`}
+            aria-label={t('velocidadeReal.inputs.distanceEditAria', 'Editar distância do percurso: {{distance}} metros', { distance: distanciaMeters })}
             className="w-full min-h-[48px] bg-white border border-slate-200 rounded-xl px-4 py-2.5 flex items-center justify-between hover:border-[#3CA64C] transition-all cursor-pointer shadow-2xs touch-target group"
           >
             <div className="flex items-baseline gap-1.5 font-mono">
@@ -70,7 +74,9 @@ export const VelocidadeInputsPanel: React.FC<VelocidadeInputsPanelProps> = ({
 
           {/* Atalhos Rápidos de Distância */}
           <div className="flex items-center gap-1.5 flex-wrap pt-1">
-            <span className="text-[10px] uppercase font-bold text-slate-400 mr-1">Atalhos:</span>
+            <span className="text-[10px] uppercase font-bold text-slate-400 mr-1">
+              {t('velocidadeReal.inputs.shortcuts', 'Atalhos:')}
+            </span>
             {distanciaPresets.map((val) => (
               <button
                 key={val}
@@ -90,7 +96,7 @@ export const VelocidadeInputsPanel: React.FC<VelocidadeInputsPanelProps> = ({
           {distanciaMeters < 100 && (
             <div className="text-[11px] text-amber-800 bg-amber-50 p-2 rounded-lg border border-amber-200 flex items-center gap-1.5 font-medium">
               <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-              <span>Para maior rigor, recomenda-se percurso ≥ 100 m.</span>
+              <span>{t('velocidadeReal.inputs.distanceWarning', 'Para maior rigor, recomenda-se percurso ≥ 100 m.')}</span>
             </div>
           )}
         </div>
@@ -100,7 +106,9 @@ export const VelocidadeInputsPanel: React.FC<VelocidadeInputsPanelProps> = ({
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Clock className="w-4 h-4 text-[#1D734B]" />
-              <span className="text-xs font-bold text-slate-800">Tempo do percurso</span>
+              <span className="text-xs font-bold text-slate-800">
+                {t('velocidadeReal.inputs.timeLabel', 'Tempo do percurso')}
+              </span>
             </div>
             <DidacticHelp
               faqFile="VelocidadeRealFAQTempo.md"
@@ -114,7 +122,7 @@ export const VelocidadeInputsPanel: React.FC<VelocidadeInputsPanelProps> = ({
           <button
             type="button"
             onClick={() => onOpenKeypad('tempo')}
-            aria-label={`Editar tempo cronometrado: ${tempoSeconds} segundos`}
+            aria-label={t('velocidadeReal.inputs.timeEditAria', 'Editar tempo cronometrado: {{time}} segundos', { time: tempoSeconds })}
             className="w-full min-h-[48px] bg-white border border-slate-200 rounded-xl px-4 py-2.5 flex items-center justify-between hover:border-[#3CA64C] transition-all cursor-pointer shadow-2xs touch-target group"
           >
             <div className="flex items-baseline gap-1.5 font-mono">
@@ -130,7 +138,9 @@ export const VelocidadeInputsPanel: React.FC<VelocidadeInputsPanelProps> = ({
 
           {/* Atalhos Rápidos de Tempo */}
           <div className="flex items-center gap-1.5 flex-wrap pt-1">
-            <span className="text-[10px] uppercase font-bold text-slate-400 mr-1">Atalhos:</span>
+            <span className="text-[10px] uppercase font-bold text-slate-400 mr-1">
+              {t('velocidadeReal.inputs.shortcuts', 'Atalhos:')}
+            </span>
             {tempoPresets.map((val) => (
               <button
                 key={val}
@@ -150,7 +160,7 @@ export const VelocidadeInputsPanel: React.FC<VelocidadeInputsPanelProps> = ({
           {tempoSeconds < 20 && (
             <div className="text-[11px] text-amber-800 bg-amber-50 p-2 rounded-lg border border-amber-200 flex items-center gap-1.5 font-medium">
               <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-              <span>Tempo muito curto pode reduzir a precisão da medição.</span>
+              <span>{t('velocidadeReal.inputs.timeWarning', 'Tempo muito curto pode reduzir a precisão da medição.')}</span>
             </div>
           )}
         </div>

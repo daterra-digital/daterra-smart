@@ -36,7 +36,7 @@ export const BottomNavigationBar: React.FC = () => {
   return (
     <nav
       role="navigation"
-      aria-label="Navegação móvel principal"
+      aria-label={t('nav.mobileAriaLabel', 'Navegação móvel principal')}
       className="fixed bottom-0 left-0 right-0 z-30 md:hidden bg-white/95 backdrop-blur-md border-t border-slate-200/80 shadow-[0_-4px_20px_rgba(0,0,0,0.06)]"
       style={{
         paddingBottom: 'var(--bottom-safe-area, env(safe-area-inset-bottom, 0px))'

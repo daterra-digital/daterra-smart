@@ -1,6 +1,7 @@
 import React from 'react';
 import { Trees, Droplets, Info } from 'lucide-react';
 import type { TrvCalculationResult } from './trvDataMapper';
+import { useLanguage } from '../../context/LanguageContext';
 
 interface TrvResultCardProps {
   trvResult: TrvCalculationResult;
@@ -15,26 +16,40 @@ export const TrvResultCard: React.FC<TrvResultCardProps> = ({
   larguraCopa,
   distanciaEntrelinhas
 }) => {
+  const { t, language } = useLanguage();
+  const locale = language === 'en-GB' ? 'en-GB' : 'pt-PT';
   const { volume_copa, caldaReferenciaLHa, caldaMinLHa, caldaMaxLHa, isValid } = trvResult;
 
   const getCanopyClassification = () => {
     if (!isValid || volume_copa <= 0) {
-      return { label: 'Aguardando valores válidos', color: 'bg-slate-800 text-slate-300' };
+      return {
+        label: t('volumeCopa.classifications.awaiting', 'Aguardando valores válidos'),
+        color: 'bg-slate-800 text-slate-300'
+      };
     }
     if (volume_copa < 6000) {
-      return { label: 'Copa Baixa / Vinha Compacta', color: 'bg-emerald-950/60 text-emerald-200 border-emerald-700/80' };
+      return {
+        label: t('volumeCopa.classifications.low', 'Copa Baixa / Vinha Compacta'),
+        color: 'bg-emerald-950/60 text-emerald-200 border-emerald-700/80'
+      };
     }
     if (volume_copa <= 12000) {
-      return { label: 'Copa Média / Pomar Padrão', color: 'bg-teal-950/60 text-teal-200 border-teal-700/80' };
+      return {
+        label: t('volumeCopa.classifications.medium', 'Copa Média / Pomar Padrão'),
+        color: 'bg-teal-950/60 text-teal-200 border-teal-700/80'
+      };
     }
-    return { label: 'Copa Grande / Pomar Vigoroso', color: 'bg-amber-950/60 text-amber-200 border-amber-800/80' };
+    return {
+      label: t('volumeCopa.classifications.high', 'Copa Grande / Pomar Vigoroso'),
+      color: 'bg-amber-950/60 text-amber-200 border-amber-800/80'
+    };
   };
 
   const status = getCanopyClassification();
 
   return (
     <section
-      aria-label="Resultado do volume de copa calculado"
+      aria-label={t('volumeCopa.resultBadge', 'Resultado do volume de copa calculado')}
       className="bg-[#114037] text-white rounded-3xl p-5 sm:p-7 shadow-xl border border-[#1D734B] space-y-4"
     >
       <div className="flex items-center justify-between gap-2 border-b border-white/10 pb-3">
@@ -44,10 +59,10 @@ export const TrvResultCard: React.FC<TrvResultCardProps> = ({
           </div>
           <div>
             <span className="text-[10px] uppercase font-black tracking-widest text-[#3AAA35] block">
-              Resultado Oficial
+              {t('volumeCopa.resultBadge', 'Resultado Oficial')}
             </span>
             <span className="text-xs text-slate-200 font-semibold">
-              Tree Row Volume (TRV)
+              {t('volumeCopa.results.trv', 'Tree Row Volume (TRV)')}
             </span>
           </div>
         </div>
@@ -61,26 +76,32 @@ export const TrvResultCard: React.FC<TrvResultCardProps> = ({
         <div>
           <div className="flex items-baseline gap-2">
             <span className="font-mono text-4xl sm:text-5xl font-black tracking-tight text-white">
-              {isValid ? volume_copa.toLocaleString('pt-PT', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) : '--'}
+              {isValid ? volume_copa.toLocaleString(locale, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) : '--'}
             </span>
-            <span className="text-xl sm:text-2xl font-bold text-[#3AAA35]">m³ TRV/ha</span>
+            <span className="text-xl sm:text-2xl font-bold text-[#3AAA35]">
+              {t('volumeCopa.results.trvUnit', 'm³ TRV/ha')}
+            </span>
           </div>
           <p className="text-xs text-slate-300 font-medium mt-1">
-            Volume tridimensional de vegetação foliar por hectare
+            {t('volumeCopa.volumeNote', 'Volume tridimensional de vegetação foliar por hectare')}
           </p>
         </div>
 
-        {/* Estimativa de Calda de Referência (EPPO / DGAV) */}
+        {/* Estimativa de Calda de Referência */}
         <div className="bg-emerald-950/60 border border-emerald-700/80 rounded-2xl p-3 sm:px-4 space-y-1">
           <div className="flex items-center gap-1.5 text-emerald-200 text-xs font-bold">
             <Droplets className="w-4 h-4 text-[#3AAA35] shrink-0" />
-            <span>Calda Sugerida de Referência</span>
+            <span>{t('volumeCopa.referenceVolume', 'Calda Sugerida de Referência')}</span>
           </div>
           <div className="text-base font-mono font-black text-white">
             {isValid ? `~ ${caldaReferenciaLHa} L/ha` : '--'}
           </div>
           <p className="text-[10px] text-emerald-300/80 leading-tight">
-            Faixa operacional: {isValid ? `${caldaMinLHa} a ${caldaMaxLHa} L/ha (0,04 a 0,07 L/m³)` : '--'}
+            {isValid
+              ? `${t('volumeCopa.operationalRange', 'Faixa operacional: {{range}} (0,04 a 0,07 L/m³)', {
+                  range: `${caldaMinLHa} a ${caldaMaxLHa} L/ha`
+                })}`
+              : '--'}
           </p>
         </div>
       </div>

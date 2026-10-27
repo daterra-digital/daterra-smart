@@ -28,7 +28,7 @@ export const CalibracaoMetodoSelector: React.FC<CalibracaoMetodoSelectorProps> =
           {t('calibracaoPulverizador.chooseDoseExpressionMethod', 'Escolha o método de expressão de dose')}
         </h2>
         <span className="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider">
-          EPPO PP 1/239
+          {t('common.calibration', 'Calibração')}
         </span>
       </div>
 
@@ -58,7 +58,7 @@ export const CalibracaoMetodoSelector: React.FC<CalibracaoMetodoSelectorProps> =
             <span className="text-sm sm:text-base font-black tracking-tight">LWA</span>
             {selectedMethod === 'lwa' && (
               <span className="text-[9.5px] font-extrabold bg-[#3CA64C]/25 text-[#73d181] px-1.5 py-0.5 rounded">
-                Ativo
+                {t('common.active', 'Ativo')}
               </span>
             )}
           </div>
@@ -89,7 +89,7 @@ export const CalibracaoMetodoSelector: React.FC<CalibracaoMetodoSelectorProps> =
             <span className="text-sm sm:text-base font-black tracking-tight">TRV</span>
             {selectedMethod === 'trv' && (
               <span className="text-[9.5px] font-extrabold bg-[#3CA64C]/25 text-[#73d181] px-1.5 py-0.5 rounded">
-                Ativo
+                {t('common.active', 'Ativo')}
               </span>
             )}
           </div>

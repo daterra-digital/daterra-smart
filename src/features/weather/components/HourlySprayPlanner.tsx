@@ -104,7 +104,7 @@ export const HourlySprayPlanner: React.FC<HourlySprayPlannerProps> = ({ hourly }
           </span>
         </div>
         <span className="text-emerald-700 font-bold text-[11px] self-end sm:self-auto">
-          Normas DGAV / EPPO
+          Parâmetros de Pulverização
         </span>
       </div>
     </div>

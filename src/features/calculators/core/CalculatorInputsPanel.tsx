@@ -16,6 +16,7 @@ import { Info, Sprout, Trees } from 'lucide-react';
 import type { CalculatorFieldDefinition, CalculatorModeDefinition } from './types.ts';
 import { CalculatorInputField } from './CalculatorInputField.tsx';
 import { DidacticHelp, type FAQFileType } from '../../concentracao/DidacticHelp.tsx';
+import { useTranslation } from '../../../context/LanguageContext.tsx';
 
 export interface CalculatorInputsPanelProps {
   /** Título da secção de entradas (ex: 'Calculadora de Dose') */
@@ -64,6 +65,7 @@ export const CalculatorInputsPanel: React.FC<CalculatorInputsPanelProps> = ({
   warnings = {},
   importedNotice
 }) => {
+  const { t } = useTranslation();
   // Filtragem e ordenação dinâmica dos campos com base no modo ativo
   const visibleFields = useMemo(() => {
     if (!modes || !activeModeId) return fields;
@@ -98,7 +100,7 @@ export const CalculatorInputsPanel: React.FC<CalculatorInputsPanelProps> = ({
         {generalHelpFile && (
           <DidacticHelp
             faqFile={generalHelpFile as FAQFileType}
-            buttonLabel="Ajuda"
+            buttonLabel={t('common.help', 'Ajuda')}
           />
         )}
       </div>

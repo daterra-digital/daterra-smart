@@ -55,13 +55,13 @@ export const InspecaoGuideModal: React.FC<InspecaoGuideModalProps> = ({
             </div>
             <div className="min-w-0">
               <span className="text-[10px] font-black uppercase tracking-wider text-[#3CA64C] block truncate">
-                Guia Oficial • DGAV / EN ISO 16122
+                Guia Oficial • EN ISO 16122
               </span>
               <h2
                 id="inspecao-guide-title"
                 className="text-sm sm:text-base font-black text-[#114037] dark:text-emerald-300 leading-tight truncate"
               >
-                Microlearning & Enquadramento Técnico
+                Guia & Enquadramento Técnico
               </h2>
             </div>
           </div>

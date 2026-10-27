@@ -1,24 +1,17 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   Trees,
-  Info,
   ChevronDown,
   ChevronUp,
   ArrowRight,
-  Check,
-  Square,
-  Circle,
-  Triangle
+  Check
 } from 'lucide-react';
 import type { CropReferenceType } from './types';
 import { formatEppoNum } from './calculations';
 import { EppoNumericField } from './EppoNumericField';
-
-const SHAPE_FACTOR_OPTIONS = [
-  { value: 1.0, title: 'Retangular', subtitle: 'SF 1.00', Icon: Square },
-  { value: 0.85, title: 'Globular', subtitle: 'SF 0.85', Icon: Circle },
-  { value: 0.75, title: 'Cónica', subtitle: 'SF 0.75', Icon: Triangle }
-];
+import { ShapeFactorSelector } from './ShapeFactorSelector';
+import { CanopyConceptBadge } from './CanopyConceptBadge';
+import { useLanguage } from '../../context/LanguageContext';
 
 export interface CanopyGeometryCardProps {
   isOpen: boolean;
@@ -55,13 +48,21 @@ export const CanopyGeometryCard: React.FC<CanopyGeometryCardProps> = ({
   onChangeShapeFactor,
   onChangeCropReference
 }) => {
-  const [showIndexTooltip, setShowIndexTooltip] = useState<boolean>(false);
+  const { t } = useLanguage();
   const isWallCrop = cropReference === 'vinha';
-  const cropLabel = isWallCrop ? 'Vinha | Sebe' : 'Pomar | Fruteiras';
+  const cropLabel = isWallCrop
+    ? t('ajusteDose.cropVineHedge', 'Vinha | Sebe')
+    : t('ajusteDose.cropOrchardFruit', 'Pomar | Fruteiras');
 
   const heightTooltipText = isWallCrop
-    ? 'Utilize apenas a altura da faixa que vai efetivamente pulverizar (ex.: apenas a zona dos cachos), e não a altura total da sebe da vinha. O alvo é a copa que é tratada.'
-    : 'Utilize apenas a altura da faixa que vai efetivamente pulverizar (ex.: apenas a zona foliar ativa da árvore), e não a altura total da árvore. O alvo é a copa que é tratada.';
+    ? t(
+        'ajusteDose.heightTooltipVine',
+        'Utilize apenas a altura da faixa que vai efetivamente pulverizar (ex.: apenas a zona dos cachos), e não a altura total da sebe da vinha. O alvo é a copa que é tratada.'
+      )
+    : t(
+        'ajusteDose.heightTooltipOrchard',
+        'Utilize apenas a altura da faixa que vai efetivamente pulverizar (ex.: apenas a zona foliar ativa da árvore), e não a altura total da árvore. O alvo é a copa que é tratada.'
+      );
 
   return (
     <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden transition-all">
@@ -82,10 +83,10 @@ export const CanopyGeometryCard: React.FC<CanopyGeometryCardProps> = ({
           </div>
           <div className="min-w-0">
             <span className="text-[10px] font-black uppercase tracking-wider text-[#3CA64C] block">
-              Passo 1 de 3 • Geometria 3D
+              {t('ajusteDose.step1Tag', 'Passo 1 de 3 • Geometria 3D')}
             </span>
             <h2 className="text-sm sm:text-base font-black text-slate-900 truncate">
-              Geometria do Pomar / Vinha
+              {t('ajusteDose.step1Title', 'Geometria do Pomar / Vinha')}
             </h2>
           </div>
         </div>
@@ -100,7 +101,7 @@ export const CanopyGeometryCard: React.FC<CanopyGeometryCardProps> = ({
             </span>
           )}
           <span className="px-2.5 py-1 rounded-xl bg-slate-100 text-slate-700 text-xs font-bold flex items-center gap-1">
-            <span>{isOpen ? 'Ocultar' : 'Editar'}</span>
+            <span>{isOpen ? t('common.hide', 'Ocultar') : t('common.edit', 'Editar')}</span>
             {isOpen ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
           </span>
         </div>
@@ -120,7 +121,7 @@ export const CanopyGeometryCard: React.FC<CanopyGeometryCardProps> = ({
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              Vinha | Sebe (Método LWA)
+              {t('ajusteDose.cropVineLwaMethod', 'Vinha | Sebe (Método LWA)')}
             </button>
             <button
               type="button"
@@ -131,59 +132,21 @@ export const CanopyGeometryCard: React.FC<CanopyGeometryCardProps> = ({
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              Pomar | Fruteiras (Método TRV)
+              {t('ajusteDose.cropOrchardTrvMethod', 'Pomar | Fruteiras (Método TRV)')}
             </button>
           </div>
 
-          {/* 3. Badge com Tooltip (i) do Conceito EPPO */}
-          <div className="flex items-center justify-between gap-2 flex-wrap">
-            {isWallCrop ? (
-              <button
-                type="button"
-                onClick={() => setShowIndexTooltip((p) => !p)}
-                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-emerald-50 hover:bg-emerald-100 text-emerald-950 border border-emerald-200 text-xs font-mono font-black transition-colors cursor-pointer"
-              >
-                <span className="w-2 h-2 rounded-full bg-[#3CA64C]" />
-                <span>Parede Foliar (tLWA): {formatEppoNum(lwaM2Ha, 0)} m²/ha</span>
-                <Info className="w-3.5 h-3.5 text-emerald-700" />
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={() => setShowIndexTooltip((p) => !p)}
-                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-sky-50 hover:bg-sky-100 text-sky-950 border border-sky-200 text-xs font-mono font-black transition-colors cursor-pointer"
-              >
-                <span className="w-2 h-2 rounded-full bg-sky-500" />
-                <span>Volume de Copa (TRV): {formatEppoNum(trvM3Ha, 0)} m³/ha</span>
-                <Info className="w-3.5 h-3.5 text-sky-700" />
-              </button>
-            )}
-            <span className="text-[10px] font-semibold text-slate-400">
-              Toque em (i) para conceito EPPO
-            </span>
-          </div>
+          {/* 2. Badge com Tooltip (i) do Conceito EPPO */}
+          <CanopyConceptBadge
+            isWallCrop={isWallCrop}
+            lwaM2Ha={lwaM2Ha}
+            trvM3Ha={trvM3Ha}
+          />
 
-          {showIndexTooltip && (
-            <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 text-xs text-slate-700 leading-relaxed animate-fade-in">
-              {isWallCrop ? (
-                <p>
-                  LWA (Treated Leaf Wall Area): Em culturas em sebe (vinha e fruteiras), o alvo é a
-                  área vertical tratada dos dois lados da linha: (2 x h x 10000) / r. Referência
-                  EPPO: 10.000 m²/ha.
-                </p>
-              ) : (
-                <p>
-                  TRV (Tree Row Volume): Em pomares e fruteiras de copa globular, o alvo é o volume
-                  tridimensional da árvore: (h x w x SF x 10000) / r. Referência EPPO: 10.000 m³/ha.
-                </p>
-              )}
-            </div>
-          )}
-
-          {/* 2 & 4 & 6. Campos com DaterraKeypad ao Toque + Máx 5 Atalhos */}
+          {/* 3. Campos com DaterraKeypad ao Toque */}
           <div className="space-y-3">
             <EppoNumericField
-              label="Altura Tratada (h)"
+              label={t('ajusteDose.canopyHeightLabel', 'Altura Tratada (h)')}
               value={canopyHeightM}
               onChange={onChangeHeight}
               unit="m"
@@ -195,7 +158,7 @@ export const CanopyGeometryCard: React.FC<CanopyGeometryCardProps> = ({
 
             {!isWallCrop && (
               <EppoNumericField
-                label="Largura da Copa (w)"
+                label={t('ajusteDose.canopyWidthLabel', 'Largura da Copa (w)')}
                 value={canopyWidthM}
                 onChange={onChangeWidth}
                 unit="m"
@@ -206,7 +169,7 @@ export const CanopyGeometryCard: React.FC<CanopyGeometryCardProps> = ({
             )}
 
             <EppoNumericField
-              label="Distância Entrelinha (r)"
+              label={t('ajusteDose.rowSpacingLabel', 'Distância Entrelinha (r)')}
               value={rowSpacingM}
               onChange={onChangeRowSpacing}
               unit="m"
@@ -216,39 +179,19 @@ export const CanopyGeometryCard: React.FC<CanopyGeometryCardProps> = ({
             />
           </div>
 
-          {/* Seletor Visual de Fator de Forma (SF) a 100% da largura (Apenas Método TRV) */}
+          {/* Seletor Visual de Fator de Forma (SF) (Apenas Método TRV) */}
           {!isWallCrop && (
-            <div className="w-full space-y-2 pt-2 border-t border-slate-100">
-              <span className="text-[11px] font-black uppercase tracking-wider text-slate-600 block">
-                Formato da Copa • Fator de Forma (SF)
-              </span>
-              <div className="w-full grid grid-cols-3 gap-2">
-                {SHAPE_FACTOR_OPTIONS.map(({ value: sf, title, subtitle, Icon }) => {
-                  const isSelected = Math.abs(shapeFactor - sf) < 1e-6;
-                  return (
-                    <button
-                      key={sf}
-                      type="button"
-                      onClick={() => onChangeShapeFactor(sf)}
-                      className={`w-full flex flex-col items-center justify-center p-3 rounded-xl border transition-all cursor-pointer touch-target ${
-                        isSelected
-                          ? 'bg-emerald-900 text-white border-emerald-900 shadow-xs'
-                          : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100 hover:text-slate-900'
-                      }`}
-                    >
-                      <Icon className="w-6 h-6 mb-1" />
-                      <span className="text-sm font-semibold leading-tight">{title}</span>
-                      <span className="text-xs font-mono opacity-75 mt-0.5">{subtitle}</span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
+            <ShapeFactorSelector
+              shapeFactor={shapeFactor}
+              onChangeShapeFactor={onChangeShapeFactor}
+            />
           )}
 
           <div className="pt-2 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <span className="text-[11px] font-medium text-slate-400">
-              {isWallCrop ? 'Cultura em sebe • Método LWA' : 'Copa 3D • Método TRV'}
+              {isWallCrop
+                ? t('ajusteDose.wallSummaryTag', 'Cultura em sebe • Método LWA')
+                : t('ajusteDose.orchardSummaryTag', 'Copa 3D • Método TRV')}
             </span>
 
             <button
@@ -256,7 +199,7 @@ export const CanopyGeometryCard: React.FC<CanopyGeometryCardProps> = ({
               onClick={onNextStep}
               className="px-4 py-2.5 rounded-xl bg-[#114037] hover:bg-[#19584b] text-white text-xs font-extrabold flex items-center justify-center gap-2 transition-colors cursor-pointer"
             >
-              <span>Seguinte: Dados do Rótulo</span>
+              <span>{t('ajusteDose.nextStepLabel', 'Seguinte: Dados do Rótulo')}</span>
               <ArrowRight className="w-4 h-4 text-[#8ffa94]" />
             </button>
           </div>

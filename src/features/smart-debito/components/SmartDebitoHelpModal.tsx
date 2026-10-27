@@ -30,7 +30,7 @@ export const SmartDebitoHelpModal: React.FC<SmartDebitoHelpModalProps> = ({ isOp
             </div>
             <div>
               <h2 className="text-base font-extrabold tracking-tight">
-                Microlearning & Guia Técnico ISO 16122
+                Guia Técnico ISO 16122
               </h2>
               <p className="text-xs text-slate-300">
                 Normas ISO 16122-2 e ISO 16122-3 para Auditoria de Débitos

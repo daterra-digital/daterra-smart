@@ -452,8 +452,8 @@ export const ExplorationView: React.FC = () => {
                   <Sprout className="w-6 h-6" />
                 </div>
                 <div>
-                  <h2 className="text-fluid-subtitle font-black text-[#114037]">Perfil — Cultura (Cartão Cultura)</h2>
-                  <span className="text-xs text-slate-500 font-semibold block">Mapeamento da Parcela, Dados Técnicos e Geometria TRV</span>
+                  <h2 className="text-fluid-subtitle font-black text-[#114037]">{t('exploration.cropCardTitle', 'Perfil — Cultura (Cartão Cultura)')}</h2>
+                  <span className="text-xs text-slate-500 font-semibold block">{t('exploration.cropCardSubtitle', 'Mapeamento da Parcela, Dados Técnicos e Geometria TRV')}</span>
                 </div>
               </div>
 
@@ -462,7 +462,7 @@ export const ExplorationView: React.FC = () => {
                 type="button"
                 onClick={() => openMicro('perfil_cultura')}
                 className="px-3.5 min-h-[44px] bg-[#3CA64C]/10 hover:bg-[#3CA64C]/20 text-[#114037] font-extrabold text-xs rounded-xl transition-all flex items-center gap-1.5 touch-target"
-                title="Microlearning: Diretrizes de Cultura"
+                title="Guia: Diretrizes de Cultura"
               >
                 <Info className="w-4 h-4 text-[#3CA64C]" />
                 <span>Ajuda</span>
@@ -518,7 +518,7 @@ export const ExplorationView: React.FC = () => {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1.5">Área (ha)</label>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5">{t('exploration.areaHa', 'Área (ha)')}</label>
                     <input
                       type="text"
                       placeholder="ex: 4,5"
@@ -537,10 +537,10 @@ export const ExplorationView: React.FC = () => {
                 </h3>
                 <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1.5">Sistema de Condução</label>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5">{t('exploration.trainingSystem', 'Sistema de Condução')}</label>
                     <input
                       type="text"
-                      placeholder="ex: Cordão Monolateral"
+                      placeholder={t('exploration.trainingSystemPlaceholder', 'ex: Cordão Monolateral')}
                       value={cultSystem}
                       onChange={(e) => setCultSystem(e.target.value)}
                       className="w-full min-h-[48px] px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-semibold outline-none focus:border-[#3CA64C]"
@@ -559,7 +559,7 @@ export const ExplorationView: React.FC = () => {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1.5">Distância Entrelinha (m)</label>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5">{t('exploration.rowSpacingM', 'Distância Entrelinha (m)')}</label>
                     <input
                       type="text"
                       placeholder="ex: 2,2"
@@ -570,7 +570,7 @@ export const ExplorationView: React.FC = () => {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1.5">Estado Fenológico</label>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5">{t('exploration.growthStage', 'Estado Fenológico')}</label>
                     <select
                       value={cultPhenological}
                       onChange={(e) => setCultPhenological(e.target.value)}
@@ -578,10 +578,10 @@ export const ExplorationView: React.FC = () => {
                     >
                       <option value="Repouso vegetativo">Repouso vegetativo</option>
                       <option value="Abrolhamento">Abrolhamento</option>
-                      <option value="Floração">Floração</option>
+                      <option value="Floração">{t('exploration.stages.flowering', 'Floração')}</option>
                       <option value="Vingamento">Vingamento</option>
-                      <option value="Pinta / Maturação">Pinta / Maturação</option>
-                      <option value="Pós-colheita">Pós-colheita</option>
+                      <option value="Pinta / Maturação">{t('exploration.stages.veraison', 'Pinta / Maturação')}</option>
+                      <option value="Pós-colheita">{t('exploration.stages.postHarvest', 'Pós-colheita')}</option>
                     </select>
                   </div>
                 </div>
@@ -616,7 +616,7 @@ export const ExplorationView: React.FC = () => {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1.5">LAI (Índice Área Foliar)</label>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5">{t('exploration.laiIndex', 'LAI (Índice Área Foliar)')}</label>
                     <input
                       type="text"
                       placeholder="ex: 1,8"
@@ -709,7 +709,7 @@ export const ExplorationView: React.FC = () => {
                 </div>
                 <div>
                   <h2 className="text-fluid-subtitle font-black text-[#114037]">Perfil — Equipamentos (ISO 16122)</h2>
-                  <span className="text-xs text-slate-500 font-semibold block">Configuração por Acordeões Específicos da Exploração</span>
+                  <span className="text-xs text-slate-500 font-semibold block">{t('exploration.equipmentSectionsTitle', 'Configuração por Acordeões Específicos da Exploração')}</span>
                 </div>
               </div>
 
@@ -718,7 +718,7 @@ export const ExplorationView: React.FC = () => {
                 type="button"
                 onClick={() => openMicro('perfil_equipamento')}
                 className="px-3.5 min-h-[44px] bg-[#3CA64C]/10 hover:bg-[#3CA64C]/20 text-[#114037] font-extrabold text-xs rounded-xl transition-all flex items-center gap-1.5 touch-target"
-                title="Microlearning: Diretrizes de Equipamento"
+                title="Guia: Diretrizes de Equipamento"
               >
                 <Info className="w-4 h-4 text-[#3CA64C]" />
                 <span>Ajuda</span>
@@ -738,7 +738,7 @@ export const ExplorationView: React.FC = () => {
                 >
                   <span className="flex items-center gap-2">
                     <Wrench className="w-4 h-4 text-[#1D734B]" />
-                    <span>Identificação Principal</span>
+                    <span>{t('exploration.mainIdentification', 'Identificação Principal')}</span>
                   </span>
                   <ChevronDown className={`w-4 h-4 transition-transform ${accIdent ? 'rotate-180' : ''}`} />
                 </button>
@@ -747,7 +747,7 @@ export const ExplorationView: React.FC = () => {
                   <div className="p-5 bg-white space-y-4 animate-fade-in border-t border-slate-200">
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                       <div>
-                        <label className="block text-xs font-bold text-slate-700 mb-1.5">Nome (Referência)</label>
+                        <label className="block text-xs font-bold text-slate-700 mb-1.5">{t('exploration.nameRef', 'Nome (Referência)')}</label>
                         <input
                           type="text"
                           placeholder="ex: Atomizador Tomix 1000L"
@@ -802,7 +802,7 @@ export const ExplorationView: React.FC = () => {
 
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                       <div>
-                        <label className="block text-xs font-bold text-slate-700 mb-1.5">Nº Série</label>
+                        <label className="block text-xs font-bold text-slate-700 mb-1.5">{t('exploration.serialNumber', 'Nº Série')}</label>
                         <input
                           type="text"
                           placeholder="ex: SN-2024-991"
@@ -813,7 +813,7 @@ export const ExplorationView: React.FC = () => {
                       </div>
 
                       <div>
-                        <label className="block text-xs font-bold text-slate-700 mb-1.5">Ano Construção (Ano YYYY)</label>
+                        <label className="block text-xs font-bold text-slate-700 mb-1.5">{t('exploration.buildYear', 'Ano Construção (Ano YYYY)')}</label>
                         <input
                           type="text"
                           maxLength={4}
@@ -825,7 +825,7 @@ export const ExplorationView: React.FC = () => {
                       </div>
 
                       <div>
-                        <label className="block text-xs font-bold text-slate-700 mb-1.5">Capacidade depósito (L)</label>
+                        <label className="block text-xs font-bold text-slate-700 mb-1.5">{t('exploration.tankCapacityL', 'Capacidade depósito (L)')}</label>
                         <input
                           type="text"
                           placeholder="ex: 1000"
@@ -840,15 +840,15 @@ export const ExplorationView: React.FC = () => {
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
                       <label className="flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer">
                         <input type="checkbox" checked={eqHandWashingTank} onChange={(e) => setEqHandWashingTank(e.target.checked)} className="w-4 h-4 rounded accent-[#3CA64C]" />
-                        <span>Depósito lava-mãos</span>
+                        <span>{t('exploration.handWashTank', 'Depósito lava-mãos')}</span>
                       </label>
                       <label className="flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer">
                         <input type="checkbox" checked={eqCircuitRinse} onChange={(e) => setEqCircuitRinse(e.target.checked)} className="w-4 h-4 rounded accent-[#3CA64C]" />
-                        <span>Depósito lava-circuitos</span>
+                        <span>{t('exploration.circuitRinseTank', 'Depósito lava-circuitos')}</span>
                       </label>
                       <label className="flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer">
                         <input type="checkbox" checked={eqProductIncorporator} onChange={(e) => setEqProductIncorporator(e.target.checked)} className="w-4 h-4 rounded accent-[#3CA64C]" />
-                        <span>Depósito incorporador de produto</span>
+                        <span>{t('exploration.chemicalInductionTank', 'Depósito incorporador de produto')}</span>
                       </label>
                     </div>
 
@@ -957,8 +957,8 @@ export const ExplorationView: React.FC = () => {
                           className="w-full min-h-[48px] px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-semibold outline-none focus:border-[#3CA64C]"
                         >
                           <option value="Membrana">Membrana</option>
-                          <option value="Pistão">Pistão</option>
-                          <option value="Centrífuga">Centrífuga</option>
+                          <option value="Pistão">{t('exploration.pumpTypes.piston', 'Pistão')}</option>
+                          <option value="Centrífuga">{t('exploration.pumpTypes.centrifugal', 'Centrífuga')}</option>
                           <option value="Outro">Outro</option>
                         </select>
                       </div>
@@ -971,11 +971,11 @@ export const ExplorationView: React.FC = () => {
                       </label>
                       <label className="flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer">
                         <input type="checkbox" checked={eqSuctionFilter} onChange={(e) => setEqSuctionFilter(e.target.checked)} className="w-4 h-4 rounded accent-[#3CA64C]" />
-                        <span>Filtro aspiração</span>
+                        <span>{t('exploration.suctionFilter', 'Filtro aspiração')}</span>
                       </label>
                       <label className="flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer">
                         <input type="checkbox" checked={eqPressureFilter} onChange={(e) => setEqPressureFilter(e.target.checked)} className="w-4 h-4 rounded accent-[#3CA64C]" />
-                        <span>Filtro pressão</span>
+                        <span>{t('exploration.pressureFilter', 'Filtro pressão')}</span>
                       </label>
                       <label className="flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer">
                         <input type="checkbox" checked={eqLineFilters} onChange={(e) => setEqLineFilters(e.target.checked)} className="w-4 h-4 rounded accent-[#3CA64C]" />
@@ -997,7 +997,7 @@ export const ExplorationView: React.FC = () => {
                 >
                   <span className="flex items-center gap-2">
                     <Sliders className="w-4 h-4 text-[#1D734B]" />
-                    <span>Comandos e Regulação</span>
+                    <span>{t('exploration.controlsRegulation', 'Comandos e Regulação')}</span>
                   </span>
                   <ChevronDown className={`w-4 h-4 transition-transform ${accComandos ? 'rotate-180' : ''}`} />
                 </button>
@@ -1044,7 +1044,7 @@ export const ExplorationView: React.FC = () => {
                       </div>
 
                       <div>
-                        <label className="block text-xs font-bold text-slate-700 mb-1.5">Nº de Secções</label>
+                        <label className="block text-xs font-bold text-slate-700 mb-1.5">{t('exploration.boomSectionsCount', 'Nº de Secções')}</label>
                         <input
                           type="text"
                           placeholder="ex: 4"
@@ -1062,7 +1062,7 @@ export const ExplorationView: React.FC = () => {
                       </label>
                       <label className="flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer">
                         <input type="checkbox" checked={eqIsElectric} onChange={(e) => setEqIsElectric(e.target.checked)} className="w-4 h-4 rounded accent-[#3CA64C]" />
-                        <span>Elétrico</span>
+                        <span>{t('exploration.regTypes.electric', 'Elétrico')}</span>
                       </label>
                       <label className="flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer">
                         <input type="checkbox" checked={eqIsIsobus} onChange={(e) => setEqIsIsobus(e.target.checked)} className="w-4 h-4 rounded accent-[#3CA64C]" />
@@ -1070,7 +1070,7 @@ export const ExplorationView: React.FC = () => {
                       </label>
                       <label className="flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer">
                         <input type="checkbox" checked={eqIsAutomatic} onChange={(e) => setEqIsAutomatic(e.target.checked)} className="w-4 h-4 rounded accent-[#3CA64C]" />
-                        <span>Automático</span>
+                        <span>{t('exploration.regTypes.automatic', 'Automático')}</span>
                       </label>
                       <label className="flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer">
                         <input type="checkbox" checked={eqHasComputer} onChange={(e) => setEqHasComputer(e.target.checked)} className="w-4 h-4 rounded accent-[#3CA64C]" />
@@ -1092,7 +1092,7 @@ export const ExplorationView: React.FC = () => {
                 >
                   <span className="flex items-center gap-2">
                     <Gauge className="w-4 h-4 text-[#1D734B]" />
-                    <span>Manómetro</span>
+                    <span>{t('exploration.manometer', 'Manómetro')}</span>
                   </span>
                   <ChevronDown className={`w-4 h-4 transition-transform ${accManometro ? 'rotate-180' : ''}`} />
                 </button>
@@ -1101,15 +1101,15 @@ export const ExplorationView: React.FC = () => {
                   <div className="p-5 bg-white space-y-4 animate-fade-in border-t border-slate-200">
                     <div className="grid grid-cols-1 sm:grid-cols-5 gap-4">
                       <div>
-                        <label className="block text-xs font-bold text-slate-700 mb-1.5">Diâmetro manómetro (mm)</label>
+                        <label className="block text-xs font-bold text-slate-700 mb-1.5">{t('exploration.manometerDiameter', 'Diâmetro manómetro (mm)')}</label>
                         <input type="text" placeholder="ex: 63" value={eqManometerDiameter} onChange={(e) => setEqManometerDiameter(e.target.value)} className="w-full min-h-[48px] px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-semibold input-mono" />
                       </div>
                       <div>
-                        <label className="block text-xs font-bold text-slate-700 mb-1.5">Divisões escala (bar)</label>
+                        <label className="block text-xs font-bold text-slate-700 mb-1.5">{t('exploration.scaleDivisions', 'Divisões escala (bar)')}</label>
                         <input type="text" placeholder="ex: 0,2" value={eqManometerDivisions} onChange={(e) => setEqManometerDivisions(e.target.value)} className="w-full min-h-[48px] px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-semibold input-mono" />
                       </div>
                       <div>
-                        <label className="block text-xs font-bold text-slate-700 mb-1.5">Valor máximo escala (bar)</label>
+                        <label className="block text-xs font-bold text-slate-700 mb-1.5">{t('exploration.maxScaleValue', 'Valor máximo escala (bar)')}</label>
                         <input type="text" placeholder="ex: 25" value={eqManometerMaxValue} onChange={(e) => setEqManometerMaxValue(e.target.value)} className="w-full min-h-[48px] px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-semibold input-mono" />
                       </div>
                       <div>
@@ -1117,7 +1117,7 @@ export const ExplorationView: React.FC = () => {
                         <input type="text" placeholder="ex: 1,6" value={eqManometerErrorClass} onChange={(e) => setEqManometerErrorClass(e.target.value)} className="w-full min-h-[48px] px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-semibold input-mono" />
                       </div>
                       <div>
-                        <label className="block text-xs font-bold text-slate-700 mb-1.5">Pressão máxima (bar)</label>
+                        <label className="block text-xs font-bold text-slate-700 mb-1.5">{t('exploration.maxPressure', 'Pressão máxima (bar)')}</label>
                         <input type="text" placeholder="ex: 20" value={eqMaxPressure} onChange={(e) => setEqMaxPressure(e.target.value)} className="w-full min-h-[48px] px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-semibold input-mono" />
                       </div>
                     </div>
@@ -1136,7 +1136,7 @@ export const ExplorationView: React.FC = () => {
                 >
                   <span className="flex items-center gap-2">
                     <Layers className="w-4 h-4 text-[#1D734B]" />
-                    <span>Equipamento de Distribuição (Condicional)</span>
+                    <span>{t('exploration.distributionEquipment', 'Equipamento de Distribuição (Condicional)')}</span>
                   </span>
                   <ChevronDown className={`w-4 h-4 transition-transform ${accDistrib ? 'rotate-180' : ''}`} />
                 </button>
@@ -1155,10 +1155,10 @@ export const ExplorationView: React.FC = () => {
                         <option value="Barra horizontal">Barra horizontal</option>
                         <option value="Barra vertical">Barra vertical</option>
                         <option value="Ventilador">Ventilador</option>
-                        <option value="Pistola/Lança">Pistola/Lança</option>
-                        <option value="Pneumático">Pneumático</option>
-                        <option value="Canhão">Canhão</option>
-                        <option value="Painéis">Painéis</option>
+                        <option value="Pistola/Lança">{t('exploration.distTypes.lance', 'Pistola/Lança')}</option>
+                        <option value="Pneumático">{t('exploration.distTypes.pneumatic', 'Pneumático')}</option>
+                        <option value="Canhão">{t('exploration.distTypes.cannon', 'Canhão')}</option>
+                        <option value="Painéis">{t('exploration.distTypes.panels', 'Painéis')}</option>
                       </select>
                     </div>
 
@@ -1198,14 +1198,14 @@ export const ExplorationView: React.FC = () => {
                         <span className="text-xs font-black text-[#114037] block">Campos: Ventilador</span>
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                           <div>
-                            <label className="block text-xs font-bold text-slate-700 mb-1.5">Transmissão ventilador</label>
+                            <label className="block text-xs font-bold text-slate-700 mb-1.5">{t('exploration.fanTransmission', 'Transmissão ventilador')}</label>
                             <select value={eqFanTransmission} onChange={(e) => setEqFanTransmission(e.target.value)} className="w-full min-h-[48px] px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-semibold">
                               <option value="Correia">correia</option>
                               <option value="Cardan">cardan</option>
                             </select>
                           </div>
                           <div>
-                            <label className="block text-xs font-bold text-slate-700 mb-1.5">Diâmetro ventilador (mm)</label>
+                            <label className="block text-xs font-bold text-slate-700 mb-1.5">{t('exploration.fanDiameter', 'Diâmetro ventilador (mm)')}</label>
                             <input type="text" placeholder="ex: 800" value={eqFanDiameter} onChange={(e) => setEqFanDiameter(e.target.value)} className="w-full min-h-[48px] px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-semibold input-mono" />
                           </div>
                           <div>
@@ -1221,15 +1221,15 @@ export const ExplorationView: React.FC = () => {
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
                           <label className="flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer">
                             <input type="checkbox" checked={eqSuctionAirDeflector} onChange={(e) => setEqSuctionAirDeflector(e.target.checked)} className="w-4 h-4 rounded accent-[#3CA64C]" />
-                            <span>Defletor de ar de aspiração</span>
+                            <span>{t('exploration.intakeAirDeflector', 'Defletor de ar de aspiração')}</span>
                           </label>
                           <label className="flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer">
                             <input type="checkbox" checked={eqCompressionAirDeflector} onChange={(e) => setEqCompressionAirDeflector(e.target.checked)} className="w-4 h-4 rounded accent-[#3CA64C]" />
-                            <span>Defletor de ar de compressão</span>
+                            <span>{t('exploration.compressionAirDeflector', 'Defletor de ar de compressão')}</span>
                           </label>
                           <label className="flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer">
                             <input type="checkbox" checked={eqHeightCompressionAirDeflector} onChange={(e) => setEqHeightCompressionAirDeflector(e.target.checked)} className="w-4 h-4 rounded accent-[#3CA64C]" />
-                            <span>Defletor de ar de compressão em altura</span>
+                            <span>{t('exploration.heightAirDeflector', 'Defletor de ar de compressão em altura')}</span>
                           </label>
                         </div>
                       </div>
@@ -1238,10 +1238,10 @@ export const ExplorationView: React.FC = () => {
                     {/* SE PISTOLA / LANÇA */}
                     {eqDistributionType === 'Pistola/Lança' && (
                       <div className="bg-emerald-50/60 p-4 rounded-2xl border border-emerald-200 space-y-4 animate-fade-in">
-                        <span className="text-xs font-black text-[#114037] block">Campos: Pistola / Lança</span>
+                        <span className="text-xs font-black text-[#114037] block">{t('exploration.lanceFields', 'Campos: Pistola / Lança')}</span>
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                           <div>
-                            <label className="block text-xs font-bold text-slate-700 mb-1.5">Número de pistolas/lanças</label>
+                            <label className="block text-xs font-bold text-slate-700 mb-1.5">{t('exploration.lanceCount', 'Número de pistolas/lanças')}</label>
                             <input type="text" placeholder="ex: 2" value={eqLancesCount} onChange={(e) => setEqLancesCount(e.target.value)} className="w-full min-h-[48px] px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-semibold input-mono" />
                           </div>
                           <div>
@@ -1261,14 +1261,14 @@ export const ExplorationView: React.FC = () => {
                     {/* SE PNEUMÁTICO */}
                     {eqDistributionType === 'Pneumático' && (
                       <div className="bg-emerald-50/60 p-4 rounded-2xl border border-emerald-200 space-y-4 animate-fade-in">
-                        <span className="text-xs font-black text-[#114037] block">Campos: Pneumático</span>
+                        <span className="text-xs font-black text-[#114037] block">{t('exploration.pneumaticFields', 'Campos: Pneumático')}</span>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           <div>
-                            <label className="block text-xs font-bold text-slate-700 mb-1.5">Número de bocais pneumáticos</label>
+                            <label className="block text-xs font-bold text-slate-700 mb-1.5">{t('exploration.pneumaticNozzlesCount', 'Número de bocais pneumáticos')}</label>
                             <input type="text" placeholder="ex: 8" value={eqPneumaticNozzlesCount} onChange={(e) => setEqPneumaticNozzlesCount(e.target.value)} className="w-full min-h-[48px] px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-semibold input-mono" />
                           </div>
                           <div>
-                            <label className="block text-xs font-bold text-slate-700 mb-1.5">Número de bicos por bocal pneumático</label>
+                            <label className="block text-xs font-bold text-slate-700 mb-1.5">{t('exploration.nozzlesPerPneumaticOutlet', 'Número de bicos por bocal pneumático')}</label>
                             <input type="text" placeholder="ex: 2" value={eqNozzlesPerPneumaticHead} onChange={(e) => setEqNozzlesPerPneumaticHead(e.target.value)} className="w-full min-h-[48px] px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-semibold input-mono" />
                           </div>
                         </div>
@@ -1278,9 +1278,9 @@ export const ExplorationView: React.FC = () => {
                     {/* SE CANHÃO */}
                     {eqDistributionType === 'Canhão' && (
                       <div className="bg-emerald-50/60 p-4 rounded-2xl border border-emerald-200 space-y-4 animate-fade-in">
-                        <span className="text-xs font-black text-[#114037] block">Campos: Canhão</span>
+                        <span className="text-xs font-black text-[#114037] block">{t('exploration.cannonFields', 'Campos: Canhão')}</span>
                         <div className="w-full sm:w-1/2">
-                          <label className="block text-xs font-bold text-slate-700 mb-1.5">Número de agrupamento de bicos</label>
+                          <label className="block text-xs font-bold text-slate-700 mb-1.5">{t('exploration.nozzleClustersCount', 'Número de agrupamento de bicos')}</label>
                           <input type="text" placeholder="ex: 4" value={eqCannonNozzleGroupsCount} onChange={(e) => setEqCannonNozzleGroupsCount(e.target.value)} className="w-full min-h-[48px] px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-semibold input-mono" />
                         </div>
                       </div>
@@ -1289,14 +1289,14 @@ export const ExplorationView: React.FC = () => {
                     {/* SE PAINÉIS */}
                     {eqDistributionType === 'Painéis' && (
                       <div className="bg-emerald-50/60 p-4 rounded-2xl border border-emerald-200 space-y-4 animate-fade-in">
-                        <span className="text-xs font-black text-[#114037] block">Campos: Painéis</span>
+                        <span className="text-xs font-black text-[#114037] block">{t('exploration.panelsFields', 'Campos: Painéis')}</span>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           <div>
-                            <label className="block text-xs font-bold text-slate-700 mb-1.5">Número de painéis</label>
+                            <label className="block text-xs font-bold text-slate-700 mb-1.5">{t('exploration.panelsCount', 'Número de painéis')}</label>
                             <input type="text" placeholder="ex: 4" value={eqPanelsCount} onChange={(e) => setEqPanelsCount(e.target.value)} className="w-full min-h-[48px] px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-semibold input-mono" />
                           </div>
                           <div>
-                            <label className="block text-xs font-bold text-slate-700 mb-1.5">Número de linhas tratadas simultaneamente</label>
+                            <label className="block text-xs font-bold text-slate-700 mb-1.5">{t('exploration.treatedRowsCount', 'Número de linhas tratadas simultaneamente')}</label>
                             <input type="text" placeholder="ex: 2" value={eqSimultaneousRowsCount} onChange={(e) => setEqSimultaneousRowsCount(e.target.value)} className="w-full min-h-[48px] px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-semibold input-mono" />
                           </div>
                         </div>
@@ -1317,7 +1317,7 @@ export const ExplorationView: React.FC = () => {
                 >
                   <span className="flex items-center gap-2">
                     <Info className="w-4 h-4 text-[#1D734B]" />
-                    <span>Outros e Observações</span>
+                    <span>{t('exploration.otherObservations', 'Outros e Observações')}</span>
                   </span>
                   <ChevronDown className={`w-4 h-4 transition-transform ${accOutros ? 'rotate-180' : ''}`} />
                 </button>
@@ -1326,7 +1326,7 @@ export const ExplorationView: React.FC = () => {
                   <div className="p-5 bg-white space-y-4 animate-fade-in border-t border-slate-200">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-xs font-bold text-slate-700 mb-1.5">Data da Inspeção (Notificações)</label>
+                        <label className="block text-xs font-bold text-slate-700 mb-1.5">{t('exploration.inspectionDate', 'Data da Inspeção (Notificações)')}</label>
                         <input
                           type="date"
                           value={eqInspectionDate}
@@ -1336,7 +1336,7 @@ export const ExplorationView: React.FC = () => {
                       </div>
 
                       <div>
-                        <label className="block text-xs font-bold text-slate-700 mb-1.5">Data da Calibração (Notificações)</label>
+                        <label className="block text-xs font-bold text-slate-700 mb-1.5">{t('exploration.calibrationDate', 'Data da Calibração (Notificações)')}</label>
                         <input
                           type="date"
                           value={eqCalibrationDate}
@@ -1347,10 +1347,10 @@ export const ExplorationView: React.FC = () => {
                     </div>
 
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-1.5">Notas / Observações</label>
+                      <label className="block text-xs font-bold text-slate-700 mb-1.5">{t('exploration.notesObservations', 'Notas / Observações')}</label>
                       <textarea
                         rows={3}
-                        placeholder="Observações técnicas sobre manutenção ou inspeção..."
+                        placeholder={t('exploration.notesPlaceholder', 'Observações técnicas sobre manutenção ou inspeção...')}
                         value={eqNotes}
                         onChange={(e) => setEqNotes(e.target.value)}
                         className="w-full p-3 bg-slate-50 border border-slate-300 rounded-xl text-xs outline-none focus:border-[#3CA64C]"
@@ -1419,8 +1419,8 @@ export const ExplorationView: React.FC = () => {
                   <Gauge className="w-6 h-6" />
                 </div>
                 <div>
-                  <h2 className="text-fluid-subtitle font-black text-[#114037]">Perfil — Bicos de Pulverização (ISO 10625)</h2>
-                  <span className="text-xs text-slate-500 font-semibold block">Seleção de Fabricante, Modelo Reativo, Cor ISO e Débito Nominal</span>
+                  <h2 className="text-fluid-subtitle font-black text-[#114037]">{t('exploration.nozzlesCardTitle', 'Perfil — Bicos de Pulverização (ISO 10625)')}</h2>
+                  <span className="text-xs text-slate-500 font-semibold block">{t('exploration.nozzlesCardSubtitle', 'Seleção de Fabricante, Modelo Reativo, Cor ISO e Débito Nominal')}</span>
                 </div>
               </div>
 
@@ -1429,7 +1429,7 @@ export const ExplorationView: React.FC = () => {
                 type="button"
                 onClick={() => openMicro('perfil_bicos')}
                 className="px-3.5 min-h-[44px] bg-[#3CA64C]/10 hover:bg-[#3CA64C]/20 text-[#114037] font-extrabold text-xs rounded-xl transition-all flex items-center gap-1.5 touch-target"
-                title="Microlearning: Diretrizes de Bicos"
+                title="Guia: Diretrizes de Bicos"
               >
                 <Info className="w-4 h-4 text-[#3CA64C]" />
                 <span>Ajuda</span>
@@ -1490,7 +1490,7 @@ export const ExplorationView: React.FC = () => {
 
                 <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1.5">Cor (Código ISO 10625)</label>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5">{t('exploration.isoColorCode', 'Cor (Código ISO 10625)')}</label>
                     <select
                       value={nozzleColor}
                       onChange={(e) => setNozzleColor(e.target.value)}
@@ -1511,14 +1511,14 @@ export const ExplorationView: React.FC = () => {
                     >
                       <option value="Cone Oco">Cone Oco</option>
                       <option value="Cone Cheio">Cone Cheio</option>
-                      <option value="Injeção de Ar">Injeção de Ar (Anti-deriva)</option>
+                      <option value="Injeção de Ar">{t('exploration.airInjection', 'Injeção de Ar (Anti-deriva)')}</option>
                       <option value="Leque Standard">Leque Standard</option>
                       <option value="Defletor">Defletor</option>
                     </select>
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1.5">Pressão de Trabalho (bar)</label>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5">{t('exploration.workingPressureBar', 'Pressão de Trabalho (bar)')}</label>
                     <input
                       type="text"
                       placeholder="ex: 10,0"
@@ -1529,7 +1529,7 @@ export const ExplorationView: React.FC = () => {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1.5">Débito Nominal (L/min)</label>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5">{t('exploration.nominalFlowRate', 'Débito Nominal (L/min)')}</label>
                     <input
                       type="text"
                       placeholder="ex: 1,03"
@@ -1592,8 +1592,8 @@ export const ExplorationView: React.FC = () => {
                   <ShieldCheck className="w-6 h-6" />
                 </div>
                 <div>
-                  <h2 className="text-fluid-subtitle font-black text-[#114037]">Perfil — Calibração & Ensaio em Branco</h2>
-                  <span className="text-xs text-slate-500 font-semibold block">Medição de Débito e Cálculo do Volume de Calda (L/ha)</span>
+                  <h2 className="text-fluid-subtitle font-black text-[#114037]">{t('exploration.calibrationCardTitle', 'Perfil — Calibração & Ensaio em Branco')}</h2>
+                  <span className="text-xs text-slate-500 font-semibold block">{t('exploration.calibrationCardSubtitle', 'Medição de Débito e Cálculo do Volume de Calda (L/ha)')}</span>
                 </div>
               </div>
 
@@ -1602,7 +1602,7 @@ export const ExplorationView: React.FC = () => {
                 type="button"
                 onClick={() => openMicro('perfil_calibracao')}
                 className="px-3.5 min-h-[44px] bg-[#3CA64C]/10 hover:bg-[#3CA64C]/20 text-[#114037] font-extrabold text-xs rounded-xl transition-all flex items-center gap-1.5 touch-target"
-                title="Microlearning: Diretrizes de Calibração"
+                title={t('exploration.guideCalibration', 'Guia: Diretrizes de Calibração')}
               >
                 <Info className="w-4 h-4 text-[#3CA64C]" />
                 <span>Ajuda</span>
@@ -1658,7 +1658,7 @@ export const ExplorationView: React.FC = () => {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1.5">Pressão (bar)</label>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5">{t('exploration.pressureBar', 'Pressão (bar)')}</label>
                     <input
                       type="text"
                       placeholder="ex: 10,0"
@@ -1680,7 +1680,7 @@ export const ExplorationView: React.FC = () => {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1.5">Débito Total (L/min)</label>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5">{t('exploration.totalFlowRate', 'Débito Total (L/min)')}</label>
                     <input
                       type="text"
                       placeholder="ex: 12,36"
@@ -1719,13 +1719,13 @@ export const ExplorationView: React.FC = () => {
                 className="w-full min-h-[48px] bg-[#3CA64C] hover:bg-[#3AAA35] text-white font-black text-xs rounded-2xl shadow-md flex items-center justify-center gap-2 transition-all active:scale-95 touch-target"
               >
                 <Plus className="w-4 h-4 text-white" />
-                <span>Gravar Ficha de Calibração no IndexedDB</span>
+                <span>{t('exploration.saveCalibrationIndexedDb', 'Gravar Ficha de Calibração no IndexedDB')}</span>
               </button>
             </form>
 
             {/* Listagem de Calibrações Gravadas */}
             <div className="pt-6 border-t border-slate-100 space-y-4">
-              <h4 className="text-xs font-black uppercase tracking-wider text-[#114037]">Fichas de Calibração Registadas</h4>
+              <h4 className="text-xs font-black uppercase tracking-wider text-[#114037]">{t('exploration.registeredCalibrations', 'Fichas de Calibração Registadas')}</h4>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {calibrations?.map(cl => (
                   <div key={cl.id} className="p-4 bg-slate-50 border border-slate-200 rounded-2xl flex items-center justify-between shadow-xs">
@@ -1740,7 +1740,7 @@ export const ExplorationView: React.FC = () => {
                     <button
                       onClick={() => cl.id && db.profiles_calibrations.delete(cl.id)}
                       className="p-2 text-rose-600 hover:bg-rose-100 rounded-xl transition-colors"
-                      title="Eliminar calibração"
+                      title={t('exploration.deleteCalibration', 'Eliminar calibração')}
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>

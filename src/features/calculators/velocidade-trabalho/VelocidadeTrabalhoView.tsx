@@ -16,12 +16,14 @@ import { enqueueMutation } from '../../../services/outbox/outboxService';
 import { generateIdempotencyKey } from '../../../services/integrations/centralgestMapper';
 import { DaterraKeypadModal } from '../../../components/DaterraKeypad';
 import { buildVelocidadeStructuredValues } from './velocidadeDataMapper';
+import { useLanguage } from '../../../context/LanguageContext';
 import { VelocidadeHeader } from './VelocidadeHeader';
 import { VelocidadeResultCard } from './VelocidadeResultCard';
 import { VelocidadeInputsPanel } from './VelocidadeInputsPanel';
 import { VelocidadeFooterBar } from './VelocidadeFooterBar';
 
 export const VelocidadeTrabalhoView: React.FC = () => {
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const [distanciaMeters, setDistanciaMeters] = useState<number>(100);
   const [tempoSeconds, setTempoSeconds] = useState<number>(45);
@@ -58,7 +60,7 @@ export const VelocidadeTrabalhoView: React.FC = () => {
   const handleSaveToHistory = async () => {
     try {
       if (!speedResult.isValid) {
-        setToastMessage('Insira valores válidos de distância e tempo antes de gravar.');
+        setToastMessage(t('velocidadeReal.actions.invalidInputs', 'Insira valores válidos de distância e tempo antes de gravar.'));
         setTimeout(() => setToastMessage(null), 3000);
         return;
       }
@@ -92,11 +94,11 @@ export const VelocidadeTrabalhoView: React.FC = () => {
         }
       });
 
-      setToastMessage('Medição gravada e enfileirada na Outbox offline!');
+      setToastMessage(t('velocidadeReal.actions.saveSuccess', 'Medição gravada e enfileirada na Outbox offline!'));
       setTimeout(() => setToastMessage(null), 3500);
     } catch (err) {
       console.error('Erro ao gravar velocidade:', err);
-      setToastMessage('Erro ao gravar a medição.');
+      setToastMessage(t('velocidadeReal.actions.saveError', 'Erro ao gravar a medição.'));
       setTimeout(() => setToastMessage(null), 3000);
     }
   };

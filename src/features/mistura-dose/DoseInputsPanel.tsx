@@ -1,5 +1,6 @@
 import React from 'react';
 import { Pencil, Droplet, Layers } from 'lucide-react';
+import { useTranslation } from '../../context/LanguageContext';
 import type { DoseUnitMode } from './doseDataMapper';
 import { DidacticHelp, type FAQFileType } from '../concentracao/DidacticHelp';
 
@@ -50,6 +51,7 @@ export const DoseInputsPanel: React.FC<DoseInputsPanelProps> = ({
   onSelectPresetDose,
   onSelectPresetVolCalda
 }) => {
+  const { t } = useTranslation();
   const isSolid = unitMode === 'solid';
   const doseUnit = isSolid ? 'kg/ha' : 'L/ha';
 
@@ -73,7 +75,7 @@ export const DoseInputsPanel: React.FC<DoseInputsPanelProps> = ({
         <button
           type="button"
           onClick={() => onOpenKeypad(field)}
-          aria-label={`Editar ${label}`}
+          aria-label={t('common.editField', 'Editar {{label}}', { label })}
           className="min-h-[48px] px-3 py-1.5 bg-white border border-slate-300 hover:border-emerald-500 rounded-xl flex items-center gap-2 shadow-xs cursor-pointer touch-target group"
         >
           <span className="font-mono text-base font-black text-slate-800 group-hover:text-emerald-700">{valueStr}</span>
@@ -89,7 +91,7 @@ export const DoseInputsPanel: React.FC<DoseInputsPanelProps> = ({
       {/* Seletor de Formulação: Líquida vs Sólida */}
       <div>
         <label className="text-[11px] font-black uppercase tracking-wider text-slate-500 mb-2 block">
-          Formulação do Produto Comercial
+          {t('calculators.dose.productFormulation', 'Formulação do Produto Comercial')}
         </label>
         <div className="grid grid-cols-2 gap-2 bg-slate-100 p-1 rounded-2xl border border-slate-200">
           <button
@@ -100,7 +102,7 @@ export const DoseInputsPanel: React.FC<DoseInputsPanelProps> = ({
             }`}
           >
             <Droplet className="w-4 h-4 shrink-0" />
-            <span>Produto Líquido (L/ha)</span>
+            <span>{t('calculators.dose.liquidProduct', 'Produto Líquido (L/ha)')}</span>
           </button>
           <button
             type="button"
@@ -110,13 +112,13 @@ export const DoseInputsPanel: React.FC<DoseInputsPanelProps> = ({
             }`}
           >
             <Layers className="w-4 h-4 shrink-0" />
-            <span>Produto Sólido (kg/ha)</span>
+            <span>{t('calculators.dose.solidProduct', 'Produto Sólido (kg/ha)')}</span>
           </button>
         </div>
       </div>
 
       {renderCard(
-        'Capacidade Útil do Depósito (L)',
+        t('calculators.dose.tankCapacity', 'Capacidade Útil do Depósito (L)'),
         `${volPreparar} L`,
         'volPreparar',
         'DoseFAQVolumePreparar.md',
@@ -128,7 +130,7 @@ export const DoseInputsPanel: React.FC<DoseInputsPanelProps> = ({
       )}
 
       {renderCard(
-        `Dose Recomendada no Rótulo (${doseUnit})`,
+        t('calculators.dose.labelDoseWithUnit', 'Dose Recomendada no Rótulo ({{unit}})', { unit: doseUnit }),
         `${doseValue} ${doseUnit}`,
         'doseValue',
         'DoseFAQDoseRecomendada.md',
@@ -140,7 +142,7 @@ export const DoseInputsPanel: React.FC<DoseInputsPanelProps> = ({
       )}
 
       {renderCard(
-        'Volume de Calda Aplicado (L/ha)',
+        t('calculators.dose.sprayVolume', 'Volume de Calda Aplicado (L/ha)'),
         `${volCalda} L/ha`,
         'volCalda',
         'DoseFAQVolumeAplicado.md',

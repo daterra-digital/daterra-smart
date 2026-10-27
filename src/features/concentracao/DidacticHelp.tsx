@@ -177,10 +177,10 @@ interface ParsedFAQSection {
 }
 
 function parseMarkdownFAQ(mdText: string): { title: string; sections: ParsedFAQSection[] } {
-  if (!mdText) return { title: 'Microlearning DATERRA', sections: [] };
+  if (!mdText) return { title: 'Guia Agronómico DATERRA', sections: [] };
 
   const lines = mdText.replace(/\r\n/g, '\n').split('\n');
-  let title = 'Microlearning';
+  let title = 'Guia Agronómico';
   const sections: ParsedFAQSection[] = [];
   let currentQuestion = '';
   let currentLines: string[] = [];

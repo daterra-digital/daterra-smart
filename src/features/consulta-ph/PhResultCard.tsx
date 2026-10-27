@@ -1,5 +1,6 @@
 import React from 'react';
 import { FlaskConical, AlertTriangle, CheckCircle, ShieldAlert, Droplets } from 'lucide-react';
+import { useTranslation } from '../../context/LanguageContext';
 import type { PhCalculationResult, TipoCalda } from './phDataMapper';
 import { TIPO_CALDA_CONFIG } from './phDataMapper';
 import { DidacticHelp } from '../concentracao/DidacticHelp';
@@ -15,6 +16,7 @@ export const PhResultCard: React.FC<PhResultCardProps> = ({
   ph,
   tipoCalda
 }) => {
+  const { t } = useTranslation();
   const {
     status,
     statusLabel,
@@ -29,7 +31,7 @@ export const PhResultCard: React.FC<PhResultCardProps> = ({
 
   return (
     <section
-      aria-label="Resultado da avaliação de pH da calda"
+      aria-label={t('calculators.ph.resultAria', 'Resultado da avaliação de pH da calda')}
       className="bg-[#114037] text-white rounded-3xl p-5 sm:p-7 shadow-xl border border-[#1D734B] space-y-4"
     >
       <div className="flex items-center justify-between gap-2 border-b border-white/10 pb-3 flex-wrap">
@@ -78,13 +80,13 @@ export const PhResultCard: React.FC<PhResultCardProps> = ({
               {alertLevel === 'warning' && (
                 <span className="px-2.5 py-1 rounded-xl text-xs font-black bg-amber-500/20 text-amber-300 border border-amber-500/40 inline-flex items-center gap-1.5">
                   <AlertTriangle className="w-3.5 h-3.5" />
-                  <span>{status.includes('alcalino') ? 'Alcalino' : 'Ácido'}</span>
+                  <span>{status.includes('alcalino') ? t('calculators.ph.alkaline', 'Alcalino') : t('calculators.ph.acidic', 'Ácido')}</span>
                 </span>
               )}
               {alertLevel === 'danger' && (
                 <span className="px-2.5 py-1 rounded-xl text-xs font-black bg-rose-500/20 text-rose-300 border border-rose-500/40 inline-flex items-center gap-1.5">
                   <ShieldAlert className="w-3.5 h-3.5" />
-                  <span>Crítico</span>
+                  <span>{t('calculators.ph.critical', 'Crítico')}</span>
                 </span>
               )}
             </div>
@@ -106,7 +108,7 @@ export const PhResultCard: React.FC<PhResultCardProps> = ({
         >
           <div className="flex items-center gap-1.5 text-xs font-bold">
             <Droplets className="w-4 h-4 shrink-0" />
-            <span>Orientação de Campo</span>
+            <span>{t('calculators.ph.fieldGuidance', 'Orientação de Campo')}</span>
           </div>
           <p className="text-xs sm:text-sm font-bold text-white leading-snug">
             {actionRecommendation}

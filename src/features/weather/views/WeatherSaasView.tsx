@@ -48,7 +48,7 @@ export const WeatherSaasView: React.FC = () => {
             Estação Bioclimática & Janelas de Decisão
           </h1>
           <p className="text-xs text-slate-500 mt-0.5">
-            Cruzamento de meteorologia Open-Meteo com normas EPPO/DGAV e perfis de pulverização
+            Cruzamento de meteorologia Open-Meteo com parâmetros agronómicos e perfis de pulverização
           </p>
         </div>
 

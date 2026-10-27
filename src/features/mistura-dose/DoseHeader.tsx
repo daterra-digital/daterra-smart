@@ -1,5 +1,6 @@
 import React from 'react';
 import { ChevronLeft, History, RotateCcw } from 'lucide-react';
+import { useTranslation } from '../../context/LanguageContext';
 import { DidacticHelp } from '../concentracao/DidacticHelp';
 
 interface DoseHeaderProps {
@@ -15,30 +16,32 @@ export const DoseHeader: React.FC<DoseHeaderProps> = ({
   onReset,
   historyCount
 }) => {
+  const { t } = useTranslation();
+
   return (
     <header className="bg-white px-4 py-3 rounded-2xl border border-slate-200 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
       <div className="flex items-center gap-3">
         <button
           type="button"
           onClick={onBack}
-          aria-label="Voltar ao catálogo de ferramentas"
+          aria-label={t('common.backToTools', 'Voltar ao catálogo de ferramentas')}
           className="min-h-[48px] px-3.5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl transition-all flex items-center gap-1.5 text-xs font-bold cursor-pointer touch-target"
         >
           <ChevronLeft className="w-4 h-4 text-[#114037]" />
-          <span>Voltar</span>
+          <span>{t('common.back', 'Voltar')}</span>
         </button>
         <div className="h-6 w-[1px] bg-slate-200 hidden sm:block" />
         <div>
           <div className="flex items-center gap-2 flex-wrap">
             <h1 className="text-base sm:text-lg font-black text-[#114037] leading-tight">
-              Mistura de Calda (Dose)
+              {t('calculators.dose.title', 'Mistura de Calda (Dose)')}
             </h1>
             <span className="text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200">
-              Dose de Rótulo / DGAV
+              {t('calculators.dose.badge', 'Dose de Rótulo / DGAV')}
             </span>
           </div>
           <p className="text-xs text-slate-500 font-medium">
-            Quantidade de produto comercial por depósito e área coberta
+            {t('calculators.dose.subtitle', 'Quantidade de produto comercial por depósito e área coberta')}
           </p>
         </div>
       </div>
@@ -47,7 +50,7 @@ export const DoseHeader: React.FC<DoseHeaderProps> = ({
         <DidacticHelp
           faqFile="DoseFAQGeral.md"
           topic="dose-geral"
-          buttonLabel="Guia"
+          buttonLabel={t('common.guideShort', 'Guia')}
           variant="button"
           iconType="help"
           className="min-h-[48px] px-3.5 py-2.5 !bg-emerald-50 hover:!bg-emerald-100 !text-[#114037] border border-emerald-200 !rounded-xl !text-xs !font-bold shadow-xs cursor-pointer touch-target"
@@ -56,11 +59,11 @@ export const DoseHeader: React.FC<DoseHeaderProps> = ({
         <button
           type="button"
           onClick={onOpenHistory}
-          aria-label="Abrir histórico de misturas por dose"
+          aria-label={t('calculators.dose.openHistoryAria', 'Abrir histórico de misturas por dose')}
           className="min-h-[48px] px-3.5 py-2.5 bg-sky-50 hover:bg-sky-100 text-sky-900 border border-sky-200 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shadow-xs cursor-pointer touch-target"
         >
           <History className="w-4 h-4 text-sky-700" />
-          <span>Histórico</span>
+          <span>{t('common.history', 'Histórico')}</span>
           {historyCount > 0 && (
             <span className="px-1.5 py-0.5 text-[10px] bg-sky-600 text-white rounded-full font-black">
               {historyCount}
@@ -71,9 +74,9 @@ export const DoseHeader: React.FC<DoseHeaderProps> = ({
         <button
           type="button"
           onClick={onReset}
-          aria-label="Reiniciar parâmetros padrão"
+          aria-label={t('common.resetDefaults', 'Reiniciar parâmetros padrão')}
           className="min-h-[48px] p-2.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-xl transition-all cursor-pointer touch-target"
-          title="Repor valores de referência"
+          title={t('common.resetDefaults', 'Repor valores de referência')}
         >
           <RotateCcw className="w-4 h-4" />
         </button>

@@ -4,8 +4,11 @@ import {
   WifiOff, Calculator, Award, ArrowRight, 
   CheckCircle2, LineChart
 } from 'lucide-react';
+import { useTranslation } from '../context/LanguageContext';
 
 export const LandingView: React.FC = () => {
+  const { t } = useTranslation();
+
   return (
     <div className="space-y-16 py-8">
       {/* Hero Section */}
@@ -18,16 +21,16 @@ export const LandingView: React.FC = () => {
           <div className="max-w-4xl lg:max-w-5xl space-y-6 relative z-10">
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 border border-white/20 text-xs font-semibold text-daterra-accent backdrop-blur-md">
               <Award className="w-4 h-4" />
-              <span>Tecnologia agrícola pensada para o terreno.</span>
+              <span>{t('landing.heroBadge', 'Tecnologia agrícola pensada para o terreno.')}</span>
             </div>
 
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-5xl xl:text-6xl font-black tracking-tight leading-[1.15]">
-              <span className="block">Ferramentas digitais para uma</span>
-              <span className="text-daterra-accent block">agricultura mais eficiente</span>
+              <span className="block">{t('landing.heroTitleLine1', 'Ferramentas digitais para uma')}</span>
+              <span className="text-daterra-accent block">{t('landing.heroTitleLine2', 'agricultura mais eficiente')}</span>
             </h1>
 
             <p className="text-base sm:text-lg text-slate-200 leading-relaxed font-normal max-w-2xl">
-              Apoio digital para preparar operações agrícolas, realizar cálculos técnicos e tomar decisões mais informadas no campo.
+              {t('landing.heroSubtitle', 'Apoio digital para preparar operações agrícolas, realizar cálculos técnicos e tomar decisões mais informadas no campo.')}
             </p>
 
             <div className="pt-4 flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
@@ -35,29 +38,29 @@ export const LandingView: React.FC = () => {
                 to="/login"
                 className="px-8 py-4 bg-daterra-accent hover:bg-daterra-accent/90 text-white font-extrabold text-base rounded-2xl transition-all shadow-xl shadow-daterra-accent/30 flex items-center justify-center gap-3 touch-target active:scale-95"
               >
-                <span>Entrar na DATERRA Smart</span>
+                <span>{t('landing.ctaEnter', 'Entrar na DATERRA Smart')}</span>
                 <ArrowRight className="w-5 h-5" />
               </Link>
               <Link
                 to="/sobre"
                 className="px-8 py-4 bg-white/10 hover:bg-white/20 text-white font-bold text-base rounded-2xl transition-all border border-white/20 flex items-center justify-center touch-target"
               >
-                Saber Mais
+                {t('landing.ctaLearnMore', 'Saber Mais')}
               </Link>
             </div>
 
             <div className="pt-6 grid grid-cols-2 sm:grid-cols-3 gap-4 border-t border-white/10 text-xs font-medium text-slate-300">
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4 text-daterra-accent" />
-                <span>Disponível no Terreno</span>
+                <span>{t('landing.highlightFieldReady', 'Disponível no Terreno')}</span>
               </div>
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4 text-daterra-accent" />
-                <span>Cálculos de Elevada Precisão</span>
+                <span>{t('landing.highlightHighPrecision', 'Cálculos de Elevada Precisão')}</span>
               </div>
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4 text-daterra-accent" />
-                <span>Acompanhamento Técnico</span>
+                <span>{t('landing.highlightTechnicalSupport', 'Acompanhamento Técnico')}</span>
               </div>
             </div>
           </div>
@@ -68,13 +71,13 @@ export const LandingView: React.FC = () => {
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
         <div className="text-center max-w-2xl mx-auto space-y-2">
           <span className="text-xs font-extrabold uppercase tracking-widest text-daterra-secondary">
-            Funcionalidades & Apoio Prático
+            {t('landing.sectionBadge', 'Funcionalidades & Apoio Prático')}
           </span>
           <h2 className="text-2xl sm:text-4xl font-extrabold text-daterra-primary">
-            Concebido para o Trabalho no Campo
+            {t('landing.sectionTitle', 'Concebido para o Trabalho no Campo')}
           </h2>
           <p className="text-sm text-slate-600">
-            A DATERRA Smart disponibiliza ferramentas práticas concebidas para apoiar decisões técnicas e facilitar as tarefas diárias no terreno.
+            {t('landing.sectionSubtitle', 'A DATERRA Smart disponibiliza ferramentas práticas concebidas para apoiar decisões técnicas e facilitar as tarefas diárias no terreno.')}
           </p>
         </div>
 
@@ -84,9 +87,11 @@ export const LandingView: React.FC = () => {
             <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-daterra-secondary flex items-center justify-center font-bold">
               <WifiOff className="w-6 h-6" />
             </div>
-            <h3 className="text-xl font-bold text-daterra-primary">Funciona mesmo quando a ligação à Internet é limitada</h3>
+            <h3 className="text-xl font-bold text-daterra-primary">
+              {t('landing.cardOfflineTitle', 'Funciona mesmo quando a ligação à Internet é limitada')}
+            </h3>
             <p className="text-xs text-slate-600 leading-relaxed">
-              Consulta e registo de informação durante o trabalho no campo. Realize cálculos técnicos com confiança mesmo em parcelas rurais ou zonas com cobertura de rede limitada.
+              {t('landing.cardOfflineDesc', 'Consulta e registo de informação durante o trabalho no campo. Realize cálculos técnicos com confiança mesmo em parcelas rurais ou zonas com cobertura de rede limitada.')}
             </p>
           </div>
 
@@ -95,9 +100,11 @@ export const LandingView: React.FC = () => {
             <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-daterra-secondary flex items-center justify-center font-bold">
               <Calculator className="w-6 h-6" />
             </div>
-            <h3 className="text-xl font-bold text-daterra-primary">Cálculos agrícolas simples, rápidos e orientados para a prática</h3>
+            <h3 className="text-xl font-bold text-daterra-primary">
+              {t('landing.cardCalculatorsTitle', 'Cálculos agrícolas simples, rápidos e orientados para a prática')}
+            </h3>
             <p className="text-xs text-slate-600 leading-relaxed">
-              Teclado adaptado ao terreno com atalhos de valores comuns e validação rigorosa para apoio à preparação de caldas e calibração de equipamentos agrícolas.
+              {t('landing.cardCalculatorsDesc', 'Teclado adaptado ao terreno com atalhos de valores comuns e validação rigorosa para apoio à preparação de caldas e calibração de equipamentos agrícolas.')}
             </p>
           </div>
 
@@ -106,9 +113,11 @@ export const LandingView: React.FC = () => {
             <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-daterra-secondary flex items-center justify-center font-bold">
               <LineChart className="w-6 h-6" />
             </div>
-            <h3 className="text-xl font-bold text-daterra-primary">Informação agrícola, acompanhamento e formação num único espaço</h3>
+            <h3 className="text-xl font-bold text-daterra-primary">
+              {t('landing.cardAcademyTitle', 'Informação agrícola, acompanhamento e formação num único espaço')}
+            </h3>
             <p className="text-xs text-slate-600 leading-relaxed">
-              Apoio prático na organização de operações, consulta técnica e ligação ao ecossistema de conhecimento e formação da Academia DATERRA.
+              {t('landing.cardAcademyDesc', 'Apoio prático na organização de operações, consulta técnica e ligação ao ecossistema de conhecimento e formação da Academia DATERRA.')}
             </p>
           </div>
         </div>
