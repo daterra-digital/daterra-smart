@@ -45,6 +45,16 @@ const TOOLS_CATALOG: ToolModule[] = [
     prioridade: 'alta'
   },
   {
+    id: 'calc_aplicacao_manual',
+    name: 'Aplicação Manual',
+    category: 'Pulverização',
+    description: 'Cálculo de produto para caldas manuais (dorso/lança) por perguntas simples e ensaio de campo.',
+    icon: FlaskConical,
+    isCore: true,
+    caminho: '/ferramentas/aplicacao-manual',
+    prioridade: 'alta'
+  },
+  {
     id: 'calc_area_parede_foliar',
     name: 'Área de Parede Foliar (LWA)',
     category: 'Calibração',
@@ -552,6 +562,10 @@ export const ToolsView: React.FC = () => {
 
   if (currentViewTool === 'calc_eppo') {
     return <Navigate to="/ferramentas/eppo" replace />;
+  }
+
+  if (currentViewTool === 'calc_aplicacao_manual') {
+    return <Navigate to="/ferramentas/aplicacao-manual" replace />;
   }
 
   if (currentViewTool === 'calc_area_parede_foliar') {

@@ -5,11 +5,13 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { X, Tag, Plus, Save, Calendar, ShieldCheck, Share2 } from 'lucide-react';
+import { X, Tag, Plus, Save, Calendar, ShieldCheck, Share2, RotateCcw } from 'lucide-react';
 import type { CalculationHistoryRecord } from '../../../types/calculator.ts';
 import { DEFAULT_SUGGESTED_TAGS } from '../../../types/calculator.ts';
 import { cleanAndDeduplicateTags } from '../core/historyService.ts';
 import { hasEligibleTransferTargets } from '../core/transferService.ts';
+import { ManualPreparationCard } from '../../aplicacao-manual/components/ManualPreparationCard';
+import { humanizeManualInputs } from '../../aplicacao-manual/services/manualHistoryPresentation';
 
 export interface HistoryDetailModalProps {
   isOpen: boolean;
@@ -18,6 +20,7 @@ export interface HistoryDetailModalProps {
   mode?: 'view' | 'edit';
   onSaveMetadata: (id: string, metadata: { name?: string; notes?: string; tags?: string[] }) => Promise<void>;
   onOpenTransfer?: (record: CalculationHistoryRecord) => void;
+  onReuseCalculation?: (record: CalculationHistoryRecord) => void;
 }
 
 export const HistoryDetailModal: React.FC<HistoryDetailModalProps> = ({
@@ -26,7 +29,8 @@ export const HistoryDetailModal: React.FC<HistoryDetailModalProps> = ({
   record,
   mode = 'view',
   onSaveMetadata,
-  onOpenTransfer
+  onOpenTransfer,
+  onReuseCalculation
 }) => {
   const [isEditing, setIsEditing] = useState<boolean>(mode === 'edit');
   const [name, setName] = useState<string>('');
@@ -34,6 +38,7 @@ export const HistoryDetailModal: React.FC<HistoryDetailModalProps> = ({
   const [tags, setTags] = useState<string[]>([]);
   const [customTagInput, setCustomTagInput] = useState<string>('');
   const [isSaving, setIsSaving] = useState<boolean>(false);
+  const [areInputsOpen, setAreInputsOpen] = useState<boolean>(false);
 
   useEffect(() => {
     if (record) {
@@ -41,6 +46,7 @@ export const HistoryDetailModal: React.FC<HistoryDetailModalProps> = ({
       setNotes(record.notes || '');
       setTags(record.tags ? [...record.tags] : []);
       setIsEditing(mode === 'edit');
+      setAreInputsOpen(false);
     }
   }, [record, mode]);
 
@@ -92,7 +98,9 @@ export const HistoryDetailModal: React.FC<HistoryDetailModalProps> = ({
         <div className="flex items-center justify-between p-5 sm:p-6 border-b border-slate-200">
           <div>
             <span className="text-[10px] font-extrabold uppercase tracking-widest text-daterra-accent block">
-              {record.calculatorId === 'calc_concentracao'
+              {record.calculatorId === 'calc_aplicacao_manual'
+                ? `APLICAÇÃO MANUAL · ${record.inputs['mode']?.rawValue === 'concentracao' ? 'CONCENTRAÇÃO' : 'DOSE'}`
+                : record.calculatorId === 'calc_concentracao'
                 ? 'CONCENTRAÇÃO DA CALDA'
                 : record.calculatorId === 'calc_velocidade_real' || record.calculatorId === 'calc_area_parede_foliar' || record.calculatorId === 'calc_calibracao_pulverizador'
                 ? 'CALIBRAÇÃO'
@@ -100,7 +108,9 @@ export const HistoryDetailModal: React.FC<HistoryDetailModalProps> = ({
             </span>
             <h2 id="detail-modal-title" className="text-base sm:text-lg font-black text-daterra-primary">
               {record.name || (
-                record.calculatorId === 'calc_concentracao'
+                record.calculatorId === 'calc_aplicacao_manual'
+                  ? (record.inputs['mode']?.rawValue === 'concentracao' ? 'Aplicação Manual — Concentração' : 'Aplicação Manual — Dose')
+                  : record.calculatorId === 'calc_concentracao'
                   ? 'Cálculo de Concentração'
                   : record.calculatorId === 'calc_velocidade_real'
                   ? 'Velocidade Real de Trabalho'
@@ -119,6 +129,16 @@ export const HistoryDetailModal: React.FC<HistoryDetailModalProps> = ({
                   : 'Cálculo de Dose por Hectare'
               )}
             </h2>
+            {record.calculatorId === 'calc_aplicacao_manual' && (
+              <div className="mt-1 flex items-center gap-1.5 flex-wrap">
+                <span className="inline-block text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200/60">
+                  {record.inputs['plantStage']?.rawValue === 'jovem' ? 'Planta Jovem' : 'Planta Adulta'}
+                </span>
+                <span className="inline-block text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200">
+                  {record.inputs['productState']?.rawValue === 'solido' ? 'Produto Sólido' : 'Produto Líquido'}
+                </span>
+              </div>
+            )}
             {record.calculatorId === 'calc_concentracao' && (
               <div className="mt-1">
                 <span className="inline-block text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200/60">
@@ -152,49 +172,95 @@ export const HistoryDetailModal: React.FC<HistoryDetailModalProps> = ({
             </div>
           </div>
 
-          {/* Grelha de Resultados Oficiais */}
-          <div>
-            <h3 className="text-xs font-extrabold uppercase tracking-wider text-slate-500 mb-2">
-              Resultados Obtidos
-            </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {Object.entries(record.outputs).map(([key, val]) => (
-                <div key={key} className="p-3.5 bg-slate-100/70 border border-slate-200/80 rounded-2xl">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 block mb-0.5">
-                    {val.label || key}
-                  </span>
-                  <div className="text-xl font-black font-mono-numbers text-daterra-primary">
-                    {typeof val.rawValue === 'number'
-                      ? val.rawValue.toLocaleString('pt-PT', { maximumFractionDigits: 2 })
-                      : val.rawValue}{' '}
-                    <span className="text-sm font-bold text-daterra-accent">{val.unit}</span>
+          {/* Resultados Principais */}
+          {record.calculatorId === 'calc_aplicacao_manual' ? (
+            <ManualPreparationCard
+              caldaPrepararL={Number(record.inputs['caldaPrepararL']?.rawValue || 0)}
+              formattedQ={{
+                primaryValue: record.outputs['quantidade_pf']?.rawValue != null ? String(record.outputs['quantidade_pf'].rawValue) : '-',
+                primaryUnit: record.outputs['quantidade_pf']?.unit || (record.inputs['productState']?.rawValue === 'solido' ? 'g' : 'mL'),
+                secondaryText: record.outputs['quantidade_pf']?.subValue != null ? `${record.outputs['quantidade_pf'].subValue} ${record.outputs['quantidade_pf'].subUnit}` : null
+              }}
+              isSolid={record.inputs['productState']?.rawValue === 'solido'}
+              areaTratadaEstimadaM2={record.outputs['areaTratadaEstimadaM2']?.rawValue !== undefined ? Number(record.outputs['areaTratadaEstimadaM2'].rawValue) : undefined}
+              isJovemSemEnsaio={record.inputs['plantStage']?.rawValue === 'jovem' && !record.inputs['hasEnsaio']}
+              onRequestAreaJovem={onReuseCalculation ? () => { onReuseCalculation(record); onClose(); } : undefined}
+            />
+          ) : (
+            <div>
+              <h3 className="text-xs font-extrabold uppercase tracking-wider text-slate-500 mb-2">
+                Resultados Obtidos
+              </h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {Object.entries(record.outputs).map(([key, val]) => (
+                  <div key={key} className="p-3.5 bg-slate-100/70 border border-slate-200/80 rounded-2xl">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 block mb-0.5">
+                      {val.label || key}
+                    </span>
+                    <div className="text-xl font-black font-mono-numbers text-daterra-primary">
+                      {typeof val.rawValue === 'number'
+                        ? val.rawValue.toLocaleString('pt-PT', { maximumFractionDigits: 2 })
+                        : val.rawValue}{' '}
+                      <span className="text-sm font-bold text-daterra-accent">{val.unit}</span>
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
-          </div>
+          )}
 
-          {/* Entradas Utilizadas no Cálculo */}
-          <div>
-            <h3 className="text-xs font-extrabold uppercase tracking-wider text-slate-500 mb-2">
-              Valores de Entrada
-            </h3>
-            <div className="space-y-2">
-              {Object.entries(record.inputs).map(([key, val]) => (
-                <div
-                  key={key}
-                  className="flex items-center justify-between p-3 bg-slate-50 border border-slate-200/60 rounded-xl text-xs"
-                >
-                  <span className="font-bold text-slate-700">{val.label || key}</span>
-                  <span className="font-extrabold font-mono-numbers text-daterra-primary">
-                    {typeof val.rawValue === 'number'
-                      ? val.rawValue.toLocaleString('pt-PT', { maximumFractionDigits: 3 })
-                      : val.rawValue}{' '}
-                    {val.unit}
-                  </span>
-                </div>
-              ))}
-            </div>
+          {/* Acordeão: Valores de Entrada Utilizados (Fechado por Defeito) */}
+          <div className="bg-slate-50 border border-slate-200/80 rounded-2xl overflow-hidden shadow-2xs">
+            <button
+              type="button"
+              onClick={() => setAreInputsOpen(!areInputsOpen)}
+              className="w-full p-3.5 flex items-center justify-between text-xs font-extrabold text-slate-700 hover:bg-slate-100/80 transition-colors cursor-pointer touch-target"
+            >
+              <span className="uppercase tracking-wider text-slate-600">
+                {record.calculatorId === 'calc_aplicacao_manual' ? 'Valores de Entrada e Detalhes' : 'Valores de Entrada'}
+              </span>
+              <span className="text-xs font-bold text-slate-400">
+                {areInputsOpen ? '▲ Recolher' : '▼ Ver entradas'}
+              </span>
+            </button>
+            {areInputsOpen && (
+              <div className="p-3.5 pt-1 space-y-2 border-t border-slate-200/60 bg-white/60">
+                {record.calculatorId === 'calc_aplicacao_manual' ? (
+                  <>
+                    {humanizeManualInputs(record.inputs).map((item) => (
+                      <div
+                        key={item.id}
+                        className="flex items-center justify-between p-2.5 bg-white border border-slate-200/60 rounded-xl text-xs"
+                      >
+                        <span className="font-bold text-slate-700">{item.label}</span>
+                        <strong className="font-mono-numbers text-daterra-primary">{item.displayValue}</strong>
+                      </div>
+                    ))}
+                    {record.outputs['volumeAplicadoLHa']?.rawValue && (
+                      <div className="flex items-center justify-between p-2.5 bg-emerald-50/60 border border-emerald-200/60 rounded-xl text-xs">
+                        <span className="font-bold text-emerald-900">Volume medido de calda (V)</span>
+                        <strong className="font-mono-numbers text-emerald-950">{record.outputs['volumeAplicadoLHa'].rawValue} L/ha</strong>
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  Object.entries(record.inputs).map(([key, val]) => (
+                    <div
+                      key={key}
+                      className="flex items-center justify-between p-2.5 bg-white border border-slate-200/60 rounded-xl text-xs"
+                    >
+                      <span className="font-bold text-slate-700">{val.label || key}</span>
+                      <span className="font-extrabold font-mono-numbers text-daterra-primary">
+                        {typeof val.rawValue === 'number'
+                          ? val.rawValue.toLocaleString('pt-PT', { maximumFractionDigits: 3 })
+                          : String(val.rawValue)}{' '}
+                        {val.unit}
+                      </span>
+                    </div>
+                  ))
+                )}
+              </div>
+            )}
           </div>
 
           {/* Secção de Metadados: Nome, Notas e Etiquetas */}
@@ -364,10 +430,22 @@ export const HistoryDetailModal: React.FC<HistoryDetailModalProps> = ({
           </div>
 
           <div className="flex items-center gap-2">
+            {!isEditing && onReuseCalculation && (
+              <button
+                type="button"
+                onClick={() => onReuseCalculation(record)}
+                className="px-4 py-2.5 bg-[#114037] hover:bg-[#114037]/90 text-white font-bold text-xs rounded-xl shadow-md transition-all flex items-center gap-1.5 touch-target cursor-pointer"
+                title="Carregar respostas deste cálculo para um novo percurso"
+              >
+                <RotateCcw className="w-3.5 h-3.5 text-[#3CA64C]" />
+                <span>Reutilizar Cálculo</span>
+              </button>
+            )}
+
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2.5 bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 font-bold text-xs rounded-xl transition-colors touch-target"
+              className="px-4 py-2.5 bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 font-bold text-xs rounded-xl transition-colors touch-target cursor-pointer"
             >
               Fechar
             </button>

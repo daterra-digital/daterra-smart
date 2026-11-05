@@ -1944,5 +1944,197 @@
     "invalidEmailError": "Por favor introduza um endereço de e-mail válido.",
     "fillRequiredError": "No registo, preencha Nome, Apelido, E-mail e Entidade.",
     "linkSentSuccess": "Link de acesso enviado para o seu e-mail!"
+  },
+  "manual": {
+    "header": {
+      "subtitle": "Cálculo da quantidade de produto para o volume de calda a preparar"
+    },
+    "actions": {
+      "techGuide": "Guia Técnico",
+      "guideAria": "Abrir Guia Técnico da Aplicação Manual",
+      "historyAria": "Abrir histórico local com {{count}} registos",
+      "resetAria": "Reiniciar parâmetros da aplicação manual",
+      "footerAria": "Ações da ferramenta de aplicação manual"
+    },
+    "start": {
+      "title": "Aplicação Manual",
+      "desc": "Calcule a quantidade de produto e a área aproximada a tratar, passo a passo.",
+      "startBtn": "Começar cálculo"
+    },
+    "p1": {
+      "title": "O rótulo indica a quantidade por...?",
+      "desc": "Consulte a indicação expressa na embalagem oficial do produto.",
+      "doseTitle": "Dose — por hectare",
+      "doseDesc": "Apoio: L/ha ou kg/ha",
+      "concTitle": "Concentração — por 100 litros",
+      "concDesc": "mL/100 L, g/100 L, L/100 L ou kg/100 L",
+      "helpTrigger": "Não sei identificar? (Exemplos de rótulo)"
+    },
+    "p2": {
+      "title": "O produto é líquido ou sólido?",
+      "desc": "É o produto antes de o misturar com água.",
+      "liquid": "Líquido",
+      "solid": "Sólido"
+    },
+    "p3": {
+      "titleDose": "Qual é a dose indicada no rótulo?",
+      "titleConc": "Qual é a concentração indicada no rótulo?",
+      "desc": "Use o valor do rótulo.",
+      "fieldLabel": "Quantidade do Rótulo"
+    },
+    "p4": {
+      "title": "Quanta calda quer preparar?",
+      "desc": "Pode preparar menos que a capacidade do depósito.",
+      "fieldLabel": "Calda a Preparar"
+    },
+    "p5": {
+      "title": "Em que estado está a planta que irá tratar?",
+      "desc": "O volume varia com o desenvolvimento foliar da cultura.",
+      "young": "Planta Jovem",
+      "youngSub": "Início de vegetação",
+      "adult": "Planta Adulta",
+      "adultSub": "Pleno desenvolvimento"
+    },
+    "p6": {
+      "title": "Sabe quanto gasta numa área conhecida?",
+      "desc": "Escolha como mediu a área do ensaio.",
+      "knownArea": "Área conhecida",
+      "knownAreaDesc": "Ex: canteiro, talhão ou medição direta em m²",
+      "measuredStrip": "Faixa medida",
+      "measuredStripDesc": "Comprimento e largura efetiva tratada (m)"
+    },
+    "p7a": {
+      "title": "Que área tratou no ensaio?",
+      "desc": "Superfície tratada com o pulverizador no ensaio.",
+      "fieldLabel": "Área Tratada no Ensaio"
+    },
+    "p7b": {
+      "title": "Qual é o comprimento da faixa?",
+      "desc": "Distância percorrida durante a aplicação teste.",
+      "fieldLabel": "Comprimento da Faixa"
+    },
+    "p7c": {
+      "title": "Qual é a largura da faixa tratada?",
+      "desc": "Largura molhada pelo bico ou lança (não usar a entrelinha inteira se não a tratar toda).",
+      "fieldLabel": "Largura da Faixa"
+    },
+    "p8": {
+      "title": "Quanta água gastou no ensaio?",
+      "desc": "É a água utilizada para tratar a área que indicou.",
+      "fieldLabel": "Água Gasta no Ensaio"
+    },
+    "p9": {
+      "title": "O rótulo tem um volume de calda recomendado?",
+      "desc": "Volume de calda por hectare de referência para a cultura.",
+      "yesDesc": "Indicar valor do rótulo",
+      "no": "Não / Não sei",
+      "noDesc": "Usar referência 1000 L/ha",
+      "refMsg": "Vamos usar a referência de 1000 L/ha.",
+      "changeRef": "Alterar referência"
+    },
+    "p9a": {
+      "title": "Qual é o volume de calda recomendado?",
+      "desc": "Volume por hectare indicado no rótulo.",
+      "fieldLabel": "Volume Recomendado"
+    },
+    "p10": {
+      "title": "Quer calcular a área a tratar?",
+      "desc": "Estime a área que consegue tratar com a calda que vai preparar.",
+      "yesDesc": "Indicar ensaio",
+      "noDesc": "Apenas dose para depósito"
+    },
+    "p11": {
+      "title": "Confirme os valores introduzidos",
+      "desc": "Verifique os parâmetros antes de calcular a calda."
+    },
+    "summary": {
+      "mode": "Cálculo por",
+      "dose": "Dose por hectare",
+      "conc": "Concentração por 100 L",
+      "state": "Estado do Produto",
+      "rate": "Indicação do Rótulo",
+      "tank": "Calda a Preparar",
+      "plant": "Estado da Planta",
+      "area": "Área do Ensaio",
+      "strip": "Dimensões da Faixa",
+      "water": "Água Gasta no Ensaio",
+      "appliedV": "Volume de Calda Aplicado",
+      "recVolume": "Volume Recomendado (R)",
+      "recRotulo": "Rótulo",
+      "recEditado": "Editado",
+      "recDefault": "Referência 1000 L/ha",
+      "noEnsaioJovem": "Sem ensaio: o cálculo será direto para o volume de calda a preparar.",
+      "edit": "Alterar",
+      "calculateBtn": "Calcular produto"
+    },
+    "result": {
+      "badgeDose": "PULVERIZAÇÃO · DOSE",
+      "badgeConc": "PULVERIZAÇÃO · CONCENTRAÇÃO",
+      "title": "Produto para preparar {{t}} L de calda",
+      "solidLabel": "Produto Sólido a Pesar",
+      "liquidLabel": "Produto Líquido a Medir",
+      "areaMsg": "Esta quantidade de calda permite tratar aproximadamente {{area}} m².",
+      "areaHelp": "Estimativa baseada na água gasta e na área do ensaio. Pode variar com o ritmo e a forma de aplicação.",
+      "noAreaTitle": "Área a tratar não calculada",
+      "noAreaSub": "O produto está calculado. Se pretender, pode estimar a área que o depósito cobre.",
+      "calcAreaBtn": "Calcular área",
+      "showDetails": "Ver detalhes do cálculo",
+      "newCalc": "Novo cálculo",
+      "editResponses": "Alterar respostas"
+    },
+    "shortcuts": {
+      "other": "Outro valor"
+    },
+    "common": {
+      "unit": "Unidade:"
+    },
+    "help": {
+      "title": "Como saber identificar no rótulo?",
+      "p1": "• Se o rótulo diz por exemplo \"2 L/ha\" ou \"1,5 kg/ha\", trata-se de DOSE.",
+      "p2": "• Se o rótulo diz \"100 mL/100 L\", \"50 g/hL\" ou \"0,1 L/hL\", trata-se de CONCENTRAÇÃO (1 hL = 100 L)."
+    },
+    "guide": {
+      "badge": "MICROLEARNING AGRONÓMICO",
+      "title": "Guia Técnico da Aplicação Manual"
+    },
+    "history": {
+      "reusedMsg": "Respostas do histórico carregadas para novo percurso."
+    },
+    "card": {
+      "header": "PREPARAR A CALDA",
+      "tankLabel": "DE CALDA A PREPARAR",
+      "productLabel": "PRODUTO FITOFARMACÊUTICO",
+      "waterLabel": "ÁGUA NO DEPÓSITO",
+      "waterAction": "COMPLETAR COM ÁGUA",
+      "waterTarget": "até perfazer {{t}} L de calda",
+      "waterHelp": "Adicione água até perfazer o volume final, seguindo as instruções do rótulo.",
+      "areaLabel": "ÁREA APROXIMADA A TRATAR",
+      "areaSubtitle": "Esta quantidade de calda permite tratar aproximadamente esta área.",
+      "areaNotCalculated": "Área não calculada (sem ensaio)",
+      "calcAreaBtn": "Calcular área a tratar",
+      "areaUnavailable": "Área não disponível"
+    },
+    "details": {
+      "inputsTitle": "Valores de Entrada",
+      "type": "Tipo de produto",
+      "solid": "Sólido",
+      "liquid": "Líquido",
+      "labelDose": "Dose indicada no rótulo",
+      "labelConc": "Concentração indicada no rótulo",
+      "tankVol": "Volume de calda a preparar",
+      "stage": "Estado vegetativo",
+      "young": "Planta jovem",
+      "adult": "Planta adulta",
+      "trialTitle": "Medição do Ensaio em Branco",
+      "trialArea": "Área do ensaio (A)",
+      "trialWater": "Água gasta no ensaio (W)",
+      "rateV": "Volume medido de calda (V)",
+      "formulaTitle": "Fórmulas e Ajustes",
+      "recVolume": "Volume de referência (R)",
+      "originDefault": "Predefinido habitual",
+      "originLabel": "Indicado no rótulo / editado",
+      "factorRV": "Fator de ajuste (R / V)",
+      "equivDose": "Dose equivalente teórica"
+    }
   }
 }

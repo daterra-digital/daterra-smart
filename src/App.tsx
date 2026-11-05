@@ -34,6 +34,7 @@ import { PreInspectionView } from './views/PreInspectionView';
 import { PreInspecaoCalculator } from './features/pre-inspecao';
 import { VelocidadeTrabalhoView } from './features/calculators/velocidade-trabalho';
 import { TabelasDebitoHubView, DebitoTrabalhoView } from './features/calculators/tabelas-debito';
+import { AplicacaoManualCalculator } from './features/aplicacao-manual';
 import { AgriChatView } from './features/agri-chat/AgriChatView';
 import { WeatherSaasView } from './features/weather/views/WeatherSaasView';
 import { isLocalhost } from './utils/environment';
@@ -96,6 +97,9 @@ export const AppContent: React.FC = () => {
           <Route path="/ferramentas/velocidade-trabalho" element={<VelocidadeTrabalhoView />} />
           <Route path="/tools/velocidade-trabalho" element={<VelocidadeTrabalhoView />} />
           <Route path="/tools/calc_velocidade_real" element={<VelocidadeTrabalhoView />} />
+          <Route path="/ferramentas/aplicacao-manual" element={<AplicacaoManualCalculator />} />
+          <Route path="/tools/aplicacao-manual" element={<AplicacaoManualCalculator />} />
+          <Route path="/tools/calc_aplicacao_manual" element={<AplicacaoManualCalculator />} />
 
           {/* Ferramentas Restritas ao Plano PRO (Gated via TierRouteGuard) */}
           <Route element={<TierRouteGuard requiredTier="pro" />}>

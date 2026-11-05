@@ -1770,5 +1770,197 @@
     "invalidEmailError": "Please enter a valid email address.",
     "fillRequiredError": "For registration, please fill First Name, Last Name, Email and Entity.",
     "linkSentSuccess": "Access link sent to your email!"
+  },
+  "manual": {
+    "header": {
+      "subtitle": "Calculation of product quantity for the spray mixture volume to prepare"
+    },
+    "actions": {
+      "techGuide": "Technical Guide",
+      "guideAria": "Open Manual Application Technical Guide",
+      "historyAria": "Open local history with {{count}} records",
+      "resetAria": "Reset manual application parameters",
+      "footerAria": "Manual application tool actions"
+    },
+    "start": {
+      "title": "Manual Application",
+      "desc": "Calculate product quantity and approximate treatment area, step by step.",
+      "startBtn": "Start calculation"
+    },
+    "p1": {
+      "title": "Does the label indicate the rate by...?",
+      "desc": "Check the official product label indication.",
+      "doseTitle": "Dose — per hectare",
+      "doseDesc": "E.g. L/ha or kg/ha",
+      "concTitle": "Concentration — per 100 litres",
+      "concDesc": "mL/100 L, g/100 L, L/100 L or kg/100 L",
+      "helpTrigger": "Need help identifying? (Label examples)"
+    },
+    "p2": {
+      "title": "Is the product liquid or solid?",
+      "desc": "Product state before mixing with water.",
+      "liquid": "Liquid",
+      "solid": "Solid"
+    },
+    "p3": {
+      "titleDose": "What is the dose stated on the label?",
+      "titleConc": "What is the concentration stated on the label?",
+      "desc": "Enter the label figure.",
+      "fieldLabel": "Label Quantity"
+    },
+    "p4": {
+      "title": "How much spray mix do you want to prepare?",
+      "desc": "You can prepare less than full tank capacity.",
+      "fieldLabel": "Spray Volume to Prepare"
+    },
+    "p5": {
+      "title": "What is the growth stage of the crop?",
+      "desc": "Water volume varies with canopy and foliage development.",
+      "young": "Young Crop",
+      "youngSub": "Early vegetative growth",
+      "adult": "Mature Crop",
+      "adultSub": "Full canopy development"
+    },
+    "p6": {
+      "title": "Do you know your water output over a known area?",
+      "desc": "Choose how you measured your calibration trial area.",
+      "knownArea": "Known area",
+      "knownAreaDesc": "E.g. plot or measured ground in m²",
+      "measuredStrip": "Measured strip",
+      "measuredStripDesc": "Strip length and effective treated width (m)"
+    },
+    "p7a": {
+      "title": "What area did you treat in the test?",
+      "desc": "Surface covered in your trial run.",
+      "fieldLabel": "Treated Trial Area"
+    },
+    "p7b": {
+      "title": "What is the length of the strip?",
+      "desc": "Distance walked during the calibration test.",
+      "fieldLabel": "Strip Length"
+    },
+    "p7c": {
+      "title": "What is the treated strip width?",
+      "desc": "Effective swath width wetted by the nozzle or wand.",
+      "fieldLabel": "Treated Width"
+    },
+    "p8": {
+      "title": "How much water did you use in the test?",
+      "desc": "Volume of water used to spray the measured area.",
+      "fieldLabel": "Water Used in Test"
+    },
+    "p9": {
+      "title": "Does the label state a recommended water volume?",
+      "desc": "Reference water rate per hectare for this crop.",
+      "yesDesc": "Enter label figure",
+      "no": "No / Not sure",
+      "noDesc": "Use standard reference of 1000 L/ha",
+      "refMsg": "We will use the standard baseline of 1000 L/ha.",
+      "changeRef": "Change baseline"
+    },
+    "p9a": {
+      "title": "What is the recommended water volume?",
+      "desc": "Water rate per hectare indicated on the label.",
+      "fieldLabel": "Recommended Water Rate"
+    },
+    "p10": {
+      "title": "Would you like to calculate estimated treated area?",
+      "desc": "Estimate the ground area you can cover with this tank.",
+      "yesDesc": "Enter field test",
+      "noDesc": "Tank product only"
+    },
+    "p11": {
+      "title": "Review entered values",
+      "desc": "Check your settings before calculating product amount."
+    },
+    "summary": {
+      "mode": "Calculation by",
+      "dose": "Dose per hectare",
+      "conc": "Concentration per 100 L",
+      "state": "Product State",
+      "rate": "Label Rate",
+      "tank": "Spray Volume",
+      "plant": "Growth Stage",
+      "area": "Trial Area",
+      "strip": "Strip Dimensions",
+      "water": "Water Used in Test",
+      "appliedV": "Applied Spray Rate",
+      "recVolume": "Recommended Rate (R)",
+      "recRotulo": "Label",
+      "recEditado": "Edited",
+      "recDefault": "Reference 1000 L/ha",
+      "noEnsaioJovem": "No trial: direct dilution for prepared tank volume.",
+      "edit": "Change",
+      "calculateBtn": "Calculate product"
+    },
+    "result": {
+      "badgeDose": "SPRAYING · DOSE",
+      "badgeConc": "SPRAYING · CONCENTRATION",
+      "title": "Product required for {{t}} L of spray mix",
+      "solidLabel": "Solid Product to Weigh",
+      "liquidLabel": "Liquid Product to Measure",
+      "areaMsg": "This volume of spray mix will treat approximately {{area}} m².",
+      "areaHelp": "Estimate based on water used and test area. May vary with walking speed and spray technique.",
+      "noAreaTitle": "Covered area not calculated",
+      "noAreaSub": "Product is calculated. If needed, enter a calibration test to estimate covered area.",
+      "calcAreaBtn": "Calculate area",
+      "showDetails": "View calculation details",
+      "newCalc": "New calculation",
+      "editResponses": "Change answers"
+    },
+    "shortcuts": {
+      "other": "Other value"
+    },
+    "common": {
+      "unit": "Unit:"
+    },
+    "help": {
+      "title": "How to identify on the label?",
+      "p1": "• If the label states e.g. \"2 L/ha\" or \"1.5 kg/ha\", it is a DOSE.",
+      "p2": "• If the label states \"100 mL/100 L\", \"50 g/hL\" or \"0.1 L/hL\", it is a CONCENTRATION (1 hL = 100 L)."
+    },
+    "guide": {
+      "badge": "AGRONOMIC MICROLEARNING",
+      "title": "Manual Application Technical Guide"
+    },
+    "history": {
+      "reusedMsg": "Calculation inputs loaded into a new guided run."
+    },
+    "card": {
+      "header": "PREPARE SPRAY MIX",
+      "tankLabel": "SPRAY MIX TO PREPARE",
+      "productLabel": "PLANT PROTECTION PRODUCT",
+      "waterLabel": "WATER IN TANK",
+      "waterAction": "FILL WITH WATER",
+      "waterTarget": "up to {{t}} L of spray mix",
+      "waterHelp": "Add water up to the final volume, following the label instructions.",
+      "areaLabel": "APPROXIMATE TREATED AREA",
+      "areaSubtitle": "This volume of spray mix covers approximately this area.",
+      "areaNotCalculated": "Area not calculated (no trial)",
+      "calcAreaBtn": "Calculate area to treat",
+      "areaUnavailable": "Area unavailable"
+    },
+    "details": {
+      "inputsTitle": "Input Values",
+      "type": "Product type",
+      "solid": "Solid",
+      "liquid": "Liquid",
+      "labelDose": "Label dose rate",
+      "labelConc": "Label concentration",
+      "tankVol": "Spray mix to prepare",
+      "stage": "Growth stage",
+      "young": "Young plant",
+      "adult": "Mature plant",
+      "trialTitle": "Blank Test Measurement",
+      "trialArea": "Trial area (A)",
+      "trialWater": "Water used in trial (W)",
+      "rateV": "Measured spray volume (V)",
+      "formulaTitle": "Formulas and Adjustments",
+      "recVolume": "Reference volume (R)",
+      "originDefault": "Standard default",
+      "originLabel": "Label recommended / custom",
+      "factorRV": "Adjustment factor (R / V)",
+      "equivDose": "Theoretical equivalent dose"
+    }
   }
 }
