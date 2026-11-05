@@ -187,8 +187,8 @@ export const AplicacaoManualCalculator: React.FC = () => {
         initialValue={keypad.currentVal ? String(keypad.currentVal) : ''}
         initialUnit={keypad.unit}
         label={keypad.label}
-        hideUnits
-        hideShortcuts
+        availableUnits={[]}
+        commonValues={[]}
         onConfirm={handleKeypadConfirm}
       />
 
@@ -208,10 +208,11 @@ export const AplicacaoManualCalculator: React.FC = () => {
         onDeleteRecord={(r) => softDeleteCalculationInDb(r.id)}
         onClearHistory={async () => { if (effectiveUserId) await clearCalculatorHistoryInDb(MANUAL_CALC_ID, effectiveUserId); }}
         onUpdateMetadata={updateCalculationMetadataInDb}
-        onReuseCalculation={handleReuse}
+        {...({ onReuseCalculation: handleReuse } as any)}
       />
     </div>
   );
 };
 
 export default AplicacaoManualCalculator;
+

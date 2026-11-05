@@ -4,7 +4,7 @@
  */
 
 import { strict as assert } from 'assert';
-import { calculateManualApplication, formatEquivalents, formatSmartNumber } from '../src/features/aplicacao-manual/aplicacaoManualEngine.ts';
+import { calculateManualApplication, formatEquivalents } from '../src/features/aplicacao-manual/aplicacaoManualEngine.ts';
 
 console.log('🧪 Iniciando testes de validação matemática da Aplicação Manual...');
 

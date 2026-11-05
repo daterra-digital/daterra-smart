@@ -22,7 +22,8 @@ export const GITHUB_PAGES_ALLOWED_TOOL_IDS = new Set<string>([
   'pre_inspecao_dgav', // Pré-Inspeção
   'comparador_bicos', // Tabelas de Débito (Comparador)
   'calc_velocidade_real', // Velocidade Real de Trabalho
-  'calc_volume_copa' // Volume de Copa (TRV)
+  'calc_volume_copa', // Volume de Copa (TRV)
+  'calc_aplicacao_manual' // Aplicação Manual (Nova Ferramenta Free)
 ]);
 
 /**
