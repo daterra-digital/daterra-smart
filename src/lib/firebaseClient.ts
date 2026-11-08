@@ -3,21 +3,27 @@ import { getAnalytics, isSupported } from 'firebase/analytics';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import { getFunctions } from 'firebase/functions';
+import { setupAppCheck } from './appCheck';
+
+const env = (typeof import.meta !== 'undefined' && (import.meta as any).env) || {};
 
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || 'AIzaSyBMHfYUCcC-E-FzKkUkPDRaJVVHcTl6MaY',
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || 'daterra-smart-4c0cf.firebaseapp.com',
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || 'daterra-smart-4c0cf',
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || 'daterra-smart-4c0cf.firebasestorage.app',
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || '467705911466',
-  appId: import.meta.env.VITE_FIREBASE_APP_ID || '1:467705911466:web:53dce21622f9d2aa1418d3',
-  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || 'G-T6VDSDCQJG'
+  apiKey: env.VITE_FIREBASE_API_KEY || 'AIzaSyBMHfYUCcC-E-FzKkUkPDRaJVVHcTl6MaY',
+  authDomain: env.VITE_FIREBASE_AUTH_DOMAIN || 'daterra-smart-4c0cf.firebaseapp.com',
+  projectId: env.VITE_FIREBASE_PROJECT_ID || 'daterra-smart-4c0cf',
+  storageBucket: env.VITE_FIREBASE_STORAGE_BUCKET || 'daterra-smart-4c0cf.firebasestorage.app',
+  messagingSenderId: env.VITE_FIREBASE_MESSAGING_SENDER_ID || '467705911466',
+  appId: env.VITE_FIREBASE_APP_ID || '1:467705911466:web:53dce21622f9d2aa1418d3',
+  measurementId: env.VITE_FIREBASE_MEASUREMENT_ID || 'G-T6VDSDCQJG'
 };
 
 export const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const firestoreDb = getFirestore(app);
 export const functions = getFunctions(app);
+
+// Ativação tolerante de App Check (SEC-01)
+export const appCheck = setupAppCheck(app);
 
 export const analyticsPromise =
   typeof window !== 'undefined' &&
