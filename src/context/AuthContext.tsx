@@ -19,6 +19,8 @@ import {
   clearPendingAuth
 } from '../services/auth/pendingAuthStorage';
 
+import { clearLocalSessionData } from '../services/auth/sessionCleanupService';
+
 export type AuthUser = {
   id: string;
   uid: string;
@@ -51,6 +53,7 @@ export interface AuthContextType {
   signInWithGoogle: (options?: GoogleSignInOptions) => Promise<{ error: string | null; message?: string }>;
   logout: () => Promise<void>;
   refreshProfile: () => Promise<void>;
+  clearLocalSessionData: (options?: { purgeAll?: boolean }) => Promise<{ success: boolean }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -280,11 +283,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const logout = async (): Promise<void> => {
+    const currentUserId = user?.id || user?.uid;
+    try {
+      await clearLocalSessionData(currentUserId);
+    } catch (err) {
+      console.warn('[AuthContext] Aviso ao desinfetar sessão local:', err);
+    }
     await signOut(auth);
-    localStorage.removeItem('daterra_auth');
     clearPendingAuth();
     setUser(null);
     setProfile(null);
+  };
+
+  const handleManualSessionCleanup = async (options?: { purgeAll?: boolean }) => {
+    const currentUserId = user?.id || user?.uid;
+    return clearLocalSessionData(currentUserId, options);
   };
 
   return (
@@ -298,7 +311,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         completeMagicLinkSignIn,
         signInWithGoogle,
         logout,
-        refreshProfile
+        refreshProfile,
+        clearLocalSessionData: handleManualSessionCleanup
       }}
     >
       {children}
