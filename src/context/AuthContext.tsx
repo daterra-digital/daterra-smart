@@ -13,7 +13,11 @@ import { httpsCallable } from 'firebase/functions';
 import { auth, firestoreDb, functions } from '../lib/firebaseClient';
 import type { Profile, PendingRegistrationData } from '../types/profile';
 
-const PENDING_AUTH_STORAGE_KEY = 'daterra_pending_auth';
+import {
+  savePendingAuth,
+  getValidPendingAuth,
+  clearPendingAuth
+} from '../services/auth/pendingAuthStorage';
 
 export type AuthUser = {
   id: string;
@@ -74,13 +78,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const userDocRef = doc(firestoreDb, 'users', fbUser.uid);
       const snap = await getDoc(userDocRef);
 
-      let pending: PendingRegistrationData | null = null;
-      try {
-        const raw = localStorage.getItem(PENDING_AUTH_STORAGE_KEY);
-        if (raw) pending = JSON.parse(raw) as PendingRegistrationData;
-      } catch {
-        pending = null;
-      }
+      const pending = getValidPendingAuth();
 
       if (!snap.exists()) {
         const now = new Date().toISOString();
@@ -107,13 +105,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           updated_at: now
         };
         await setDoc(userDocRef, newProfile, { merge: true });
-        localStorage.removeItem(PENDING_AUTH_STORAGE_KEY);
+        clearPendingAuth();
         setProfile(newProfile);
         return newProfile;
       }
 
       const existingData = snap.data() as Profile;
-      localStorage.removeItem(PENDING_AUTH_STORAGE_KEY);
+      clearPendingAuth();
       setProfile(existingData);
       return existingData;
     } catch (err) {
@@ -124,6 +122,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     let isMounted = true;
+    // Limpeza ativa no arranque: descarta pedidos pendentes expirados (> 15 min)
+    getValidPendingAuth();
+
     const authTimeout = setTimeout(() => {
       if (isMounted) setIsAuthLoading(false);
     }, 3000);
@@ -162,10 +163,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return { error: 'Por favor introduza um endereço de e-mail válido.' };
       }
 
-      localStorage.setItem(
-        PENDING_AUTH_STORAGE_KEY,
-        JSON.stringify({ ...data, email: cleanEmail })
-      );
+      savePendingAuth({ ...data, email: cleanEmail });
 
       const redirectUrl = `${window.location.origin}${window.location.pathname}#/login`;
       const callSendMagicLink = httpsCallable(functions, 'sendCustomMagicLink');
@@ -197,15 +195,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     let targetEmail = emailOverride?.trim().toLowerCase() || '';
     if (!targetEmail) {
-      try {
-        const raw = localStorage.getItem(PENDING_AUTH_STORAGE_KEY);
-        if (raw) {
-          const parsed = JSON.parse(raw) as PendingRegistrationData;
-          targetEmail = parsed.email?.trim().toLowerCase() || '';
-        }
-      } catch {
-        targetEmail = '';
-      }
+      const pending = getValidPendingAuth();
+      targetEmail = pending?.email?.trim().toLowerCase() || '';
     }
 
     if (!targetEmail) {
@@ -256,6 +247,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const logout = async (): Promise<void> => {
     await signOut(auth);
     localStorage.removeItem('daterra_auth');
+    clearPendingAuth();
     setUser(null);
     setProfile(null);
   };
