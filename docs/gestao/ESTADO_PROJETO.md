@@ -52,4 +52,5 @@
 - [x] **Tarefa 8:** Supressão da leitura de tier simulado em produção — SEC-01 (`src/context/SubscriptionContext.tsx`).
 - [x] **Tarefa 9:** Minimização e expiração ativa de `daterra_pending_auth` — SEC-06 (`src/context/AuthContext.tsx`).
 - [x] **Tarefa 10:** Segregação de dados locais por utilizador no IndexedDB — SEC-02 (`src/db/db.ts`).
-- [ ] **Tarefa 11 (Próximo Passo):** Hardening de segurança na Cloud Function de Login / Magic Link — SEC-03, SEC-04, SEC-05 (`functions/`).
+- [x] **Tarefa 11:** Hardening de segurança na Cloud Function de Login / Magic Link — SEC-03, SEC-04, SEC-05 (`functions/`).
+- [ ] **Tarefa 12 (Próximo Passo):** Invalidação controlada de cache e atualização transparente do Service Worker (PWA / Workbox) com Content Security Policy (`index.html`, `vite.config.ts`).

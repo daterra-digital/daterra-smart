@@ -1,5 +1,8 @@
 import { onCall, HttpsError } from 'firebase-functions/v2/https';
 import * as admin from 'firebase-admin';
+import { verifyTurnstileToken } from './auth/turnstileVerifier';
+import { checkAuthRateLimit } from './auth/rateLimiter';
+import { validateRedirectUrl } from './auth/redirectUrlValidator';
 
 if (!admin.apps.length) {
   admin.initializeApp();
@@ -59,6 +62,7 @@ interface SendCustomMagicLinkPayload {
   firstName?: string;
   lastName?: string;
   companyName?: string;
+  captchaToken?: string;
 }
 
 export const sendCustomMagicLink = onCall(
@@ -67,16 +71,37 @@ export const sendCustomMagicLink = onCall(
     const data = (request.data || {}) as SendCustomMagicLinkPayload;
     const cleanEmail = (data.email || '').trim().toLowerCase();
 
+    // 1. Validação de formato de e-mail
     if (!cleanEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
       throw new HttpsError('invalid-argument', 'Por favor introduza um endereço de e-mail válido.');
     }
 
-    const targetContinueUrl = data.redirectUrl || DEFAULT_APP_URL;
+    // 2. Validação estrita de URL de redirecionamento (SEC-05 - Anti Open Redirect / Phishing)
+    let validatedRedirectUrl: string;
+    try {
+      validatedRedirectUrl = validateRedirectUrl(data.redirectUrl, DEFAULT_APP_URL);
+    } catch (urlErr: any) {
+      throw new HttpsError('invalid-argument', urlErr?.message || 'URL de redirecionamento não autorizado.');
+    }
+
+    // 3. Validação do Desafio Anti-Robô Cloudflare Turnstile (SEC-03)
+    const clientIp = request.rawRequest?.ip;
+    const turnstileResult = await verifyTurnstileToken(data.captchaToken, clientIp);
+    if (!turnstileResult.success) {
+      throw new HttpsError('permission-denied', turnstileResult.error || 'Verificação anti-robô falhou.');
+    }
+
+    // 4. Rate-Limiting Distribuído (SEC-04 - Prevenção de Abuso e Esgotamento de Quota)
+    try {
+      await checkAuthRateLimit(cleanEmail);
+    } catch (rateErr: any) {
+      throw new HttpsError('resource-exhausted', rateErr?.message || 'Limite de pedidos excedido.');
+    }
 
     try {
-      // 1. Gerar o link oficial de autenticação via Firebase Admin SDK
+      // 5. Gerar o link oficial de autenticação via Firebase Admin SDK
       const actionCodeSettings: admin.auth.ActionCodeSettings = {
-        url: targetContinueUrl,
+        url: validatedRedirectUrl,
         handleCodeInApp: true
       };
 
