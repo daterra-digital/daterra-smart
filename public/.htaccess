@@ -1,0 +1,62 @@
+# ----------------------------------------------------------------------
+# DATERRA Smart - Configuração Apache / cPanel (.htaccess)
+# Domínio Oficial: smart.daterra.com.pt
+# Suporte a SPA (Single Page Application), Cabeçalhos de Segurança e Cache
+# ----------------------------------------------------------------------
+
+# 1. Roteamento SPA (Prevenção de Erros 404 em Recarregamento de Rotas)
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+
+  # Previne loops na página principal
+  RewriteRule ^index\.html$ - [L]
+
+  # Se o recurso existir fisicamente no disco, entrega diretamente
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+
+  # Redireciona todas as rotas dinâmicas (/ferramentas/*, /login, etc.) para a SPA
+  RewriteRule . /index.html [L]
+</IfModule>
+
+# 2. Cabeçalhos de Segurança HTTP (SEC-05 & SEC-08)
+<IfModule mod_headers.c>
+  # Previne Clickjacking
+  Header always set X-Frame-Options "DENY"
+
+  # Previne ataque de MIME-type sniffing
+  Header always set X-Content-Type-Options "nosniff"
+
+  # Proteção de Referência de Origem
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+
+  # Permissões do Navegador (Geolocalização para Clima, Bloqueio de Microfone/Câmara)
+  Header always set Permissions-Policy "geolocation=(self), camera=(), microphone=()"
+
+  # Forçar HTTPS com HSTS em Produção
+  Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains; preload" env=HTTPS
+</IfModule>
+
+# 3. Proteção de Listagem de Diretórios
+Options -Indexes
+
+# 4. Estratégia de Cache para PWA e Service Worker
+# Garante que index.html é sempre revalidado para atualizações imediatas
+<Files "index.html">
+  <IfModule mod_headers.c>
+    Header set Cache-Control "no-cache, no-store, must-revalidate"
+    Header set Pragma "no-cache"
+    Header set Expires "0"
+  </IfModule>
+</Files>
+
+# Ficheiros estáticos com hash no nome (assets JS/CSS) podem ter cache longo
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType text/css "access plus 1 year"
+  ExpiresByType application/javascript "access plus 1 year"
+  ExpiresByType image/png "access plus 1 month"
+  ExpiresByType image/svg+xml "access plus 1 month"
+  ExpiresByType application/manifest+json "access plus 1 day"
+</IfModule>
