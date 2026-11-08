@@ -50,7 +50,7 @@ describe('SEC-01: Firebase App Check & Proteção Anti-Abuso', () => {
   it('5. firebaseClient.ts deve exportar appCheck', () => {
     const source = fs.readFileSync(path.resolve('src/lib/firebaseClient.ts'), 'utf8');
 
-    assert.ok(source.includes("import { setupAppCheck } from './appCheck'"), 'Deve importar setupAppCheck');
+    assert.ok(source.includes("from './appCheck"), 'Deve importar setupAppCheck');
     assert.ok(source.includes('export const appCheck = setupAppCheck(app)'), 'Deve exportar appCheck');
   });
 

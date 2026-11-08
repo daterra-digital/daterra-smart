@@ -3,7 +3,7 @@ import { getAnalytics, isSupported } from 'firebase/analytics';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import { getFunctions } from 'firebase/functions';
-import { setupAppCheck } from './appCheck';
+import { setupAppCheck } from './appCheck.ts';
 
 const env = (typeof import.meta !== 'undefined' && (import.meta as any).env) || {};
 
