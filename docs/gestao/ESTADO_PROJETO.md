@@ -54,4 +54,5 @@
 - [x] **Tarefa 10:** Segregação de dados locais por utilizador no IndexedDB — SEC-02 (`src/db/db.ts`).
 - [x] **Tarefa 11:** Hardening de segurança na Cloud Function de Login / Magic Link — SEC-03, SEC-04, SEC-05 (`functions/`).
 - [x] **Tarefa 12:** Invalidação controlada de cache e atualização transparente do Service Worker (PWA / Workbox) com Content Security Policy (`index.html`, `vite.config.ts`).
-- [ ] **Tarefa 13 (Próximo Passo):** Regras de Segurança do Firestore (`firestore.rules`) com Isolamento de Utilizador e Proteção de Dados na Nuvem.
+- [x] **Tarefa 13:** Regras de Segurança do Firestore (`firestore.rules`) com Isolamento de Utilizador e Proteção de Dados na Nuvem.
+- [ ] **Tarefa 14 (Próximo Passo):** Transição para V-RC (Candidata a Lançamento — Tag `v1.0.1-rc1`) e Relatório Ilustrativo de Prontidão.

@@ -1,0 +1,249 @@
+rules_version = '2';
+
+// ===============================================================
+// Assumed Data Model
+// ===============================================================
+//
+// Collection: users/{userId}
+// Document ID: Firebase Auth UID (request.auth.uid)
+// Fields:
+//   - id: string (optional, must match request.auth.uid)
+//   - email: string (optional, valid email format, max 100 chars)
+//   - displayName: string (optional/nullable, max 150 chars)
+//   - first_name: string (optional/nullable, max 100 chars)
+//   - last_name: string (optional/nullable, max 100 chars)
+//   - phone: string (optional/nullable, max 30 chars)
+//   - company_name: string (optional/nullable, max 150 chars)
+//   - role: string (optional/nullable, max 50 chars, protected against self-elevation)
+//   - job_title: string (optional/nullable, max 100 chars)
+//   - nif: string (optional/nullable, max 30 chars)
+//   - address: string (optional/nullable, max 200 chars)
+//   - postal_code: string (optional/nullable, max 20 chars)
+//   - city: string (optional/nullable, max 100 chars)
+//   - plan: string (optional, enum: 'free' | 'plus' | 'pro' | 'ultra' | 'enterprise', default 'free' on create, protected on update)
+//   - tier: string (optional, enum: 'free' | 'plus' | 'pro' | 'ultra' | 'enterprise', default 'free' on create, protected on update)
+//   - subscriptionTier: string (optional, enum: 'free' | 'plus' | 'pro' | 'ultra' | 'enterprise', default 'free' on create, protected on update)
+//   - isAdmin: bool (optional, must be false client-side, protected against escalation)
+//   - credits: int or float (optional, >= 0 and <= 10000, initial <= 5, non-increasing client-side)
+//   - newsletter_subscribed: bool (optional)
+//   - newsletter_subscribed_at: string or timestamp (optional, max 50 chars)
+//   - newsletter_updated_at: string or timestamp (optional, max 50 chars)
+//   - platform_notifications_enabled: bool (optional)
+//   - platform_notifications_updated_at: string or timestamp (optional, max 50 chars)
+//   - language: string (optional, max 10 chars)
+//   - co_branding: map (optional, configuration for PDF co-branding)
+//   - created_at: string or timestamp (optional, immutable on update)
+//   - updated_at: string or timestamp (optional, max 50 chars)
+//
+// Collection: _auth_rate_limits/{docId}
+// Document ID: SHA-256 hash prefix of recipient email
+// Purpose: Backend rate limit store for auth Cloud Functions. Client access strictly forbidden.
+//
+// Collection: user_moodle_links/{uid}
+// Document ID: User UID
+// Purpose: Confidential mapping between Firebase UID and Moodle ID. Client access strictly forbidden.
+//
+// Collection: academy_idempotency/{mutationId}
+// Document ID: Mutation UUID
+// Purpose: Backend transactional idempotency registry. Client access strictly forbidden.
+//
+// Subcollections: users/{userId}/{subcollection}/{docId=**}
+// Purpose: User-scoped nested data (presets, audit records, export history). Scoped to owner.
+//
+// Catch-all: /{document=**}
+// Default Deny: All unmapped documents and collections are rejected.
+// ===============================================================
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+
+    // Check if the request is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Check if authenticated user owns the resource
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // Validate email format
+    function isValidEmail(email) {
+      return email is string &&
+        email.matches('^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$');
+    }
+
+    // Validate tier/plan enum values
+    function isValidTierValue(val) {
+      return val in ['free', 'plus', 'pro', 'ultra', 'enterprise'];
+    }
+
+    // Check that immutable document ID and created_at timestamps remain unchanged
+    function areImmutableFieldsUnchanged() {
+      return (!('id' in resource.data) || !('id' in request.resource.data) || request.resource.data.id == resource.data.id) &&
+        (!('created_at' in resource.data) || !('created_at' in request.resource.data) || request.resource.data.created_at == resource.data.created_at);
+    }
+
+    // Protect isAdmin from client-side self-elevation
+    function isIsAdminUnchanged() {
+      return !request.resource.data.diff(resource.data).affectedKeys().hasAny(['isAdmin']) &&
+        (!('isAdmin' in request.resource.data) || request.resource.data.isAdmin == false);
+    }
+
+    // Protect tier from client-side privilege escalation
+    function isTierUnchanged() {
+      return !request.resource.data.diff(resource.data).affectedKeys().hasAny(['tier']) ||
+        (('tier' in request.resource.data) && ('tier' in resource.data) && request.resource.data.tier == resource.data.tier);
+    }
+
+    // Protect plan from client-side privilege escalation
+    function isPlanUnchanged() {
+      return !request.resource.data.diff(resource.data).affectedKeys().hasAny(['plan']) ||
+        (('plan' in request.resource.data) && ('plan' in resource.data) && request.resource.data.plan == resource.data.plan);
+    }
+
+    // Protect subscriptionTier from client-side privilege escalation
+    function isSubscriptionTierUnchanged() {
+      return !request.resource.data.diff(resource.data).affectedKeys().hasAny(['subscriptionTier']) ||
+        (('subscriptionTier' in request.resource.data) && ('subscriptionTier' in resource.data) && request.resource.data.subscriptionTier == resource.data.subscriptionTier);
+    }
+
+    // Protect role from client-side privilege escalation
+    function isRoleUnchanged() {
+      return !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role']) ||
+        (('role' in request.resource.data) && ('role' in resource.data) && request.resource.data.role == resource.data.role);
+    }
+
+    // Ensure credits can only stay unchanged or decrease client-side (e.g. audit consumption)
+    function areCreditsValidOnUpdate() {
+      return !request.resource.data.diff(resource.data).affectedKeys().hasAny(['credits']) ||
+        (('credits' in request.resource.data) && ('credits' in resource.data) && request.resource.data.credits <= resource.data.credits);
+    }
+
+    // ===============================================================
+    // Domain Validator (Validator Function Pattern)
+    // Enforced in BOTH create and update rules to eliminate Update Bypass
+    // ===============================================================
+    function isValidUserDoc(data) {
+      let allowedFields = [
+        'id', 'email', 'displayName',
+        'first_name', 'last_name', 'phone', 'company_name',
+        'role', 'job_title', 'nif', 'address', 'postal_code', 'city',
+        'plan', 'tier', 'subscriptionTier',
+        'isAdmin', 'credits',
+        'newsletter_subscribed', 'newsletter_subscribed_at', 'newsletter_updated_at',
+        'platform_notifications_enabled', 'platform_notifications_updated_at',
+        'language', 'co_branding',
+        'created_at', 'updated_at'
+      ];
+
+      return data.keys().hasOnly(allowedFields) &&
+        // id: if present, must match caller UID
+        (!('id' in data) || data.id == request.auth.uid) &&
+        // email: if present, must be valid email format and bounded
+        (!('email' in data) || (data.email is string && data.email.size() <= 100 && isValidEmail(data.email))) &&
+        // String fields with strict size bounds (preventing Resource Exhaustion / DoS)
+        (!('displayName' in data) || data.displayName == null || (data.displayName is string && data.displayName.size() <= 150)) &&
+        (!('first_name' in data) || data.first_name == null || (data.first_name is string && data.first_name.size() <= 100)) &&
+        (!('last_name' in data) || data.last_name == null || (data.last_name is string && data.last_name.size() <= 100)) &&
+        (!('phone' in data) || data.phone == null || (data.phone is string && data.phone.size() <= 30)) &&
+        (!('company_name' in data) || data.company_name == null || (data.company_name is string && data.company_name.size() <= 150)) &&
+        (!('role' in data) || data.role == null || (data.role is string && data.role.size() <= 50)) &&
+        (!('job_title' in data) || data.job_title == null || (data.job_title is string && data.job_title.size() <= 100)) &&
+        (!('nif' in data) || data.nif == null || (data.nif is string && data.nif.size() <= 30)) &&
+        (!('address' in data) || data.address == null || (data.address is string && data.address.size() <= 200)) &&
+        (!('postal_code' in data) || data.postal_code == null || (data.postal_code is string && data.postal_code.size() <= 20)) &&
+        (!('city' in data) || data.city == null || (data.city is string && data.city.size() <= 100)) &&
+        (!('language' in data) || (data.language is string && data.language.size() <= 10)) &&
+        // Tiers & Plans
+        (!('plan' in data) || isValidTierValue(data.plan)) &&
+        (!('tier' in data) || isValidTierValue(data.tier)) &&
+        (!('subscriptionTier' in data) || isValidTierValue(data.subscriptionTier)) &&
+        // isAdmin can NEVER be true client-side
+        (!('isAdmin' in data) || data.isAdmin == false) &&
+        // Credits must be non-negative number within realistic limit
+        (!('credits' in data) || ((data.credits is int || data.credits is float) && data.credits >= 0 && data.credits <= 10000)) &&
+        // Booleans
+        (!('newsletter_subscribed' in data) || data.newsletter_subscribed is bool) &&
+        (!('platform_notifications_enabled' in data) || data.platform_notifications_enabled is bool) &&
+        // Dates & timestamps (bounded strings or native timestamps)
+        (!('newsletter_subscribed_at' in data) || data.newsletter_subscribed_at is timestamp || (data.newsletter_subscribed_at is string && data.newsletter_subscribed_at.size() <= 50)) &&
+        (!('newsletter_updated_at' in data) || data.newsletter_updated_at is timestamp || (data.newsletter_updated_at is string && data.newsletter_updated_at.size() <= 50)) &&
+        (!('platform_notifications_updated_at' in data) || data.platform_notifications_updated_at is timestamp || (data.platform_notifications_updated_at is string && data.platform_notifications_updated_at.size() <= 50)) &&
+        (!('created_at' in data) || data.created_at is timestamp || (data.created_at is string && data.created_at.size() <= 50)) &&
+        (!('updated_at' in data) || data.updated_at is timestamp || (data.updated_at is string && data.updated_at.size() <= 50)) &&
+        // Co-branding map (if present)
+        (!('co_branding' in data) || data.co_branding is map);
+    }
+
+    // ===============================================================
+    // Rules: users/{userId}
+    // ===============================================================
+    match /users/{userId} {
+      // Read: allowed ONLY for the authenticated owner
+      allow read: if isOwner(userId);
+
+      // Create: allowed ONLY for the authenticated owner with baseline free tier
+      allow create: if isOwner(userId) &&
+        isValidUserDoc(request.resource.data) &&
+        (!('id' in request.resource.data) || request.resource.data.id == userId) &&
+        (!('tier' in request.resource.data) || request.resource.data.tier == 'free') &&
+        (!('plan' in request.resource.data) || request.resource.data.plan == 'free') &&
+        (!('subscriptionTier' in request.resource.data) || request.resource.data.subscriptionTier == 'free') &&
+        (!('role' in request.resource.data) || request.resource.data.role == null || request.resource.data.role != 'admin') &&
+        (!('isAdmin' in request.resource.data) || request.resource.data.isAdmin == false) &&
+        (!('credits' in request.resource.data) || request.resource.data.credits <= 5);
+
+      // Update: allowed ONLY for the authenticated owner, preventing privilege escalation
+      allow update: if isOwner(userId) &&
+        isValidUserDoc(request.resource.data) &&
+        areImmutableFieldsUnchanged() &&
+        isIsAdminUnchanged() &&
+        isTierUnchanged() &&
+        isPlanUnchanged() &&
+        isSubscriptionTierUnchanged() &&
+        isRoleUnchanged() &&
+        areCreditsValidOnUpdate();
+
+      // Delete: strictly forbidden client-side
+      allow delete: if false;
+
+      // Subcollections: strictly scoped to the document owner
+      match /{subcollection}/{docId=**} {
+        allow read, write: if isOwner(userId);
+      }
+    }
+
+    // ===============================================================
+    // Backend Internal Collections (Firebase Admin SDK Only)
+    // Direct client access is strictly forbidden
+    // ===============================================================
+
+    // Rate limiter registry used by Cloud Functions
+    match /_auth_rate_limits/{docId} {
+      allow read, write: if false;
+    }
+
+    // Confidential Moodle user mapping (Admin SDK only)
+    match /user_moodle_links/{uid} {
+      allow read, write: if false;
+    }
+
+    // Transactional idempotency store (Admin SDK only)
+    match /academy_idempotency/{mutationId} {
+      allow read, write: if false;
+    }
+
+    // ===============================================================
+    // Global Catch-all Default Deny
+    // Reject any other unmapped collections or paths
+    // ===============================================================
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
