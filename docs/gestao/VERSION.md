@@ -10,8 +10,8 @@
 
 | Estado do Fluxo | Versão Ativa | Tag Git | Commit SHA-40 | Ambiente / Destino | Data de Referência |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **V-PAGES (Atual)** | `1.0.0` | `v1.0.0-pages` *(a criar)* | `eb54766b1fcc54b201ffd6b1a8c51610bd6f3825` | GitHub Pages | 05/11/2026, 01:06:14 GMT |
-| **V-DEV (Ativa)** | `1.0.1-dev` | *(Branch `develop`)* | `eb54766b1fcc54b201ffd6b1a8c51610bd6f3825` | Localhost (Ambiente de Testes) | 08/11/2026 |
+| **V-PAGES (Atual)** | `1.0.0` | `v1.0.0-pages` | `eb54766b1fcc54b201ffd6b1a8c51610bd6f3825` | GitHub Pages | 05/11/2026, 01:06:14 GMT |
+| **V-DEV (Ativa)** | `1.0.1-dev` | *(Branch `develop`)* | `796114d` (base `eb54766`) | Localhost (Ambiente de Testes) | 08/11/2026 |
 | **V-RC** | *(Nenhuma)* | *(Pendente)* | — | Congelamento para Homologação | — |
 | **V-PROD** | `1.0.0-prod` | `v1.0.0-prod` *(Pendente)* | — | cPanel (`smart.daterra.com.pt`) | — |
 

@@ -2,7 +2,7 @@
   "name": "daterra-smart",
   "description": "PWA SaaS Suite Agrícola - DATERRA Smart",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.1-dev",
   "type": "module",
   "scripts": {
     "dev": "vite",

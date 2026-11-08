@@ -92,3 +92,22 @@ Cada ação técnica enquadra-se estritamente num de três níveis:
 1. **Nível 1 — Inspeção Passiva:** Leitura de ficheiros locais, análise de git log, consulta de endpoints públicos e cálculo de hashes. Não altera estado. Autorizada por defeito no âmbito da tarefa ativa.
 2. **Nível 2 — Alteração Local em Branch de Desenvolvimento (`develop`):** Edição de código, execução de testes e compilação na branch `develop`. Requer aprovação da proposta no Prompt 1.
 3. **Nível 3 — Operação de Publicação / Produção:** Disparo de pipeline para GitHub Pages ou cPanel, alterações no Firebase de produção, ou criação de Releases remotas. **Exige obrigatoriamente a apresentação prévia do Relatório Ilustrativo de Prontidão e aprovação expressa do utilizador.**
+
+---
+
+## 6. Lista Oficial das 11 Ferramentas Canónicas Aprovadas (Blindadas)
+
+Constitui regra de ouro permanente a **proibição de modificar código, fórmulas ou interfaces** das seguintes 11 ferramentas canónicas homologadas no GitHub Pages:
+
+1. **Ajuste da Dose (Método EPPO)** (`/ferramentas/ajuste-dose-eppo`)
+2. **Aplicação Manual** (`/ferramentas/aplicacao-manual`)
+3. **Área de Parede Foliar (LWA)** (`/ferramentas/area-parede-foliar`)
+4. **Consulta de pH** (`/ferramentas/consulta-ph`)
+5. **Mistura de Calda (Concentração)** (`/ferramentas/concentracao-calda`)
+6. **Mistura de Calda (Dose)** (`/ferramentas/dose`)
+7. **Ordem de Mistura** (`/ferramentas/ordem-mistura`)
+8. **Pré-Inspeção** (`/ferramentas/pre-inspecao`)
+9. **Tabelas de Débito (Comparador)** (`/ferramentas/comparador-bicos`)
+10. **Velocidade Real de Trabalho** (`/ferramentas/velocidade-real`)
+11. **Volume de Copa (TRV)** (`/ferramentas/volume-copa`)
+

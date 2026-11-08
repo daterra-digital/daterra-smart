@@ -105,3 +105,22 @@ Através do workflow dedicado `.github/workflows/rollback-github-pages.yml`, o a
 1. Introduzir o nome de uma tag anterior válida (ex.: `v1.0.0-pages`).
 2. O workflow faz o checkout dessa tag exata, compila e republica no GitHub Pages.
 3. A versão com problemas é substituída em minutos, sem tocar no cPanel.
+
+---
+
+## 6. Lista Oficial das 11 Ferramentas Canónicas Aprovadas (Blindadas)
+
+As 11 ferramentas canónicas abaixo constituem o núcleo produtivo oficial e homologado publicado no GitHub Pages (`https://daterra-digital.github.io/daterra-smart/`). **Estas ferramentas estão blindadas e não podem ser alteradas sem autorização explícita**:
+
+1. **Ajuste da Dose (Método EPPO)** (`/ferramentas/ajuste-dose-eppo`)
+2. **Aplicação Manual** (`/ferramentas/aplicacao-manual`)
+3. **Área de Parede Foliar (LWA)** (`/ferramentas/area-parede-foliar`)
+4. **Consulta de pH** (`/ferramentas/consulta-ph`)
+5. **Mistura de Calda (Concentração)** (`/ferramentas/concentracao-calda`)
+6. **Mistura de Calda (Dose)** (`/ferramentas/dose`)
+7. **Ordem de Mistura** (`/ferramentas/ordem-mistura`)
+8. **Pré-Inspeção** (`/ferramentas/pre-inspecao`)
+9. **Tabelas de Débito (Comparador)** (`/ferramentas/comparador-bicos`)
+10. **Velocidade Real de Trabalho** (`/ferramentas/velocidade-real`)
+11. **Volume de Copa (TRV)** (`/ferramentas/volume-copa`)
+
