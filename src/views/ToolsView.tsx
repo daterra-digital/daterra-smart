@@ -21,7 +21,7 @@ import { isToolAllowedInCurrentEnv } from '../utils/environment';
 import { useSubscription } from '../context/SubscriptionContext';
 import { PRO_TOOL_IDS } from '../types/subscription';
 import { ToolCard } from '../components/tools/ToolCard';
-import { isRcEvaluationMode } from '../utils/rcEvaluationMode';
+import { isRcEvaluationMode, getToolReleaseBadge } from '../utils/rcEvaluationMode';
 
 export interface ToolModule {
   id: string;
@@ -65,13 +65,6 @@ const TOOLS_CATALOG: ToolModule[] = [
     isCore: true,
     caminho: '/ferramentas/area-parede-foliar',
     prioridade: 'alta'
-  },
-  {
-    id: 'gestao_caderno_campo',
-    name: 'Caderno de Campo Digital',
-    category: 'Gestão',
-    description: 'Registo digital de tratamentos fitossanitários com verificação de limites oficiais.',
-    icon: ClipboardCheck
   },
   {
     id: 'calc_calibracao_pulverizador',
@@ -436,7 +429,20 @@ export const ToolsView: React.FC = () => {
     }).sort((a, b) => {
       const nameA = t(`tools.catalog.${a.id}.name`, a.name);
       const nameB = t(`tools.catalog.${b.id}.name`, b.name);
-      return nameA.localeCompare(nameB, undefined, { sensitivity: 'base' });
+
+      // Em ambientes de avaliação (V-DEV, V-RC, V-PAGES), agrupar primeiro 'PAGES' e depois 'RC'
+      if (isRcEvaluationMode()) {
+        const badgeA = getToolReleaseBadge(a.id);
+        const badgeB = getToolReleaseBadge(b.id);
+        const rankA = badgeA === 'PAGES' ? 1 : badgeA === 'RC' ? 2 : 3;
+        const rankB = badgeB === 'PAGES' ? 1 : badgeB === 'RC' ? 2 : 3;
+        if (rankA !== rankB) {
+          return rankA - rankB;
+        }
+      }
+
+      // Ordenação estritamente alfabética A-Z (com suporte a acentuação portuguesa)
+      return nameA.localeCompare(nameB, 'pt', { sensitivity: 'base' });
     });
   }, [visibleCatalog, selectedCategory, searchQuery, t]);
 

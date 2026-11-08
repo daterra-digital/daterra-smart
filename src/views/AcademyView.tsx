@@ -14,14 +14,19 @@ export const AcademyView: React.FC = () => {
             {t('academy.moodleIntegratedPlatform', 'Plataforma Moodle Integrada')}
           </span>
           <h1 className="text-2xl sm:text-3xl font-black text-daterra-primary">
-            {t('academy.title')}
+            {t('academy.title', 'Academia DATERRA')}
           </h1>
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
+          <div className="px-3 py-1 bg-blue-50 border border-blue-200 text-blue-700 rounded-2xl text-xs font-bold flex items-center gap-1.5 shadow-xs">
+            <span className="w-2 h-2 rounded-full bg-blue-500" />
+            <span>RC</span>
+          </div>
+
           <div className="px-3.5 py-2 bg-indigo-50 border border-indigo-200 text-indigo-800 rounded-2xl text-xs font-bold flex items-center gap-2">
             <GraduationCap className="w-4 h-4 text-indigo-600 shrink-0" />
-            <span>{t('academy.moodleConnected')}</span>
+            <span>{t('academy.moodleConnected', 'Moodle Conectado')}</span>
           </div>
 
           <a
@@ -30,7 +35,7 @@ export const AcademyView: React.FC = () => {
             rel="noopener noreferrer"
             className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs rounded-2xl transition-all shadow-md flex items-center gap-2 touch-target"
           >
-            <span>{t('academy.visitAcademy')}</span>
+            <span>{t('academy.visitAcademy', 'Visitar Academia')}</span>
             <ExternalLink className="w-4 h-4" />
           </a>
         </div>
@@ -40,19 +45,19 @@ export const AcademyView: React.FC = () => {
       <div className="bg-gradient-to-br from-indigo-900 via-indigo-800 to-daterra-primary text-white p-6 sm:p-8 rounded-3xl shadow-floating space-y-6">
         <div className="flex items-center justify-between border-b border-white/15 pb-4">
           <span className="text-xs font-bold uppercase tracking-wider text-daterra-accent">
-            {t('academy.activeCourse')}
+            {t('academy.activeCourse', 'Curso Ativo')}
           </span>
           <span className="px-3 py-1 bg-white/10 rounded-full text-xs font-bold font-mono-numbers">
-            {t('academy.percentCompleted')}
+            {t('academy.percentCompleted', '75% Concluído')}
           </span>
         </div>
 
         <div className="space-y-2">
           <h2 className="text-2xl font-black leading-tight">
-            {t('academy.courseTitle')}
+            {t('academy.courseTitle', 'Boas Práticas na Aplicação de Fitofármacos')}
           </h2>
           <p className="text-xs text-slate-200 max-w-2xl leading-relaxed">
-            {t('academy.courseDescription')}
+            {t('academy.courseDescription', 'Curso avançado focado na otimização de caldas, calibração legal e mitigação de deriva em culturas arvenses e permanentes.')}
           </p>
         </div>
 
@@ -103,7 +108,7 @@ export const AcademyView: React.FC = () => {
             rel="noopener noreferrer"
             className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs rounded-xl transition-colors inline-flex items-center gap-1.5"
           >
-            <span>{t('academy.viewProgram')}</span>
+            <span>{t('academy.viewProgram', 'Ver Programa')}</span>
             <ExternalLink className="w-3.5 h-3.5" />
           </a>
         </div>
@@ -122,7 +127,7 @@ export const AcademyView: React.FC = () => {
             rel="noopener noreferrer"
             className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs rounded-xl transition-colors inline-flex items-center gap-1.5"
           >
-            <span>{t('academy.viewProgram')}</span>
+            <span>{t('academy.viewProgram', 'Ver Programa')}</span>
             <ExternalLink className="w-3.5 h-3.5" />
           </a>
         </div>
@@ -130,4 +135,3 @@ export const AcademyView: React.FC = () => {
     </div>
   );
 };
-

@@ -34,6 +34,9 @@ export const WeatherSaasView: React.FC = () => {
             <span className="px-3 py-1 rounded-full text-[11px] font-extrabold bg-daterra-primary text-white uppercase tracking-wider">
               Módulo Agronómico Avançado
             </span>
+            <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-blue-100 text-blue-700 border border-blue-300 uppercase tracking-widest shadow-xs">
+              RC
+            </span>
             <WeatherLocationSearchDropdown
               currentLocation={currentLocation}
               onSelectLocation={selectLocation}

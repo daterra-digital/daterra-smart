@@ -5,9 +5,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
-import { isLocalhost } from '../utils/environment';
 import { DashboardWeatherCard } from '../features/weather/components/DashboardWeatherCard';
-import { DashboardNdviCard } from '../features/dashboard/components/DashboardNdviCard';
 import { DashboardFavoritesCard } from '../features/dashboard/components/DashboardFavoritesCard';
 
 export const DashboardView: React.FC = () => {
@@ -26,7 +24,6 @@ export const DashboardView: React.FC = () => {
     t('dashboard.defaultFarmName', 'Exploração Agrícola');
 
   const userFirstName = userFullName.split(' ')[0] || t('common.user', 'Utilizador');
-  const agromonitoringApiKey = import.meta.env.VITE_AGROMONITORING_KEY || 'NÃO_CONFIGURADA';
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -92,10 +89,7 @@ export const DashboardView: React.FC = () => {
           <DashboardWeatherCard />
         </div>
 
-        {/* LINHA 3 — CARTÃO LARGURA TOTAL: Mapas NDVI (Localhost Only) */}
-        {isLocalhost() && <DashboardNdviCard agromonitoringApiKey={agromonitoringApiKey} />}
-
-        {/* LINHA 4 — CARTÃO ESQUERDO: Academia DATERRA */}
+        {/* LINHA 3 — CARTÃO ESQUERDO: Academia DATERRA */}
         <div className="lg:col-span-1 bg-white p-6 rounded-3xl shadow-soft border border-slate-200 flex flex-col justify-between space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">

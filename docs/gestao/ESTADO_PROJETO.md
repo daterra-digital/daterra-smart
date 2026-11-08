@@ -57,3 +57,5 @@
 - [x] **Tarefa 13:** Regras de Segurança do Firestore (`firestore.rules`) com Isolamento de Utilizador e Proteção de Dados na Nuvem.
 - [x] **Tarefa 14:** Transição para V-RC (Candidata a Lançamento — Tag `v1.0.1-rc1`), modo de avaliação em `localhost:5175`, etiquetas visuais e Relatório de Prontidão.
 - [ ] **Tarefa 15 (Próximo Passo):** Publicação e Deploy Controlado para V-PAGES (`https://daterra-digital.github.io/daterra-smart/`).
+- [ ] **Tarefa 16:** Preparação e Homologação de Produção cPanel (V-PROD).
+- [ ] **Tarefa 17 (Planeada):** Ergonomia de Campo — Inicialização das Calculadoras com Inputs Vazios (Placeholders de Prontidão de Dados e Limpeza de Pré-preenchimentos).

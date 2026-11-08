@@ -14,7 +14,9 @@ import { useLanguage, LANGUAGE_OPTIONS, type SupportedLanguage } from '../contex
 import { MicrolearningModal } from '../components/MicrolearningModal';
 import { HelpView } from './HelpView';
 import { AboutView } from './AboutView';
+import { ExplorationView, type ProfileTab as ExplorationTab } from './ExplorationView';
 import { SettingsSubmenuNav, type SettingsSubmenu } from '../features/settings/SettingsSubmenuNav';
+import { SettingsNotificationsTab } from '../features/settings/SettingsNotificationsTab';
 import type { Profile } from '../types/profile';
 import type { CoBrandingConfig } from '../features/smart-debito/types';
 import {
@@ -29,23 +31,45 @@ export const SettingsView: React.FC = () => {
   const { user, refreshProfile } = useAuth();
   const { language, setLanguage, t } = useLanguage();
 
-  const getSubmenuFromPath = (pathname: string): SettingsSubmenu => {
-    if (pathname.includes('/ajuda')) return 'ajuda';
-    if (pathname.includes('/sobre')) return 'sobre';
+  const getSubmenuFromLocation = (pathname: string, search: string): SettingsSubmenu => {
+    const params = new URLSearchParams(search);
+    const tabParam = params.get('tab');
+    if (tabParam === 'exploracao' || tabParam === 'cultura' || tabParam === 'equipamento' || tabParam === 'bicos' || tabParam === 'calibracao') {
+      return 'exploracao';
+    }
+    if (pathname.includes('/ajuda') || tabParam === 'ajuda') return 'ajuda';
+    if (pathname.includes('/sobre') || tabParam === 'sobre') return 'sobre';
+    if (tabParam === 'preferencias') return 'preferencias';
+    if (tabParam === 'notificacoes') return 'notificacoes';
+    if (tabParam === 'gestao_dados') return 'gestao_dados';
     return 'perfil';
   };
 
+  const getExplorationTabFromLocation = (search: string): ExplorationTab => {
+    const params = new URLSearchParams(search);
+    const tabParam = params.get('tab');
+    if (tabParam === 'equipamento' || tabParam === 'bicos' || tabParam === 'calibracao') {
+      return tabParam;
+    }
+    return 'cultura';
+  };
+
   const [activeSubmenu, setActiveSubmenu] = useState<SettingsSubmenu>(() => 
-    getSubmenuFromPath(location.pathname)
+    getSubmenuFromLocation(location.pathname, location.search)
+  );
+  const [explorationTab, setExplorationTab] = useState<ExplorationTab>(() =>
+    getExplorationTabFromLocation(location.search)
   );
   const [feedbackMsg, setFeedbackMsg] = useState('');
 
   useEffect(() => {
-    const matched = getSubmenuFromPath(location.pathname);
-    if (location.pathname === '/ajuda' || location.pathname === '/sobre') {
+    const matched = getSubmenuFromLocation(location.pathname, location.search);
+    if (location.pathname === '/ajuda' || location.pathname === '/sobre' || location.search.includes('tab=')) {
       setActiveSubmenu(matched);
+      const matchedExplorationTab = getExplorationTabFromLocation(location.search);
+      setExplorationTab(matchedExplorationTab);
     }
-  }, [location.pathname]);
+  }, [location.pathname, location.search]);
 
   // Microlearning Modal State
   const [microModalOpen, setMicroModalOpen] = useState(false);
@@ -289,11 +313,6 @@ export const SettingsView: React.FC = () => {
   };
 
   // ---------------------------------------------------------------------------
-  // ESTADOS 3: NOTIFICAÇÕES
-  // ---------------------------------------------------------------------------
-  const [masterNotifications, setMasterNotifications] = useState(true);
-
-  // ---------------------------------------------------------------------------
   // HANDLERS DE AÇÕES
   // ---------------------------------------------------------------------------
   const handleSaveProfile = async (e: FormEvent) => {
@@ -355,12 +374,6 @@ export const SettingsView: React.FC = () => {
   const handleSavePreferences = (e: React.FormEvent) => {
     e.preventDefault();
     setFeedbackMsg(t('settings.preferencesSaved', 'Preferências e Unidades Padrão guardadas!'));
-    setTimeout(() => setFeedbackMsg(''), 3500);
-  };
-
-  const handleSaveNotifications = (e: React.FormEvent) => {
-    e.preventDefault();
-    setFeedbackMsg(t('settings.notificationsSaved', 'Preferências de Notificação guardadas com sucesso!'));
     setTimeout(() => setFeedbackMsg(''), 3500);
   };
 
@@ -427,7 +440,7 @@ export const SettingsView: React.FC = () => {
 
         <div className="flex items-center gap-2.5 bg-slate-100 px-4 py-2.5 rounded-2xl border border-slate-200 text-slate-700 text-xs font-extrabold font-mono-numbers">
           <User className="w-4 h-4 text-[#1D734B]" />
-          <span>ID: {user?.id || 'A carregar...'}</span>
+          <span>ID: {user?.id || t('common.states.loading', 'A carregar...')}</span>
         </div>
       </div>
 
@@ -448,7 +461,8 @@ export const SettingsView: React.FC = () => {
             navigate('/definicoes');
           }
         }}
-        onNavigateExploration={() => navigate('/exploracao')}
+        activeExplorationTab={explorationTab}
+        onSelectExplorationTab={setExplorationTab}
       />
 
 
@@ -458,9 +472,14 @@ export const SettingsView: React.FC = () => {
       {activeSubmenu === 'perfil' && (
         <div className="space-y-6 animate-fade-in">
           <div className="bg-white p-6 sm:p-8 rounded-3xl shadow-soft border border-slate-200 space-y-8">
-            <h2 className="text-fluid-subtitle font-black text-[#114037] border-b border-slate-100 pb-4">
-              {t('settings.profileTitle', 'Definições — Perfil do Utilizador')}
-            </h2>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
+              <h2 className="text-fluid-subtitle font-black text-[#114037]">
+                {t('settings.profileTitle', 'Definições — Perfil do Utilizador')}
+              </h2>
+              <span className="self-start sm:self-center px-3 py-1 bg-amber-100 border border-amber-300 text-amber-900 rounded-full text-xs font-extrabold uppercase tracking-wide shrink-0">
+                {t('common.status.inImprovement', 'Em melhoria')}
+              </span>
+            </div>
 
             {/* Indicadores de Loading / Erro */}
             {isLoadingProfile && (
@@ -677,18 +696,23 @@ export const SettingsView: React.FC = () => {
           <div className="bg-white p-6 sm:p-8 rounded-3xl shadow-soft border border-slate-200 space-y-8">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
               <div>
-                <h2 className="text-fluid-subtitle font-black text-[#114037]">
-                  Definições — Co-Branding & Personalização Institucional
-                </h2>
-                <p className="text-xs text-slate-500 font-medium mt-1">
-                  Configure o logotipo, paleta de cores e dados da sua organização para emissão de relatórios oficiais (como o Smart Débito ISO 16122).
+                <div className="flex flex-wrap items-center gap-2 mb-1">
+                  <h2 className="text-fluid-subtitle font-black text-[#114037]">
+                    {t('settings.branding.title', 'Definições — Co-Branding & Personalização Institucional')}
+                  </h2>
+                  <span className="px-2.5 py-0.5 bg-blue-100 border border-blue-300 text-blue-900 rounded-full text-xs font-black uppercase tracking-wide shrink-0">
+                    RC
+                  </span>
+                </div>
+                <p className="text-xs text-slate-500 font-medium">
+                  {t('settings.branding.subtitle', 'Configure o logotipo, paleta de cores e dados da sua organização para emissão de relatórios oficiais (como o Smart Débito ISO 16122).')}
                 </p>
               </div>
 
               {/* Interruptor Ativar / Desativar Co-Branding */}
               <div className="flex items-center gap-3 shrink-0 bg-slate-50 px-4 py-2 rounded-2xl border border-slate-200">
                 <span className="text-xs font-bold text-slate-700">
-                  {coBranding.isEnabled ? 'Co-Branding Ativo' : 'Desativado'}
+                  {coBranding.isEnabled ? t('settings.branding.statusActive', 'Co-Branding Ativo') : t('settings.branding.statusDisabled', 'Desativado')}
                 </span>
                 <button
                   type="button"
@@ -696,7 +720,7 @@ export const SettingsView: React.FC = () => {
                   className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
                     coBranding.isEnabled ? 'bg-[#3CA64C]' : 'bg-slate-300'
                   }`}
-                  aria-label="Ativar ou desativar Co-Branding"
+                  aria-label={t('settings.branding.toggleAria', 'Ativar ou desativar Co-Branding')}
                 >
                   <span
                     className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${
@@ -720,10 +744,10 @@ export const SettingsView: React.FC = () => {
               <div className="bg-slate-50/80 p-5 rounded-2xl border border-slate-200 space-y-4">
                 <div className="flex items-center justify-between">
                   <h3 className="text-xs font-black uppercase tracking-wider text-[#1D734B]">
-                    Pré-visualização do Banner Oficial
+                    {t('settings.branding.bannerPreviewTitle', 'Pré-visualização do Banner Oficial')}
                   </h3>
                   <span className="text-[11px] font-bold text-slate-500">
-                    Aparência nos Relatórios PDF e na Aplicação
+                    {t('settings.branding.bannerPreviewSubtitle', 'Aparência nos Relatórios PDF e na Aplicação')}
                   </span>
                 </div>
 
@@ -768,7 +792,7 @@ export const SettingsView: React.FC = () => {
                       <div className="min-w-0">
                         <div className="flex items-center gap-2">
                           <h4 className="text-sm sm:text-base font-extrabold tracking-tight truncate">
-                            {coBranding.companyName || 'Nome da Empresa'}
+                            {coBranding.companyName || t('settings.branding.defaultCompanyName', 'Nome da Empresa')}
                           </h4>
                           <span
                             style={{
@@ -777,12 +801,12 @@ export const SettingsView: React.FC = () => {
                             }}
                             className="text-[9px] uppercase tracking-wider font-extrabold px-1.5 py-0.5 rounded shadow-xs shrink-0"
                           >
-                            {coBranding.isEnabled ? 'Co-Branding Ativo' : 'Desativado'}
+                            {coBranding.isEnabled ? t('settings.branding.statusActive', 'Co-Branding Ativo') : t('settings.branding.statusDisabled', 'Desativado')}
                           </span>
                         </div>
 
                         <p className="text-xs opacity-90 mt-1 truncate">
-                          {coBranding.address || 'Morada da Empresa'}{coBranding.postalCode ? ` · ${coBranding.postalCode}` : ''}
+                          {coBranding.address || t('settings.branding.defaultCompanyAddress', 'Morada da Empresa')}{coBranding.postalCode ? ` · ${coBranding.postalCode}` : ''}
                         </p>
 
                         <p className="text-[11px] opacity-80 mt-0.5 truncate">
@@ -799,7 +823,7 @@ export const SettingsView: React.FC = () => {
                         style={{ backgroundColor: coBranding.secondaryColor, color: '#FFFFFF' }}
                         className="text-[10px] font-black tracking-wider uppercase px-2.5 py-1 rounded-lg shadow-xs"
                       >
-                        INSPEÇÃO OFICIAL ISO 16122
+                        {t('settings.branding.officialInspectionBadge', 'INSPEÇÃO OFICIAL ISO 16122')}
                       </span>
                     </div>
                   </div>
@@ -811,10 +835,10 @@ export const SettingsView: React.FC = () => {
                 {/* Logotipo da Empresa */}
                 <div className="bg-slate-50/80 p-5 rounded-2xl border border-slate-200 space-y-4">
                   <h3 className="text-xs font-black uppercase tracking-wider text-[#1D734B]">
-                    Logotipo da Empresa
+                    {t('settings.branding.logoSectionTitle', 'Logotipo da Empresa')}
                   </h3>
                   <p className="text-xs text-slate-600 leading-relaxed">
-                    Carregue o logotipo da sua organização (PNG, JPG ou SVG). O sistema enquadra-o automaticamente num espaço com fundo branco neutro no banner do PDF e da plataforma, acomodando ficheiros com ou sem fundo.
+                    {t('settings.branding.logoSectionDesc', 'Carregue o logotipo da sua organização (PNG, JPG ou SVG). O sistema enquadra-o automaticamente num espaço com fundo branco neutro no banner do PDF e da plataforma, acomodando ficheiros com ou sem fundo.')}
                   </p>
 
                   <div className="flex items-center gap-4 pt-1">
@@ -854,7 +878,7 @@ export const SettingsView: React.FC = () => {
                           onClick={() => setCoBranding((prev) => ({ ...prev, logoUrl: null }))}
                           className="text-xs text-rose-600 hover:text-rose-800 font-bold text-left hover:underline px-1 cursor-pointer"
                         >
-                          Remover Logotipo Atual
+                          {t('settings.branding.removeLogo', 'Remover Logotipo Atual')}
                         </button>
                       )}
                     </div>
@@ -865,7 +889,7 @@ export const SettingsView: React.FC = () => {
                 <div className="bg-slate-50/80 p-5 rounded-2xl border border-slate-200 space-y-4">
                   <div className="flex items-center justify-between">
                     <h3 className="text-xs font-black uppercase tracking-wider text-[#1D734B]">
-                      Paleta de 3 Cores
+                      {t('settings.branding.colorPaletteTitle', 'Paleta de 3 Cores')}
                     </h3>
                     <Palette className="w-4 h-4 text-[#1D734B]" />
                   </div>
@@ -944,7 +968,7 @@ export const SettingsView: React.FC = () => {
                   {/* Sugestões Rápidas de Paletas */}
                   <div className="pt-1">
                     <span className="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-2">
-                      Sugestões Rápidas:
+                      {t('settings.branding.quickPresets', 'Sugestões Rápidas:')}
                     </span>
                     <div className="flex flex-wrap gap-2">
                       {PRESET_CO_BRANDING_PALETTES.map((pal) => (
@@ -974,7 +998,7 @@ export const SettingsView: React.FC = () => {
               <div className="bg-slate-50/80 p-5 rounded-2xl border border-slate-200 space-y-4">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                   <h3 className="text-xs font-black uppercase tracking-wider text-[#1D734B]">
-                    Dados da Empresa no Banner e Relatórios
+                    {t('settings.branding.companyDataTitle', 'Dados da Empresa no Banner e Relatórios')}
                   </h3>
                   <button
                     type="button"
@@ -1091,15 +1115,35 @@ export const SettingsView: React.FC = () => {
       )}
 
       {/* ========================================================================= */}
-      {/* SUB-MENU 2: PREFERÊNCIAS (Unidades Padrão com Dica UI de Unidades)         */}
+      {/* SUB-MENU 2: EXPLORAÇÃO AGRÍCOLA (Cultura, Equipamentos, Bicos, Calibração) */}
+      {/* ========================================================================= */}
+      {activeSubmenu === 'exploracao' && (
+        <div className="space-y-6 animate-fade-in">
+          <ExplorationView
+            embedded={true}
+            hideHeader={true}
+            hideTabs={true}
+            activeTab={explorationTab}
+            onTabChange={setExplorationTab}
+          />
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* SUB-MENU 3: PREFERÊNCIAS (Unidades Padrão com Dica UI de Unidades)         */}
       {/* ========================================================================= */}
       {activeSubmenu === 'preferencias' && (
         <div className="space-y-6 animate-fade-in">
           <div className="bg-white p-6 sm:p-8 rounded-3xl shadow-soft border border-slate-200 space-y-8">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-4">
-              <h2 className="text-fluid-subtitle font-black text-[#114037]">
-                Definições — Preferências & Unidades Padrão
-              </h2>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="text-fluid-subtitle font-black text-[#114037]">
+                  {t('settings.preferencesTitle', 'Definições — Preferências & Unidades Padrão')}
+                </h2>
+                <span className="px-3 py-1 bg-amber-100 border border-amber-300 text-amber-900 rounded-full text-xs font-extrabold uppercase tracking-wide shrink-0">
+                  {t('common.status.inImprovement', 'Em melhoria')}
+                </span>
+              </div>
               
               {/* Botão de Microlearning 'i' Ajuda */}
               <button
@@ -1251,7 +1295,7 @@ export const SettingsView: React.FC = () => {
                       />
                     </div>
                     <p className="text-[11px] text-slate-500 font-medium">
-                      Padrão oficial utilizado na Europa, Brasil e na maior parte do mundo. Aplica hectares para área, quilogramas/litros para massa e volume, e bar para pressão.
+                      {t('settings.units.siDesc', 'Padrão oficial utilizado na Europa, Brasil e na maior parte do mundo. Aplica hectares para área, quilogramas/litros para massa e volume, e bar para pressão.')}
                     </p>
                   </label>
 
@@ -1280,7 +1324,7 @@ export const SettingsView: React.FC = () => {
                       />
                     </div>
                     <p className="text-[11px] text-slate-500 font-medium">
-                      Ideal para utilizadores nos EUA ou para quem opera maquinaria agrícola americana. Converte dados para acres, bushels, galões e libras por polegada quadrada (PSI).
+                      {t('settings.units.usDesc', 'Ideal para utilizadores nos EUA ou para quem opera maquinaria agrícola americana. Converte dados para acres, bushels, galões e libras por polegada quadrada (PSI).')}
                     </p>
                   </label>
 
@@ -1309,7 +1353,7 @@ export const SettingsView: React.FC = () => {
                       />
                     </div>
                     <p className="text-[11px] text-slate-500 font-medium">
-                      Configuração comum no Reino Unido, Canadá e Austrália. Combina hectares e litros com unidades imperiais como bushels e libras.
+                      {t('settings.units.ukDesc', 'Configuração comum no Reino Unido, Canadá e Austrália. Combina hectares e litros com unidades imperiais como bushels e libras.')}
                     </p>
                   </label>
 
@@ -1338,7 +1382,7 @@ export const SettingsView: React.FC = () => {
                       />
                     </div>
                     <p className="text-[11px] text-slate-500 font-medium">
-                      Indicado para pequenas e médias explorações focadas no comércio local tradicional. Inclui suporte a alqueire, arroba e quintal.
+                      {t('settings.units.tradDesc', 'Indicado para pequenas e médias explorações focadas no comércio local tradicional. Inclui suporte a alqueire, arroba e quintal.')}
                     </p>
                   </label>
                 </div>
@@ -1362,9 +1406,14 @@ export const SettingsView: React.FC = () => {
       {activeSubmenu === 'gestao_dados' && (
         <div className="space-y-8 animate-fade-in">
           <div className="bg-white p-6 sm:p-8 rounded-3xl shadow-soft border border-slate-200 space-y-8">
-            <h2 className="text-fluid-subtitle font-black text-[#114037] border-b border-slate-100 pb-4">
-              {t('settings.dataManagement.title', 'Definições — Gestão de Dados e Cópia de Segurança')}
-            </h2>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
+              <h2 className="text-fluid-subtitle font-black text-[#114037]">
+                {t('settings.dataManagement.title', 'Definições — Gestão de Dados e Cópia de Segurança')}
+              </h2>
+              <span className="self-start sm:self-center px-3 py-1 bg-amber-100 border border-amber-300 text-amber-900 rounded-full text-xs font-extrabold uppercase tracking-wide shrink-0">
+                {t('common.status.inImprovement', 'Em melhoria')}
+              </span>
+            </div>
 
             {/* Exportar e Importar */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -1376,13 +1425,24 @@ export const SettingsView: React.FC = () => {
                 <p className="text-xs text-slate-500">
                   {t('settings.dataManagement.exportDesc', 'Descarregue uma cópia de segurança completa em JSON ou exporte relatórios em CSV.')}
                 </p>
-                <div className="flex flex-wrap gap-2 pt-2">
-                  <button className="px-4 min-h-[44px] bg-[#114037] hover:bg-[#0d332c] text-white font-bold text-xs rounded-xl transition-all touch-target">
+                <div className="flex flex-wrap items-center gap-2 pt-2">
+                  <button
+                    disabled
+                    className="px-4 min-h-[44px] bg-slate-200 text-slate-500 font-bold text-xs rounded-xl cursor-not-allowed touch-target"
+                    title={t('settings.dataManagement.inImprovementNotice', 'Protótipo em melhoria — Funcionalidade de cópia de segurança e exportação em desenvolvimento.')}
+                  >
                     {t('settings.dataManagement.exportJson', 'Exportar JSON')}
                   </button>
-                  <button className="px-4 min-h-[44px] bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold text-xs rounded-xl transition-all touch-target">
+                  <button
+                    disabled
+                    className="px-4 min-h-[44px] bg-slate-200 text-slate-500 font-bold text-xs rounded-xl cursor-not-allowed touch-target"
+                    title={t('settings.dataManagement.inImprovementNotice', 'Protótipo em melhoria — Funcionalidade de cópia de segurança e exportação em desenvolvimento.')}
+                  >
                     {t('settings.dataManagement.exportCsv', 'Exportar CSV')}
                   </button>
+                  <span className="text-[10px] font-extrabold text-amber-800 bg-amber-100 px-2 py-0.5 rounded-full border border-amber-300">
+                    {t('common.status.inImprovement', 'Em melhoria')}
+                  </span>
                 </div>
               </div>
 
@@ -1394,9 +1454,18 @@ export const SettingsView: React.FC = () => {
                 <p className="text-xs text-slate-500">
                   {t('settings.dataManagement.importDesc', 'Restaure os seus perfis de cultura, atomizadores e bicos através de um ficheiro prévio.')}
                 </p>
-                <button className="px-4 min-h-[44px] bg-[#3CA64C] hover:bg-[#3AAA35] text-white font-bold text-xs rounded-xl transition-all touch-target">
-                  {t('settings.dataManagement.selectJson', 'Selecionar Ficheiro JSON')}
-                </button>
+                <div className="flex flex-wrap items-center gap-2 pt-2">
+                  <button
+                    disabled
+                    className="px-4 min-h-[44px] bg-slate-200 text-slate-500 font-bold text-xs rounded-xl cursor-not-allowed touch-target"
+                    title={t('settings.dataManagement.inImprovementNotice', 'Protótipo em melhoria — Funcionalidade de importação e restauro em desenvolvimento.')}
+                  >
+                    {t('settings.dataManagement.selectJson', 'Selecionar Ficheiro JSON')}
+                  </button>
+                  <span className="text-[10px] font-extrabold text-amber-800 bg-amber-100 px-2 py-0.5 rounded-full border border-amber-300">
+                    {t('common.status.inImprovement', 'Em melhoria')}
+                  </span>
+                </div>
               </div>
             </div>
 
@@ -1487,28 +1556,9 @@ export const SettingsView: React.FC = () => {
       )}
 
       {/* SUB-MENUS 3, 5, 6: NOTIFICAÇÕES, AJUDA E SOBRE */}
+      {/* SUB-MENU 4: NOTIFICAÇÕES (Newsletters & Alertas Operacionais) */}
       {activeSubmenu === 'notificacoes' && (
-        <div className="bg-white p-6 sm:p-8 rounded-3xl shadow-soft border border-slate-200 space-y-6 animate-fade-in">
-          <h2 className="text-fluid-subtitle font-black text-[#114037] border-b border-slate-100 pb-4">
-            {t('settings.notificationsTab.title', 'Definições — Preferências de Notificações')}
-          </h2>
-          <form onSubmit={handleSaveNotifications} className="space-y-6">
-            <div className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-200">
-              <div>
-                <span className="font-extrabold text-slate-900 text-xs block">
-                  {t('settings.notificationsTab.platformAlerts', 'Notificações da Plataforma')}
-                </span>
-                <span className="text-xs text-slate-500">
-                  {t('settings.notificationsTab.platformAlertsDesc', 'Receber alertas operacionais no telemóvel e email')}
-                </span>
-              </div>
-              <input type="checkbox" checked={masterNotifications} onChange={(e) => setMasterNotifications(e.target.checked)} className="w-5 h-5 accent-[#3CA64C]" />
-            </div>
-            <button type="submit" className="w-full min-h-[48px] bg-[#3CA64C] text-white font-black text-xs rounded-2xl shadow-md touch-target cursor-pointer">
-              {t('settings.notificationsTab.save', 'Guardar Definições de Notificações')}
-            </button>
-          </form>
-        </div>
+        <SettingsNotificationsTab />
       )}
 
       {activeSubmenu === 'ajuda' && (

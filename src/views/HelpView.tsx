@@ -4,6 +4,7 @@ import {
   Mail, ExternalLink
 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
+import { VersionCard } from '../components/version/VersionCard';
 
 export const HelpView: React.FC = () => {
   const { t } = useLanguage();
@@ -119,10 +120,8 @@ export const HelpView: React.FC = () => {
         </div>
       </div>
 
-      {/* Versão */}
-      <div className="p-4 bg-slate-100 rounded-2xl border border-slate-200 text-center text-xs font-mono-numbers text-slate-500 font-bold">
-        {t('help.version', 'Versão: 1.0.1-rc1 (DATERRA Smart PWA)')}
-      </div>
+      {/* Cartão de Versão Oficial DATERRA Smart */}
+      <VersionCard />
     </div>
   );
 };
