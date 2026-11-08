@@ -21,8 +21,11 @@ export async function verifyTurnstileToken(
     if (process.env.NODE_ENV === 'test' || process.env.FUNCTIONS_EMULATOR === 'true') {
       return { success: true };
     }
-    console.warn('[Turnstile] TURNSTILE_SECRET_KEY não configurada no ambiente. Validação ignorada em modo permissivo.');
-    return { success: true };
+    console.error('[Turnstile] Falha de Segurança: TURNSTILE_SECRET_KEY não configurada no ambiente. Rejeitando por Fail-Closed (SEC-02).');
+    return {
+      success: false,
+      error: 'Configuração de segurança anti-robô não inicializada no servidor. Contacte o suporte.'
+    };
   }
 
   if (!token || token.trim() === '') {

@@ -17,7 +17,7 @@ import path from 'node:path';
 // Importa os módulos compilados do functions/lib/auth
 const { validateRedirectUrl } = await import('../functions/lib/auth/redirectUrlValidator.js');
 const { verifyTurnstileToken } = await import('../functions/lib/auth/turnstileVerifier.js');
-const { checkAuthRateLimit, clearInMemoryRateLimits, RATE_LIMIT_WINDOW_MS, MAX_REQUESTS_PER_WINDOW } = await import('../functions/lib/auth/rateLimiter.js');
+const { checkAuthRateLimit, clearInMemoryRateLimits, RATE_LIMIT_WINDOW_MS, MAX_REQUESTS_PER_WINDOW, MAX_REQUESTS_PER_IP_WINDOW } = await import('../functions/lib/auth/rateLimiter.js');
 
 describe('SEC-05: Validação Estrita de Redirecionamento (Anti-Open Redirect)', () => {
 
@@ -29,8 +29,10 @@ describe('SEC-05: Validação Estrita de Redirecionamento (Anti-Open Redirect)',
       'https://daterra-digital.github.io/daterra-smart/',
       'https://daterra-digital.github.io/daterra-smart/#/login',
       'http://localhost:5173/daterra-smart/login',
+      'http://localhost:5175/daterra-smart/login',
       'http://localhost:3000/#/login',
-      'http://127.0.0.1:5173/login'
+      'http://127.0.0.1:5173/login',
+      'http://127.0.0.1:5175/login'
     ];
 
     for (const url of validUrls) {
@@ -80,6 +82,18 @@ describe('SEC-03: Validação do Desafio Anti-Robô Cloudflare Turnstile', () =>
     try {
       const result = await verifyTurnstileToken('', '127.0.0.1', '');
       assert.equal(result.success, true);
+    } finally {
+      process.env.NODE_ENV = originalEnv;
+    }
+  });
+
+  it('2.3. Em produção sem secret key, deve rejeitar por Fail-Closed (SEC-02)', async () => {
+    const originalEnv = process.env.NODE_ENV;
+    process.env.NODE_ENV = 'production';
+    try {
+      const result = await verifyTurnstileToken('mock_token', '127.0.0.1', '');
+      assert.equal(result.success, false);
+      assert.match(result.error, /não inicializada no servidor/);
     } finally {
       process.env.NODE_ENV = originalEnv;
     }
@@ -176,6 +190,26 @@ describe('SEC-04: Rate Limiting Distribuído e Cooldown Anti-Spam', () => {
     await assert.doesNotReject(async () => {
       await checkAuthRateLimit(emailB, t);
     });
+  });
+
+  it('3.6. Deve limitar pedidos por IP para prevenir rotação de e-mails (SEC-15)', async () => {
+    const ip = '198.51.100.42';
+    let t = Date.now();
+
+    // Faz 15 pedidos de e-mails diferentes a partir do mesmo IP
+    for (let i = 0; i < MAX_REQUESTS_PER_IP_WINDOW; i++) {
+      const email = `attacker_${i}@teste.pt`;
+      await checkAuthRateLimit(email, ip, t);
+      t += 1000;
+    }
+
+    // 16º pedido a partir do mesmo IP deve ser rejeitado mesmo com e-mail novo
+    await assert.rejects(
+      async () => {
+        await checkAuthRateLimit('attacker_novo@teste.pt', ip, t);
+      },
+      /Demasiados pedidos a partir desta ligação/
+    );
   });
 
 });

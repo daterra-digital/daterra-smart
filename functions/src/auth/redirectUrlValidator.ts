@@ -7,8 +7,8 @@
 const ALLOWED_ORIGIN_PATTERNS: (string | RegExp)[] = [
   /^https:\/\/smart\.daterra\.com\.pt(\/|$)/i,
   /^https:\/\/daterra-digital\.github\.io(\/|$)/i,
-  /^http:\/\/localhost:(3000|4173|5173)(\/|$)/i,
-  /^http:\/\/127\.0\.0\.1:(3000|4173|5173)(\/|$)/i
+  /^http:\/\/localhost:(3000|4173|5173|5175)(\/|$)/i,
+  /^http:\/\/127\.0\.0\.1:(3000|4173|5173|5175)(\/|$)/i
 ];
 
 export function validateRedirectUrl(urlCandidate?: string, defaultUrl?: string): string {

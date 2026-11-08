@@ -71,12 +71,23 @@ export const sendCustomMagicLink = onCall(
     const data = (request.data || {}) as SendCustomMagicLinkPayload;
     const cleanEmail = (data.email || '').trim().toLowerCase();
 
-    // 1. Validação de formato de e-mail
-    if (!cleanEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
-      throw new HttpsError('invalid-argument', 'Por favor introduza um endereço de e-mail válido.');
+    // 1. Validação de formato e tamanho de e-mail (SEC-20)
+    if (!cleanEmail || cleanEmail.length > 100 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
+      throw new HttpsError('invalid-argument', 'Por favor introduza um endereço de e-mail válido (máx. 100 caracteres).');
     }
 
-    // 2. Validação estrita de URL de redirecionamento (SEC-05 - Anti Open Redirect / Phishing)
+    // 1.1. Limites estritos de tamanho nos campos de registo (SEC-20)
+    if (data.firstName && data.firstName.length > 100) {
+      throw new HttpsError('invalid-argument', 'O nome não pode exceder 100 caracteres.');
+    }
+    if (data.lastName && data.lastName.length > 100) {
+      throw new HttpsError('invalid-argument', 'O apelido não pode exceder 100 caracteres.');
+    }
+    if (data.companyName && data.companyName.length > 150) {
+      throw new HttpsError('invalid-argument', 'O nome da entidade não pode exceder 150 caracteres.');
+    }
+
+    // 2. Validação estrita de URL de redirecionamento (SEC-05 & SEC-03)
     let validatedRedirectUrl: string;
     try {
       validatedRedirectUrl = validateRedirectUrl(data.redirectUrl, DEFAULT_APP_URL);
@@ -84,16 +95,16 @@ export const sendCustomMagicLink = onCall(
       throw new HttpsError('invalid-argument', urlErr?.message || 'URL de redirecionamento não autorizado.');
     }
 
-    // 3. Validação do Desafio Anti-Robô Cloudflare Turnstile (SEC-03)
+    // 3. Validação do Desafio Anti-Robô Cloudflare Turnstile (SEC-03 & SEC-02)
     const clientIp = request.rawRequest?.ip;
     const turnstileResult = await verifyTurnstileToken(data.captchaToken, clientIp);
     if (!turnstileResult.success) {
       throw new HttpsError('permission-denied', turnstileResult.error || 'Verificação anti-robô falhou.');
     }
 
-    // 4. Rate-Limiting Distribuído (SEC-04 - Prevenção de Abuso e Esgotamento de Quota)
+    // 4. Rate-Limiting Distribuído por E-mail e IP (SEC-04 & SEC-15)
     try {
-      await checkAuthRateLimit(cleanEmail);
+      await checkAuthRateLimit(cleanEmail, clientIp);
     } catch (rateErr: any) {
       throw new HttpsError('resource-exhausted', rateErr?.message || 'Limite de pedidos excedido.');
     }

@@ -1,6 +1,6 @@
 /**
- * DATERRA Smart - Limitador de Taxa de Pedidos de Autenticação (SEC-04)
- * Prevenção de Abuso, Ataques de Força Bruta e Esgotamento de Quota Brevo
+ * DATERRA Smart - Limitador de Taxa de Pedidos de Autenticação (SEC-04 & SEC-15)
+ * Prevenção de Abuso, Ataques de Força Bruta e Esgotamento de Quota Brevo por E-mail e IP
  * (< 200 LOC)
  */
 
@@ -8,7 +8,8 @@ import * as crypto from 'crypto';
 import * as admin from 'firebase-admin';
 
 export const RATE_LIMIT_WINDOW_MS = 15 * 60 * 1000; // 15 minutos
-export const MAX_REQUESTS_PER_WINDOW = 5;
+export const MAX_REQUESTS_PER_WINDOW = 5; // Por e-mail
+export const MAX_REQUESTS_PER_IP_WINDOW = 15; // Por IP (SEC-15)
 export const MIN_COOLDOWN_MS = 10 * 1000; // 10 segundos entre cliques consecutivos
 
 interface RateLimitEntry {
@@ -20,22 +21,37 @@ interface RateLimitEntry {
 // Fallback em memória para ambientes sem Firestore ativo (ex: testes unitários offline)
 const inMemoryCache = new Map<string, RateLimitEntry>();
 
-function getEmailHash(email: string): string {
-  return crypto.createHash('sha256').update(email.trim().toLowerCase()).digest('hex').substring(0, 32);
+function getHash(val: string): string {
+  return crypto.createHash('sha256').update(val.trim().toLowerCase()).digest('hex').substring(0, 32);
 }
 
 export async function checkAuthRateLimit(
   email: string,
-  now: number = Date.now(),
+  nowOrIp?: number | string,
+  maybeNowOrFirestore?: number | admin.firestore.Firestore,
   customFirestore?: admin.firestore.Firestore
 ): Promise<void> {
   const cleanEmail = email.trim().toLowerCase();
-  const hash = getEmailHash(cleanEmail);
-
+  let clientIp: string | undefined;
+  let now: number = Date.now();
   let firestore: admin.firestore.Firestore | null = null;
-  if (customFirestore) {
-    firestore = customFirestore;
+
+  if (typeof nowOrIp === 'string') {
+    clientIp = nowOrIp.trim();
+    if (typeof maybeNowOrFirestore === 'number') {
+      now = maybeNowOrFirestore;
+      firestore = customFirestore || null;
+    } else {
+      firestore = (maybeNowOrFirestore as admin.firestore.Firestore) || customFirestore || null;
+    }
+  } else if (typeof nowOrIp === 'number') {
+    now = nowOrIp;
+    firestore = (maybeNowOrFirestore as admin.firestore.Firestore) || customFirestore || null;
   } else {
+    firestore = (maybeNowOrFirestore as admin.firestore.Firestore) || customFirestore || null;
+  }
+
+  if (!firestore) {
     try {
       if (admin.apps.length > 0) {
         firestore = admin.firestore();
@@ -45,57 +61,79 @@ export async function checkAuthRateLimit(
     }
   }
 
+  const emailHash = 'email_' + getHash(cleanEmail);
+  const ipHash = clientIp ? 'ip_' + getHash(clientIp) : null;
+
+  // 1. Verificação no Firestore (se disponível)
   if (firestore) {
-    const docRef = firestore.collection('_auth_rate_limits').doc(hash);
+    // 1.1. Limite por IP (SEC-15)
+    if (ipHash) {
+      const ipDocRef = firestore.collection('_auth_rate_limits').doc(ipHash);
+      const ipSnap = await ipDocRef.get();
+      if (ipSnap.exists) {
+        const ipData = ipSnap.data() as RateLimitEntry;
+        const ipElapsed = now - (ipData.windowStart || 0);
+        if (ipElapsed <= RATE_LIMIT_WINDOW_MS && (ipData.count || 0) >= MAX_REQUESTS_PER_IP_WINDOW) {
+          throw new Error('Demasiados pedidos a partir desta ligação de rede. Por favor aguarde antes de tentar novamente.');
+        }
+        if (ipElapsed > RATE_LIMIT_WINDOW_MS) {
+          await ipDocRef.set({ windowStart: now, count: 1, lastRequest: now, updatedAt: admin.firestore.FieldValue.serverTimestamp() });
+        } else {
+          await ipDocRef.update({ count: (ipData.count || 0) + 1, lastRequest: now, updatedAt: admin.firestore.FieldValue.serverTimestamp() });
+        }
+      } else {
+        await ipDocRef.set({ windowStart: now, count: 1, lastRequest: now, updatedAt: admin.firestore.FieldValue.serverTimestamp() });
+      }
+    }
+
+    // 1.2. Limite por E-mail (SEC-04)
+    const docRef = firestore.collection('_auth_rate_limits').doc(emailHash);
     const snap = await docRef.get();
 
     if (!snap.exists) {
-      await docRef.set({
-        windowStart: now,
-        count: 1,
-        lastRequest: now,
-        updatedAt: admin.firestore.FieldValue.serverTimestamp()
-      });
+      await docRef.set({ windowStart: now, count: 1, lastRequest: now, updatedAt: admin.firestore.FieldValue.serverTimestamp() });
       return;
     }
 
     const data = snap.data() as RateLimitEntry;
     const windowElapsed = now - (data.windowStart || 0);
 
-    // Se a janela expirou, reinicia a contagem
     if (windowElapsed > RATE_LIMIT_WINDOW_MS) {
-      await docRef.set({
-        windowStart: now,
-        count: 1,
-        lastRequest: now,
-        updatedAt: admin.firestore.FieldValue.serverTimestamp()
-      });
+      await docRef.set({ windowStart: now, count: 1, lastRequest: now, updatedAt: admin.firestore.FieldValue.serverTimestamp() });
       return;
     }
 
-    // Cooldown mínimo de 10s para evitar cliques múltiplos acidentais
     if (now - (data.lastRequest || 0) < MIN_COOLDOWN_MS) {
       throw new Error('Aguarde alguns segundos antes de solicitar um novo link de acesso.');
     }
 
-    // Limite máximo de pedidos por janela
     if ((data.count || 0) >= MAX_REQUESTS_PER_WINDOW) {
       const remainingMinutes = Math.max(1, Math.ceil((RATE_LIMIT_WINDOW_MS - windowElapsed) / 60000));
       throw new Error(`Limite de ${MAX_REQUESTS_PER_WINDOW} pedidos atingido para este e-mail. Por favor aguarde ${remainingMinutes} minuto(s) antes de tentar novamente.`);
     }
 
-    await docRef.update({
-      count: (data.count || 0) + 1,
-      lastRequest: now,
-      updatedAt: admin.firestore.FieldValue.serverTimestamp()
-    });
+    await docRef.update({ count: (data.count || 0) + 1, lastRequest: now, updatedAt: admin.firestore.FieldValue.serverTimestamp() });
     return;
   }
 
-  // Fallback em memória (para desenvolvimento local / testes)
-  const current = inMemoryCache.get(hash);
+  // 2. Fallback em memória (para testes unitários locais / emulador)
+  if (ipHash) {
+    const ipEntry = inMemoryCache.get(ipHash);
+    if (ipEntry && now - ipEntry.windowStart <= RATE_LIMIT_WINDOW_MS && ipEntry.count >= MAX_REQUESTS_PER_IP_WINDOW) {
+      throw new Error('Demasiados pedidos a partir desta ligação de rede. Por favor aguarde antes de tentar novamente.');
+    }
+    if (!ipEntry || now - ipEntry.windowStart > RATE_LIMIT_WINDOW_MS) {
+      inMemoryCache.set(ipHash, { windowStart: now, count: 1, lastRequest: now });
+    } else {
+      ipEntry.count += 1;
+      ipEntry.lastRequest = now;
+      inMemoryCache.set(ipHash, ipEntry);
+    }
+  }
+
+  const current = inMemoryCache.get(emailHash);
   if (!current || now - current.windowStart > RATE_LIMIT_WINDOW_MS) {
-    inMemoryCache.set(hash, { windowStart: now, count: 1, lastRequest: now });
+    inMemoryCache.set(emailHash, { windowStart: now, count: 1, lastRequest: now });
     return;
   }
 
@@ -111,7 +149,7 @@ export async function checkAuthRateLimit(
 
   current.count += 1;
   current.lastRequest = now;
-  inMemoryCache.set(hash, current);
+  inMemoryCache.set(emailHash, current);
 }
 
 export function clearInMemoryRateLimits(): void {
