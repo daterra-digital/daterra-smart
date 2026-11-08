@@ -52,6 +52,7 @@ describe('SEC-05: Regras de Segurança do Cloud Firestore (firestore.rules)', ()
     assert.ok(rules.includes('match /_auth_rate_limits/{docId}'), 'Deve mapear _auth_rate_limits');
     assert.ok(rules.includes('match /user_moodle_links/{uid}'), 'Deve mapear user_moodle_links');
     assert.ok(rules.includes('match /academy_idempotency/{mutationId}'), 'Deve mapear academy_idempotency');
+    assert.ok(rules.includes('match /_user_deletion_ops/{uid}'), 'Deve mapear _user_deletion_ops');
   });
 
   it('6. Deve conter fecho global Default Deny', () => {
@@ -67,6 +68,41 @@ describe('SEC-05: Regras de Segurança do Cloud Firestore (firestore.rules)', ()
     const parsed = JSON.parse(raw);
     assert.ok(Array.isArray(parsed.indexes));
     assert.ok(Array.isArray(parsed.fieldOverrides));
+  });
+
+  it('8. Não deve conter regra recursiva permissiva para subcoleções de users', () => {
+    const rules = fs.readFileSync(path.resolve('firestore.rules'), 'utf8');
+    assert.ok(
+      !rules.includes('match /{subcollection}/{docId=**}'),
+      'Não deve conter wildcard permissivo de subcoleções em users/{userId}'
+    );
+  });
+
+  it('9. Não deve usar allow ... if false como mecanismo de sobreposição enganoso', () => {
+    const rules = fs.readFileSync(path.resolve('firestore.rules'), 'utf8');
+    // Verifica que match /users/{userId} não tem regras internas redundantes com if false sobrepostas
+    const userMatchSection = rules.match(/match\s+\/users\/\{userId\}\s*\{([\s\S]*?)\n\s{4}\}/);
+    assert.ok(userMatchSection, 'Secção users/{userId} deve existir');
+    const userBody = userMatchSection[1];
+    assert.ok(
+      !userBody.includes('match /{subcollection}'),
+      'users/{userId} não deve conter sub-match com if false tentando anular regras pai'
+    );
+  });
+
+  it('10. Não deve usar request.resource.size (propriedade exclusiva de Cloud Storage Rules)', () => {
+    const rules = fs.readFileSync(path.resolve('firestore.rules'), 'utf8');
+    assert.ok(
+      !rules.includes('request.resource.size'),
+      'request.resource.size pertence a Cloud Storage; em Firestore usa-se data.size() para número de campos'
+    );
+  });
+
+  it('11. Proteção estrita contra mutação de privilégios e role admin', () => {
+    const rules = fs.readFileSync(path.resolve('firestore.rules'), 'utf8');
+    assert.ok(rules.includes("request.resource.data.role != 'admin'"), 'Deve impedir atribuição de role admin');
+    assert.ok(rules.includes("request.resource.data.isAdmin == false"), 'isAdmin deve ser sempre false');
+    assert.ok(rules.includes("request.resource.data.tier == 'free'"), 'tier inicial deve ser free');
   });
 
 });

@@ -11,6 +11,7 @@ export const RATE_LIMIT_WINDOW_MS = 15 * 60 * 1000; // 15 minutos
 export const MAX_REQUESTS_PER_WINDOW = 5; // Por e-mail
 export const MAX_REQUESTS_PER_IP_WINDOW = 15; // Por IP (SEC-15)
 export const MIN_COOLDOWN_MS = 10 * 1000; // 10 segundos entre cliques consecutivos
+export const AUTH_RATE_LIMIT_RETENTION_MS = 2 * 60 * 60 * 1000; // 2 horas: prazo mínimo necessário (8x a janela de 15m)
 
 interface RateLimitEntry {
   windowStart: number;
@@ -20,9 +21,10 @@ interface RateLimitEntry {
 
 // Fallback em memória para ambientes sem Firestore ativo (ex: testes unitários offline)
 const inMemoryCache = new Map<string, RateLimitEntry>();
+const RATE_LIMIT_PEPPER = process.env.RATE_LIMIT_PEPPER || 'daterra-rate-limit-pepper-v1-2026';
 
 function getHash(val: string): string {
-  return crypto.createHash('sha256').update(val.trim().toLowerCase()).digest('hex').substring(0, 32);
+  return crypto.createHmac('sha256', RATE_LIMIT_PEPPER).update(val.trim().toLowerCase()).digest('hex').substring(0, 32);
 }
 
 export async function checkAuthRateLimit(
@@ -76,22 +78,25 @@ export async function checkAuthRateLimit(
         if (ipElapsed <= RATE_LIMIT_WINDOW_MS && (ipData.count || 0) >= MAX_REQUESTS_PER_IP_WINDOW) {
           throw new Error('Demasiados pedidos a partir desta ligação de rede. Por favor aguarde antes de tentar novamente.');
         }
+        const ttlTimestamp = admin.firestore.Timestamp.fromMillis(now + AUTH_RATE_LIMIT_RETENTION_MS);
         if (ipElapsed > RATE_LIMIT_WINDOW_MS) {
-          await ipDocRef.set({ windowStart: now, count: 1, lastRequest: now, updatedAt: admin.firestore.FieldValue.serverTimestamp() });
+          await ipDocRef.set({ windowStart: now, count: 1, lastRequest: now, expiresAt: ttlTimestamp, updatedAt: admin.firestore.FieldValue.serverTimestamp() });
         } else {
-          await ipDocRef.update({ count: (ipData.count || 0) + 1, lastRequest: now, updatedAt: admin.firestore.FieldValue.serverTimestamp() });
+          await ipDocRef.update({ count: (ipData.count || 0) + 1, lastRequest: now, expiresAt: ttlTimestamp, updatedAt: admin.firestore.FieldValue.serverTimestamp() });
         }
       } else {
-        await ipDocRef.set({ windowStart: now, count: 1, lastRequest: now, updatedAt: admin.firestore.FieldValue.serverTimestamp() });
+        const ttlTimestamp = admin.firestore.Timestamp.fromMillis(now + AUTH_RATE_LIMIT_RETENTION_MS);
+        await ipDocRef.set({ windowStart: now, count: 1, lastRequest: now, expiresAt: ttlTimestamp, updatedAt: admin.firestore.FieldValue.serverTimestamp() });
       }
     }
 
     // 1.2. Limite por E-mail (SEC-04)
     const docRef = firestore.collection('_auth_rate_limits').doc(emailHash);
     const snap = await docRef.get();
+    const ttlTimestamp = admin.firestore.Timestamp.fromMillis(now + AUTH_RATE_LIMIT_RETENTION_MS);
 
     if (!snap.exists) {
-      await docRef.set({ windowStart: now, count: 1, lastRequest: now, updatedAt: admin.firestore.FieldValue.serverTimestamp() });
+      await docRef.set({ windowStart: now, count: 1, lastRequest: now, expiresAt: ttlTimestamp, updatedAt: admin.firestore.FieldValue.serverTimestamp() });
       return;
     }
 
@@ -99,7 +104,7 @@ export async function checkAuthRateLimit(
     const windowElapsed = now - (data.windowStart || 0);
 
     if (windowElapsed > RATE_LIMIT_WINDOW_MS) {
-      await docRef.set({ windowStart: now, count: 1, lastRequest: now, updatedAt: admin.firestore.FieldValue.serverTimestamp() });
+      await docRef.set({ windowStart: now, count: 1, lastRequest: now, expiresAt: ttlTimestamp, updatedAt: admin.firestore.FieldValue.serverTimestamp() });
       return;
     }
 
@@ -112,7 +117,7 @@ export async function checkAuthRateLimit(
       throw new Error(`Limite de ${MAX_REQUESTS_PER_WINDOW} pedidos atingido para este e-mail. Por favor aguarde ${remainingMinutes} minuto(s) antes de tentar novamente.`);
     }
 
-    await docRef.update({ count: (data.count || 0) + 1, lastRequest: now, updatedAt: admin.firestore.FieldValue.serverTimestamp() });
+    await docRef.update({ count: (data.count || 0) + 1, lastRequest: now, expiresAt: ttlTimestamp, updatedAt: admin.firestore.FieldValue.serverTimestamp() });
     return;
   }
 
@@ -154,4 +159,25 @@ export async function checkAuthRateLimit(
 
 export function clearInMemoryRateLimits(): void {
   inMemoryCache.clear();
+}
+
+/**
+ * Função de limpeza manual ou agendada para registos expirados em _auth_rate_limits.
+ */
+export async function cleanupExpiredAuthRateLimits(
+  firestore?: admin.firestore.Firestore
+): Promise<number> {
+  const db = firestore || (admin.apps.length > 0 ? admin.firestore() : null);
+  if (!db) return 0;
+
+  const now = admin.firestore.Timestamp.now();
+  const snap = await db.collection('_auth_rate_limits').where('expiresAt', '<=', now).limit(100).get();
+  if (snap.empty) return 0;
+
+  const batch = db.batch();
+  for (const doc of snap.docs) {
+    batch.delete(doc.ref);
+  }
+  await batch.commit();
+  return snap.size;
 }

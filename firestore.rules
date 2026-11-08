@@ -47,8 +47,9 @@ rules_version = '2';
 // Document ID: Mutation UUID
 // Purpose: Backend transactional idempotency registry. Client access strictly forbidden.
 //
-// Subcollections: users/{userId}/{subcollection}/{docId=**}
-// Purpose: User-scoped nested data (presets, audit records, export history). Scoped to owner.
+// Subcollections: Currently NOT permitted client-side (Zero Client Subcollections).
+// All operational farm data resides offline in Dexie.js v10 / IndexedDB.
+// Default Deny applies to any nested paths under users/{userId}/**.
 //
 // Catch-all: /{document=**}
 // Default Deny: All unmapped documents and collections are rejected.
@@ -212,10 +213,9 @@ service cloud.firestore {
       // Delete: strictly forbidden client-side
       allow delete: if false;
 
-      // Subcollections: strictly scoped to the document owner
-      match /{subcollection}/{docId=**} {
-        allow read, write: if isOwner(userId);
-      }
+      // Note: Subcollections under users/{userId} are strictly forbidden.
+      // Rules are non-recursive without explicit wildcard match statements.
+      // Unmapped subcollection requests fall through to Global Default Deny.
     }
 
     // ===============================================================
@@ -235,6 +235,11 @@ service cloud.firestore {
 
     // Transactional idempotency store (Admin SDK only)
     match /academy_idempotency/{mutationId} {
+      allow read, write: if false;
+    }
+
+    // Operation audit registry for account deletion resumption (Admin SDK only)
+    match /_user_deletion_ops/{uid} {
       allow read, write: if false;
     }
 

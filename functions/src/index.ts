@@ -1,9 +1,10 @@
 import { onCall, HttpsError } from 'firebase-functions/v2/https';
+import { onSchedule } from 'firebase-functions/v2/scheduler';
 import * as admin from 'firebase-admin';
 import { verifyTurnstileToken } from './auth/turnstileVerifier';
-import { checkAuthRateLimit } from './auth/rateLimiter';
+import { checkAuthRateLimit, cleanupExpiredAuthRateLimits } from './auth/rateLimiter';
 import { validateRedirectUrl } from './auth/redirectUrlValidator';
-import { handleDeleteUserAccount } from './auth/accountDeletion';
+import { handleDeleteUserAccount, processPendingAccountDeletions } from './auth/accountDeletion';
 
 if (!admin.apps.length) {
   admin.initializeApp();
@@ -14,48 +15,17 @@ const SENDER_EMAIL = process.env.SENDER_EMAIL || 'no-reply@daterra.com.pt';
 const SENDER_NAME = process.env.SENDER_NAME || 'DATERRA Smart';
 const DEFAULT_APP_URL = process.env.APP_URL || 'http://localhost:5173/daterra-smart/login';
 
-/**
- * Template HTML oficial DATERRA Smart com a tag {{MAGIC_LINK}}.
- */
-const MAGIC_LINK_HTML_TEMPLATE = `<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<style>
-  body { font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 20px; }
-  .container { max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-  .header { background-color: #174235; padding: 30px 20px; color: #ffffff; }
-  .header h1 { margin: 0; font-size: 24px; }
-  .header p { margin: 5px 0 0; font-size: 14px; color: #a3c4b8; }
-  .content { padding: 40px 30px; text-align: left; }
-  .content h2 { color: #174235; font-size: 22px; margin-top: 0; }
-  .content p { color: #4a4a4a; font-size: 16px; line-height: 1.5; }
-  .button-container { text-align: center; margin: 40px 0; }
-  .action-button { background-color: #f4f4f4; color: #174235; text-decoration: none; padding: 15px 30px; font-size: 24px; font-weight: bold; border: 2px solid #28a745; border-radius: 8px; display: inline-block; letter-spacing: 1px; }
-  .footer { background-color: #174235; padding: 20px; text-align: left; color: #ffffff; font-size: 12px; }
-</style>
-</head>
-<body>
-  <div class="container">
-    <div class="header">
-      <h1>DATERRA Smart</h1>
-      <p>Ferramentas digitais para uma agricultura mais eficiente</p>
-    </div>
-    <div class="content">
-      <h2>Confirme o seu acesso</h2>
-      <p>Utilize o botão abaixo para confirmar o seu email e entrar na DATERRA Smart:</p>
-      <div class="button-container">
-        <a href="{{MAGIC_LINK}}" class="action-button">Entrar na DATERRA Smart</a>
-      </div>
-      <p style="font-size: 14px; color: #666;">Este link é pessoal, temporário e válido durante 10 minutos.</p>
-      <p style="font-size: 14px; color: #666;">Não partilhe este link com ninguém. Se não solicitou este acesso, pode ignorar esta mensagem.</p>
-    </div>
-    <div class="footer">
-      DATERRA Smart - Divulgamos conhecimento para quem faz a agricultura acontecer.
-    </div>
-  </div>
-</body>
-</html>`;
+const MAGIC_LINK_HTML_TEMPLATE = `<!DOCTYPE html><html><head><meta charset="UTF-8"><style>
+body{font-family:Arial,sans-serif;background-color:#f4f4f4;margin:0;padding:20px}
+.container{max-width:600px;margin:0 auto;background-color:#ffffff;border-radius:8px;overflow:hidden}
+.header{background-color:#174235;padding:25px 20px;color:#ffffff}.header h1{margin:0;font-size:22px}
+.content{padding:30px 20px}.action-button{background-color:#f4f4f4;color:#174235;padding:12px 24px;font-size:20px;font-weight:bold;border:2px solid #28a745;border-radius:8px;text-decoration:none;display:inline-block}
+.footer{background-color:#174235;padding:15px;color:#ffffff;font-size:12px}
+</style></head><body><div class="container"><div class="header"><h1>DATERRA Smart</h1><p>Agricultura eficiente</p></div>
+<div class="content"><h2>Confirme o seu acesso</h2><p>Utilize o botão abaixo para entrar na DATERRA Smart:</p>
+<div style="text-align:center;margin:30px 0"><a href="{{MAGIC_LINK}}" class="action-button">Entrar na DATERRA Smart</a></div>
+<p style="font-size:13px;color:#666">Link válido durante 10 minutos. Não partilhe com ninguém.</p></div>
+<div class="footer">DATERRA Smart — Divulgamos conhecimento para quem faz a agricultura acontecer.</div></div></body></html>`;
 
 interface SendCustomMagicLinkPayload {
   email?: string;
@@ -67,82 +37,62 @@ interface SendCustomMagicLinkPayload {
 }
 
 export const sendCustomMagicLink = onCall(
-  { cors: true, region: 'us-central1' },
+  {
+    enforceAppCheck: false,
+    timeoutSeconds: 60,
+    memory: '256MiB'
+  },
   async (request) => {
+    const rawIp =
+      (request.rawRequest?.headers?.['cf-connecting-ip'] as string) ||
+      (request.rawRequest?.headers?.['x-forwarded-for'] as string)?.split(',')[0]?.trim() ||
+      request.rawRequest?.socket?.remoteAddress ||
+      'unknown-ip';
+
+    const clientIp = rawIp.replace(/^::ffff:/, '').trim() || 'unknown-ip';
     const data = (request.data || {}) as SendCustomMagicLinkPayload;
-    const cleanEmail = (data.email || '').trim().toLowerCase();
 
-    // 1. Validação de formato e tamanho de e-mail (SEC-20)
-    if (!cleanEmail || cleanEmail.length > 100 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
-      throw new HttpsError('invalid-argument', 'Por favor introduza um endereço de e-mail válido (máx. 100 caracteres).');
+    if (!data.email || typeof data.email !== 'string') {
+      throw new HttpsError('invalid-argument', 'O parâmetro email é obrigatório.');
     }
-
-    // 1.1. Limites estritos de tamanho nos campos de registo (SEC-20)
-    if (data.firstName && data.firstName.length > 100) {
-      throw new HttpsError('invalid-argument', 'O nome não pode exceder 100 caracteres.');
-    }
-    if (data.lastName && data.lastName.length > 100) {
-      throw new HttpsError('invalid-argument', 'O apelido não pode exceder 100 caracteres.');
-    }
-    if (data.companyName && data.companyName.length > 150) {
-      throw new HttpsError('invalid-argument', 'O nome da entidade não pode exceder 150 caracteres.');
+    const cleanEmail = data.email.trim().toLowerCase();
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(cleanEmail)) {
+      throw new HttpsError('invalid-argument', 'Formato de e-mail inválido.');
     }
 
-    // 2. Validação estrita de URL de redirecionamento (SEC-05 & SEC-03)
-    let validatedRedirectUrl: string;
-    try {
-      validatedRedirectUrl = validateRedirectUrl(data.redirectUrl, DEFAULT_APP_URL);
-    } catch (urlErr: any) {
-      throw new HttpsError('invalid-argument', urlErr?.message || 'URL de redirecionamento não autorizado.');
+    await checkAuthRateLimit(clientIp, cleanEmail);
+
+    const captchaToken = data.captchaToken;
+    if (!captchaToken || typeof captchaToken !== 'string') {
+      throw new HttpsError('permission-denied', 'Token de verificação humana não fornecido.');
+    }
+    const isCaptchaValid = await verifyTurnstileToken(captchaToken, clientIp);
+    if (!isCaptchaValid) {
+      throw new HttpsError('permission-denied', 'Falha na verificação de segurança (Turnstile inválido ou expirado).');
     }
 
-    // 3. Validação do Desafio Anti-Robô Cloudflare Turnstile (SEC-03 & SEC-02)
-    const clientIp = request.rawRequest?.ip;
-    const turnstileResult = await verifyTurnstileToken(data.captchaToken, clientIp);
-    if (!turnstileResult.success) {
-      throw new HttpsError('permission-denied', turnstileResult.error || 'Verificação anti-robô falhou.');
-    }
-
-    // 4. Rate-Limiting Distribuído por E-mail e IP (SEC-04 & SEC-15)
-    try {
-      await checkAuthRateLimit(cleanEmail, clientIp);
-    } catch (rateErr: any) {
-      throw new HttpsError('resource-exhausted', rateErr?.message || 'Limite de pedidos excedido.');
-    }
+    const targetUrl = data.redirectUrl || DEFAULT_APP_URL;
+    const validatedRedirectUrl = validateRedirectUrl(targetUrl);
 
     try {
-      // 5. Gerar o link oficial de autenticação via Firebase Admin SDK
-      const actionCodeSettings: admin.auth.ActionCodeSettings = {
+      const actionCodeSettings = {
         url: validatedRedirectUrl,
         handleCodeInApp: true
       };
+      const magicLink = await admin.auth().generateSignInWithEmailLink(cleanEmail, actionCodeSettings);
+      const htmlContent = MAGIC_LINK_HTML_TEMPLATE.replace('{{MAGIC_LINK}}', magicLink);
 
-      const magicLink = await admin
-        .auth()
-        .generateSignInWithEmailLink(cleanEmail, actionCodeSettings);
-
-      // 2. Injetar a tag {{MAGIC_LINK}} no template HTML
-      const htmlContent = MAGIC_LINK_HTML_TEMPLATE.replace(/\{\{MAGIC_LINK\}\}/g, magicLink);
-
-      // 3. Disparar o e-mail transacional via API REST v3 do Brevo
       const brevoResponse = await fetch('https://api.brevo.com/v3/smtp/email', {
         method: 'POST',
         headers: {
-          accept: 'application/json',
           'api-key': BREVO_API_KEY,
-          'content-type': 'application/json'
+          'Content-Type': 'application/json',
+          Accept: 'application/json'
         },
         body: JSON.stringify({
-          sender: {
-            name: SENDER_NAME,
-            email: SENDER_EMAIL
-          },
-          to: [
-            {
-              email: cleanEmail,
-              ...(data.firstName ? { name: `${data.firstName} ${data.lastName || ''}`.trim() } : {})
-            }
-          ],
+          sender: { email: SENDER_EMAIL, name: SENDER_NAME },
+          to: [{ email: cleanEmail, ...(data.firstName ? { name: `${data.firstName} ${data.lastName || ''}`.trim() } : {}) }],
           subject: 'O seu link de acesso à DATERRA Smart',
           htmlContent
         })
@@ -151,34 +101,48 @@ export const sendCustomMagicLink = onCall(
       if (!brevoResponse.ok) {
         const errBody = await brevoResponse.text();
         console.error('[sendCustomMagicLink] Erro na API Brevo:', brevoResponse.status, errBody);
-        throw new HttpsError(
-          'internal',
-          `Erro ao enviar o e-mail pelo provedor Brevo (${brevoResponse.status}).`
-        );
+        throw new HttpsError('internal', `Erro ao enviar o e-mail pelo provedor Brevo (${brevoResponse.status}).`);
       }
 
       const brevoResult = (await brevoResponse.json()) as { messageId?: string };
-
-      return {
-        success: true,
-        messageId: brevoResult?.messageId || 'ok'
-      };
+      return { success: true, messageId: brevoResult?.messageId || 'ok' };
     } catch (err: any) {
       console.error('[sendCustomMagicLink] Exceção:', err);
-      if (err instanceof HttpsError) {
-        throw err;
-      }
-      throw new HttpsError(
-        'internal',
-        err?.message || 'Não foi possível gerar ou enviar o link de acesso.'
-      );
+      if (err instanceof HttpsError) throw err;
+      throw new HttpsError('internal', err?.message || 'Não foi possível gerar ou enviar o link de acesso.');
     }
   }
 );
 
 /**
  * Função Autenticada para Cumprimento do Art. 17º do RGPD (Direito ao Apagamento)
+ * Timeout estrito de 120s para acomodar operações paginadas com checkpoints.
  */
-export const deleteUserAccount = onCall({ enforceAppCheck: false }, async (request) => {
-  return handleDeleteUserAccount(request);
-});
+export const deleteUserAccount = onCall(
+  { enforceAppCheck: false, timeoutSeconds: 120 },
+  async (request) => {
+    return handleDeleteUserAccount(request);
+  }
+);
+
+/**
+ * Retoma Agendada de Operações de Eliminação (Cloud Scheduler)
+ * Executa a cada 30 min com timeout de 300s e instância única (maxInstances: 1).
+ */
+export const scheduledAccountDeletionRetries = onSchedule(
+  { schedule: 'every 30 minutes', timeoutSeconds: 300, maxInstances: 1 },
+  async () => {
+    await processPendingAccountDeletions();
+  }
+);
+
+/**
+ * Limpeza Agendada de Rate Limits Expirados (Cloud Scheduler)
+ * Purga documentos de _auth_rate_limits com retenção ultrapassada (> 24h).
+ */
+export const scheduledAuthRateLimitCleanup = onSchedule(
+  { schedule: 'every 30 minutes', timeoutSeconds: 120, maxInstances: 1 },
+  async () => {
+    await cleanupExpiredAuthRateLimits();
+  }
+);
