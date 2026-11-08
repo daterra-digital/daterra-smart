@@ -1,0 +1,115 @@
+name: Rollback GitHub Pages (Reversão Rápida)
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_tag_or_sha:
+        description: 'Tag Git ou Commit SHA-40 anterior para restaurar (ex: v1.0.0-pages ou eb54766b1fcc54b201ffd6b1a8c51610bd6f3825)'
+        required: true
+        type: string
+      confirm_token:
+        description: 'Confirmação obrigatória: introduza estritamente REVERTER'
+        required: true
+        type: string
+      rollback_reason:
+        description: 'Motivo / Justificação da reversão'
+        required: true
+        default: 'Restauro de versão estável anterior'
+        type: string
+
+# Permissões necessárias para autenticação OIDC e publicação no GitHub Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Cancela deploys concorrentes
+concurrency:
+  group: 'pages'
+  cancel-in-progress: true
+
+jobs:
+  rollback-deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Validar Parâmetros de Reversão
+        env:
+          CONFIRM_TOKEN: ${{ inputs.confirm_token }}
+          TARGET_REF: ${{ inputs.target_tag_or_sha }}
+          REASON: ${{ inputs.rollback_reason }}
+        run: |
+          set -euo pipefail
+          if [ "$CONFIRM_TOKEN" != "REVERTER" ]; then
+            echo "::error::Confirmação textual inválida ('$CONFIRM_TOKEN'). Requer estritamente 'REVERTER'."
+            exit 1
+          fi
+          if [ -z "$TARGET_REF" ]; then
+            echo "::error::A referência de destino para reversão não pode estar vazia."
+            exit 1
+          fi
+          echo "Reversão autorizada para a referência: $TARGET_REF"
+          echo "Motivo: $REASON"
+
+      - name: Checkout da Versão Anterior Estável
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.target_tag_or_sha }}
+
+      - name: Configurar Ambiente Node.js (v20)
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Configurar GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Instalar Dependências Limpas
+        run: npm ci
+
+      - name: Compilar Aplicação da Versão Restaurada
+        run: npm run build
+        env:
+          VITE_DATERRA_ENV: 'pages'
+          VITE_FIREBASE_API_KEY: ${{ secrets.VITE_FIREBASE_API_KEY }}
+          VITE_FIREBASE_AUTH_DOMAIN: ${{ secrets.VITE_FIREBASE_AUTH_DOMAIN }}
+          VITE_FIREBASE_PROJECT_ID: ${{ secrets.VITE_FIREBASE_PROJECT_ID }}
+          VITE_FIREBASE_STORAGE_BUCKET: ${{ secrets.VITE_FIREBASE_STORAGE_BUCKET }}
+          VITE_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.VITE_FIREBASE_MESSAGING_SENDER_ID }}
+          VITE_FIREBASE_APP_ID: ${{ secrets.VITE_FIREBASE_APP_ID }}
+          VITE_FIREBASE_MEASUREMENT_ID: ${{ secrets.VITE_FIREBASE_MEASUREMENT_ID }}
+          VITE_TURNSTILE_SITE_KEY: ${{ secrets.VITE_TURNSTILE_SITE_KEY }}
+          VITE_GA_MEASUREMENT_ID: ${{ secrets.VITE_GA_MEASUREMENT_ID }}
+          VITE_AGROMONITORING_KEY: ${{ secrets.VITE_AGROMONITORING_KEY }}
+          VITE_MOODLE_API_URL: ${{ secrets.VITE_MOODLE_API_URL }}
+
+      - name: Gerar Manifesto de Rollback
+        env:
+          TARGET_REF: ${{ inputs.target_tag_or_sha }}
+          REASON: ${{ inputs.rollback_reason }}
+        run: |
+          node -e '
+            const fs = require("fs");
+            const manifest = {
+              rollbackAt: new Date().toISOString(),
+              targetRef: process.env.TARGET_REF,
+              reason: process.env.REASON,
+              environment: "github-pages",
+              workflow: "rollback-github-pages.yml",
+              nodeVersion: process.version
+            };
+            fs.writeFileSync("./dist/rollback-manifest.json", JSON.stringify(manifest, null, 2));
+          '
+
+      - name: Upload do Artefato de Build (dist)
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: './dist'
+
+      - name: Publicar Versão Revertida no GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

@@ -48,4 +48,5 @@
 - [x] **Tarefa 4:** Documentação de versionamento (`VERSION.md`, `CHANGELOG.md`, `GESTAO_VERSOES_DATERRA_SMART.md`).
 - [x] **Tarefa 5:** Limpeza controlada e organização estrutural da V-DEV (`supabase/` removido, `resources/raw-data/`).
 - [x] **Tarefa 6:** Validação obrigatória da V-DEV (10 verificações de conformidade aprovadas, 11 ferramentas canónicas blindadas).
-- [ ] **Tarefa 7 (Próximo Passo):** Desativação do push automático no workflow do GitHub Pages (`.github/workflows/deploy-pages.yml`).
+- [x] **Tarefa 7:** Desativação do push automático no GitHub Pages e criação de workflow de rollback rápido.
+- [ ] **Tarefa 8 (Próximo Passo):** Supressão da leitura de tier simulado em produção — SEC-01 (`src/context/SubscriptionContext.tsx`).
