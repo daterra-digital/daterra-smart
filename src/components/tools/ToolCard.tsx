@@ -54,27 +54,22 @@ export const ToolCard: React.FC<ToolCardProps> = ({
           : 'bg-slate-50/60 hover:bg-white border-slate-200/80 hover:border-slate-300 shadow-xs hover:shadow-md'
       }`}
     >
-      <div className="space-y-4">
-        {/* Cabeçalho do Cartão: Ícone, Categoria e Badge de Estado */}
-        <div className="flex items-start justify-between gap-3">
-          <div className="flex items-center gap-3">
+      <div className="space-y-3">
+        {/* Topo do Cartão: Ícone, Categoria e Badges de Estado */}
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2.5">
             <div
-              className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 transition-transform group-hover:scale-105 ${
+              className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-transform group-hover:scale-105 ${
                 isInstalled
                   ? 'bg-[#114037] text-white shadow-md'
                   : 'bg-slate-200 text-slate-600'
               }`}
             >
-              <IconComponent className="w-6 h-6" />
+              <IconComponent className="w-5 h-5" />
             </div>
-            <div>
-              <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#1D734B]">
-                {categoryLabel}
-              </span>
-              <h3 className="text-sm font-extrabold text-slate-900 leading-snug line-clamp-1">
-                {toolName}
-              </h3>
-            </div>
+            <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#1D734B]">
+              {categoryLabel}
+            </span>
           </div>
 
           <div className="flex items-center gap-1.5 shrink-0">
@@ -84,12 +79,12 @@ export const ToolCard: React.FC<ToolCardProps> = ({
               </span>
             )}
             {releaseBadge === 'RC' && (
-              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-amber-100 text-amber-800 border border-amber-300 shadow-2xs">
+              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-amber-100 text-amber-900 border border-amber-300 shadow-2xs">
                 RC
               </span>
             )}
             {PRO_TOOL_IDS.has(tool.id) && (
-              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-[#114037] text-[#3CA64C] border border-[#3CA64C]/30 shadow-xs">
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-[#114037] text-[#3CA64C] border border-[#3CA64C]/30 shadow-xs">
                 <Sparkles className="w-3 h-3 text-[#3CA64C]" />
                 <span>{t('gating.badge_pro', 'PRO')}</span>
               </span>
@@ -97,8 +92,13 @@ export const ToolCard: React.FC<ToolCardProps> = ({
           </div>
         </div>
 
-        {/* Descrição Breve Resiliente (altura uniforme com line-clamp-2) */}
-        <p className="text-xs text-slate-600 leading-relaxed font-normal line-clamp-2 overflow-hidden min-h-[2.5rem]">
+        {/* Título da Ferramenta com Largura Total (Sem abreviações ou reticências) */}
+        <h3 className="text-sm sm:text-base font-extrabold text-slate-900 leading-snug min-h-[2.75rem] flex items-center">
+          {toolName}
+        </h3>
+
+        {/* Descrição Breve Resiliente (altura uniforme de 2 linhas) */}
+        <p className="text-xs text-slate-500 leading-relaxed font-medium line-clamp-2 min-h-[2.5rem]">
           {toolDescription}
         </p>
       </div>

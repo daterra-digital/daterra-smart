@@ -88,7 +88,7 @@ const TOOLS_CATALOG: ToolModule[] = [
   },
   {
     id: 'verificador_ph',
-    name: 'Consulta de pH',
+    name: 'Consultar pH',
     category: 'Pulverização',
     description: 'Consulta do pH ideal da calda, constante pKa e estabilidade de substâncias ativas.',
     icon: FlaskConical,
@@ -108,7 +108,7 @@ const TOOLS_CATALOG: ToolModule[] = [
   },
   {
     id: 'drone_buffer_zone',
-    name: 'Drone Buffer Zone & Legal Compliance',
+    name: 'Drone Buffer Zone & Legal Engine',
     category: 'Pulverização',
     description: 'Cálculo de zonas tampão e distâncias de segurança legais para drones agrícolas.',
     icon: Layers,
@@ -218,7 +218,7 @@ const TOOLS_CATALOG: ToolModule[] = [
   },
   {
     id: 'calc_volume_copa',
-    name: 'Volume de Copa (TRV)',
+    name: 'Volume de Calda (TRV)',
     category: 'Calibração',
     description: 'Cálculo do volume de massa foliar tridimensional (m³/ha).',
     icon: Trees,
