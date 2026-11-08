@@ -28,8 +28,22 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
     return mapPlanToTier(profile?.plan);
   }, [profile?.plan]);
 
-  // Nível simulado (armazenado localmente para testes e alternância rápida em dev/demo)
+  // Nível simulado (estritamente ativo em desenvolvimento para testes rápidos)
+  const isDevMode = Boolean(import.meta.env?.DEV);
+
   const [simulatedTier, setSimulatedTierState] = useState<UserTier | null>(() => {
+    // Em produção, nunca lê do localStorage e limpa resíduos de simulação
+    if (!isDevMode) {
+      try {
+        if (localStorage.getItem(SIMULATED_TIER_STORAGE_KEY)) {
+          localStorage.removeItem(SIMULATED_TIER_STORAGE_KEY);
+        }
+      } catch {
+        // Ignorar erros de quota/acesso a localStorage
+      }
+      return null;
+    }
+
     try {
       const stored = localStorage.getItem(SIMULATED_TIER_STORAGE_KEY);
       if (stored === 'free' || stored === 'pro' || stored === 'ultra' || stored === 'corporate') {
@@ -46,6 +60,11 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const [upgradeModalFeature, setUpgradeModalFeature] = useState<string | null>(null);
 
   const setSimulatedTier = useCallback((tier: UserTier | null) => {
+    if (!isDevMode) {
+      // Em produção, a simulação de plano é estritamente proibida
+      return;
+    }
+
     setSimulatedTierState(tier);
     try {
       if (tier) {
@@ -56,11 +75,14 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
     } catch {
       // Ignorar erros de localStorage
     }
-  }, []);
+  }, [isDevMode]);
 
   const effectiveTier = useMemo<UserTier>(() => {
+    if (!isDevMode) {
+      return currentTier;
+    }
     return simulatedTier || currentTier;
-  }, [simulatedTier, currentTier]);
+  }, [isDevMode, simulatedTier, currentTier]);
 
   const canAccessTier = useCallback((requiredTier: UserTier): boolean => {
     const userRank = TIER_RANK[effectiveTier] ?? 0;
@@ -83,8 +105,8 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const value = useMemo<SubscriptionContextType>(() => ({
     currentTier,
     effectiveTier,
-    isSimulating: simulatedTier !== null,
-    simulatedTier,
+    isSimulating: isDevMode && simulatedTier !== null,
+    simulatedTier: isDevMode ? simulatedTier : null,
     setSimulatedTier,
     canAccessTier,
     isPro,
@@ -93,6 +115,7 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
     openUpgradeModal,
     closeUpgradeModal
   }), [
+    isDevMode,
     currentTier,
     effectiveTier,
     simulatedTier,

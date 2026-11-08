@@ -49,4 +49,5 @@
 - [x] **Tarefa 5:** Limpeza controlada e organização estrutural da V-DEV (`supabase/` removido, `resources/raw-data/`).
 - [x] **Tarefa 6:** Validação obrigatória da V-DEV (10 verificações de conformidade aprovadas, 11 ferramentas canónicas blindadas).
 - [x] **Tarefa 7:** Desativação do push automático no GitHub Pages e criação de workflow de rollback rápido.
-- [ ] **Tarefa 8 (Próximo Passo):** Supressão da leitura de tier simulado em produção — SEC-01 (`src/context/SubscriptionContext.tsx`).
+- [x] **Tarefa 8:** Supressão da leitura de tier simulado em produção — SEC-01 (`src/context/SubscriptionContext.tsx`).
+- [ ] **Tarefa 9 (Próximo Passo):** Minimização e expiração ativa de `daterra_pending_auth` — SEC-06 (`src/context/AuthContext.tsx`).
