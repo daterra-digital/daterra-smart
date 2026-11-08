@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useSearchParams, useNavigate, Navigate } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { 
-  Search, X, CheckCircle2, Download, ArrowRight, Plus, Trash2,
+  Search, X, CheckCircle2,
   FlaskConical, Calculator, Gauge, Trees, Scale, ClipboardCheck, 
   CloudSun, Layers, Tractor, ChevronLeft, SlidersHorizontal, 
   Sparkles, Save, Sprout, AlertCircle, Leaf, Satellite
@@ -20,6 +20,8 @@ import { VelocidadeTrabalhoView } from '../features/calculators/velocidade-traba
 import { isToolAllowedInCurrentEnv } from '../utils/environment';
 import { useSubscription } from '../context/SubscriptionContext';
 import { PRO_TOOL_IDS } from '../types/subscription';
+import { ToolCard } from '../components/tools/ToolCard';
+import { isRcEvaluationMode } from '../utils/rcEvaluationMode';
 
 export interface ToolModule {
   id: string;
@@ -38,7 +40,7 @@ const TOOLS_CATALOG: ToolModule[] = [
     id: 'ajuste_dose_eppo',
     name: 'Ajuste da Dose (Método EPPO)',
     category: 'Pulverização',
-    description: 'Harmonização de doses (D_LWA, D_TRV, D_GA, mL/hL) e quantidade de produto no depósito para culturas 3D segundo EPPO PP 1/239 (3).',
+    description: 'Harmonização de doses e volume de calda no depósito para culturas 3D (EPPO PP 1/239).',
     icon: Scale,
     isCore: true,
     caminho: '/ferramentas/ajuste-dose-eppo',
@@ -58,7 +60,7 @@ const TOOLS_CATALOG: ToolModule[] = [
     id: 'calc_area_parede_foliar',
     name: 'Área de Parede Foliar (LWA)',
     category: 'Calibração',
-    description: 'Calcula a área de parede foliar por hectare (LWA - Leaf Wall Area).',
+    description: 'Cálculo da área foliar tratada (m²/ha) para culturas em sebe.',
     icon: Leaf,
     isCore: true,
     caminho: '/ferramentas/area-parede-foliar',
@@ -68,7 +70,7 @@ const TOOLS_CATALOG: ToolModule[] = [
     id: 'gestao_caderno_campo',
     name: 'Caderno de Campo Digital',
     category: 'Gestão',
-    description: 'Registo digital de tratamentos fitossanitários com verificação automática de limites SIFITO.',
+    description: 'Registo digital de tratamentos fitossanitários com verificação de limites oficiais.',
     icon: ClipboardCheck
   },
   {
@@ -85,7 +87,7 @@ const TOOLS_CATALOG: ToolModule[] = [
     id: 'calc_eppo',
     name: 'Calculadora EPPO (LWA / TRV)',
     category: 'Pulverização',
-    description: 'Calcula o volume de calda e dosagem de produto por depósito e por hectare pela metodologia EPPO PP 1/239.',
+    description: 'Cálculo do volume de calda e dosagem pela metodologia EPPO PP 1/239.',
     icon: FlaskConical,
     isCore: true,
     caminho: '/ferramentas/eppo',
@@ -95,7 +97,7 @@ const TOOLS_CATALOG: ToolModule[] = [
     id: 'verificador_ph',
     name: 'Consulta de pH',
     category: 'Pulverização',
-    description: 'Consulte o pH ideal da calda, constante pKa, código MoA e estabilidade de substâncias ativas offline.',
+    description: 'Consulta do pH ideal da calda, constante pKa e estabilidade de substâncias ativas.',
     icon: FlaskConical,
     isCore: true,
     caminho: '/ferramentas/verificador-ph',
@@ -105,7 +107,7 @@ const TOOLS_CATALOG: ToolModule[] = [
     id: 'calc_debito_total',
     name: 'Débito Total do Pulverizador',
     category: 'Calibração',
-    description: 'Calcula o débito global do pulverizador a partir do volume de calda, velocidade de trabalho e largura efetiva tratada.',
+    description: 'Cálculo do débito global do pulverizador a partir do volume, velocidade e largura.',
     icon: Gauge,
     isCore: true,
     caminho: '/ferramentas/debito-total',
@@ -113,9 +115,9 @@ const TOOLS_CATALOG: ToolModule[] = [
   },
   {
     id: 'drone_buffer_zone',
-    name: 'Drone Buffer Zone & Legal Compliance (SprayOps)',
+    name: 'Drone Buffer Zone & Legal Compliance',
     category: 'Pulverização',
-    description: 'Cálculo de zonas tampão dinâmicas, mitigação de deriva e distâncias de segurança legais para drones agrícolas.',
+    description: 'Cálculo de zonas tampão e distâncias de segurança legais para drones agrícolas.',
     icon: Layers,
     isCore: true,
     caminho: '/ferramentas/drone-buffer-zone',
@@ -125,21 +127,21 @@ const TOOLS_CATALOG: ToolModule[] = [
     id: 'clima_estacao_agricola',
     name: 'Estação Climática & Risco de Deriva',
     category: 'Clima',
-    description: 'Monitorização em tempo real da velocidade do vento, humidade e temperatura com alertas de deriva.',
+    description: 'Monitorização em tempo real do vento, humidade e temperatura com alertas de deriva.',
     icon: CloudSun
   },
   {
     id: 'gestao_exploracoes',
     name: 'Gestão de Explorações e Parcelas',
     category: 'Gestão',
-    description: 'Registo centralizado de parcelas, culturas, pulverizadores e bicos da exploração agrícola.',
+    description: 'Registo centralizado de parcelas, culturas, pulverizadores e bicos da exploração.',
     icon: Tractor
   },
   {
     id: 'satelite_ndvi',
-    name: 'Inteligência de Satélite & NDVI (Copernicus)',
+    name: 'Inteligência de Satélite & NDVI',
     category: 'Pulverização',
-    description: 'Monitorização de vigor vegetativo Sentinel-2 (10m), modulação de volume de calda por NDVI e intercâmbio de talhões (KML/GeoJSON).',
+    description: 'Monitorização de vigor foliar Sentinel-2 e modulação de volume por NDVI.',
     icon: Satellite,
     isCore: true,
     caminho: '/ferramentas/satelite-ndvi',
@@ -149,7 +151,7 @@ const TOOLS_CATALOG: ToolModule[] = [
     id: 'calc_concentracao',
     name: 'Mistura de Calda (Concentração)',
     category: 'Pulverização',
-    description: 'Calcula a quantidade exata de pesticida a diluir por depósito para Planta Jovem ou Copa Adulta.',
+    description: 'Cálculo da quantidade de produto e água para o depósito com base na concentração do rótulo.',
     icon: FlaskConical,
     isCore: true
   },
@@ -157,7 +159,7 @@ const TOOLS_CATALOG: ToolModule[] = [
     id: 'calc_dose',
     name: 'Mistura de Calda (Dose)',
     category: 'Pulverização',
-    description: 'Converte a dose do rótulo (L/ha ou kg/ha) para a calda do depósito e calcula a área coberta por tanque.',
+    description: 'Conversão da dose de rótulo para a calda do depósito e cálculo de área por tanque.',
     icon: Calculator,
     isCore: true
   },
@@ -165,7 +167,7 @@ const TOOLS_CATALOG: ToolModule[] = [
     id: 'mistura_compatibilidade',
     name: 'Ordem de Mistura',
     category: 'Pulverização',
-    description: 'Ordem correta de adição de produtos no depósito para evitar floculação e inativação de substâncias.',
+    description: 'Sequência de adição de produtos fitofarmacêuticos para evitar reações e precipitação.',
     icon: Layers,
     isCore: true,
     caminho: '/ferramentas/mistura',
@@ -175,7 +177,7 @@ const TOOLS_CATALOG: ToolModule[] = [
     id: 'pre_inspecao_dgav',
     name: 'Pré-Inspeção',
     category: 'Calibração',
-    description: 'Diagnóstico prévio em Modo Expresso e Detalhado (Norma ISO 16122) para avaliar o estado do equipamento antes da inspeção oficial.',
+    description: 'Lista de requisitos para a inspeção de pulverizadores (Norma ISO 16122).',
     icon: ClipboardCheck,
     isCore: true,
     caminho: '/ferramentas/pre-inspecao',
@@ -185,7 +187,7 @@ const TOOLS_CATALOG: ToolModule[] = [
     id: 'smart_debito',
     name: 'Smart Débito (ISO 16122)',
     category: 'Calibração',
-    description: 'Auditoria de pulverizadores (valores manuais ou de caudolímetro eletrónico por offset) e validação de desvios e simetria bilateral (ISO 16122-2 / ISO 16122-3).',
+    description: 'Auditoria de pulverizadores com validação de desvios e simetria bilateral (ISO 16122).',
     icon: Gauge,
     isCore: true,
     caminho: '/ferramentas/smart-debito',
@@ -195,7 +197,7 @@ const TOOLS_CATALOG: ToolModule[] = [
     id: 'comparador_bicos',
     name: 'Tabelas de Débito (Comparador)',
     category: 'Calibração',
-    description: 'Compare débitos técnicos reais, curvas de pressão e espectro de gotas de dois bicos em simultâneo.',
+    description: 'Comparação de débito, pressão e espetro de gotas entre dois bicos comerciais.',
     icon: Scale,
     isCore: true,
     caminho: '/ferramentas/comparador-bicos',
@@ -205,7 +207,7 @@ const TOOLS_CATALOG: ToolModule[] = [
     id: 'calc_velocidade_real',
     name: 'Velocidade Real de Trabalho',
     category: 'Calibração',
-    description: 'Calcule a velocidade real do equipamento no campo para apoiar a calibração.',
+    description: 'Cálculo da velocidade real de avanço (km/h) do conjunto trator e alfaia agrícola.',
     icon: Gauge,
     isCore: true,
     caminho: '/ferramentas/velocidade-real',
@@ -215,7 +217,7 @@ const TOOLS_CATALOG: ToolModule[] = [
     id: 'calc_volume_calda_trv',
     name: 'Volume de Calda Adequado por TRV',
     category: 'Calibração',
-    description: 'Estima o volume de calda por hectare com base no Volume de Copa (TRV) e num coeficiente técnico de calibração.',
+    description: 'Estimativa do volume de calda por hectare com base no TRV e coeficiente técnico.',
     icon: FlaskConical,
     isCore: true,
     caminho: '/ferramentas/volume-calda-trv',
@@ -225,7 +227,7 @@ const TOOLS_CATALOG: ToolModule[] = [
     id: 'calc_volume_copa',
     name: 'Volume de Copa (TRV)',
     category: 'Calibração',
-    description: 'Determina a massa foliar tridimensional (m³/ha) em pomares e vinhas para cálculo de dosagem proporcional.',
+    description: 'Cálculo do volume de massa foliar tridimensional (m³/ha).',
     icon: Trees,
     isCore: true,
     caminho: '/ferramentas/volume-copa',
@@ -295,7 +297,7 @@ export const getSmartFormattedResult = (
 export const ToolsView: React.FC = () => {
   const { t } = useLanguage();
   const navigate = useNavigate();
-  const { isPro, openUpgradeModal } = useSubscription();
+  const { isPro, openUpgradeModal, effectiveTier } = useSubscription();
   const [searchParams, setSearchParams] = useSearchParams();
   const currentViewTool = searchParams.get('tool'); // ferramenta em execução (ex: calc_concentracao, calc_dose)
 
@@ -371,6 +373,9 @@ export const ToolsView: React.FC = () => {
 
   // Abrir uma Ferramenta / Funcionalidade
   const handleOpenTool = (toolId: string) => {
+    if (!isToolAllowedInCurrentEnv(toolId)) {
+      return;
+    }
     if (PRO_TOOL_IDS.has(toolId) && !isPro) {
       const toolName = TOOLS_CATALOG.find(t => t.id === toolId)?.name || t('gating.tiers.pro.label', 'PRO');
       openUpgradeModal(toolName);
@@ -420,11 +425,20 @@ export const ToolsView: React.FC = () => {
   const filteredTools = useMemo(() => {
     return visibleCatalog.filter(tool => {
       const matchesCategory = selectedCategory === 'Todas' || tool.category === selectedCategory;
-      const matchesSearch = tool.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                            tool.description.toLowerCase().includes(searchQuery.toLowerCase());
+      const localizedName = t(`tools.catalog.${tool.id}.name`, tool.name);
+      const localizedDesc = t(`tools.catalog.${tool.id}.description`, tool.description);
+      const q = searchQuery.toLowerCase();
+      const matchesSearch = tool.name.toLowerCase().includes(q) ||
+                            tool.description.toLowerCase().includes(q) ||
+                            localizedName.toLowerCase().includes(q) ||
+                            localizedDesc.toLowerCase().includes(q);
       return matchesCategory && matchesSearch;
-    }).sort((a, b) => a.name.localeCompare(b.name, 'pt-PT', { sensitivity: 'base' }));
-  }, [visibleCatalog, selectedCategory, searchQuery]);
+    }).sort((a, b) => {
+      const nameA = t(`tools.catalog.${a.id}.name`, a.name);
+      const nameB = t(`tools.catalog.${b.id}.name`, b.name);
+      return nameA.localeCompare(nameB, undefined, { sensitivity: 'base' });
+    });
+  }, [visibleCatalog, selectedCategory, searchQuery, t]);
 
   const activeInstalledCount = useMemo(() => {
     return visibleCatalog.filter(t => installedToolIds.has(t.id)).length;
@@ -548,6 +562,10 @@ export const ToolsView: React.FC = () => {
   const concOutput = calculateConcentrationResult();
 
   // --- SE UMA FERRAMENTA ESPECÍFICA ESTIVER EM EXECUÇÃO ---
+  if (currentViewTool && !isToolAllowedInCurrentEnv(currentViewTool)) {
+    return <Navigate to="/ferramentas" replace />;
+  }
+
   if (currentViewTool === 'calc_volume_copa' || currentViewTool === 'geometria_trv_copa') {
     return <Navigate to="/ferramentas/volume-copa" replace />;
   }
@@ -564,12 +582,12 @@ export const ToolsView: React.FC = () => {
     return <Navigate to="/ferramentas/eppo" replace />;
   }
 
-  if (currentViewTool === 'calc_aplicacao_manual') {
-    return <Navigate to="/ferramentas/aplicacao-manual" replace />;
-  }
-
   if (currentViewTool === 'calc_area_parede_foliar') {
     return <AreaParedeFoliarCalculator />;
+  }
+
+  if (currentViewTool === 'calc_aplicacao_manual') {
+    return <Navigate to="/ferramentas/aplicacao-manual" replace />;
   }
 
   if (currentViewTool === 'calc_dose') {
@@ -985,6 +1003,20 @@ export const ToolsView: React.FC = () => {
         </div>
       )}
 
+      {/* Banner Exclusivo de Avaliação RC (Suprimido automaticamente em V-PAGES) */}
+      {isRcEvaluationMode() && (
+        <div className="bg-gradient-to-r from-amber-500/10 via-emerald-500/10 to-amber-500/10 border border-amber-500/30 rounded-2xl p-3 px-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-xs text-slate-800 shadow-2xs animate-fade-in font-medium">
+          <div className="flex items-center gap-2">
+            <span className="px-2 py-0.5 bg-amber-500 text-white font-black rounded-md text-[10px] tracking-wider">RC PREVIEW</span>
+            <span className="font-semibold">Ambiente de Avaliação Localhost:5175 (Etiquetas ativas apenas para revisão interna)</span>
+          </div>
+          <div className="flex items-center gap-2 text-[10px] font-extrabold shrink-0">
+            <span className="px-2 py-0.5 bg-emerald-100 text-[#114037] border border-emerald-300 rounded-md">PAGES: 11 Canónicas</span>
+            <span className="px-2 py-0.5 bg-amber-100 text-amber-800 border border-amber-300 rounded-md">RC: Novidades</span>
+          </div>
+        </div>
+      )}
+
       {/* 1. TÍTULO DO ECRÃ: 'Ferramentas' */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-slate-200/80 pb-4">
         <div>
@@ -999,6 +1031,30 @@ export const ToolsView: React.FC = () => {
           <p className="text-xs text-slate-500 font-medium mt-1">
             {t('tools.subtitle', 'Catálogo operacional de ferramentas e funcionalidades agronómicas da DATERRA Smart.')}
           </p>
+        </div>
+
+        <div className="flex items-center gap-2 shrink-0">
+          {effectiveTier === 'pro' ? (
+            <button
+              type="button"
+              onClick={() => openUpgradeModal()}
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-[#114037] text-[#3CA64C] text-xs font-black uppercase rounded-2xl shadow-sm hover:bg-[#1D734B] hover:text-white transition-all touch-target"
+              title={t('gating.modal.badge', 'DATERRA PRO')}
+            >
+              <Sparkles className="w-3.5 h-3.5 text-[#3CA64C]" />
+              <span>{t('gating.tiers.pro.label', 'PRO')}</span>
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={() => openUpgradeModal()}
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-2xl transition-all touch-target"
+              title={t('gating.modal.badge', 'DATERRA PRO')}
+            >
+              <span>{t('gating.tiers.free.label', 'Gratuito')}</span>
+              <span className="text-[10px] text-[#1D734B] font-extrabold underline ml-0.5">Upgrade PRO</span>
+            </button>
+          )}
         </div>
       </div>
 
@@ -1018,7 +1074,7 @@ export const ToolsView: React.FC = () => {
             <button
               onClick={() => setSearchQuery('')}
               className="absolute right-3.5 p-1 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-100 transition-colors"
-              aria-label="Limpar pesquisa"
+              aria-label={t('tools.clearSearch', 'Limpar pesquisa')}
             >
               <X className="w-4 h-4" />
             </button>
@@ -1076,7 +1132,13 @@ export const ToolsView: React.FC = () => {
           </span>
           {selectedCategory !== 'Todas' && (
             <span className="text-[#1D734B] font-bold">
-              {t('tools.filterCategoryActive', 'Filtro: {{category}}', { category: selectedCategory })}
+              {t('tools.filterCategoryActive', 'Filtro: {{category}}', {
+                category:
+                  selectedCategory === 'Calibração' ? t('tools.catCalibration', 'Calibração') :
+                  selectedCategory === 'Pulverização' ? t('tools.catSpraying', 'Pulverização') :
+                  selectedCategory === 'Gestão' ? t('tools.catManagement', 'Gestão') :
+                  selectedCategory === 'Clima' ? t('tools.catWeather', 'Clima') : selectedCategory
+              })}
             </span>
           )}
         </div>
@@ -1099,135 +1161,17 @@ export const ToolsView: React.FC = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {filteredTools.map((tool) => {
-              const isInstalled = installedToolIds.has(tool.id);
-              const isInstalling = installingToolId === tool.id;
-              const IconComponent = tool.icon;
-
-              return (
-                <div
-                  key={tool.id}
-                  className={`relative p-5 sm:p-6 rounded-3xl border transition-all duration-300 flex flex-col justify-between group ${
-                    isInstalled
-                      ? 'bg-gradient-to-br from-emerald-50/40 via-white to-white border-emerald-500/30 shadow-soft hover:shadow-xl hover:border-emerald-500/50'
-                      : 'bg-slate-50/60 hover:bg-white border-slate-200/80 hover:border-slate-300 shadow-xs hover:shadow-md'
-                  }`}
-                >
-                  <div className="space-y-4">
-                    {/* Cabeçalho do Cartão: Ícone, Categoria e Badge de Estado */}
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="flex items-center gap-3">
-                        <div
-                          className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 transition-transform group-hover:scale-105 ${
-                            isInstalled
-                              ? 'bg-[#114037] text-white shadow-md'
-                              : 'bg-slate-200 text-slate-600'
-                          }`}
-                        >
-                          <IconComponent className="w-6 h-6" />
-                        </div>
-                        <div>
-                          <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#1D734B]">
-                            {tool.category}
-                          </span>
-                          <h3 className="text-sm font-extrabold text-slate-900 leading-snug">
-                            {tool.name}
-                          </h3>
-                        </div>
-                      </div>
-
-                      {PRO_TOOL_IDS.has(tool.id) && (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-[#114037] text-[#3CA64C] border border-[#3CA64C]/30 shadow-xs shrink-0">
-                          <Sparkles className="w-3 h-3 text-[#3CA64C]" />
-                          <span>{t('gating.badge_pro', 'PRO')}</span>
-                        </span>
-                      )}
-                    </div>
-
-                    {/* Descrição Breve de 1 ou 2 Linhas */}
-                    <p className="text-xs text-slate-600 leading-relaxed font-normal line-clamp-2">
-                      {tool.description}
-                    </p>
-                  </div>
-
-                  {/* Estado de Instalação e Botão de Ação */}
-                  <div className="pt-5 mt-4 border-t border-slate-100 flex items-center justify-between gap-3">
-                    {/* Badge de Estado Visual */}
-                    <div>
-                      {tool.isCore ? (
-                        isInstalled ? (
-                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-emerald-100/90 text-emerald-800 text-[10px] font-extrabold rounded-full">
-                            <CheckCircle2 className="w-3 h-3 text-emerald-600" />
-                            <span>{t('tools.active', 'Ativa')}</span>
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-slate-200/80 text-slate-600 text-[10px] font-extrabold rounded-full">
-                            <Download className="w-3 h-3 text-slate-500" />
-                            <span>{t('tools.available', 'Disponível')}</span>
-                          </span>
-                        )
-                      ) : (
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-amber-50 text-amber-800 border border-amber-200/80 text-[10px] font-extrabold rounded-full">
-                          <Sparkles className="w-3 h-3 text-amber-600" />
-                          <span>{t('tools.comingSoonBadge', 'Em Breve')}</span>
-                        </span>
-                      )}
-                    </div>
-
-                    {/* Botões de Ação */}
-                    <div className="flex items-center gap-2">
-                      {tool.isCore ? (
-                        isInstalled ? (
-                          <>
-                            <button
-                              type="button"
-                              onClick={() => handleUninstallTool(tool.id, tool.name)}
-                              className="px-3 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-bold rounded-xl transition-all active:scale-95 touch-target flex items-center gap-1"
-                              title={t('tools.uninstallTooltip', 'Desinstalar funcionalidade')}
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                              <span className="hidden sm:inline">{t('tools.uninstall', 'Desinstalar')}</span>
-                            </button>
-
-                            <button
-                              type="button"
-                              onClick={() => handleOpenTool(tool.id)}
-                              className="px-4 py-2 bg-[#114037] hover:bg-[#1D734B] text-white text-xs font-extrabold rounded-xl transition-all shadow-md flex items-center gap-1.5 active:scale-95 touch-target"
-                            >
-                              <span>{t('tools.open', 'Abrir')}</span>
-                              <ArrowRight className="w-3.5 h-3.5" />
-                            </button>
-                          </>
-                        ) : (
-                          <button
-                            type="button"
-                            disabled={isInstalling}
-                            onClick={() => handleInstallTool(tool)}
-                            className={`px-4 py-2.5 bg-[#3CA64C] hover:bg-[#3AAA35] text-white text-xs font-extrabold rounded-xl transition-all shadow-sm flex items-center gap-1.5 active:scale-95 touch-target ${
-                              isInstalling ? 'opacity-70 cursor-wait' : ''
-                            }`}
-                          >
-                            {isInstalling ? (
-                              <span>{t('tools.installing', 'A instalar...')}</span>
-                            ) : (
-                              <>
-                                <Plus className="w-3.5 h-3.5" />
-                                <span>{t('tools.install', 'Instalar')}</span>
-                              </>
-                            )}
-                          </button>
-                        )
-                      ) : (
-                        <span className="text-[11px] font-bold text-slate-400 italic">
-                          {t('tools.comingSoonRelease', 'Lançamento em breve')}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-
-                </div>
-              );
-            })}
+            {filteredTools.map((tool) => (
+              <ToolCard
+                key={tool.id}
+                tool={tool}
+                isInstalled={installedToolIds.has(tool.id)}
+                isInstalling={installingToolId === tool.id}
+                onOpenTool={handleOpenTool}
+                onInstallTool={handleInstallTool}
+                onUninstallTool={handleUninstallTool}
+              />
+            ))}
           </div>
         )}
       </div>

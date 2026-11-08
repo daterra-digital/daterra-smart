@@ -2,10 +2,11 @@
   "name": "daterra-smart",
   "description": "PWA SaaS Suite Agrícola - DATERRA Smart",
   "private": true,
-  "version": "1.0.1-dev",
+  "version": "1.0.1-rc1",
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:rc": "vite --port 5175 --mode rc",
     "build": "tsc -b && vite build",
     "lint": "oxlint",
     "preview": "vite preview",

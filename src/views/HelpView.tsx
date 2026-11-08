@@ -121,7 +121,7 @@ export const HelpView: React.FC = () => {
 
       {/* Versão */}
       <div className="p-4 bg-slate-100 rounded-2xl border border-slate-200 text-center text-xs font-mono-numbers text-slate-500 font-bold">
-        {t('help.version', 'Versão: 1.0.1-dev (DATERRA Smart PWA)')}
+        {t('help.version', 'Versão: 1.0.1-rc1 (DATERRA Smart PWA)')}
       </div>
     </div>
   );

@@ -55,4 +55,5 @@
 - [x] **Tarefa 11:** Hardening de segurança na Cloud Function de Login / Magic Link — SEC-03, SEC-04, SEC-05 (`functions/`).
 - [x] **Tarefa 12:** Invalidação controlada de cache e atualização transparente do Service Worker (PWA / Workbox) com Content Security Policy (`index.html`, `vite.config.ts`).
 - [x] **Tarefa 13:** Regras de Segurança do Firestore (`firestore.rules`) com Isolamento de Utilizador e Proteção de Dados na Nuvem.
-- [ ] **Tarefa 14 (Próximo Passo):** Transição para V-RC (Candidata a Lançamento — Tag `v1.0.1-rc1`) e Relatório Ilustrativo de Prontidão.
+- [x] **Tarefa 14:** Transição para V-RC (Candidata a Lançamento — Tag `v1.0.1-rc1`), modo de avaliação em `localhost:5175`, etiquetas visuais e Relatório de Prontidão.
+- [ ] **Tarefa 15 (Próximo Passo):** Publicação e Deploy Controlado para V-PAGES (`https://daterra-digital.github.io/daterra-smart/`).
