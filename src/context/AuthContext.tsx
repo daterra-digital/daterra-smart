@@ -34,6 +34,13 @@ export type AuthUser = {
   };
 };
 
+export interface GoogleSignInOptions {
+  isRegistration?: boolean;
+  companyName?: string;
+  firstName?: string;
+  lastName?: string;
+}
+
 export interface AuthContextType {
   user: AuthUser | null;
   profile: Profile | null;
@@ -41,7 +48,7 @@ export interface AuthContextType {
   isAuthLoading: boolean;
   requestMagicLink: (data: PendingRegistrationData, captchaToken?: string) => Promise<{ error: string | null }>;
   completeMagicLinkSignIn: (emailOverride?: string) => Promise<{ error: string | null; needsEmail?: boolean }>;
-  signInWithGoogle: () => Promise<{ error: string | null }>;
+  signInWithGoogle: (options?: GoogleSignInOptions) => Promise<{ error: string | null; message?: string }>;
   logout: () => Promise<void>;
   refreshProfile: () => Promise<void>;
 }
@@ -218,21 +225,49 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const signInWithGoogle = async (): Promise<{ error: string | null }> => {
+  const signInWithGoogle = async (
+    options?: GoogleSignInOptions
+  ): Promise<{ error: string | null; message?: string }> => {
     try {
       const provider = new GoogleAuthProvider();
       provider.setCustomParameters({ prompt: 'select_account' });
       const credential = await signInWithPopup(auth, provider);
+
+      // Verificação de Registo vs Login:
+      // Se estiver na aba "Iniciar Sessão" (isRegistration !== true), a conta tem de existir no Firestore
+      const userDocRef = doc(firestoreDb, 'users', credential.user.uid);
+      const snap = await getDoc(userDocRef);
+
+      if (!options?.isRegistration && !snap.exists()) {
+        await signOut(auth);
+        return {
+          error: 'ACCOUNT_NOT_FOUND',
+          message: 'Esta conta Google ainda não está registada na DATERRA Smart. Por favor, aceda à aba "Criar Conta" para efetuar o registo.'
+        };
+      }
+
+      // Se for registo de nova conta, guarda previamente os dados da exploração/empresa
+      if (options?.isRegistration && !snap.exists()) {
+        savePendingAuth({
+          email: credential.user.email || '',
+          firstName: options.firstName,
+          lastName: options.lastName,
+          companyName: options.companyName,
+          isRegistration: true
+        });
+      }
+
       const loadedProfile = await ensureAndLoadProfile(credential.user);
       setUser(mapFirebaseUser(credential.user, loadedProfile));
       return { error: null };
     } catch (err: any) {
-      if (err?.code === 'auth/popup-closed-by-user') {
+      if (err?.code === 'auth/popup-closed-by-user' || err?.code === 'auth/cancelled-popup-request') {
         return { error: null };
       }
       console.error('❌ [signInWithGoogle] Erro na autenticação Google:', err);
       return {
-        error: err?.message || 'Não foi possível autenticar com a conta Google.'
+        error: 'GOOGLE_UNAVAILABLE',
+        message: 'A autenticação com a conta Google encontra-se temporariamente indisponível. Por favor, utilize o seu e-mail para receber um link de acesso seguro.'
       };
     }
   };

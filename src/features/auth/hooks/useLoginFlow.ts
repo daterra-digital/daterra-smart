@@ -46,11 +46,30 @@ export function useLoginFlow() {
   const handleGoogleSignIn = async () => {
     setError('');
     setSuccessMsg('');
+
+    if (mode === 'register' && !companyName.trim()) {
+      setError(t('auth.googleNeedCompany', 'Para se registar com a Google, indique a sua Entidade / Empresa agrícola no campo abaixo.'));
+      return;
+    }
+
     setLoading(true);
-    const res = await signInWithGoogle();
+    const res = await signInWithGoogle({
+      isRegistration: mode === 'register',
+      companyName: companyName.trim(),
+      firstName: firstName.trim(),
+      lastName: lastName.trim()
+    });
     setLoading(false);
-    if (res.error) setError(res.error);
-    else if (auth.currentUser) navigate('/dashboard');
+
+    if (res.error) {
+      if (res.message) {
+        setError(res.message);
+      } else {
+        setError(t('auth.googleUnavailable', 'A autenticação com a conta Google encontra-se temporariamente indisponível. Por favor, utilize o seu e-mail para receber um link de acesso seguro.'));
+      }
+    } else if (auth.currentUser) {
+      navigate('/dashboard');
+    }
   };
 
   const handleSubmit = async (e?: React.FormEvent) => {
