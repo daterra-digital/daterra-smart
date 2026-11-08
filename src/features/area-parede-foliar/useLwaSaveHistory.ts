@@ -4,6 +4,7 @@ import { buildCalculationRecord, saveCalculationToDb } from '../calculators/core
 import { enqueueMutation } from '../../services/outbox/outboxService';
 import { generateIdempotencyKey } from '../../services/integrations/centralgestMapper';
 import { useLanguage } from '../../context/LanguageContext';
+import { LEGACY_UNASSIGNED_MARKER } from '../../types/calculator';
 
 export function useLwaSaveHistory() {
   const { t } = useLanguage();
@@ -12,7 +13,8 @@ export function useLwaSaveHistory() {
   const saveToHistory = async (
     alturaVegetacao: number,
     distanciaEntrelinhas: number,
-    lwaResult: LwaCalculationResult
+    lwaResult: LwaCalculationResult,
+    userId: string = LEGACY_UNASSIGNED_MARKER
   ) => {
     try {
       if (!lwaResult.isValid) {
@@ -27,7 +29,7 @@ export function useLwaSaveHistory() {
         lwaResult.area_parede_foliar
       );
       const record = buildCalculationRecord({
-        userId: 'local-user',
+        userId,
         calculatorId: 'calc_area_parede_foliar',
         calculatorVersion: '1.0.0',
         name: `LWA ${lwaResult.area_parede_foliar} m²/ha (h:${alturaVegetacao}m, r:${distanciaEntrelinhas}m)`,
@@ -41,6 +43,7 @@ export function useLwaSaveHistory() {
         entityId: generateIdempotencyKey(),
         entityType: 'calculation',
         operation: 'CREATE',
+        userId,
         payload: {
           calculationId: record.id,
           calculatorId: 'calc_area_parede_foliar',

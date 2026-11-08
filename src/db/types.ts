@@ -194,4 +194,5 @@ export interface MutationOutboxRecord {
   updatedAt: string;
   attempts: number;
   lastError?: string;
+  userId?: string;
 }

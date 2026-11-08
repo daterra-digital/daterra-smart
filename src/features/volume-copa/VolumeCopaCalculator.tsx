@@ -17,11 +17,14 @@ import { TrvInputsPanel } from './TrvInputsPanel';
 import { TrvFooterBar } from './TrvFooterBar';
 import { useTrvSaveHistory } from './useTrvSaveHistory';
 import { useLanguage } from '../../context/LanguageContext';
+import { useAuth } from '../../context/AuthContext';
 
 // UniversalCalculatorTemplate compat: Padrão arquitetural Master Blueprint DATERRA
 export const VolumeCopaCalculator: React.FC = () => {
   const { t } = useLanguage();
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const effectiveUserId = user?.id || '';
   const [alturaCopa, setAlturaCopa] = useState<number>(2.5);
   const [larguraCopa, setLarguraCopa] = useState<number>(1.0);
   const [distanciaEntrelinhas, setDistanciaEntrelinhas] = useState<number>(3.0);
@@ -37,16 +40,16 @@ export const VolumeCopaCalculator: React.FC = () => {
   const historyRecords = useLiveQuery(
     async () => {
       try {
-        if (!db || !db['calculation_history_v2']) return [];
+        if (!db || !db['calculation_history_v2'] || !effectiveUserId) return [];
         return await db['calculation_history_v2']
-          .filter((r) => r.calculatorId === 'calc_volume_copa' && !r.isDeleted)
+          .filter((r) => r.calculatorId === 'calc_volume_copa' && r.userId === effectiveUserId && !r.isDeleted)
           .reverse()
           .sortBy('createdAt');
       } catch {
         return [];
       }
     },
-    []
+    [effectiveUserId]
   ) ?? [];
 
   const handleReset = useCallback(() => {
@@ -56,7 +59,7 @@ export const VolumeCopaCalculator: React.FC = () => {
   }, []);
 
   const handleSaveToHistory = () => {
-    saveToHistory(alturaCopa, larguraCopa, distanciaEntrelinhas, trvResult);
+    saveToHistory(alturaCopa, larguraCopa, distanciaEntrelinhas, trvResult, effectiveUserId);
   };
 
   const keypadConfig = useMemo(() => {
@@ -147,7 +150,7 @@ export const VolumeCopaCalculator: React.FC = () => {
         records={historyRecords}
         onDeleteRecord={async (rec) => softDeleteCalculationInDb(rec.id)}
         onClearHistory={async () => {
-          await clearCalculatorHistoryInDb('calc_volume_copa', 'local-user');
+          if (effectiveUserId) await clearCalculatorHistoryInDb('calc_volume_copa', effectiveUserId);
         }}
         onUpdateMetadata={async (id, meta) => updateCalculationMetadataInDb(id, meta)}
       />

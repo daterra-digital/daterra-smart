@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { CheckCircle2 } from 'lucide-react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../../db/db';
+import { useAuth } from '../../context/AuthContext';
+import { LEGACY_UNASSIGNED_MARKER } from '../../types/calculator';
 import {
   calculateDoseExtended,
   getDoseKeypadConfig,
@@ -24,6 +26,8 @@ import { DoseFooterBar } from './DoseFooterBar';
 // UniversalCalculatorTemplate compat: Padrão arquitetural Master Blueprint DATERRA
 export const DoseCaldaCalculator: React.FC = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const effectiveUserId = user?.id || '';
   const [volPreparar, setVolPreparar] = useState<number>(1000);
   const [doseValue, setDoseValue] = useState<number>(2);
   const [unitMode, setUnitMode] = useState<DoseUnitMode>('liquid');
@@ -41,16 +45,16 @@ export const DoseCaldaCalculator: React.FC = () => {
   const historyRecords = useLiveQuery(
     async () => {
       try {
-        if (!db || !db['calculation_history_v2']) return [];
+        if (!db || !db['calculation_history_v2'] || !effectiveUserId) return [];
         return await db['calculation_history_v2']
-          .filter((r) => r.calculatorId === 'calc_dose' && !r.isDeleted)
+          .filter((r) => r.calculatorId === 'calc_dose' && r.userId === effectiveUserId && !r.isDeleted)
           .reverse()
           .sortBy('createdAt');
       } catch {
         return [];
       }
     },
-    []
+    [effectiveUserId]
   ) ?? [];
 
   const handleReset = useCallback(() => {
@@ -67,7 +71,14 @@ export const DoseCaldaCalculator: React.FC = () => {
         setTimeout(() => setToastMessage(null), 3000);
         return;
       }
-      await persistDoseRecord(volPreparar, doseValue, unitMode, volCalda, calcResult);
+      await persistDoseRecord(
+        volPreparar,
+        doseValue,
+        unitMode,
+        volCalda,
+        calcResult,
+        effectiveUserId || LEGACY_UNASSIGNED_MARKER
+      );
       setToastMessage('Mistura de calda gravada e enfileirada na Outbox offline!');
       setTimeout(() => setToastMessage(null), 3500);
     } catch (err) {
@@ -146,7 +157,11 @@ export const DoseCaldaCalculator: React.FC = () => {
         calculatorTitle="Mistura de Calda (Dose)"
         records={historyRecords}
         onDeleteRecord={async (rec) => softDeleteCalculationInDb(rec.id)}
-        onClearHistory={async () => { await clearCalculatorHistoryInDb('calc_dose', 'local-user'); }}
+        onClearHistory={async () => {
+          if (effectiveUserId) {
+            await clearCalculatorHistoryInDb('calc_dose', effectiveUserId);
+          }
+        }}
         onUpdateMetadata={async (id, meta) => updateCalculationMetadataInDb(id, meta)}
       />
 

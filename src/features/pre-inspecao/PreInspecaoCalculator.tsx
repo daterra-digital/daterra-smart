@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { CheckCircle2 } from 'lucide-react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../../db/db';
+import { useAuth } from '../../context/AuthContext';
 import { isDroneEquipment } from './data/equipmentConfigs';
 import { usePreInspecaoState } from './hooks/usePreInspecaoState';
 import { persistInspecaoRecord } from './inspecaoStorage';
@@ -25,6 +26,8 @@ import { PreInspectionProgressHeader } from './PreInspectionProgressHeader';
 
 export const PreInspecaoCalculator: React.FC = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const effectiveUserId = user?.id || '';
   const state = usePreInspecaoState();
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [isGuideOpen, setIsGuideOpen] = useState(false);
@@ -33,15 +36,15 @@ export const PreInspecaoCalculator: React.FC = () => {
 
   const historyRecords = useLiveQuery(async () => {
     try {
-      if (!db || !db['calculation_history_v2']) return [];
+      if (!db || !db['calculation_history_v2'] || !effectiveUserId) return [];
       return await db['calculation_history_v2']
-        .filter((r) => r.calculatorId === 'calc_pre_inspecao' && !r.isDeleted)
+        .filter((r) => r.calculatorId === 'calc_pre_inspecao' && r.userId === effectiveUserId && !r.isDeleted)
         .reverse()
         .sortBy('createdAt');
     } catch {
       return [];
     }
-  }, []) ?? [];
+  }, [effectiveUserId]) ?? [];
 
   const handleSaveToHistory = async () => {
     try {
@@ -50,7 +53,7 @@ export const PreInspecaoCalculator: React.FC = () => {
         setTimeout(() => setToastMessage(null), 3000);
         return;
       }
-      await persistInspecaoRecord(state.answers, state.calcResult, state.activeOption.title);
+      await persistInspecaoRecord(state.answers, state.calcResult, state.activeOption.title, effectiveUserId);
       setToastMessage('Boletim gravado e enfileirado na Outbox offline!');
       setTimeout(() => setToastMessage(null), 3500);
     } catch (err) {
@@ -149,7 +152,9 @@ export const PreInspecaoCalculator: React.FC = () => {
         calculatorTitle={`Pré-Inspeção (${state.activeOption.title})`}
         records={historyRecords}
         onDeleteRecord={async (rec) => softDeleteCalculationInDb(rec.id)}
-        onClearHistory={async () => { await clearCalculatorHistoryInDb('calc_pre_inspecao', 'local-user'); }}
+        onClearHistory={async () => {
+          if (effectiveUserId) await clearCalculatorHistoryInDb('calc_pre_inspecao', effectiveUserId);
+        }}
         onUpdateMetadata={async (id, meta) => updateCalculationMetadataInDb(id, meta)}
       />
 

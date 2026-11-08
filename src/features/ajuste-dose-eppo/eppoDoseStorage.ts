@@ -3,10 +3,12 @@ import { buildEppoDoseStructuredValues } from './eppoDoseDataMapper';
 import { buildCalculationRecord, saveCalculationToDb } from '../calculators/core/historyService';
 import { enqueueMutation } from '../../services/outbox/outboxService';
 import { generateIdempotencyKey } from '../../services/integrations/centralgestMapper';
+import { LEGACY_UNASSIGNED_MARKER } from '../../types/calculator';
 
 export async function persistEppoDoseRecord(
   inputs: EppoDoseInputsState,
-  calcResult: EppoDoseCalculationResult
+  calcResult: EppoDoseCalculationResult,
+  userId: string = LEGACY_UNASSIGNED_MARKER
 ) {
   const { inputs: structuredInputs, outputs } = buildEppoDoseStructuredValues(inputs, calcResult);
   const unit = inputs.unitMode === 'liquid' ? 'L/ha' : 'kg/ha';
@@ -21,7 +23,7 @@ export async function persistEppoDoseRecord(
   if (inputs.selectedEquipmentName) tags.push(inputs.selectedEquipmentName);
 
   const record = buildCalculationRecord({
-    userId: 'local-user',
+    userId,
     calculatorId: 'ajuste_dose_eppo',
     calculatorVersion: '2.1.0',
     name: calcName,
@@ -36,6 +38,7 @@ export async function persistEppoDoseRecord(
     entityId: generateIdempotencyKey(),
     entityType: 'calculation',
     operation: 'CREATE',
+    userId,
     payload: {
       calculationId: record.id,
       calculatorId: 'ajuste_dose_eppo',

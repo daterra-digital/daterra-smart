@@ -1,6 +1,6 @@
 // src/db/db.ts
 import Dexie, { type Table } from 'dexie';
-import type { CalculationHistoryRecord, CalibrationProfile } from '../types/calculator';
+import { type CalculationHistoryRecord, type CalibrationProfile, LEGACY_UNASSIGNED_MARKER } from '../types/calculator';
 import type { ActiveSubstance } from '../features/verificador-ph/types.ts';
 import { seedMicrolearningIfEmpty } from './seed.ts';
 import type {
@@ -149,6 +149,37 @@ export class DaterraDatabase extends Dexie {
       mutation_outbox: '++id, entityId, entityType, operation, synced, updatedAt, attempts'
     }).upgrade(async () => {
       console.log('[DaterraSmartDB] Migrado com sucesso para a Versão 9 (Telemetria Agronómica Pro ativa).');
+    });
+
+    // Versão 10: Segregação estrita de dados locais por utilizador (SEC-02)
+    this.version(10).stores({
+      calculation_history: '++id, date, calculator_type, profile_id, userId',
+      profiles_cultures: '++id, name, crop_type, last_lwa_m2_ha, last_trv_m3_ha, userId',
+      profiles_equipment: '++id, name, machine_efficiency_pct, userId',
+      profiles_nozzles: '++id, manufacturer, model, equipment_id, userId',
+      profiles_calibrations: '++id, equipment_id, nozzle_id, userId',
+      microlearning_content: '++id, &field_key',
+      installed_tools: '++id, &tool_id',
+      calculation_history_v2: '&id, userId, calculatorId, createdAt, syncStatus, isDeleted, [calculatorId+userId+isDeleted]',
+      calibration_profiles: '&id, userId, equipmentProfileId, status, syncStatus, isDeleted',
+      mix_history: '++id, date, userId',
+      active_substances: 'id, name, moa, nameEn',
+      eppo_history: '++id, date, userId',
+      mutation_outbox: '++id, entityId, entityType, operation, synced, updatedAt, attempts, userId'
+    }).upgrade(async (tx) => {
+      // Migração de preservação: registos antigos com 'local-user' ou sem userId são migrados para LEGACY_UNASSIGNED_MARKER
+      // Ficam 100% preservados na base local, mas nunca são atribuídos inadvertidamente nem vazados entre contas
+      await tx.table('calculation_history_v2').toCollection().modify((record: any) => {
+        if (!record.userId || record.userId === 'local-user' || record.userId.trim() === '') {
+          record.userId = LEGACY_UNASSIGNED_MARKER;
+        }
+      });
+      await tx.table('mutation_outbox').toCollection().modify((record: any) => {
+        if (!record.userId || record.userId === 'local-user' || record.userId.trim() === '') {
+          record.userId = LEGACY_UNASSIGNED_MARKER;
+        }
+      });
+      console.log('[DaterraSmartDB] Migrado com sucesso para a Versão 10 (Segregação por Utilizador SEC-02 ativa).');
     });
   }
 }

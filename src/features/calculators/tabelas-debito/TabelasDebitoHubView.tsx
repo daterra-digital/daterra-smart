@@ -6,6 +6,8 @@ import type { DebitoHubMode } from './debitoTypes';
 import { NOZZLES_BY_ID } from '../../nozzle-comparison/nozzleComparison.data';
 import { calculateNozzleFlow, compareNozzles } from '../../nozzle-comparison/nozzleComparison.calculations';
 import { saveDebitoHistory, useDebitoHistory } from './services/debitoHistoryService';
+import { useAuth } from '../../../context/AuthContext';
+import { LEGACY_UNASSIGNED_MARKER } from '../../../types/calculator';
 import { DebitoHeader } from './DebitoHeader';
 import { DebitoModeSelector } from './DebitoModeSelector';
 import { DebitoFooterBar } from './DebitoFooterBar';
@@ -16,6 +18,8 @@ import { DebitoModalsContainer } from './components/DebitoModalsContainer';
 
 export const TabelasDebitoHubView: React.FC = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const effectiveUserId = user?.id || '';
   const [activeMode, setActiveMode] = useState<DebitoHubMode>('comparador');
 
   // Modo 1: Bicos ISO
@@ -54,7 +58,7 @@ export const TabelasDebitoHubView: React.FC = () => {
   const [keypadTarget, setKeypadTarget] = useState<'unitario_p' | 'comp_p' | 'ref_p' | 'target_q' | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  const historyRecords = useDebitoHistory();
+  const historyRecords = useDebitoHistory(effectiveUserId);
 
   const handleReset = useCallback(() => {
     if (activeMode === 'unitario') { setSelectedCode('02'); setUnitarioPressure(3.0); }
@@ -64,7 +68,16 @@ export const TabelasDebitoHubView: React.FC = () => {
 
   const handleSaveToHistory = async () => {
     try {
-      await saveDebitoHistory({ activeMode, selectedIsoNozzle, unitarioPressure, unitarioFlow, nozzleA, nozzleB, compPressure });
+      await saveDebitoHistory({
+        activeMode,
+        selectedIsoNozzle,
+        unitarioPressure,
+        unitarioFlow,
+        nozzleA,
+        nozzleB,
+        compPressure,
+        userId: effectiveUserId || LEGACY_UNASSIGNED_MARKER
+      });
       setToastMessage('Calibração de bicos gravada e sincronizada na Outbox!');
     } catch {
       setToastMessage('Erro ao gravar no histórico.');
@@ -175,6 +188,7 @@ export const TabelasDebitoHubView: React.FC = () => {
         isHistoryOpen={isHistoryOpen}
         onCloseHistory={() => setIsHistoryOpen(false)}
         historyRecords={historyRecords}
+        userId={effectiveUserId}
       />
 
       <DebitoFooterBar

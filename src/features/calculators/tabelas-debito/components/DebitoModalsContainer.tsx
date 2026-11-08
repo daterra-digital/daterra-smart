@@ -38,6 +38,7 @@ export interface DebitoModalsContainerProps {
   isHistoryOpen: boolean;
   onCloseHistory: () => void;
   historyRecords: any[];
+  userId?: string;
 }
 
 export const DebitoModalsContainer: React.FC<DebitoModalsContainerProps> = ({
@@ -66,7 +67,8 @@ export const DebitoModalsContainer: React.FC<DebitoModalsContainerProps> = ({
   onCloseGuide,
   isHistoryOpen,
   onCloseHistory,
-  historyRecords
+  historyRecords,
+  userId
 }) => {
   return (
     <>
@@ -122,7 +124,11 @@ export const DebitoModalsContainer: React.FC<DebitoModalsContainerProps> = ({
         calculatorTitle="Tabelas de Débito (Comparador)"
         records={historyRecords}
         onDeleteRecord={async (rec) => softDeleteCalculationInDb(rec.id)}
-        onClearHistory={async () => { await clearCalculatorHistoryInDb('calc_tabelas_debito', 'local-user'); }}
+        onClearHistory={async () => {
+          if (userId) {
+            await clearCalculatorHistoryInDb('calc_tabelas_debito', userId);
+          }
+        }}
         onUpdateMetadata={async (id, meta) => updateCalculationMetadataInDb(id, meta)}
       />
     </>

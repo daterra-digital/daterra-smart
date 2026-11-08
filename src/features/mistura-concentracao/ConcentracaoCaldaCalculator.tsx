@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { CheckCircle2 } from 'lucide-react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../../db/db';
+import { useAuth } from '../../context/AuthContext';
 import {
   calculateConcentracaoExtended,
   getConcentracaoKeypadConfig,
@@ -25,6 +26,8 @@ import { ConcentracaoFooterBar } from './ConcentracaoFooterBar';
 // UniversalCalculatorTemplate compat: Padrão arquitetural Master Blueprint DATERRA
 export const ConcentracaoCaldaCalculator: React.FC = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const effectiveUserId = user?.id || '';
   const [concValue, setConcValue] = useState<number>(100);
   const [concUnit, setConcUnit] = useState<ConcentracaoUnit>('mL/hL');
   const [volPreparar, setVolPreparar] = useState<number>(400);
@@ -44,16 +47,16 @@ export const ConcentracaoCaldaCalculator: React.FC = () => {
   const historyRecords = useLiveQuery(
     async () => {
       try {
-        if (!db || !db['calculation_history_v2']) return [];
+        if (!db || !db['calculation_history_v2'] || !effectiveUserId) return [];
         return await db['calculation_history_v2']
-          .filter((r) => r.calculatorId === 'calc_concentracao' && !r.isDeleted)
+          .filter((r) => r.calculatorId === 'calc_concentracao' && r.userId === effectiveUserId && !r.isDeleted)
           .reverse()
           .sortBy('createdAt');
       } catch {
         return [];
       }
     },
-    []
+    [effectiveUserId]
   ) ?? [];
 
   const handleReset = useCallback(() => {
@@ -72,7 +75,7 @@ export const ConcentracaoCaldaCalculator: React.FC = () => {
         setTimeout(() => setToastMessage(null), 3000);
         return;
       }
-      await persistConcentracaoRecord(concValue, concUnit, volPreparar, mode, volRecomendado, volAplicado, calcResult);
+      await persistConcentracaoRecord(concValue, concUnit, volPreparar, mode, volRecomendado, volAplicado, calcResult, effectiveUserId);
       setToastMessage('Concentração gravada e enfileirada na Outbox offline!');
       setTimeout(() => setToastMessage(null), 3500);
     } catch (err) {
@@ -156,7 +159,9 @@ export const ConcentracaoCaldaCalculator: React.FC = () => {
         calculatorTitle="Mistura de Calda (Concentração)"
         records={historyRecords}
         onDeleteRecord={async (rec) => softDeleteCalculationInDb(rec.id)}
-        onClearHistory={async () => { await clearCalculatorHistoryInDb('calc_concentracao', 'local-user'); }}
+        onClearHistory={async () => {
+          if (effectiveUserId) await clearCalculatorHistoryInDb('calc_concentracao', effectiveUserId);
+        }}
         onUpdateMetadata={async (id, meta) => updateCalculationMetadataInDb(id, meta)}
       />
 

@@ -3,11 +3,13 @@ import { buildInspecaoStructuredValues } from './inspecaoDataMapper';
 import { buildCalculationRecord, saveCalculationToDb } from '../calculators/core/historyService';
 import { enqueueMutation } from '../../services/outbox/outboxService';
 import { generateIdempotencyKey } from '../../services/integrations/centralgestMapper';
+import { LEGACY_UNASSIGNED_MARKER } from '../../types/calculator';
 
 export async function persistInspecaoRecord(
   answers: Record<string, ItemStatus>,
   calcResult: InspecaoEvaluationResult,
-  equipmentTitle = 'Pulverizador'
+  equipmentTitle = 'Pulverizador',
+  userId: string = LEGACY_UNASSIGNED_MARKER
 ) {
   const { inputs, outputs } = buildInspecaoStructuredValues(answers, calcResult);
 
@@ -15,7 +17,7 @@ export async function persistInspecaoRecord(
     calcResult.evaluationStyle === 'dgav_oficial' ? 'DGAV IPP' : 'ISO 16122';
 
   const record = buildCalculationRecord({
-    userId: 'local-user',
+    userId,
     calculatorId: 'calc_pre_inspecao',
     calculatorVersion: '2.0.0',
     name: `Pré-Inspeção (${equipmentTitle} • ${styleLabel}): ${calcResult.statusLabel} (${calcResult.conformityPct}%)`,
@@ -29,6 +31,7 @@ export async function persistInspecaoRecord(
     entityId: generateIdempotencyKey(),
     entityType: 'calculation',
     operation: 'CREATE',
+    userId,
     payload: {
       calculationId: record.id,
       calculatorId: 'calc_pre_inspecao',

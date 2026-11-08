@@ -2,6 +2,7 @@ import React, { useState, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CheckCircle2 } from 'lucide-react';
 import { useLiveQuery } from 'dexie-react-hooks';
+import { useAuth } from '../../context/AuthContext';
 import { db, type ProfileCulture, type ProfileEquipment } from '../../db/db';
 import { calculateEppoDoseComprehensive, getEppoKeypadConfig, type EppoDoseInputsState } from './eppoDoseDataMapper';
 import { persistEppoDoseRecord } from './eppoDoseStorage';
@@ -25,6 +26,8 @@ const INITIAL_INPUTS: EppoDoseInputsState = {
 
 export const EppoDoseCalculator: React.FC = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const effectiveUserId = user?.id || '';
   const [inputs, setInputs] = useState<EppoDoseInputsState>(INITIAL_INPUTS);
   const [activeKeypad, setActiveKeypad] = useState<keyof EppoDoseInputsState | null>(null);
   const [profileModalType, setProfileModalType] = useState<'culture' | 'equipment' | null>(null);
@@ -44,12 +47,12 @@ export const EppoDoseCalculator: React.FC = () => {
 
   const historyRecords = useLiveQuery(async () => {
     try {
-      if (!db?.['calculation_history_v2']) return [];
+      if (!db?.['calculation_history_v2'] || !effectiveUserId) return [];
       return await db['calculation_history_v2']
-        .filter((r) => (r.calculatorId === 'ajuste_dose_eppo' || r.calculatorId === 'calc_ajuste_dose_eppo') && !r.isDeleted)
+        .filter((r) => (r.calculatorId === 'ajuste_dose_eppo' || r.calculatorId === 'calc_ajuste_dose_eppo') && r.userId === effectiveUserId && !r.isDeleted)
         .reverse().sortBy('createdAt');
     } catch { return []; }
-  }, []) ?? [];
+  }, [effectiveUserId]) ?? [];
 
   const showToast = (msg: string) => { setToastMessage(msg); setTimeout(() => setToastMessage(null), 3000); };
 
@@ -109,7 +112,7 @@ export const EppoDoseCalculator: React.FC = () => {
 
   const handleSaveToHistory = async () => {
     if (!calcResult.isValid) return showToast('Insira parâmetros válidos antes de guardar.');
-    await persistEppoDoseRecord(inputs, calcResult);
+    await persistEppoDoseRecord(inputs, calcResult, effectiveUserId);
     showToast('Ajuste de dose gravado e enfileirado na Outbox offline!');
   };
 
@@ -154,7 +157,7 @@ export const EppoDoseCalculator: React.FC = () => {
 
       <EppoHistoryImportModal isOpen={isHistImportOpen} onSelectRecord={handleSelectHistoricalRecord} onClose={() => setIsHistImportOpen(false)} />
 
-      <CalculatorHistoryDrawer isOpen={isHistoryOpen} onClose={() => setIsHistoryOpen(false)} calculatorId="ajuste_dose_eppo" calculatorTitle="Ajuste da Dose (Método EPPO)" records={historyRecords} onDeleteRecord={async (r) => softDeleteCalculationInDb(r.id)} onClearHistory={async () => { await clearCalculatorHistoryInDb('ajuste_dose_eppo', 'local-user'); }} onUpdateMetadata={async (id, m) => updateCalculationMetadataInDb(id, m)} />
+      <CalculatorHistoryDrawer isOpen={isHistoryOpen} onClose={() => setIsHistoryOpen(false)} calculatorId="ajuste_dose_eppo" calculatorTitle="Ajuste da Dose (Método EPPO)" records={historyRecords} onDeleteRecord={async (r) => softDeleteCalculationInDb(r.id)} onClearHistory={async () => { if (effectiveUserId) await clearCalculatorHistoryInDb('ajuste_dose_eppo', effectiveUserId); }} onUpdateMetadata={async (id, m) => updateCalculationMetadataInDb(id, m)} />
 
       <EppoDoseGuideModal isOpen={isGuideOpen} onClose={() => setIsGuideOpen(false)} />
 

@@ -3,13 +3,15 @@ import { buildDoseStructuredValues } from './doseDataMapper';
 import { buildCalculationRecord, saveCalculationToDb } from '../calculators/core/historyService';
 import { enqueueMutation } from '../../services/outbox/outboxService';
 import { generateIdempotencyKey } from '../../services/integrations/centralgestMapper';
+import { LEGACY_UNASSIGNED_MARKER } from '../../types/calculator';
 
 export async function persistDoseRecord(
   volPreparar: number,
   doseValue: number,
   unitMode: DoseUnitMode,
   volCalda: number,
-  calcResult: DoseCalculationResult
+  calcResult: DoseCalculationResult,
+  userId: string = LEGACY_UNASSIGNED_MARKER
 ) {
   const { inputs, outputs } = buildDoseStructuredValues(
     volPreparar,
@@ -21,7 +23,7 @@ export async function persistDoseRecord(
 
   const doseUnit = unitMode === 'solid' ? 'kg/ha' : 'L/ha';
   const record = buildCalculationRecord({
-    userId: 'local-user',
+    userId,
     calculatorId: 'calc_dose',
     calculatorVersion: '1.0.0',
     name: `Mistura ${calcResult.primaryValue} ${calcResult.primaryUnit}/depósito (${doseValue} ${doseUnit})`,
@@ -35,6 +37,7 @@ export async function persistDoseRecord(
     entityId: generateIdempotencyKey(),
     entityType: 'calculation',
     operation: 'CREATE',
+    userId,
     payload: {
       calculationId: record.id,
       calculatorId: 'calc_dose',

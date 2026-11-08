@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { CheckCircle2 } from 'lucide-react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../../../db/db';
+import { useAuth } from '../../../context/AuthContext';
+import { LEGACY_UNASSIGNED_MARKER } from '../../../types/calculator';
 import { ISO_NOZZLE_COLORS, calculateIsoFlow } from './debitoTypes';
 import {
   softDeleteCalculationInDb,
@@ -21,6 +23,8 @@ import { useDebitoSaveHistory } from './services/useDebitoSaveHistory';
 
 export const DebitoTrabalhoView: React.FC = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const effectiveUserId = user?.id || '';
   const [selectedCode, setSelectedCode] = useState<string>('02'); // ISO 02 Amarelo por omissão
   const [pressureBar, setPressureBar] = useState<number>(3.0);
   const [isKeypadOpen, setIsKeypadOpen] = useState<boolean>(false);
@@ -41,16 +45,16 @@ export const DebitoTrabalhoView: React.FC = () => {
   const historyRecords = useLiveQuery(
     async () => {
       try {
-        if (!db || !db.calculation_history_v2) return [];
+        if (!db || !db.calculation_history_v2 || !effectiveUserId) return [];
         return await db.calculation_history_v2
-          .filter((r) => r.calculatorId === 'calc_tabelas_debito' && !r.isDeleted)
+          .filter((r) => r.calculatorId === 'calc_tabelas_debito' && r.userId === effectiveUserId && !r.isDeleted)
           .reverse()
           .sortBy('createdAt');
       } catch {
         return [];
       }
     },
-    []
+    [effectiveUserId]
   ) ?? [];
 
   const handleReset = useCallback(() => {
@@ -59,7 +63,7 @@ export const DebitoTrabalhoView: React.FC = () => {
   }, []);
 
   const handleSaveToHistory = () => {
-    saveToHistory(selectedNozzle, pressureBar, flowResult);
+    saveToHistory(selectedNozzle, pressureBar, flowResult, effectiveUserId || LEGACY_UNASSIGNED_MARKER);
   };
 
   return (
@@ -134,7 +138,9 @@ export const DebitoTrabalhoView: React.FC = () => {
         records={historyRecords}
         onDeleteRecord={async (rec) => softDeleteCalculationInDb(rec.id)}
         onClearHistory={async () => {
-          await clearCalculatorHistoryInDb('calc_tabelas_debito', 'local-user');
+          if (effectiveUserId) {
+            await clearCalculatorHistoryInDb('calc_tabelas_debito', effectiveUserId);
+          }
         }}
         onUpdateMetadata={async (id, meta) => updateCalculationMetadataInDb(id, meta)}
       />

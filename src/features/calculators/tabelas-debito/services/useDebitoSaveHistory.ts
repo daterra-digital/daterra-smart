@@ -3,6 +3,7 @@ import { buildDebitoStructuredValues, type IsoFlowCalculationResult, type IsoNoz
 import { buildCalculationRecord, saveCalculationToDb } from '../../core/historyService';
 import { enqueueMutation } from '../../../../services/outbox/outboxService';
 import { generateIdempotencyKey } from '../../../../services/integrations/centralgestMapper';
+import { LEGACY_UNASSIGNED_MARKER } from '../../../../types/calculator';
 
 export function useDebitoSaveHistory() {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -10,7 +11,8 @@ export function useDebitoSaveHistory() {
   const saveToHistory = async (
     selectedNozzle: IsoNozzleColor,
     pressureBar: number,
-    flowResult: IsoFlowCalculationResult
+    flowResult: IsoFlowCalculationResult,
+    userId: string = LEGACY_UNASSIGNED_MARKER
   ) => {
     try {
       if (!flowResult.isValid) {
@@ -21,7 +23,7 @@ export function useDebitoSaveHistory() {
 
       const { inputs, outputs } = buildDebitoStructuredValues(selectedNozzle, pressureBar, flowResult);
       const record = buildCalculationRecord({
-        userId: 'local-user',
+        userId,
         calculatorId: 'calc_tabelas_debito',
         calculatorVersion: '1.0.0',
         name: `Bico ISO ${selectedNozzle.code} (${selectedNozzle.namePt}): ${flowResult.flowLMin} L/min @ ${pressureBar} bar`,
@@ -35,6 +37,7 @@ export function useDebitoSaveHistory() {
         entityId: generateIdempotencyKey(),
         entityType: 'calculation',
         operation: 'CREATE',
+        userId,
         payload: {
           calculationId: record.id,
           calculatorId: 'calc_tabelas_debito',

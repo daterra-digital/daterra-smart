@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { CheckCircle2 } from 'lucide-react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { useTranslation } from '../../context/LanguageContext';
+import { useAuth } from '../../context/AuthContext';
 import { db } from '../../db/db';
 import { calculateLwaExtended } from './lwaDataMapper';
 import {
@@ -22,6 +23,8 @@ import { useLwaSaveHistory } from './useLwaSaveHistory';
 export const AreaParedeFoliarCalculator: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const effectiveUserId = user?.id || '';
   const [alturaVegetacao, setAlturaVegetacao] = useState<number>(2.5);
   const [distanciaEntrelinhas, setDistanciaEntrelinhas] = useState<number>(3.0);
   const [activeKeypadField, setActiveKeypadField] = useState<'altura' | 'entrelinha' | null>(null);
@@ -36,16 +39,16 @@ export const AreaParedeFoliarCalculator: React.FC = () => {
   const historyRecords = useLiveQuery(
     async () => {
       try {
-        if (!db || !db['calculation_history_v2']) return [];
+        if (!db || !db['calculation_history_v2'] || !effectiveUserId) return [];
         return await db['calculation_history_v2']
-          .filter((r) => r.calculatorId === 'calc_area_parede_foliar' && !r.isDeleted)
+          .filter((r) => r.calculatorId === 'calc_area_parede_foliar' && r.userId === effectiveUserId && !r.isDeleted)
           .reverse()
           .sortBy('createdAt');
       } catch {
         return [];
       }
     },
-    []
+    [effectiveUserId]
   ) ?? [];
 
   const handleReset = useCallback(() => {
@@ -54,7 +57,7 @@ export const AreaParedeFoliarCalculator: React.FC = () => {
   }, []);
 
   const handleSaveToHistory = () => {
-    saveToHistory(alturaVegetacao, distanciaEntrelinhas, lwaResult);
+    saveToHistory(alturaVegetacao, distanciaEntrelinhas, lwaResult, effectiveUserId);
   };
 
   const keypadConfig = useMemo(() => {
@@ -132,7 +135,7 @@ export const AreaParedeFoliarCalculator: React.FC = () => {
         records={historyRecords}
         onDeleteRecord={async (rec) => softDeleteCalculationInDb(rec.id)}
         onClearHistory={async () => {
-          await clearCalculatorHistoryInDb('calc_area_parede_foliar', 'local-user');
+          if (effectiveUserId) await clearCalculatorHistoryInDb('calc_area_parede_foliar', effectiveUserId);
         }}
         onUpdateMetadata={async (id, meta) => updateCalculationMetadataInDb(id, meta)}
       />

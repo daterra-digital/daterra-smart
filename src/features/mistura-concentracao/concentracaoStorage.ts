@@ -3,6 +3,7 @@ import { buildConcentracaoStructuredValues } from './concentracaoDataMapper';
 import { buildCalculationRecord, saveCalculationToDb } from '../calculators/core/historyService';
 import { enqueueMutation } from '../../services/outbox/outboxService';
 import { generateIdempotencyKey } from '../../services/integrations/centralgestMapper';
+import { LEGACY_UNASSIGNED_MARKER } from '../../types/calculator';
 
 export async function persistConcentracaoRecord(
   concValue: number,
@@ -11,7 +12,8 @@ export async function persistConcentracaoRecord(
   mode: ConcentracaoMode,
   volRecomendado: number,
   volAplicado: number,
-  calcResult: ConcentracaoCalculationResult
+  calcResult: ConcentracaoCalculationResult,
+  userId: string = LEGACY_UNASSIGNED_MARKER
 ) {
   const { inputs, outputs } = buildConcentracaoStructuredValues(
     concValue,
@@ -24,7 +26,7 @@ export async function persistConcentracaoRecord(
   );
 
   const record = buildCalculationRecord({
-    userId: 'local-user',
+    userId,
     calculatorId: 'calc_concentracao',
     calculatorVersion: '1.0.0',
     name: `Concentração ${calcResult.primaryValue} ${calcResult.primaryUnit}/depósito (${concValue} ${concUnit})`,
@@ -38,6 +40,7 @@ export async function persistConcentracaoRecord(
     entityId: generateIdempotencyKey(),
     entityType: 'calculation',
     operation: 'CREATE',
+    userId,
     payload: {
       calculationId: record.id,
       calculatorId: 'calc_concentracao',

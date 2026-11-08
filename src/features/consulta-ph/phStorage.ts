@@ -3,16 +3,18 @@ import { buildPhStructuredValues } from './phDataMapper';
 import { buildCalculationRecord, saveCalculationToDb } from '../calculators/core/historyService';
 import { enqueueMutation } from '../../services/outbox/outboxService';
 import { generateIdempotencyKey } from '../../services/integrations/centralgestMapper';
+import { LEGACY_UNASSIGNED_MARKER } from '../../types/calculator';
 
 export async function persistPhRecord(
   ph: number,
   tipoCalda: TipoCalda,
-  calcResult: PhCalculationResult
+  calcResult: PhCalculationResult,
+  userId: string = LEGACY_UNASSIGNED_MARKER
 ) {
   const { inputs, outputs } = buildPhStructuredValues(ph, tipoCalda, calcResult);
 
   const record = buildCalculationRecord({
-    userId: 'local-user',
+    userId,
     calculatorId: 'calc_ph',
     calculatorVersion: '1.0.0',
     name: `Consulta de pH: ${ph.toFixed(1)} (${calcResult.statusLabel})`,
@@ -26,6 +28,7 @@ export async function persistPhRecord(
     entityId: generateIdempotencyKey(),
     entityType: 'calculation',
     operation: 'CREATE',
+    userId,
     payload: {
       calculationId: record.id,
       calculatorId: 'calc_ph',

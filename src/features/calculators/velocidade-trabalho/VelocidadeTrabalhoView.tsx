@@ -17,6 +17,8 @@ import { generateIdempotencyKey } from '../../../services/integrations/centralge
 import { DaterraKeypadModal } from '../../../components/DaterraKeypad';
 import { buildVelocidadeStructuredValues } from './velocidadeDataMapper';
 import { useLanguage } from '../../../context/LanguageContext';
+import { useAuth } from '../../../context/AuthContext';
+import { LEGACY_UNASSIGNED_MARKER } from '../../../types/calculator';
 import { VelocidadeHeader } from './VelocidadeHeader';
 import { VelocidadeResultCard } from './VelocidadeResultCard';
 import { VelocidadeInputsPanel } from './VelocidadeInputsPanel';
@@ -25,6 +27,8 @@ import { VelocidadeFooterBar } from './VelocidadeFooterBar';
 export const VelocidadeTrabalhoView: React.FC = () => {
   const { t } = useLanguage();
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const effectiveUserId = user?.id || '';
   const [distanciaMeters, setDistanciaMeters] = useState<number>(100);
   const [tempoSeconds, setTempoSeconds] = useState<number>(45);
   const [activeKeypadField, setActiveKeypadField] = useState<'distancia' | 'tempo' | null>(null);
@@ -35,16 +39,16 @@ export const VelocidadeTrabalhoView: React.FC = () => {
   const historyRecords = useLiveQuery(
     async () => {
       try {
-        if (!db || !db.calculation_history_v2) return [];
+        if (!db || !db.calculation_history_v2 || !effectiveUserId) return [];
         return await db.calculation_history_v2
-          .filter((r) => r.calculatorId === 'calc_velocidade_real' && !r.isDeleted)
+          .filter((r) => r.calculatorId === 'calc_velocidade_real' && r.userId === effectiveUserId && !r.isDeleted)
           .reverse()
           .sortBy('createdAt');
       } catch {
         return [];
       }
     },
-    []
+    [effectiveUserId]
   ) ?? [];
 
   const speedResult = useMemo(
@@ -68,7 +72,7 @@ export const VelocidadeTrabalhoView: React.FC = () => {
       // 1. Criação do registo estruturado para calculation_history_v2
       const { inputs, outputs } = buildVelocidadeStructuredValues(distanciaMeters, tempoSeconds, speedResult);
       const record = buildCalculationRecord({
-        userId: 'local-user',
+        userId: effectiveUserId || LEGACY_UNASSIGNED_MARKER,
         calculatorId: 'calc_velocidade_real',
         calculatorVersion: '1.0.0',
         name: `Velocidade ${speedResult.velocidade_kmh} km/h (${distanciaMeters}m em ${tempoSeconds}s)`,
@@ -83,6 +87,7 @@ export const VelocidadeTrabalhoView: React.FC = () => {
         entityId: generateIdempotencyKey(),
         entityType: 'calculation',
         operation: 'CREATE',
+        userId: effectiveUserId || LEGACY_UNASSIGNED_MARKER,
         payload: {
           calculationId: record.id,
           calculatorId: 'calc_velocidade_real',
@@ -168,7 +173,9 @@ export const VelocidadeTrabalhoView: React.FC = () => {
         records={historyRecords}
         onDeleteRecord={async (rec) => softDeleteCalculationInDb(rec.id)}
         onClearHistory={async () => {
-          await clearCalculatorHistoryInDb('calc_velocidade_real', 'local-user');
+          if (effectiveUserId) {
+            await clearCalculatorHistoryInDb('calc_velocidade_real', effectiveUserId);
+          }
         }}
         onUpdateMetadata={async (id, meta) => updateCalculationMetadataInDb(id, meta)}
       />

@@ -51,4 +51,5 @@
 - [x] **Tarefa 7:** Desativação do push automático no GitHub Pages e criação de workflow de rollback rápido.
 - [x] **Tarefa 8:** Supressão da leitura de tier simulado em produção — SEC-01 (`src/context/SubscriptionContext.tsx`).
 - [x] **Tarefa 9:** Minimização e expiração ativa de `daterra_pending_auth` — SEC-06 (`src/context/AuthContext.tsx`).
-- [ ] **Tarefa 10 (Próximo Passo):** Segregação de dados locais por utilizador no IndexedDB — SEC-02 (`src/db/db.ts`).
+- [x] **Tarefa 10:** Segregação de dados locais por utilizador no IndexedDB — SEC-02 (`src/db/db.ts`).
+- [ ] **Tarefa 11 (Próximo Passo):** Hardening de segurança na Cloud Function de Login / Magic Link — SEC-03, SEC-04, SEC-05 (`functions/`).

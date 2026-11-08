@@ -4,6 +4,7 @@ import { buildCalculationRecord, saveCalculationToDb } from '../calculators/core
 import { enqueueMutation } from '../../services/outbox/outboxService';
 import { generateIdempotencyKey } from '../../services/integrations/centralgestMapper';
 import { useLanguage } from '../../context/LanguageContext';
+import { LEGACY_UNASSIGNED_MARKER } from '../../types/calculator';
 
 export function useTrvSaveHistory() {
   const { t } = useLanguage();
@@ -13,7 +14,8 @@ export function useTrvSaveHistory() {
     alturaCopa: number,
     larguraCopa: number,
     distanciaEntrelinhas: number,
-    trvResult: TrvCalculationResult
+    trvResult: TrvCalculationResult,
+    userId: string = LEGACY_UNASSIGNED_MARKER
   ) => {
     try {
       if (!trvResult.isValid) {
@@ -29,7 +31,7 @@ export function useTrvSaveHistory() {
         trvResult.volume_copa
       );
       const record = buildCalculationRecord({
-        userId: 'local-user',
+        userId,
         calculatorId: 'calc_volume_copa',
         calculatorVersion: '1.0.0',
         name: `TRV ${trvResult.volume_copa} m³/ha (h:${alturaCopa}m, w:${larguraCopa}m, r:${distanciaEntrelinhas}m)`,
@@ -43,6 +45,7 @@ export function useTrvSaveHistory() {
         entityId: generateIdempotencyKey(),
         entityType: 'calculation',
         operation: 'CREATE',
+        userId,
         payload: {
           calculationId: record.id,
           calculatorId: 'calc_volume_copa',
