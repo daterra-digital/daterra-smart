@@ -131,7 +131,7 @@ export const concentracaoCalculatorConfig: CalculatorDefinition = {
       dimension: 'volume',
       defaultUnit: 'L',
       allowedUnits: ['L'],
-      defaultValue: 400,
+      defaultValue: undefined,
       presets: [200, 400, 600, 1000], // Exatamente 4 atalhos
       min: 1,
       max: 10000,
@@ -155,7 +155,7 @@ export const concentracaoCalculatorConfig: CalculatorDefinition = {
       dimension: 'concentration',
       defaultUnit: 'mL/hL',
       allowedUnits: ['mL/hL', 'g/hL', '%', 'L/hL', 'kg/hL'],
-      defaultValue: 100,
+      defaultValue: undefined,
       presets: [50, 100, 200, 400], // Exatamente 4 atalhos
       min: 0.01,
       max: 5000,
@@ -221,7 +221,7 @@ export const concentracaoCalculatorConfig: CalculatorDefinition = {
       dimension: 'application_rate',
       defaultUnit: 'L/ha',
       allowedUnits: ['L/ha'],
-      defaultValue: 1000,
+      defaultValue: undefined,
       presets: [500, 800, 1000, 1200], // Exatamente 4 atalhos
       min: 1,
       max: 5000,
@@ -245,7 +245,7 @@ export const concentracaoCalculatorConfig: CalculatorDefinition = {
       dimension: 'application_rate',
       defaultUnit: 'L/ha',
       allowedUnits: ['L/ha'],
-      defaultValue: 400,
+      defaultValue: undefined,
       presets: [200, 300, 400, 500], // Exatamente 4 atalhos
       min: 1,
       max: 5000,

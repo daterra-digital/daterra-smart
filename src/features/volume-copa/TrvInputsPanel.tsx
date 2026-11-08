@@ -67,7 +67,7 @@ export const TrvInputsPanel: React.FC<TrvInputsPanelProps> = ({
           helpFile="TRVFAQLargura.md"
           helpTopic="trv-largura"
           warningText={
-            larguraCopa < 0.4
+            larguraCopa > 0 && larguraCopa < 0.4
               ? t('volumeCopa.widthNarrowWarning', 'Espessura estreita (< 0,4 m).')
               : null
           }
@@ -84,7 +84,7 @@ export const TrvInputsPanel: React.FC<TrvInputsPanelProps> = ({
           helpFile="TRVFAQEntrelinha.md"
           helpTopic="trv-entrelinha"
           warningText={
-            distanciaEntrelinhas < 2.0
+            distanciaEntrelinhas > 0 && distanciaEntrelinhas < 2.0
               ? t('volumeCopa.spacingNarrowWarning', 'Entrelinha estreita (< 2,0 m).')
               : null
           }

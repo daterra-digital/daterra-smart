@@ -63,7 +63,7 @@ export const LwaInputsPanel: React.FC<LwaInputsPanelProps> = ({
           >
             <div className="flex items-baseline gap-1.5 font-mono">
               <span className="text-2xl font-black text-slate-900 group-hover:text-[#114037]">
-                {alturaVegetacao.toFixed(2)}
+                {alturaVegetacao > 0 ? alturaVegetacao.toFixed(2) : '—'}
               </span>
               <span className="text-xs font-bold text-slate-500">m</span>
             </div>
@@ -133,7 +133,7 @@ export const LwaInputsPanel: React.FC<LwaInputsPanelProps> = ({
           >
             <div className="flex items-baseline gap-1.5 font-mono">
               <span className="text-2xl font-black text-slate-900 group-hover:text-[#114037]">
-                {distanciaEntrelinhas.toFixed(2)}
+                {distanciaEntrelinhas > 0 ? distanciaEntrelinhas.toFixed(2) : '—'}
               </span>
               <span className="text-xs font-bold text-slate-500">m</span>
             </div>

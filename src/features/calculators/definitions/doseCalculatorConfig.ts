@@ -166,7 +166,7 @@ export const doseCalculatorConfig: CalculatorDefinition = {
       dimension: 'volume',
       defaultUnit: 'L',
       allowedUnits: ['L'],
-      defaultValue: 1000,
+      defaultValue: undefined,
       presets: [200, 500, 1000, 1500], // Exatamente 4 atalhos
       helpFile: 'DoseFAQVolumePreparar.md',
       required: true,
@@ -195,7 +195,7 @@ export const doseCalculatorConfig: CalculatorDefinition = {
         action: 'reset',
         noticeKey: 'unifiedKeypad.unitChangedValueReset'
       }),
-      defaultValue: 2,
+      defaultValue: undefined,
       presets: [1, 2, 3, 5], // Exatamente 4 atalhos
       helpFile: 'DoseFAQDoseRecomendada.md',
       required: true,
@@ -215,7 +215,7 @@ export const doseCalculatorConfig: CalculatorDefinition = {
       dimension: 'application_rate',
       defaultUnit: 'L/ha',
       allowedUnits: ['L/ha'],
-      defaultValue: 200,
+      defaultValue: undefined,
       presets: [100, 200, 300, 400], // Exatamente 4 atalhos
       helpFile: 'DoseFAQVolumeAplicado.md',
       required: true,

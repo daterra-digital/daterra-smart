@@ -55,7 +55,7 @@ export const TrvInputField: React.FC<TrvInputFieldProps> = ({
       >
         <div className="flex items-baseline gap-1.5 font-mono">
           <span className="text-2xl font-black text-slate-900 group-hover:text-[#114037]">
-            {value.toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            {value > 0 ? value.toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '—'}
           </span>
           <span className="text-xs font-bold text-slate-500">{unit}</span>
         </div>

@@ -25,8 +25,8 @@ export const AreaParedeFoliarCalculator: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const effectiveUserId = user?.id || '';
-  const [alturaVegetacao, setAlturaVegetacao] = useState<number>(2.5);
-  const [distanciaEntrelinhas, setDistanciaEntrelinhas] = useState<number>(3.0);
+  const [alturaVegetacao, setAlturaVegetacao] = useState<number>(0);
+  const [distanciaEntrelinhas, setDistanciaEntrelinhas] = useState<number>(0);
   const [activeKeypadField, setActiveKeypadField] = useState<'altura' | 'entrelinha' | null>(null);
   const [isHistoryOpen, setIsHistoryOpen] = useState<boolean>(false);
   const { toastMessage, saveToHistory } = useLwaSaveHistory();
