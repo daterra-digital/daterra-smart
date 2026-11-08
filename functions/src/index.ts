@@ -3,6 +3,7 @@ import * as admin from 'firebase-admin';
 import { verifyTurnstileToken } from './auth/turnstileVerifier';
 import { checkAuthRateLimit } from './auth/rateLimiter';
 import { validateRedirectUrl } from './auth/redirectUrlValidator';
+import { handleDeleteUserAccount } from './auth/accountDeletion';
 
 if (!admin.apps.length) {
   admin.initializeApp();
@@ -174,3 +175,10 @@ export const sendCustomMagicLink = onCall(
     }
   }
 );
+
+/**
+ * Função Autenticada para Cumprimento do Art. 17º do RGPD (Direito ao Apagamento)
+ */
+export const deleteUserAccount = onCall({ enforceAppCheck: false }, async (request) => {
+  return handleDeleteUserAccount(request);
+});

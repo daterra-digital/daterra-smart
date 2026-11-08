@@ -17,6 +17,7 @@ import { AboutView } from './AboutView';
 import { ExplorationView, type ProfileTab as ExplorationTab } from './ExplorationView';
 import { SettingsSubmenuNav, type SettingsSubmenu } from '../features/settings/SettingsSubmenuNav';
 import { SettingsNotificationsTab } from '../features/settings/SettingsNotificationsTab';
+import { RgpdDeleteAccountButton } from '../features/settings/RgpdDeleteAccountButton';
 import type { Profile } from '../types/profile';
 import type { CoBrandingConfig } from '../features/smart-debito/types';
 import {
@@ -1537,6 +1538,12 @@ export const SettingsView: React.FC = () => {
                     {t('settings.dangerZone.deleteCalibrationsSub', 'Remove ensaios hidráulicos')}
                   </span>
                 </button>
+
+                {/* Opção RGPD: Direito ao Apagamento (SEC-17) */}
+                <RgpdDeleteAccountButton
+                  onFeedback={(msg) => setFeedbackMsg(msg)}
+                  onError={(err) => setErrorMessage(err)}
+                />
               </div>
 
               {/* Botão Vermelho Crítico Apagar Tudo */}
