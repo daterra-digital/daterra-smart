@@ -19,8 +19,8 @@ export const AcademyView: React.FC = () => {
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
-          <div className="px-3 py-1 bg-blue-50 border border-blue-200 text-blue-700 rounded-2xl text-xs font-bold flex items-center gap-1.5 shadow-xs">
-            <span className="w-2 h-2 rounded-full bg-blue-500" />
+          <div className="px-2.5 py-0.5 bg-amber-100 border border-amber-400 text-amber-950 rounded-full text-xs font-black uppercase tracking-wider flex items-center gap-1.5 shadow-2xs">
+            <span className="w-1.5 h-1.5 rounded-full bg-amber-600" />
             <span>RC</span>
           </div>
 

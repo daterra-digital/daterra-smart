@@ -700,7 +700,7 @@ export const SettingsView: React.FC = () => {
                   <h2 className="text-fluid-subtitle font-black text-[#114037]">
                     {t('settings.branding.title', 'Definições — Co-Branding & Personalização Institucional')}
                   </h2>
-                  <span className="px-2.5 py-0.5 bg-blue-100 border border-blue-300 text-blue-900 rounded-full text-xs font-black uppercase tracking-wide shrink-0">
+                  <span className="px-2.5 py-0.5 bg-amber-100 border border-amber-400 text-amber-950 rounded-full text-xs font-black uppercase tracking-wider shrink-0">
                     RC
                   </span>
                 </div>

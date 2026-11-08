@@ -109,7 +109,7 @@ export const SettingsSubmenuNav: React.FC<SettingsSubmenuNavProps> = ({
               <Icon className="w-4 h-4 text-[#3CA64C]" />
               <span>{menu.fallback ? t(menu.labelKey, menu.fallback) : t(menu.labelKey)}</span>
               {menu.badge && (
-                <span className="px-1.5 py-0.5 rounded-md text-[9px] font-black bg-blue-100 text-blue-700 border border-blue-200 uppercase">
+                <span className="px-1.5 py-0.5 rounded-md text-[9px] font-black bg-amber-100 text-amber-950 border border-amber-400 uppercase tracking-wider">
                   {menu.badge}
                 </span>
               )}
@@ -144,7 +144,7 @@ export const SettingsSubmenuNav: React.FC<SettingsSubmenuNavProps> = ({
                 <Icon className="w-4 h-4 text-[#3CA64C]" />
                 <span>{t(tab.labelKey)}</span>
                 {tab.badge && (
-                  <span className="px-1.5 py-0.5 rounded-md text-[9px] font-black bg-blue-100 text-blue-700 border border-blue-200 uppercase">
+                  <span className="px-1.5 py-0.5 rounded-md text-[9px] font-black bg-amber-100 text-amber-950 border border-amber-400 uppercase tracking-wider">
                     {tab.badge}
                   </span>
                 )}

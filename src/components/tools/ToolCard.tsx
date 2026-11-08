@@ -74,12 +74,12 @@ export const ToolCard: React.FC<ToolCardProps> = ({
 
           <div className="flex items-center gap-1.5 shrink-0">
             {releaseBadge === 'PAGES' && (
-              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-emerald-100 text-[#114037] border border-emerald-300 shadow-2xs">
+              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-emerald-100 text-emerald-950 border border-emerald-400 shadow-2xs">
                 PAGES
               </span>
             )}
             {releaseBadge === 'RC' && (
-              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-amber-100 text-amber-900 border border-amber-300 shadow-2xs">
+              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-amber-100 text-amber-950 border border-amber-400 shadow-2xs">
                 RC
               </span>
             )}

@@ -56,7 +56,7 @@ export const PrivateNavDrawer: React.FC<PrivateNavDrawerProps> = ({
         >
           <Bot className="w-5 h-5 text-daterra-accent" />
           <span>{t('nav.assistant', 'Assistente')}</span>
-          <span className="ml-auto px-1.5 py-0.5 rounded-md text-[9px] font-black bg-blue-500/20 text-blue-200 border border-blue-400/40 uppercase">RC</span>
+          <span className="ml-auto px-1.5 py-0.5 rounded-md text-[9px] font-black bg-amber-400 text-slate-950 border border-amber-300 uppercase tracking-wider">RC</span>
         </Link>
       )}
 
@@ -67,7 +67,7 @@ export const PrivateNavDrawer: React.FC<PrivateNavDrawerProps> = ({
       >
         <GraduationCap className="w-5 h-5 text-daterra-accent" />
         <span>{t('nav.academy', 'Academia')}</span>
-        <span className="ml-auto px-1.5 py-0.5 rounded-md text-[9px] font-black bg-blue-500/20 text-blue-200 border border-blue-400/40 uppercase">RC</span>
+        <span className="ml-auto px-1.5 py-0.5 rounded-md text-[9px] font-black bg-amber-400 text-slate-950 border border-amber-300 uppercase tracking-wider">RC</span>
       </Link>
 
       <Link

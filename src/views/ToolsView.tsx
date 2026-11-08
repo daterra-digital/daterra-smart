@@ -450,6 +450,18 @@ export const ToolsView: React.FC = () => {
     return visibleCatalog.filter(t => installedToolIds.has(t.id)).length;
   }, [visibleCatalog, installedToolIds]);
 
+  const isEvaluation = isRcEvaluationMode();
+
+  const pagesTools = useMemo(() => {
+    if (!isEvaluation) return [];
+    return filteredTools.filter(tool => getToolReleaseBadge(tool.id) === 'PAGES');
+  }, [filteredTools, isEvaluation]);
+
+  const rcTools = useMemo(() => {
+    if (!isEvaluation) return [];
+    return filteredTools.filter(tool => getToolReleaseBadge(tool.id) === 'RC');
+  }, [filteredTools, isEvaluation]);
+
   // --- LÓGICA DE CÁLCULO DAS CALCULADORAS ---
   const calculateConcentrationResult = () => {
     let resultInSmall = 0;
@@ -1017,8 +1029,8 @@ export const ToolsView: React.FC = () => {
             <span className="font-semibold">Ambiente de Avaliação Localhost:5175 (Etiquetas ativas apenas para revisão interna)</span>
           </div>
           <div className="flex items-center gap-2 text-[10px] font-extrabold shrink-0">
-            <span className="px-2 py-0.5 bg-emerald-100 text-[#114037] border border-emerald-300 rounded-md">PAGES: 11 Canónicas</span>
-            <span className="px-2 py-0.5 bg-amber-100 text-amber-800 border border-amber-300 rounded-md">RC: Novidades</span>
+            <span className="px-2 py-0.5 bg-emerald-100 text-emerald-950 border border-emerald-400 rounded-md">PAGES: 11 Canónicas</span>
+            <span className="px-2 py-0.5 bg-amber-100 text-amber-950 border border-amber-400 rounded-md">RC: Novidades</span>
           </div>
         </div>
       )}
@@ -1164,6 +1176,80 @@ export const ToolsView: React.FC = () => {
             >
               {t('tools.clearFilter', 'Limpar Pesquisa e Filtros')}
             </button>
+          </div>
+        ) : isEvaluation ? (
+          <div className="space-y-8">
+            {/* GRUPO 1: FERRAMENTAS HOMOLOGADAS (PAGES) */}
+            {pagesTools.length > 0 && (
+              <section className="space-y-4" aria-label="Ferramentas Homologadas PAGES">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 pb-2 border-b border-emerald-200">
+                  <div className="flex items-center gap-2.5">
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-100 text-emerald-950 border border-emerald-400 shadow-2xs">
+                      PAGES
+                    </span>
+                    <h2 className="text-sm sm:text-base font-extrabold text-[#114037]">
+                      {t('tools.pagesGroupTitle', 'Ferramentas Homologadas')}
+                    </h2>
+                    <span className="text-xs font-bold text-slate-500 font-mono-numbers">
+                      ({pagesTools.length})
+                    </span>
+                  </div>
+                  <span className="text-[11px] text-slate-500 font-medium">
+                    {t('tools.pagesGroupDesc', 'Disponíveis e validadas no GitHub Pages')}
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                  {pagesTools.map((tool) => (
+                    <ToolCard
+                      key={tool.id}
+                      tool={tool}
+                      isInstalled={installedToolIds.has(tool.id)}
+                      isInstalling={installingToolId === tool.id}
+                      onOpenTool={handleOpenTool}
+                      onInstallTool={handleInstallTool}
+                      onUninstallTool={handleUninstallTool}
+                    />
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {/* SEPARADOR SIMPLES E GRUPO 2: CANDIDATAS A PUBLICAÇÃO (RC) */}
+            {rcTools.length > 0 && (
+              <section className="space-y-4 pt-4 border-t-2 border-dashed border-slate-200" aria-label="Candidatas a Publicação RC">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 pb-2 border-b border-amber-200">
+                  <div className="flex items-center gap-2.5">
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-100 text-amber-950 border border-amber-400 shadow-2xs">
+                      RC
+                    </span>
+                    <h2 className="text-sm sm:text-base font-extrabold text-amber-950">
+                      {t('tools.rcGroupTitle', 'Candidatas a Publicação — Novidades')}
+                    </h2>
+                    <span className="text-xs font-bold text-amber-900 font-mono-numbers">
+                      ({rcTools.length})
+                    </span>
+                  </div>
+                  <span className="text-[11px] text-amber-800 font-medium">
+                    {t('tools.rcGroupDesc', 'Em avaliação e testes locais para próximo release')}
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                  {rcTools.map((tool) => (
+                    <ToolCard
+                      key={tool.id}
+                      tool={tool}
+                      isInstalled={installedToolIds.has(tool.id)}
+                      isInstalling={installingToolId === tool.id}
+                      onOpenTool={handleOpenTool}
+                      onInstallTool={handleInstallTool}
+                      onUninstallTool={handleUninstallTool}
+                    />
+                  ))}
+                </div>
+              </section>
+            )}
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">

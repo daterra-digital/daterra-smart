@@ -141,4 +141,36 @@ describe('Modo de Avaliação de Release Candidate (V-RC)', () => {
     assert.ok(!toolCard.includes('line-clamp-1'), 'ToolCard não deve conter line-clamp-1 para evitar reticências');
   });
 
+  it('9. Uniformização de Etiquetas: RC deve ser estritamente âmbar/laranja e PAGES verde de alto contraste', () => {
+    const toolCard = fs.readFileSync(path.resolve('src/components/tools/ToolCard.tsx'), 'utf8');
+    assert.ok(toolCard.includes('bg-amber-100 text-amber-950 border border-amber-400'), 'ToolCard RC deve usar âmbar alto contraste');
+    assert.ok(toolCard.includes('bg-emerald-100 text-emerald-950 border border-emerald-400'), 'ToolCard PAGES deve usar esmeralda alto contraste');
+
+    const nav = fs.readFileSync(path.resolve('src/components/layout/PrivateDesktopNav.tsx'), 'utf8');
+    assert.ok(nav.includes('bg-amber-400 text-slate-950'), 'PrivateDesktopNav RC deve usar âmbar de alto contraste sobre fundo escuro');
+    assert.ok(!nav.includes('bg-blue-500/20 text-blue-200'), 'PrivateDesktopNav não deve conter badge azul');
+
+    const drawer = fs.readFileSync(path.resolve('src/components/layout/PrivateNavDrawer.tsx'), 'utf8');
+    assert.ok(drawer.includes('bg-amber-400 text-slate-950'), 'PrivateNavDrawer RC deve usar âmbar de alto contraste');
+
+    const academy = fs.readFileSync(path.resolve('src/views/AcademyView.tsx'), 'utf8');
+    assert.ok(academy.includes('bg-amber-100 border border-amber-400 text-amber-950'), 'AcademyView RC deve ser âmbar');
+
+    const weather = fs.readFileSync(path.resolve('src/features/weather/views/WeatherSaasView.tsx'), 'utf8');
+    assert.ok(weather.includes('bg-amber-100 text-amber-950 border border-amber-400'), 'WeatherSaasView RC deve ser âmbar');
+
+    const settingsSubmenu = fs.readFileSync(path.resolve('src/features/settings/SettingsSubmenuNav.tsx'), 'utf8');
+    assert.ok(!settingsSubmenu.includes('bg-blue-100 text-blue-700'), 'SettingsSubmenuNav não deve ter etiquetas azuis');
+    assert.ok(settingsSubmenu.includes('bg-amber-100 text-amber-950 border border-amber-400'), 'SettingsSubmenuNav deve ter etiquetas âmbar');
+  });
+
+  it('10. ToolsView deve conter separador visual entre Ferramentas Homologadas (PAGES) e Candidatas (RC)', () => {
+    const toolsView = fs.readFileSync(path.resolve('src/views/ToolsView.tsx'), 'utf8');
+    assert.ok(toolsView.includes('pagesTools'), 'ToolsView deve calcular subconjunto pagesTools');
+    assert.ok(toolsView.includes('rcTools'), 'ToolsView deve calcular subconjunto rcTools');
+    assert.ok(toolsView.includes('Ferramentas Homologadas'), 'ToolsView deve ter cabeçalho de grupo homologado');
+    assert.ok(toolsView.includes('Candidatas a Publicação — Novidades'), 'ToolsView deve ter cabeçalho de novidades RC');
+    assert.ok(toolsView.includes('border-t-2 border-dashed border-slate-200'), 'ToolsView deve conter linha separadora entre grupos');
+  });
+
 });

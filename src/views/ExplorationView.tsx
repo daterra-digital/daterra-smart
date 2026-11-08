@@ -388,7 +388,7 @@ export const ExplorationView: React.FC<ExplorationViewProps> = ({
           </div>
 
           <div className="flex flex-wrap items-center gap-2.5">
-            <span className="px-2.5 py-1 bg-blue-100 border border-blue-300 text-blue-900 rounded-2xl text-xs font-black uppercase tracking-wide">
+            <span className="px-2.5 py-0.5 bg-amber-100 border border-amber-400 text-amber-950 rounded-full text-xs font-black uppercase tracking-wider">
               RC
             </span>
             <div className="flex items-center gap-2 bg-emerald-50 px-4 py-2 rounded-2xl border border-emerald-200 text-emerald-800 text-xs font-extrabold font-mono-numbers">

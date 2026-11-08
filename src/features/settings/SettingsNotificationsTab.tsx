@@ -100,7 +100,7 @@ export const SettingsNotificationsTab: React.FC = () => {
             {t('settings.notificationsTab.subtitle', 'Gestão de canais de comunicação e subscrição de conteúdos técnicos.')}
           </p>
         </div>
-        <span className="self-start sm:self-center px-2.5 py-0.5 bg-blue-100 border border-blue-300 text-blue-900 rounded-full text-xs font-black uppercase tracking-wide shrink-0">
+        <span className="self-start sm:self-center px-2.5 py-0.5 bg-amber-100 border border-amber-400 text-amber-950 rounded-full text-xs font-black uppercase tracking-wider shrink-0">
           RC
         </span>
       </div>
