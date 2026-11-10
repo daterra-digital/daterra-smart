@@ -18,12 +18,13 @@ export const READY_TOOL_IDS = new Set<string>([
 ]);
 
 /**
- * 7 Ferramentas em Desenvolvimento / Avaliação bloqueadas no GitHub Pages
+ * 8 Ferramentas em Desenvolvimento / Avaliação bloqueadas no GitHub Pages
  */
 export const BLOCKED_TOOL_IDS_IN_PAGES = new Set<string>([
   'calc_calibracao_pulverizador',
   'calc_debito_total',
   'calc_eppo',
+  'calc_ird',
   'drone_buffer_zone',
   'smart_debito',
   'satelite_ndvi',
@@ -52,6 +53,7 @@ export const BLOCKED_PAGES_ROUTES: Record<string, string> = {
   '/ferramentas/calibracao-pulverizador': 'calc_calibracao_pulverizador',
   '/ferramentas/debito-total': 'calc_debito_total',
   '/ferramentas/eppo': 'calc_eppo',
+  '/ferramentas/risco-deriva': 'calc_ird',
   '/ferramentas/drone-buffer-zone': 'drone_buffer_zone',
   '/ferramentas/smart-debito': 'smart_debito',
   '/ferramentas/satelite-ndvi': 'satelite_ndvi',

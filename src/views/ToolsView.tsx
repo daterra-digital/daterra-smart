@@ -18,6 +18,7 @@ import { doseCalculatorConfig } from '../features/calculators/definitions/doseCa
 import { concentracaoCalculatorConfig } from '../features/calculators/definitions/concentracaoCalculatorConfig.ts';
 import { VelocidadeTrabalhoView } from '../features/calculators/velocidade-trabalho';
 import { isToolAllowedInCurrentEnv } from '../utils/environment';
+import { getDaterraEnvironment } from '../utils/releasePolicy';
 import { useSubscription } from '../context/SubscriptionContext';
 import { PRO_TOOL_IDS } from '../types/subscription';
 import { ToolCard } from '../components/tools/ToolCard';
@@ -114,6 +115,16 @@ const TOOLS_CATALOG: ToolModule[] = [
     icon: Layers,
     isCore: true,
     caminho: '/ferramentas/drone-buffer-zone',
+    prioridade: 'alta'
+  },
+  {
+    id: 'calc_ird',
+    name: 'Índice de Risco de Deriva (IRD)',
+    category: 'Pulverização',
+    description: 'Apoio heurístico à decisão de deriva na pulverização (prevalece o rótulo DGAV/SIFITO).',
+    icon: CloudSun,
+    isCore: true,
+    caminho: '/ferramentas/risco-deriva',
     prioridade: 'alta'
   },
   {
@@ -366,7 +377,7 @@ export const ToolsView: React.FC = () => {
 
   // Abrir uma Ferramenta / Funcionalidade
   const handleOpenTool = (toolId: string) => {
-    if (!isToolAllowedInCurrentEnv(toolId)) {
+    if (!isToolAllowedInCurrentEnv(toolId) || (toolId === 'calc_ird' && getDaterraEnvironment() !== 'development')) {
       return;
     }
     if (PRO_TOOL_IDS.has(toolId) && !isPro) {
@@ -411,7 +422,8 @@ export const ToolsView: React.FC = () => {
 
   // Catálogo de ferramentas visíveis no ambiente atual (filtrado para 10 ferramentas homologadas no GitHub Pages)
   const visibleCatalog = useMemo(() => {
-    return TOOLS_CATALOG.filter(tool => isToolAllowedInCurrentEnv(tool.id));
+    const isDevEnv = getDaterraEnvironment() === 'development';
+    return TOOLS_CATALOG.filter(tool => isToolAllowedInCurrentEnv(tool.id) && (tool.id !== 'calc_ird' || isDevEnv));
   }, []);
 
   // Filtro Dinâmico do Catálogo de Ferramentas (Ordenado Alfabeticamente A-Z)
@@ -606,6 +618,12 @@ export const ToolsView: React.FC = () => {
 
   if (currentViewTool === 'calc_aplicacao_manual') {
     return <Navigate to="/ferramentas/aplicacao-manual" replace />;
+  }
+
+  if (currentViewTool === 'calc_ird') {
+    return getDaterraEnvironment() === 'development'
+      ? <Navigate to="/ferramentas/risco-deriva" replace />
+      : <Navigate to="/ferramentas" replace />;
   }
 
   if (currentViewTool === 'calc_dose') {
