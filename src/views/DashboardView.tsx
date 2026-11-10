@@ -5,12 +5,30 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
+import { useWeather } from '../features/weather/hooks/useWeather';
 import { DashboardWeatherCard } from '../features/weather/components/DashboardWeatherCard';
+import { DashboardWeatherWeeklyCard } from '../features/weather/components/DashboardWeatherWeeklyCard';
 import { DashboardFavoritesCard } from '../features/dashboard/components/DashboardFavoritesCard';
 
 export const DashboardView: React.FC = () => {
   const { user, profile } = useAuth();
   const { t } = useLanguage();
+  const { currentLocation, data } = useWeather();
+
+  // Estado local da seleção de dia (apenas no Dashboard)
+  const [selectedDateIso, setSelectedDateIso] = React.useState<string | null>(null);
+
+  // Ao mudar de localidade, regressar a Hoje para evitar contexto residual
+  React.useEffect(() => {
+    setSelectedDateIso(null);
+  }, [currentLocation?.id, currentLocation?.latitude, currentLocation?.longitude]);
+
+  // Se a previsão for atualizada e a data selecionada deixar de existir, regressar a Hoje
+  React.useEffect(() => {
+    if (selectedDateIso && data?.daily && !data.daily.some((d) => d.dateIso === selectedDateIso)) {
+      setSelectedDateIso(null);
+    }
+  }, [data?.daily, selectedDateIso]);
 
   const userFullName = profile
     ? `${profile.first_name ?? ''} ${profile.last_name ?? ''}`.trim() ||
@@ -52,16 +70,16 @@ export const DashboardView: React.FC = () => {
       </div>
 
       {/* ========================================================================= */}
-      {/* GRELHA PRINCIPAL DE 3 COLUNAS (DESKTOP) / 1 COLUNA (MOBILE)              */}
+      {/* GRELHA PRINCIPAL DO DASHBOARD (3 COLUNAS DESKTOP)                         */}
       {/* ========================================================================= */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* LINHA 2 — CARTÃO ESQUERDO: Boas-vindas */}
-        <div className="lg:col-span-1 bg-gradient-to-br from-daterra-primary to-daterra-secondary text-white p-6 rounded-3xl shadow-soft flex flex-col justify-between relative overflow-hidden min-h-[340px]">
+        {/* LINHA 1 — COLUNA 1 (1/3): Boas-vindas */}
+        <div className="lg:col-span-1 bg-gradient-to-br from-daterra-primary to-daterra-secondary text-white p-5 sm:p-6 rounded-3xl shadow-soft flex flex-col justify-between relative overflow-hidden h-full">
           <div className="absolute right-0 bottom-0 opacity-10 pointer-events-none">
-            <Cpu className="w-48 h-48 -mr-10 -mb-10 text-white" />
+            <Cpu className="w-40 h-40 -mr-8 -mb-8 text-white" />
           </div>
 
-          <div className="space-y-4 relative z-10">
+          <div className="space-y-3 relative z-10">
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 text-daterra-accent font-bold text-xs">
               <Sparkles className="w-3.5 h-3.5" />
               <span>{t('dashboard.farm')}</span>
@@ -76,7 +94,7 @@ export const DashboardView: React.FC = () => {
             </p>
           </div>
 
-          <div className="pt-6 mt-4 border-t border-white/15 flex items-center justify-between text-xs relative z-10">
+          <div className="pt-4 mt-3 border-t border-white/15 flex items-center justify-between text-xs relative z-10">
             <span className="text-slate-300 font-medium">{t('dashboard.farm')}: {farmName}</span>
             <span className="px-3 py-1 rounded-lg bg-daterra-accent text-white font-extrabold text-[11px] tracking-wider uppercase shadow-sm">
               {t('dashboard.active')}
@@ -84,12 +102,23 @@ export const DashboardView: React.FC = () => {
           </div>
         </div>
 
-        {/* LINHA 2 — CARTÃO DIREITO: Meteorologia Estendida */}
-        <div className="lg:col-span-2">
-          <DashboardWeatherCard />
+        {/* LINHA 1 — COLUNAS 2-3 (2/3): Meteorologia do Dia */}
+        <div className="lg:col-span-2 h-full flex flex-col">
+          <DashboardWeatherCard
+            selectedDateIso={selectedDateIso}
+            onSelectDate={setSelectedDateIso}
+          />
         </div>
 
-        {/* LINHA 3 — CARTÃO ESQUERDO: Academia DATERRA */}
+        {/* LINHA 2 — LARGURA TOTAL (3/3): Previsão dos Próximos 7 Dias */}
+        <div className="lg:col-span-3">
+          <DashboardWeatherWeeklyCard
+            selectedDateIso={selectedDateIso}
+            onSelectDate={setSelectedDateIso}
+          />
+        </div>
+
+        {/* LINHA 3 — COLUNA 1 (1/3): Academia DATERRA */}
         <div className="lg:col-span-1 bg-white p-6 rounded-3xl shadow-soft border border-slate-200 flex flex-col justify-between space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">

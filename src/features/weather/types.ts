@@ -57,6 +57,9 @@ export interface DailyForecastItem {
   precipitationSumMm: number;
   precipitationProbabilityMax: number;
   windSpeedMaxKmh: number;
+  windGustsMaxKmh?: number;
+  windDirectionDominantDeg?: number;
+  relativeHumidityMeanPercent?: number;
   weatherCode: number;
   weatherLabel: string;
 }
@@ -75,6 +78,7 @@ export interface FullWeatherData {
   longitude: number;
   current: CurrentWeather;
   hourly: HourlyForecastItem[];
+  hourlyFull?: HourlyForecastItem[];
   daily: DailyForecastItem[];
   bioclimatic: BioclimaticMetrics;
   fetchedAt: string;

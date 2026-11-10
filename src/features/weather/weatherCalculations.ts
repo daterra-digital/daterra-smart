@@ -119,7 +119,7 @@ export function evaluateSprayWindow(
   let level: SprayDecisionLevel = 'optimal';
   let badgeLabel = 'Risco Baixo (Ótimo)';
   let title = 'Condições Favoráveis para Aplicação';
-  let reason = 'Janela meteorológica excelente para absorção da calda sem risco significativo de deriva.';
+  let reason = 'Condições favoráveis: vento calmo e Delta T na faixa recomendada, com baixo risco de deriva.';
 
   // 1. Chuva ativa ou iminente
   if (precipitationMm > 0.2) {
@@ -141,7 +141,7 @@ export function evaluateSprayWindow(
       level: 'unfavorable',
       badgeLabel: 'Vento Crítico',
       title: 'Risco Severo de Deriva',
-      reason: `Velocidade do vento (${windSpeedKmh} km/h) ou rajadas (${windGustsKmh} km/h) excedem o limite de segurança legal. Risco de contaminação de áreas vizinhas.`,
+      reason: `Velocidade do vento (${windSpeedKmh} km/h) ou rajadas (${windGustsKmh} km/h) excedem o limite operacional de segurança. Risco de deriva para áreas vizinhas.`,
       deltaT,
       windSpeedKmh,
       windGustsKmh,

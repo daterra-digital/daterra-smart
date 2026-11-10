@@ -1,5 +1,5 @@
 // src/features/weather/weatherService.ts
-import type { FullWeatherData, CurrentWeather, HourlyForecastItem, DailyForecastItem } from './types';
+import type { FullWeatherData, CurrentWeather, HourlyForecastItem, DailyForecastItem } from './types.ts';
 import {
   calculateDeltaT,
   calculateVpd,
@@ -7,10 +7,11 @@ import {
   getWindDirectionText,
   getWmoWeatherLabel,
   evaluateSprayWindow
-} from './weatherCalculations';
-
-const CACHE_KEY = 'DATERRA_WEATHER_CACHE_V2';
-const CACHE_DURATION_MS = 20 * 60 * 1000; // 20 minutos de cache local
+} from './weatherCalculations.ts';
+import {
+  getCachedWeatherData,
+  setCachedWeatherData
+} from './services/weatherCacheService.ts';
 
 export interface WeatherLocation {
   id: string;
@@ -40,7 +41,7 @@ export const DEFAULT_COORDINATES = {
 
 export function getSavedWeatherLocation(): WeatherLocation {
   try {
-    const raw = localStorage.getItem('DATERRA_ACTIVE_WEATHER_LOCATION');
+    const raw = typeof localStorage !== 'undefined' ? localStorage.getItem('DATERRA_ACTIVE_WEATHER_LOCATION') : null;
     if (raw) return JSON.parse(raw);
   } catch {
     // fallback
@@ -50,7 +51,9 @@ export function getSavedWeatherLocation(): WeatherLocation {
 
 export function saveActiveWeatherLocation(loc: WeatherLocation): void {
   try {
-    localStorage.setItem('DATERRA_ACTIVE_WEATHER_LOCATION', JSON.stringify(loc));
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem('DATERRA_ACTIVE_WEATHER_LOCATION', JSON.stringify(loc));
+    }
   } catch {
     // quota cheia
   }
@@ -91,64 +94,57 @@ interface OpenMeteoApiResponse {
     precipitation_sum: number[];
     precipitation_probability_max: number[];
     wind_speed_10m_max: number[];
+    wind_gusts_10m_max?: number[];
+    wind_direction_10m_dominant?: number[];
+    relative_humidity_2m_mean?: number[];
   };
 }
 
-export async function fetchWeatherData(coords = DEFAULT_COORDINATES): Promise<FullWeatherData> {
-  // 1. Tentar ler da Cache Local
-  try {
-    const rawCache = localStorage.getItem(CACHE_KEY);
-    if (rawCache) {
-      const parsed = JSON.parse(rawCache);
-      const isFresh = Date.now() - new Date(parsed.fetchedAt).getTime() < CACHE_DURATION_MS;
-      const isSameCoords =
-        Math.abs(parsed.latitude - coords.latitude) < 0.05 &&
-        Math.abs(parsed.longitude - coords.longitude) < 0.05;
-
-      if (isFresh && isSameCoords) {
-        return parsed;
-      }
+export async function fetchWeatherData(
+  coords = DEFAULT_COORDINATES,
+  signal?: AbortSignal,
+  bypassCache = false
+): Promise<FullWeatherData> {
+  // 1. Tentar ler da Cache Local Particionada se não for refresh explícito
+  if (!bypassCache) {
+    const cached = getCachedWeatherData(coords.latitude, coords.longitude);
+    if (cached?.isFresh) {
+      return cached.data;
     }
-  } catch (err) {
-    console.warn('Erro ao ler cache meteorológica:', err);
   }
 
   // 2. Consulta à Open-Meteo
-  const url = `https://api.open-meteo.com/v1/forecast?latitude=${coords.latitude}&longitude=${coords.longitude}&current=temperature_2m,relative_humidity_2m,dew_point_2m,apparent_temperature,precipitation,weather_code,wind_speed_10m,wind_direction_10m,wind_gusts_10m&hourly=temperature_2m,relative_humidity_2m,dew_point_2m,precipitation_probability,precipitation,weather_code,wind_speed_10m,wind_direction_10m,wind_gusts_10m,vapour_pressure_deficit,et0_fao_evapotranspiration&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,wind_speed_10m_max&timezone=auto`;
+  const url = `https://api.open-meteo.com/v1/forecast?latitude=${coords.latitude}&longitude=${coords.longitude}&current=temperature_2m,relative_humidity_2m,dew_point_2m,apparent_temperature,precipitation,weather_code,wind_speed_10m,wind_direction_10m,wind_gusts_10m&hourly=temperature_2m,relative_humidity_2m,dew_point_2m,precipitation_probability,precipitation,weather_code,wind_speed_10m,wind_direction_10m,wind_gusts_10m,vapour_pressure_deficit,et0_fao_evapotranspiration&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,wind_speed_10m_max,wind_gusts_10m_max,wind_direction_10m_dominant,relative_humidity_2m_mean&timezone=auto`;
 
   try {
-    const res = await fetch(url, { signal: AbortSignal.timeout(6000) });
+    const fetchSignal = signal || (typeof AbortSignal !== 'undefined' && 'timeout' in AbortSignal ? AbortSignal.timeout(6000) : undefined);
+    const res = await fetch(url, fetchSignal ? { signal: fetchSignal } : undefined);
     if (!res.ok) {
       throw new Error(`Open-Meteo HTTP ${res.status}`);
     }
     const data: OpenMeteoApiResponse = await res.json();
     const processed = transformOpenMeteoResponse(data, coords);
 
-    // Guardar na Cache Local
-    try {
-      localStorage.setItem(CACHE_KEY, JSON.stringify(processed));
-    } catch {
-      // Ignorar quota cheia do localStorage
-    }
+    // Guardar na Cache Local Particionada
+    setCachedWeatherData(processed);
 
     return processed;
-  } catch (error) {
-    console.warn('Falha na consulta à Open-Meteo, a tentar fallback local:', error);
-
-    // Se houver cache antiga em caso de falha de rede, usa-a
-    try {
-      const rawCache = localStorage.getItem(CACHE_KEY);
-      if (rawCache) {
-        const cached = JSON.parse(rawCache);
-        cached.current.isCached = true;
-        return cached;
-      }
-    } catch {
-      // continua para fallback
+  } catch (error: any) {
+    if (error?.name === 'AbortError') {
+      throw error;
     }
 
-    // Fallback defensivo canónico para funcionamento offline
-    return generateFallbackWeatherData(coords);
+    console.warn('Falha na consulta à Open-Meteo, a verificar cache da localidade:', error);
+
+    // Se houver cache anterior DESTA localidade específica, devolve em modo offline
+    const fallbackCached = getCachedWeatherData(coords.latitude, coords.longitude, Infinity);
+    if (fallbackCached?.data) {
+      fallbackCached.data.current.isCached = true;
+      return fallbackCached.data;
+    }
+
+    // Sem rede e sem cache para esta localidade: rejeição estrita (sem dados falsos)
+    throw new Error('Previsão indisponível para esta localidade (sem ligação à rede)');
   }
 }
 
@@ -188,15 +184,14 @@ function transformOpenMeteoResponse(
     isCached: false
   };
 
-  // Processar 24 Horas Seguintes
-  const hourly: HourlyForecastItem[] = [];
+  const hourlyFull: HourlyForecastItem[] = [];
   const now = new Date();
   const currentHourIndex = Math.max(
     0,
     data.hourly.time.findIndex((t) => new Date(t) >= now)
   );
 
-  for (let i = currentHourIndex; i < Math.min(currentHourIndex + 24, data.hourly.time.length); i++) {
+  for (let i = 0; i < data.hourly.time.length; i++) {
     const hTime = data.hourly.time[i];
     const hTemp = data.hourly.temperature_2m[i];
     const hRh = data.hourly.relative_humidity_2m[i];
@@ -211,7 +206,7 @@ function transformOpenMeteoResponse(
     const d = new Date(hTime);
     const timeFormatted = `${String(d.getHours()).padStart(2, '0')}:00`;
 
-    hourly.push({
+    hourlyFull.push({
       timeIso: hTime,
       timeFormatted,
       temperatureC: Math.round(hTemp),
@@ -229,17 +224,27 @@ function transformOpenMeteoResponse(
     });
   }
 
-  // Processar Previsão de 5 Dias
+  const hourly = hourlyFull.slice(currentHourIndex);
+
   const weekdays = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
   const daily: DailyForecastItem[] = [];
 
-  for (let i = 0; i < Math.min(5, data.daily.time.length); i++) {
+  for (let i = 0; i < Math.min(7, data.daily.time.length); i++) {
     const dTime = data.daily.time[i];
     const dObj = new Date(dTime);
     const isToday = i === 0;
     const dayName = weekdays[dObj.getDay()];
     const dayLabel = isToday ? `Hoje (${dayName})` : dayName;
     const code = data.daily.weather_code[i];
+    const gustsMax = data.daily.wind_gusts_10m_max?.[i] != null
+      ? Math.round(data.daily.wind_gusts_10m_max[i])
+      : undefined;
+    const windDirDom = data.daily.wind_direction_10m_dominant?.[i] != null
+      ? Math.round(data.daily.wind_direction_10m_dominant[i])
+      : undefined;
+    const rhMean = data.daily.relative_humidity_2m_mean?.[i] != null
+      ? Math.round(data.daily.relative_humidity_2m_mean[i])
+      : undefined;
 
     daily.push({
       dateIso: dTime,
@@ -249,12 +254,15 @@ function transformOpenMeteoResponse(
       precipitationSumMm: Math.round((data.daily.precipitation_sum[i] || 0) * 10) / 10,
       precipitationProbabilityMax: data.daily.precipitation_probability_max[i] || 0,
       windSpeedMaxKmh: Math.round(data.daily.wind_speed_10m_max[i] || 0),
+      windGustsMaxKmh: gustsMax,
+      windDirectionDominantDeg: windDirDom,
+      relativeHumidityMeanPercent: rhMean,
       weatherCode: code,
       weatherLabel: getWmoWeatherLabel(code)
     });
   }
 
-  const et0 = data.hourly.et0_fao_evapotranspiration?.[currentHourIndex] 
+  const et0 = data.hourly.et0_fao_evapotranspiration?.[currentHourIndex]
     ? Math.round(data.hourly.et0_fao_evapotranspiration[currentHourIndex] * 24 * 10) / 10
     : 4.2;
 
@@ -266,6 +274,7 @@ function transformOpenMeteoResponse(
     longitude: coords.longitude,
     current,
     hourly,
+    hourlyFull,
     daily,
     bioclimatic: {
       deltaT,
@@ -273,56 +282,6 @@ function transformOpenMeteoResponse(
       dewPointC: dewPoint,
       et0MmDay: et0,
       rainNextHoursMm: Math.round(rainNext12h * 10) / 10
-    },
-    fetchedAt: new Date().toISOString()
-  };
-}
-
-function generateFallbackWeatherData(coords: { latitude: number; longitude: number; locationName?: string }): FullWeatherData {
-  const deltaT = 4.2;
-  const vpd = 0.95;
-  const sprayEvaluation = evaluateSprayWindow(deltaT, 12, 16, 62, 0);
-
-  const current: CurrentWeather = {
-    temperatureC: 24,
-    apparentTempC: 24,
-    humidityPercent: 62,
-    windSpeedKmh: 12,
-    windDirectionDeg: 25,
-    windDirectionText: 'NNE',
-    windGustsKmh: 16,
-    precipitationMm: 0,
-    weatherCode: 0,
-    weatherLabel: 'Céu Limpo',
-    dewPointC: 14.1,
-    deltaT,
-    vpdKpa: vpd,
-    sprayEvaluation,
-    updatedAt: new Date().toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' }),
-    isCached: true
-  };
-
-  const daily: DailyForecastItem[] = [
-    { dateIso: '2026-09-30', dayLabel: 'Hoje (Seg)', maxTempC: 24, minTempC: 14, precipitationSumMm: 0, precipitationProbabilityMax: 0, windSpeedMaxKmh: 14, weatherCode: 0, weatherLabel: 'Céu Limpo' },
-    { dateIso: '2026-10-01', dayLabel: 'Terça', maxTempC: 26, minTempC: 15, precipitationSumMm: 0, precipitationProbabilityMax: 10, windSpeedMaxKmh: 11, weatherCode: 1, weatherLabel: 'Ensolarado' },
-    { dateIso: '2026-10-02', dayLabel: 'Quarta', maxTempC: 22, minTempC: 13, precipitationSumMm: 0.2, precipitationProbabilityMax: 25, windSpeedMaxKmh: 18, weatherCode: 2, weatherLabel: 'Parc. Nublado' },
-    { dateIso: '2026-10-03', dayLabel: 'Quinta', maxTempC: 19, minTempC: 11, precipitationSumMm: 3.5, precipitationProbabilityMax: 70, windSpeedMaxKmh: 24, weatherCode: 61, weatherLabel: 'Chuva Fraca' },
-    { dateIso: '2026-10-04', dayLabel: 'Sexta', maxTempC: 21, minTempC: 12, precipitationSumMm: 0, precipitationProbabilityMax: 15, windSpeedMaxKmh: 16, weatherCode: 1, weatherLabel: 'Pouca Nuvem' }
-  ];
-
-  return {
-    locationName: coords.locationName || 'Quinta da Vinha Velha',
-    latitude: coords.latitude,
-    longitude: coords.longitude,
-    current,
-    hourly: [],
-    daily,
-    bioclimatic: {
-      deltaT,
-      vpdKpa: vpd,
-      dewPointC: 14.1,
-      et0MmDay: 4.2,
-      rainNextHoursMm: 0
     },
     fetchedAt: new Date().toISOString()
   };

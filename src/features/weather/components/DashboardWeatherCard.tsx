@@ -1,182 +1,137 @@
 // src/features/weather/components/DashboardWeatherCard.tsx
 import React from 'react';
-import { Link } from 'react-router-dom';
-import {
-  Sun,
-  CloudSun,
-  CloudRain,
-  Cloud,
-  CloudLightning,
-  Wind,
-  Thermometer,
-  ArrowRight,
-  AlertTriangle,
-  CheckCircle2
-} from 'lucide-react';
-import { useWeather } from '../hooks/useWeather';
-import { useLanguage } from '../../../context/LanguageContext';
-import { WeatherLocationSearchDropdown } from './WeatherLocationSearchDropdown';
-import {
-  getLocalizedSprayBadge,
-  getLocalizedWeatherCondition,
-  getLocalizedDayLabel
-} from './weatherI18n';
+import { Compass, WifiOff, Info, RotateCcw } from 'lucide-react';
+import { useWeather } from '../hooks/useWeather.ts';
+import { useLanguage } from '../../../context/LanguageContext.tsx';
+import { WeatherLocationSearchDropdown } from './WeatherLocationSearchDropdown.tsx';
+import { DashboardWeatherMetrics } from './DashboardWeatherMetrics.tsx';
+import { DashboardWeatherHero } from './DashboardWeatherHero.tsx';
 
-export const DashboardWeatherCard: React.FC = () => {
+function formatFutureDayHeader(dateIso: string, language: string): string {
+  try {
+    const dObj = new Date(dateIso.includes('T') ? dateIso : `${dateIso}T12:00:00Z`);
+    if (isNaN(dObj.getTime())) return dateIso;
+    const localeCode = language === 'en' ? 'en-GB' : 'pt-PT';
+    return dObj.toLocaleDateString(localeCode, { weekday: 'long', day: 'numeric', month: 'short' });
+  } catch {
+    return dateIso;
+  }
+}
+
+interface DashboardWeatherCardProps {
+  selectedDateIso?: string | null;
+  onSelectDate?: (dateIso: string | null) => void;
+  hideLocationDropdown?: boolean;
+}
+
+export const DashboardWeatherCard: React.FC<DashboardWeatherCardProps> = ({
+  selectedDateIso,
+  onSelectDate,
+  hideLocationDropdown = false
+}) => {
   const { t, language } = useLanguage();
   const {
     data,
     isLoading,
+    error,
     currentLocation,
     selectLocation,
     useGpsLocation
   } = useWeather();
 
-  const getWeatherIcon = (code: number, className = 'w-6 h-6') => {
-    if (code === 0 || code === 1) return <Sun className={`${className} text-amber-500`} />;
-    if (code === 2) return <CloudSun className={`${className} text-amber-500`} />;
-    if (code === 3 || code === 45 || code === 48) return <Cloud className={`${className} text-slate-400`} />;
-    if (code >= 51 && code <= 82) return <CloudRain className={`${className} text-sky-500`} />;
-    if (code >= 95) return <CloudLightning className={`${className} text-indigo-500`} />;
-    return <Sun className={`${className} text-amber-500`} />;
-  };
-
   const cur = data?.current;
   const daily = data?.daily || [];
-  const spray = cur?.sprayEvaluation;
 
-  const isOptimal = spray?.level === 'optimal';
-  const isMarginal = spray?.level === 'marginal';
+  const isSelectedToday = !selectedDateIso || (daily[0] && selectedDateIso === daily[0].dateIso);
+  const selectedDayItem = !isSelectedToday && selectedDateIso
+    ? daily.find((d) => d.dateIso === selectedDateIso)
+    : null;
+  const isFutureDay = Boolean(selectedDayItem);
 
   return (
-    <div className="bg-white p-6 rounded-3xl shadow-soft border border-slate-200 flex flex-col justify-between space-y-4">
-      {/* Topo do Cartão: Título Interativo Clicável + Seletor de Localização */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        {/* Título Clicável que navega para /meteorologia */}
-        <Link
-          to="/meteorologia"
-          className="group flex items-center gap-3 transition-all cursor-pointer select-none"
-          title={t('weather.openBioclimatic', 'Abrir Análise Bioclimática & Janelas de Decisão (SaaS)')}
-        >
-          <div className="w-10 h-10 rounded-2xl bg-amber-50 group-hover:bg-amber-100 text-amber-600 flex items-center justify-center font-bold transition-colors shrink-0">
-            <Sun className="w-6 h-6" />
+    <div className="bg-white rounded-3xl p-5 sm:p-6 shadow-soft border border-slate-200 flex flex-col justify-between h-full space-y-3">
+      {/* 1. Topo: Título Contextual + Ação "Agora" + Seletor Pesquisável */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 border-b border-slate-100 pb-2.5">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-xl bg-[#eef8f0] text-daterra-primary flex items-center justify-center font-bold shrink-0">
+            <Compass className="w-4 h-4 text-daterra-accent shrink-0" aria-hidden="true" />
           </div>
           <div>
-            <div className="flex items-center gap-1.5 font-extrabold text-daterra-primary text-base group-hover:text-daterra-accent transition-colors">
-              <span>{t('weather.title', 'Meteorologia')}</span>
-              <ArrowRight className="w-4 h-4 opacity-40 group-hover:opacity-100 group-hover:translate-x-1 transition-all text-daterra-accent" />
+            <div className="flex items-center gap-2 flex-wrap">
+              <h2 className="text-base font-extrabold text-daterra-primary capitalize">
+                {isFutureDay && selectedDayItem
+                  ? `Previsão · ${formatFutureDayHeader(selectedDayItem.dateIso, language)}`
+                  : 'Meteorologia'}
+              </h2>
+              <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200">
+                Previsão Open-Meteo
+              </span>
+              {isFutureDay && (
+                <button
+                  type="button"
+                  onClick={() => onSelectDate?.(null)}
+                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-daterra-primary font-bold text-xs border border-emerald-200 transition-colors cursor-pointer"
+                  title={t('weather.returnToCurrentConditions', 'Regressar às condições atuais (Hoje)')}
+                  aria-label="Regressar às condições atuais"
+                >
+                  <RotateCcw className="w-3 h-3 text-daterra-accent" />
+                  <span>Agora</span>
+                </button>
+              )}
             </div>
-            <span className="text-[11px] text-slate-500 font-semibold block">
-              {t('weather.subtitle', 'Previsão & Decisão de Pulverização • Toque para abrir')}
+            <span className="text-[11px] text-slate-500 font-medium">
+              {isFutureDay
+                ? 'Condição prevista mais severa ao longo do dia'
+                : 'Condições Atuais e do Dia'}
             </span>
           </div>
-        </Link>
+        </div>
 
-        {/* Seletor Interativo Pesquisável de Localidade (geoapi.pt: 308 Municípios + Freguesias) */}
-        <WeatherLocationSearchDropdown
-          currentLocation={currentLocation}
-          onSelectLocation={selectLocation}
-          onUseGps={useGpsLocation}
+        {/* Seletor Pesquisável de Freguesia / Município (oculto quando a vista de topo já o contém) */}
+        {!hideLocationDropdown && (
+          <WeatherLocationSearchDropdown
+            currentLocation={currentLocation}
+            onSelectLocation={selectLocation}
+            onUseGps={useGpsLocation}
+          />
+        )}
+      </div>
+
+      {/* Alertas de Rede e Modo Offline */}
+      {error && !cur ? (
+        <div className="p-2 bg-amber-50 border border-amber-200 rounded-xl flex items-center gap-2 text-xs font-bold text-amber-950">
+          <WifiOff className="w-4 h-4 text-amber-700 shrink-0" aria-hidden="true" />
+          <span>{t('weather.forecastUnavailableOffline', 'Previsão indisponível para esta localidade (sem ligação à rede).')}</span>
+        </div>
+      ) : cur?.isCached ? (
+        <div className="p-2 bg-amber-50/70 border border-amber-200/80 rounded-xl flex items-center justify-between text-xs text-amber-950 px-3">
+          <span className="flex items-center gap-1.5 font-semibold text-[11px]">
+            <Info className="w-3.5 h-3.5 text-amber-700 shrink-0" aria-hidden="true" />
+            <span>Dados em cache • {cur.updatedAt ? `Leitura de ${cur.updatedAt}` : 'Modo Offline'}</span>
+          </span>
+          <span className="text-[10px] font-bold text-amber-800 uppercase tracking-wider">Offline</span>
+        </div>
+      ) : null}
+
+      {/* 2. Corpo Central: Resumo do Dia / Condições Atuais */}
+      <div className="py-0.5">
+        <DashboardWeatherHero
+          current={cur}
+          dailyToday={daily[0]}
+          selectedDayItem={selectedDayItem}
+          isFutureDay={isFutureDay}
+          isLoading={isLoading}
+          t={t}
         />
       </div>
 
-      {/* Destaque do Dia Atual + Semáforo Inteligente de Pulverização */}
-      <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 grid grid-cols-1 sm:grid-cols-3 gap-4 items-center">
-        {/* Temperatura e Condição */}
-        <div className="flex items-center gap-3">
-          {getWeatherIcon(cur?.weatherCode ?? 0, 'w-12 h-12 shrink-0')}
-          <div>
-            <div className="flex items-baseline gap-2">
-              <span className="text-3xl font-black text-slate-900 font-mono-numbers">
-                {isLoading ? '--' : `${cur?.temperatureC ?? 24}°C`}
-              </span>
-              <span className="text-xs text-slate-500 font-mono-numbers">
-                / {daily[0]?.minTempC ?? 14}°C
-              </span>
-            </div>
-            <span className="text-xs font-bold text-slate-700 block">
-              {getLocalizedWeatherCondition(cur?.weatherCode, cur?.weatherLabel, t)} • {t('weather.today', 'Hoje')}
-            </span>
-          </div>
-        </div>
-
-        {/* Vento e Humidade */}
-        <div className="space-y-1 text-xs font-mono-numbers text-slate-600">
-          <div className="flex items-center gap-2">
-            <Wind className="w-4 h-4 text-slate-400" />
-            <span>
-              {t('weather.wind', 'Vento')}: <strong>{cur?.windSpeedKmh ?? 12} km/h ({cur?.windDirectionText ?? 'NNE'})</strong>
-            </span>
-          </div>
-          <div className="flex items-center gap-2">
-            <CloudRain className="w-4 h-4 text-slate-400" />
-            <span>
-              {t('weather.humidity', 'Humidade')}: <strong>{cur?.humidityPercent ?? 62}%</strong>
-            </span>
-          </div>
-        </div>
-
-        {/* Semáforo de Janela de Pulverização */}
-        <div
-          className={`p-3 rounded-xl border flex flex-col justify-center text-center transition-colors ${
-            isOptimal
-              ? 'bg-emerald-50 border-emerald-200'
-              : isMarginal
-              ? 'bg-amber-50 border-amber-200'
-              : 'bg-rose-50 border-rose-200'
-          }`}
-        >
-          <div
-            className={`flex items-center justify-center gap-1.5 font-bold text-xs ${
-              isOptimal ? 'text-emerald-800' : isMarginal ? 'text-amber-800' : 'text-rose-800'
-            }`}
-          >
-            {isOptimal ? (
-              <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-            ) : isMarginal ? (
-              <AlertTriangle className="w-4 h-4 text-amber-600" />
-            ) : (
-              <Thermometer className="w-4 h-4 text-rose-600" />
-            )}
-            <span>{t('weather.sprayWindow', 'Janela de Pulverização')}</span>
-          </div>
-          <span
-            className={`text-[11px] font-semibold mt-0.5 ${
-              isOptimal ? 'text-emerald-700' : isMarginal ? 'text-amber-700' : 'text-rose-700'
-            }`}
-          >
-            {getLocalizedSprayBadge(spray?.badgeLabel, t)}
-          </span>
-          <span className="text-[10px] text-slate-500 font-mono-numbers mt-0.5">
-            ΔT = {cur?.deltaT ?? 4.2}°C
-          </span>
-        </div>
-      </div>
-
-      {/* Mini-Previsão dos 5 Dias */}
-      <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5 pt-1">
-        {daily.map((item, index) => (
-          <div
-            key={index}
-            className={`p-3 rounded-2xl border text-center flex flex-col items-center justify-between transition-all ${
-              index === 0
-                ? 'bg-amber-50/60 border-amber-200 ring-2 ring-amber-400/30'
-                : 'bg-slate-50 border-slate-200 hover:border-slate-300'
-            }`}
-          >
-            <span className="text-[11px] font-extrabold text-slate-800">
-              {getLocalizedDayLabel(item.dateIso, index, item.dayLabel, language, t)}
-            </span>
-            <div className="my-1.5">{getWeatherIcon(item.weatherCode)}</div>
-            <div className="text-xs font-black text-slate-900 font-mono-numbers">
-              {item.maxTempC}°C
-            </div>
-            <span className="text-[10px] text-slate-500 font-medium block truncate max-w-full">
-              {getLocalizedWeatherCondition(item.weatherCode, item.weatherLabel, t)}
-            </span>
-          </div>
-        ))}
-      </div>
+      {/* 3. Base: Faixa Horizontal Compacta das Três Métricas */}
+      <DashboardWeatherMetrics
+        current={cur}
+        dailyItem={isFutureDay ? selectedDayItem : daily[0]}
+        isFutureDay={isFutureDay}
+        isLoading={isLoading}
+      />
     </div>
   );
 };
