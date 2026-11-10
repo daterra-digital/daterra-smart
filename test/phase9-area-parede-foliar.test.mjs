@@ -231,11 +231,11 @@ describe('Fase 9: Migração da Calculadora de Área de Parede Foliar (calc_area
     assert.equal(entField?.presets?.length, 4);
   });
 
-  test('21. Valores predefinidos corretos (2,5 m e 3,0 m)', () => {
+  test('21. Campos iniciam vazios (SEC-19: defaultValue undefined) com labels oficiais', () => {
     const altField = areaParedeFoliarCalculatorConfig.fields.find(f => f.id === 'alturaVegetacao');
     const entField = areaParedeFoliarCalculatorConfig.fields.find(f => f.id === 'distanciaEntrelinhas');
-    assert.equal(altField?.defaultValue, 2.5);
-    assert.equal(entField?.defaultValue, 3.0);
+    assert.equal(altField?.defaultValue, undefined);
+    assert.equal(entField?.defaultValue, undefined);
     assert.equal(altField?.label, 'Altura da vegetação tratada');
     assert.equal(entField?.label, 'Distância entrelinhas');
   });

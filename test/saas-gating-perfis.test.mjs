@@ -42,8 +42,8 @@ describe('SaaS Multi-tier Gating & Profile Telemetry (Free & Pro)', () => {
     assert.equal(PRO_TOOL_IDS.has('mistura_compatibilidade'), false);
   });
 
-  test('4. Esquema Dexie v9 inclui versão 9 e campos de telemetria agronómica', () => {
-    assert.equal(db.verno, 9, 'Dexie versão deve ser 9');
+  test('4. Esquema Dexie atual (v10) preserva v9 e campos de telemetria agronómica', () => {
+    assert.equal(db.verno, 10, 'Dexie versão deve ser 10');
 
     const cultureIndexes = db.profiles_cultures.schema.indexes.map(i => i.name);
     assert.ok(cultureIndexes.includes('last_lwa_m2_ha'), 'profiles_cultures deve indexar last_lwa_m2_ha');

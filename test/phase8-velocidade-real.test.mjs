@@ -198,12 +198,12 @@ describe('Fase 8: Calculadora de Velocidade Real de Trabalho (calc_velocidade_re
     assert.equal(tempoField?.presets?.length, 4);
   });
 
-  test('17. Valores predefinidos são 100 m e 45 s', () => {
+  test('17. Campos iniciam vazios (SEC-19: defaultValue undefined) com unidades m e s', () => {
     const distField = velocidadeRealCalculatorConfig.fields.find(f => f.id === 'distanciaPercurso');
     const tempoField = velocidadeRealCalculatorConfig.fields.find(f => f.id === 'tempoPercurso');
-    assert.equal(distField?.defaultValue, 100);
+    assert.equal(distField?.defaultValue, undefined);
     assert.equal(distField?.defaultUnit, 'm');
-    assert.equal(tempoField?.defaultValue, 45);
+    assert.equal(tempoField?.defaultValue, undefined);
     assert.equal(tempoField?.defaultUnit, 's');
   });
 

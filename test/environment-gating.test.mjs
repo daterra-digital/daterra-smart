@@ -11,8 +11,8 @@ import {
 
 describe('Controlo de Ambiente & Publicação GitHub Pages', () => {
 
-  test('1. Lista de ferramentas permitidas no GitHub Pages contém exatamente as 10 homologadas', () => {
-    assert.equal(GITHUB_PAGES_ALLOWED_TOOL_IDS.size, 10, 'Devem ser exatamente 10 ferramentas');
+  test('1. Lista de ferramentas permitidas no GitHub Pages contém exatamente as 11 homologadas', () => {
+    assert.equal(GITHUB_PAGES_ALLOWED_TOOL_IDS.size, 11, 'Devem ser exatamente 11 ferramentas');
 
     const expectedTools = [
       'ajuste_dose_eppo',
@@ -24,7 +24,8 @@ describe('Controlo de Ambiente & Publicação GitHub Pages', () => {
       'pre_inspecao_dgav',
       'comparador_bicos',
       'calc_velocidade_real',
-      'calc_volume_copa'
+      'calc_volume_copa',
+      'calc_aplicacao_manual'
     ];
 
     for (const toolId of expectedTools) {

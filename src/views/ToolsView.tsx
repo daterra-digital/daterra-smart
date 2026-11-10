@@ -1026,10 +1026,10 @@ export const ToolsView: React.FC = () => {
         <div className="bg-gradient-to-r from-amber-500/10 via-emerald-500/10 to-amber-500/10 border border-amber-500/30 rounded-2xl p-3 px-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-xs text-slate-800 shadow-2xs animate-fade-in font-medium">
           <div className="flex items-center gap-2">
             <span className="px-2 py-0.5 bg-amber-500 text-white font-black rounded-md text-[10px] tracking-wider">RC PREVIEW</span>
-            <span className="font-semibold">Ambiente de Avaliação Localhost:5175 (Etiquetas ativas apenas para revisão interna)</span>
+            <span className="font-semibold">{t('tools.rcBannerLocalEnv', 'Ambiente de Avaliação Localhost:5175 (Etiquetas ativas apenas para revisão interna)')}</span>
           </div>
           <div className="flex items-center gap-2 text-[10px] font-extrabold shrink-0">
-            <span className="px-2 py-0.5 bg-emerald-100 text-emerald-950 border border-emerald-400 rounded-md">PAGES: 11 Canónicas</span>
+            <span className="px-2 py-0.5 bg-emerald-100 text-emerald-950 border border-emerald-400 rounded-md">{t('tools.rcBannerPagesCount', 'PAGES: 11 Canónicas')}</span>
             <span className="px-2 py-0.5 bg-amber-100 text-amber-950 border border-amber-400 rounded-md">RC: Novidades</span>
           </div>
         </div>
