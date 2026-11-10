@@ -47,7 +47,7 @@ export async function syncCultureTelemetry(
     // Registo de mutação offline (LWW) com titularidade
     await db.mutation_outbox.add({
       entityId: String(cultureId),
-      entityType: 'profile_culture',
+      entityType: 'culture',
       operation: 'UPDATE',
       payload: updateData,
       synced: 0,
@@ -91,7 +91,7 @@ export async function syncEquipmentEfficiency(
     // Registo de mutação offline (LWW) com titularidade
     await db.mutation_outbox.add({
       entityId: String(equipmentId),
-      entityType: 'profile_equipment',
+      entityType: 'equipment',
       operation: 'UPDATE',
       payload: updateData,
       synced: 0,

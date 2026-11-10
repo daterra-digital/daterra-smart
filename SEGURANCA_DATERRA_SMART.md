@@ -6,40 +6,24 @@ Documento de referência técnica e operacional da arquitetura de segurança, pr
 
 ## 📌 Registo de Tarefas e Hardening
 
-### TAREFA 1 — CSP Segura para Firebase App Check e reCAPTCHA v3 (SEC-AUD-01)
+### TAREFA 1 — CSP Segura e Alinhada na Fase 0 (`index.html`)
 
-- **Estado:** ✅ **Implementado e Validado**
+- **Estado:** ✅ **Implementado e Validado (Fase 0)**
 - **Prioridade:** Crítica
-- **Problema Identificado:**
-  1. A Política de Segurança de Conteúdo (CSP) declarada em `index.html` não autorizava os domínios `https://www.google.com/recaptcha/` e `https://www.gstatic.com/recaptcha/` em `script-src` e `frame-src`, provocando o bloqueio pelo navegador do script reCAPTCHA v3 necessário ao Firebase App Check.
-  2. A diretiva `img-src` continha o wildcard permissivo `https:`, permitindo o carregamento de imagens de qualquer origem remota.
-  3. Faltava a diretiva `form-action 'self'` e a declaração explícita de `worker-src 'self' blob:` para a PWA e Web Workers.
-- **Risco:**
-  - *Crítico:* Falha na inicialização do Firebase App Check em navegadores de utilizadores reais (erro de CSP), impedindo a validação da integridade da aplicação.
-  - *Médio:* Risco de exfiltração via formulários e injeção de imagens externas não controladas.
-- **Correção Implementada:**
-  - Ajuste estrito de todas as diretivas da CSP na meta tag do `index.html`:
-    - `default-src 'self'`: Bloqueio padrão de origens não declaradas.
-    - `script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com https://apis.google.com https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/ https://www.googletagmanager.com`: Autorização pontual e estrita sem `unsafe-eval`.
-    - `style-src 'self' 'unsafe-inline' https://fonts.googleapis.com`: Google Fonts e Tailwind.
-    - `font-src 'self' https://fonts.gstatic.com data:`: Tipografia oficial (Plus Jakarta Sans, JetBrains Mono).
-    - `img-src 'self' data: blob: https://lh3.googleusercontent.com https://server.arcgisonline.com https://*.tile.openstreetmap.org https://www.google.com`: Eliminação do wildcard `https:`, autorizando mapas de satélite ArcGIS e OpenStreetMap.
-    - `connect-src 'self' https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://*.firebaseio.com https://firestore.googleapis.com https://us-central1-daterra-smart-4c0cf.cloudfunctions.net https://firebaseappcheck.googleapis.com https://firebaseinstallations.googleapis.com https://content-firebaseappcheck.googleapis.com https://*.googleapis.com https://api.open-meteo.com https://geocoding-api.open-meteo.com https://geoapi.pt https://challenges.cloudflare.com https://api.brevo.com https://accounts.google.com https://*.google-analytics.com https://*.analytics.google.com https://stats.g.doubleclick.net https://api.erpcloud.centralgest.com`: Endpoints estritamente mapeados de App Check, Firestore, Auth, Meteorologia e ERP.
-    - `frame-src 'self' https://challenges.cloudflare.com https://*.firebaseapp.com https://accounts.google.com https://www.google.com/recaptcha/ https://recaptcha.google.com/recaptcha/`: Iframes necessários para Turnstile, Google Auth e reCAPTCHA.
-    - `worker-src 'self' blob:`: Service Worker PWA (`sw.js`) e workers de processamento PDF.
-    - `object-src 'none'`: Bloqueio absoluto de plugins externos (Flash/Java).
-    - `base-uri 'self'`: Prevenção de sequestro de base URL.
-    - `form-action 'self'`: Prevenção de envio de formulários para endpoints externos.
-  - No `public/.htaccess`, configuração do cabeçalho HTTP correspondente para cPanel/Apache com adição de `frame-ancestors 'none'` para imunização contra Clickjacking.
-- **Ficheiros Alterados:**
-  - `index.html`
-  - `public/.htaccess`
-- **Testes Criados:**
-  - `test/sec-aud-01-csp-app-check.test.mjs` (13 testes, incluindo 6 cenários adversariais).
-- **Resultado dos Testes:**
-  - 13/13 aprovados no teste da CSP (SEC-AUD-01).
-- **Riscos Residuais:**
-  - Nenhum na camada de CSP. A obtenção de tokens em produção no cPanel requer a configuração da variável `VITE_FIREBASE_APPCHECK_SITE_KEY` no pipeline CI/CD.
+- **Correção Aplicada em `index.html`:**
+  - `img-src`: Removido wildcard `https:`, restringindo a `'self' data: blob: https://lh3.googleusercontent.com https://server.arcgisonline.com` (avatar Google e tiles ArcGIS).
+  - `connect-src`: Mantidos `https://geoapi.pt` e `https://geocoding-api.open-meteo.com` (confirmados em `geoApiService.ts` e `test/geoapi-service.test.mjs`); removida origem `https://api.brevo.com` do cliente; sem abertura preventiva de novos domínios.
+  - `worker-src 'self'` e `form-action 'self'` adicionados e validados para Service Worker VitePWA (`sw.js`) e formulários SPA (`onSubmit`).
+  - `public/.htaccess`: Mantém cabeçalhos HTTP de endurecimento cPanel (`X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`, `HSTS`) sem duplicar cabeçalho CSP.
+- **Testes Validados:**
+  - `test/sec04-csp-cache-invalidation.test.mjs`
+  - `test/google-auth-guard.test.mjs`
+  - `test/phase0-turnstile-validation.test.mjs`
+- **Pendências Documentadas (Fase 0):**
+  - **Newsletter BFF (Opção B):** Chamada órfã `syncNewsletterSubscription` desativada/removida; preferências guardadas em `users/{uid}` no Firestore; sincronização externa Brevo/BFF pendente.
+  - **App Check:** `enforceAppCheck: false` mantido nas Cloud Functions até provisionamento e verificação completa em produção (`VITE_FIREBASE_APPCHECK_SITE_KEY`).
+  - **Outbox & Sync (Opção B):** Background Sync API (`reg.sync.register`) removido; drenagem apenas com a aplicação aberta (`foreground-only`) e `centralgestOutboxDriver` sinalizado em modo simulado (`isSimulationMode: true`).
+  - **TypeScript Estrito (Tarefa 0.10):** `"strict": true` permanece pendente de ativação em `tsconfig.app.json` (diagnóstico read-only inicial com 0 erros).
 
 ---
 
@@ -201,13 +185,13 @@ Ficheiros cuja ausência em `8ac232c` foi comprovada por `git cat-file -e`:
 git cat-file -e 8ac232c:functions/src/auth/accountDeletionLock.ts   # exit 128 -> Novo
 git cat-file -e 8ac232c:functions/src/auth/accountDeletionTypes.ts  # exit 128 -> Novo
 git cat-file -e 8ac232c:src/features/settings/RgpdDeleteAccountDialog.tsx # exit 128 -> Novo
-git cat-file -e 8ac232c:test/sec-aud-01-csp-app-check.test.mjs    # exit 128 -> Novo
+```
 
+```bash
 # Remoção manual controlada:
 rm functions/src/auth/accountDeletionLock.ts
 rm functions/src/auth/accountDeletionTypes.ts
 rm src/features/settings/RgpdDeleteAccountDialog.tsx
-rm test/sec-aud-01-csp-app-check.test.mjs
 ```
 
 > [!WARNING]

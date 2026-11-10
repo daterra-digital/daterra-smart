@@ -60,6 +60,7 @@ export interface InspecaoEvaluationResult {
 
 export interface PreInspectionSavedRecord {
   id: string;
+  userId?: string;
   dateIso: string;
   equipmentId: EquipmentTypeId;
   equipmentTitle: string;

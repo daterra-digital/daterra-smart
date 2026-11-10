@@ -3,6 +3,8 @@ import Dexie, { type Table } from 'dexie';
 import { type CalculationHistoryRecord, type CalibrationProfile, LEGACY_UNASSIGNED_MARKER } from '../types/calculator.ts';
 import type { ActiveSubstance } from '../features/verificador-ph/types.ts';
 import { seedMicrolearningIfEmpty } from './seed.ts';
+import type { MixHistoryRecord } from '../features/mistura/types/mixHistory.ts';
+import type { EppoHistoryRecord } from '../features/ajuste-dose-eppo/types/eppoHistory.ts';
 import type {
   CalculationHistoryItem,
   ProfileCulture,
@@ -11,8 +13,6 @@ import type {
   ProfileCalibration,
   MicrolearningContent,
   InstalledToolItem,
-  MixHistoryRecord,
-  EppoHistoryRecord,
   MutationOutboxRecord
 } from './types.ts';
 

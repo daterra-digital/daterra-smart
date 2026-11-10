@@ -1,12 +1,7 @@
-/**
- * DATERRA Smart - Serviço de Sincronização First-Offline & Mutation Outbox
- * Implementação: Camada 4 (Persistência Local & Sincronização Assíncrona)
- * Arquitetura: Offline-First com resolução Last-Write-Wins (LWW)
- */
-
+// src/services/outbox/outboxService.ts - Offline-First LWW Mutation Outbox (SEC-REM-01)
 import { db, type MutationOutboxRecord } from '../../db/db.ts';
 import { LEGACY_UNASSIGNED_MARKER } from '../../types/calculator.ts';
-import { centralgestOutboxDriver } from '../integrations/centralgestService.ts';
+import { centralgestOutboxDriver, getCentralgestConfig } from '../integrations/centralgestService.ts';
 import { handleNewsletterSubscriptionSync } from '../newsletter/newsletterOutboxHandler.ts';
 
 export type EntityType = 'calculation' | 'calibration' | 'equipment' | 'culture' | 'mixture' | 'caderno_campo' | 'newsletter_subscription';
@@ -80,12 +75,27 @@ export async function enqueueMutation<T = any>(options: EnqueueMutationOptions<T
   return id;
 }
 
+export interface OutboxSyncStatus {
+  mode: 'foreground-only';
+  backgroundSyncSupported: false;
+  driver: 'centralgest' | 'custom';
+  isSimulatedDriver: boolean;
+}
+
+/** Expõe honestamente o estado do transporte e se o driver ERP está em simulação local. */
+export function getOutboxSyncStatus(): OutboxSyncStatus {
+  const isCentralgest = activeSyncDriver === centralgestOutboxDriver;
+  return {
+    mode: 'foreground-only',
+    backgroundSyncSupported: false,
+    driver: isCentralgest ? 'centralgest' : 'custom',
+    isSimulatedDriver: isCentralgest ? getCentralgestConfig().isSimulationMode : false
+  };
+}
+
+/** Dispara apenas sincronização em primeiro plano com a aplicação aberta (sem Background Sync SW). */
 export function requestBackgroundSync(): void {
-  if (typeof window !== 'undefined' && 'serviceWorker' in navigator && 'SyncManager' in window) {
-    navigator.serviceWorker.ready
-      .then((reg: any) => reg.sync && reg.sync.register('daterra-sync-outbox'))
-      .catch((err) => console.warn('[OutboxService] Background Sync indisponível:', err));
-  } else if (typeof window !== 'undefined' && navigator.onLine) {
+  if (typeof window !== 'undefined' && navigator.onLine) {
     setTimeout(() => { drainOutbox().catch(console.error); }, 100);
   }
 }

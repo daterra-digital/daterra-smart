@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { useTranslation } from '../../context/LanguageContext';
 import { isLocalhost } from '../../utils/environment';
+import { OutboxSimulationNotice } from './OutboxSimulationNotice';
 
 interface PrivateNavDrawerProps {
   userFullName: string;
@@ -87,6 +88,8 @@ export const PrivateNavDrawer: React.FC<PrivateNavDrawerProps> = ({
         <Settings className="w-5 h-5 text-daterra-accent" />
         <span>{t('nav.settings', 'Definições')}</span>
       </Link>
+
+      <OutboxSimulationNotice variant="mobile" />
 
       <div className="pt-3 border-t border-white/10 flex items-center justify-between px-2">
         <div className="flex items-center gap-2 truncate max-w-[200px]">

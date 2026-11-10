@@ -20,7 +20,7 @@ import {
   sendMutationToCentralgest,
   centralgestOutboxDriver
 } from '../src/services/integrations/centralgestService.ts';
-import { drainOutbox } from '../src/services/outbox/outboxService.ts';
+import { drainOutbox, setOutboxSessionUser, getOutboxSyncStatus } from '../src/services/outbox/outboxService.ts';
 
 describe('Integração CentralGest ERPCloud (Arquitetura Plug-and-Play Desacoplada)', () => {
 
@@ -136,19 +136,29 @@ describe('Integração CentralGest ERPCloud (Arquitetura Plug-and-Play Desacopla
   });
 
   test('8. Drenagem E2E da Outbox com 5 mutações simultâneas contra o CentralGest Driver', async () => {
+    assert.equal(getOutboxSyncStatus().isSimulatedDriver, true);
+    assert.equal(getOutboxSyncStatus().backgroundSyncSupported, false);
+
     const mockStore = [
-      { id: 1, entityId: 'op-1', entityType: 'caderno_campo', operation: 'CREATE', synced: 0, attempts: 0, updatedAt: '2026-10-24T12:00:00Z', payload: { parcelCode: 'P1' } },
-      { id: 2, entityId: 'cal-1', entityType: 'calibration', operation: 'CREATE', synced: 0, attempts: 0, updatedAt: '2026-10-24T12:01:00Z', payload: { method: 'LWA' } },
-      { id: 3, entityId: 'calc-1', entityType: 'calculation', operation: 'CREATE', synced: 0, attempts: 0, updatedAt: '2026-10-24T12:02:00Z', payload: { dose: 2 } },
-      { id: 4, entityId: 'mix-1', entityType: 'mixture', operation: 'CREATE', synced: 0, attempts: 0, updatedAt: '2026-10-24T12:03:00Z', payload: { name: 'M1' } },
-      { id: 5, entityId: 'eq-1', entityType: 'equipment', operation: 'UPDATE', synced: 0, attempts: 0, updatedAt: '2026-10-24T12:04:00Z', payload: { name: 'Pulv-1' } }
+      { id: 1, entityId: 'op-1', entityType: 'caderno_campo', operation: 'CREATE', synced: 0, attempts: 0, updatedAt: '2026-10-24T12:00:00Z', userId: 'erp-test-user', payload: { parcelCode: 'P1' } },
+      { id: 2, entityId: 'cal-1', entityType: 'calibration', operation: 'CREATE', synced: 0, attempts: 0, updatedAt: '2026-10-24T12:01:00Z', userId: 'erp-test-user', payload: { method: 'LWA' } },
+      { id: 3, entityId: 'calc-1', entityType: 'calculation', operation: 'CREATE', synced: 0, attempts: 0, updatedAt: '2026-10-24T12:02:00Z', userId: 'erp-test-user', payload: { dose: 2 } },
+      { id: 4, entityId: 'mix-1', entityType: 'mixture', operation: 'CREATE', synced: 0, attempts: 0, updatedAt: '2026-10-24T12:03:00Z', userId: 'erp-test-user', payload: { name: 'M1' } },
+      { id: 5, entityId: 'eq-1', entityType: 'equipment', operation: 'UPDATE', synced: 0, attempts: 0, updatedAt: '2026-10-24T12:04:00Z', userId: 'erp-test-user', payload: { name: 'Pulv-1' } }
     ];
 
     const origWhere = db.mutation_outbox.where;
     const origUpdate = db.mutation_outbox.update;
 
+    setOutboxSessionUser('erp-test-user');
     db.mutation_outbox.where = (field) => ({
-      equals: (val) => ({ toArray: async () => mockStore.filter(i => i[field] === val) })
+      equals: (val) => {
+        const matches = mockStore.filter(i => i[field] === val);
+        return {
+          filter: (pred) => ({ toArray: async () => matches.filter(pred) }),
+          toArray: async () => matches
+        };
+      }
     });
     db.mutation_outbox.update = async (id, changes) => {
       const item = mockStore.find(i => i.id === id);
@@ -157,7 +167,7 @@ describe('Integração CentralGest ERPCloud (Arquitetura Plug-and-Play Desacopla
     };
 
     try {
-      const result = await drainOutbox(centralgestOutboxDriver);
+      const result = await drainOutbox(centralgestOutboxDriver, 'erp-test-user');
       assert.equal(result.processed, 5);
       assert.equal(result.succeeded, 5);
       assert.equal(result.failed, 0);
@@ -167,6 +177,7 @@ describe('Integração CentralGest ERPCloud (Arquitetura Plug-and-Play Desacopla
         assert.equal(item.attempts, 1);
       }
     } finally {
+      setOutboxSessionUser(null);
       db.mutation_outbox.where = origWhere;
       db.mutation_outbox.update = origUpdate;
     }

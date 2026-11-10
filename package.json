@@ -9,6 +9,7 @@
     "dev:rc": "vite --port 5175 --mode rc",
     "build": "tsc -b && vite build",
     "lint": "oxlint",
+    "test": "node --test \"test/*.test.mjs\"",
     "preview": "vite preview",
     "generate-data": "node scripts/generatePreInspectionData.js",
     "sync:glossario": "node scripts/sync-renovate-glossary.mjs",

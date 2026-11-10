@@ -9,6 +9,7 @@ import { BottomNavigationBar } from './BottomNavigationBar';
 import { PrivateDesktopNav } from './layout/PrivateDesktopNav';
 import { PrivateNavDrawer } from './layout/PrivateNavDrawer';
 import { HeaderLanguageDropdown } from './layout/HeaderLanguageDropdown';
+import { OutboxSimulationNotice } from './layout/OutboxSimulationNotice';
 import { drainOutbox, getPendingMutationsCount } from '../services/outbox/outboxService';
 
 export const PrivateLayout: React.FC = () => {
@@ -168,6 +169,7 @@ export const PrivateLayout: React.FC = () => {
             <p id="logout-warning-desc" className="text-sm text-gray-700">
               {pendingSyncWarning}
             </p>
+            <OutboxSimulationNotice />
             <div className="flex flex-col sm:flex-row items-center justify-end gap-3 pt-2">
               <button
                 type="button"

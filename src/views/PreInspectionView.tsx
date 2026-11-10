@@ -1,6 +1,7 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, RotateCcw, ShieldCheck, CheckCircle2, HelpCircle } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 import {
   EQUIPMENT_OPTIONS,
   getCategoriesByEquipment,
@@ -22,13 +23,21 @@ import { useTranslation } from '../context/LanguageContext';
 
 export const PreInspectionView: React.FC = () => {
   const { t } = useTranslation();
+  const { user } = useAuth();
+  const effectiveUserId = user?.id || user?.uid || '';
   const navigate = useNavigate();
   const [selectedEquipment, setSelectedEquipment] = useState<EquipmentTypeId>('barras_horizontais');
   const [isEquipmentGridOpen, setIsEquipmentGridOpen] = useState<boolean>(true);
   const [mode, setMode] = useState<EvaluationMode>('expresso');
   const [answers, setAnswers] = useState<Record<string, SubQuestionAnswer>>({});
   const [openCategoryId, setOpenCategoryId] = useState<string | null>(null);
-  const [historyRecords, setHistoryRecords] = useState<PreInspectionSavedRecord[]>(() => loadPreInspectionHistory());
+  const [historyRecords, setHistoryRecords] = useState<PreInspectionSavedRecord[]>(() =>
+    loadPreInspectionHistory(effectiveUserId)
+  );
+
+  useEffect(() => {
+    setHistoryRecords(loadPreInspectionHistory(effectiveUserId));
+  }, [effectiveUserId]);
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState<boolean>(false);
   const [isGuideModalOpen, setIsGuideModalOpen] = useState<boolean>(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -74,15 +83,22 @@ export const PreInspectionView: React.FC = () => {
   };
 
   const handleSave = () => {
-    const updated = savePreInspectionRecord({
-      equipmentId: selectedEquipment,
-      equipmentTitle: activeEquipment.title,
-      conformityPct: stats.conformityPct,
-      conformeCount: stats.conformeCount,
-      anomaliaCount: stats.anomaliaCount,
-      totalSubQuestions: stats.totalSubQuestions,
-      answers
-    });
+    if (!effectiveUserId) {
+      showToast(t('common.authRequired', 'Sessão inválida. Volte a autenticar-se antes de gravar.'));
+      return;
+    }
+    const updated = savePreInspectionRecord(
+      {
+        equipmentId: selectedEquipment,
+        equipmentTitle: activeEquipment.title,
+        conformityPct: stats.conformityPct,
+        conformeCount: stats.conformeCount,
+        anomaliaCount: stats.anomaliaCount,
+        totalSubQuestions: stats.totalSubQuestions,
+        answers
+      },
+      effectiveUserId
+    );
     setHistoryRecords(updated);
     showToast(`Pré-Inspeção guardada (${stats.conformityPct}% conforme, ${stats.anomaliaCount} anomalias).`);
   };
@@ -173,7 +189,7 @@ export const PreInspectionView: React.FC = () => {
       </div>
 
       <PreInspectionGuideModal isOpen={isGuideModalOpen} onClose={() => setIsGuideModalOpen(false)} />
-      <PreInspectionHistoryModal isOpen={isHistoryModalOpen} onClose={() => setIsHistoryModalOpen(false)} records={historyRecords} onLoadRecord={handleLoadRecord} onDeleteRecord={(id) => setHistoryRecords(deletePreInspectionRecord(id))} />
+      <PreInspectionHistoryModal isOpen={isHistoryModalOpen} onClose={() => setIsHistoryModalOpen(false)} records={historyRecords} onLoadRecord={handleLoadRecord} onDeleteRecord={(id) => setHistoryRecords(deletePreInspectionRecord(id, effectiveUserId))} />
 
       {/* BARRA INFERIOR PADRÃO DATERRA (Guardar, Histórico, Guia) */}
       <PreInspectionFooterBar

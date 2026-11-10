@@ -98,11 +98,14 @@ export async function syncCultureTelemetryToProfile(
   }
 
   const resolvedId = Number(targetId);
+  const resolvedProfile = params.userId ? undefined : await db.profiles_cultures.get(resolvedId);
+  const outboxUserId = params.userId || resolvedProfile?.userId;
 
   await enqueueMutation({
     entityId: generateIdempotencyKey(),
     entityType: 'culture',
     operation: isNew ? 'CREATE' : 'UPDATE',
+    ...(outboxUserId ? { userId: outboxUserId } : {}),
     payload: {
       id: resolvedId,
       name: targetName,
@@ -135,10 +138,12 @@ export async function syncEquipmentEfficiencyFactor(
     efficiency_correction_factor: efficiencyFactor
   });
 
+  const outboxUserId = userId || existing?.userId;
   await enqueueMutation({
     entityId: generateIdempotencyKey(),
     entityType: 'equipment',
     operation: 'UPDATE',
+    ...(outboxUserId ? { userId: outboxUserId } : {}),
     payload: {
       id: equipmentId,
       efficiency_correction_factor: efficiencyFactor

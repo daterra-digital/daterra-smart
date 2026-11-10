@@ -9,11 +9,13 @@ import { db } from '../../db/db';
 export const SENSITIVE_LOCAL_STORAGE_KEYS = [
   'daterra_auth',
   'daterra_pending_auth',
+  'daterra_cobranding_config',
   'daterra_co_branding',
   'daterra_pre_inspection_history_v1',
   'DATERRA_ACTIVE_WEATHER_LOCATION',
-  'daterra_weather_cache_v1',
-  'daterra_freguesias_cache_v1',
+  'DATERRA_WEATHER_CACHE_STORE_V1',
+  'DATERRA_WEATHER_CACHE_V2',
+  'DATERRA_FREGUESIA_COORDS_CACHE_V1',
   'daterra_chat_subscriptions',
   'daterra_simulated_tier',
   'daterra_mock_env'

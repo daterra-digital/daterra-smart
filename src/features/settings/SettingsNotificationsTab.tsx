@@ -54,10 +54,15 @@ export const SettingsNotificationsTab: React.FC = () => {
         source: 'settings_notifications'
       });
 
-      if (syncResult.persistedInFirestore && syncResult.syncedWithBff) {
+      if (syncResult.persistedInFirestore) {
         setFeedback({
           type: 'success',
-          message: t('settings.notificationsSaved', 'Preferências de Notificação guardadas com sucesso!')
+          message: syncResult.syncedWithBff
+            ? t('settings.notificationsSaved', 'Preferências de Notificação guardadas com sucesso!')
+            : t(
+                'settings.notificationsSavedFirestorePending',
+                'Preferências guardadas na conta. Sincronização externa de email/newsletter encontra-se pendente.'
+              )
         });
       } else if (syncResult.queuedInOutbox) {
         setFeedback({

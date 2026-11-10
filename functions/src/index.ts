@@ -68,7 +68,8 @@ export const sendCustomMagicLink = onCall(
       throw new HttpsError('permission-denied', 'Token de verificação humana não fornecido.');
     }
     const isCaptchaValid = await verifyTurnstileToken(captchaToken, clientIp);
-    if (!isCaptchaValid) {
+    if (!isCaptchaValid || isCaptchaValid.success !== true) {
+      console.warn('[sendCustomMagicLink] Turnstile rejeitado para IP:', clientIp, isCaptchaValid?.error);
       throw new HttpsError('permission-denied', 'Falha na verificação de segurança (Turnstile inválido ou expirado).');
     }
 
@@ -101,7 +102,7 @@ export const sendCustomMagicLink = onCall(
       if (!brevoResponse.ok) {
         const errBody = await brevoResponse.text();
         console.error('[sendCustomMagicLink] Erro na API Brevo:', brevoResponse.status, errBody);
-        throw new HttpsError('internal', `Erro ao enviar o e-mail pelo provedor Brevo (${brevoResponse.status}).`);
+        throw new HttpsError('internal', 'Não foi possível gerar ou enviar o link de acesso.');
       }
 
       const brevoResult = (await brevoResponse.json()) as { messageId?: string };
@@ -109,7 +110,7 @@ export const sendCustomMagicLink = onCall(
     } catch (err: any) {
       console.error('[sendCustomMagicLink] Exceção:', err);
       if (err instanceof HttpsError) throw err;
-      throw new HttpsError('internal', err?.message || 'Não foi possível gerar ou enviar o link de acesso.');
+      throw new HttpsError('internal', 'Não foi possível gerar ou enviar o link de acesso.');
     }
   }
 );

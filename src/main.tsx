@@ -2,20 +2,13 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 import { ErrorBoundary } from './components/ErrorBoundary';
-import { initOutboxListeners, drainOutbox } from './services/outbox/outboxService';
+import { initOutboxListeners } from './services/outbox/outboxService';
 import './index.css';
 
 // Inicializar escuta global da fila de sincronização First-Offline (Mutation Outbox)
 initOutboxListeners();
 
-// Escutar mensagens do Service Worker (ex: disparo da Background Synchronization API)
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.addEventListener('message', (event) => {
-    if (event.data?.type === 'SYNC_OUTBOX' || event.data?.type === 'DATERRA_SYNC_OUTBOX') {
-      drainOutbox().catch(console.error);
-    }
-  });
-}
+// Sincronização em segundo plano (Background Sync API) não implementada na Fase 0; drenagem ocorre com a app aberta.
 
 // Em desenvolvimento (localhost), desativar e desregistar Service Workers residuais para evitar telas em branco por cache
 if (import.meta.env.DEV && 'serviceWorker' in navigator) {

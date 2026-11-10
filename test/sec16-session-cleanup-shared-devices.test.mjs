@@ -33,11 +33,13 @@ describe('SEC-16: Zero-Leakage no Logout e Isolamento em Dispositivos Partilhado
     const requiredSensitiveKeys = [
       'daterra_auth',
       'daterra_pending_auth',
+      'daterra_cobranding_config',
       'daterra_co_branding',
       'daterra_pre_inspection_history_v1',
       'DATERRA_ACTIVE_WEATHER_LOCATION',
-      'daterra_weather_cache_v1',
-      'daterra_freguesias_cache_v1',
+      'DATERRA_WEATHER_CACHE_STORE_V1',
+      'DATERRA_WEATHER_CACHE_V2',
+      'DATERRA_FREGUESIA_COORDS_CACHE_V1',
       'daterra_chat_subscriptions',
       'daterra_simulated_tier',
       'daterra_mock_env'
@@ -63,21 +65,26 @@ describe('SEC-16: Zero-Leakage no Logout e Isolamento em Dispositivos Partilhado
 
     // Estado inicial de um operador agrícola no tablet
     mockStorage.set('daterra_auth', 'token-sessao-operador-a');
-    mockStorage.set('daterra_co_branding', JSON.stringify({ company: 'Quinta das Oliveiras', nif: '500123456' }));
+    mockStorage.set('daterra_cobranding_config', JSON.stringify({ company: 'Quinta das Oliveiras', nif: '500123456' }));
     mockStorage.set('daterra_pre_inspection_history_v1', JSON.stringify([{ id: 'insp_1', status: 'conforme' }]));
     mockStorage.set('DATERRA_ACTIVE_WEATHER_LOCATION', JSON.stringify({ lat: 41.15, lng: -8.61 }));
+    mockStorage.set('DATERRA_WEATHER_CACHE_STORE_V1', JSON.stringify({ cached: true }));
+    mockStorage.set('DATERRA_WEATHER_CACHE_V2', JSON.stringify({ legacy: true }));
+    mockStorage.set('DATERRA_FREGUESIA_COORDS_CACHE_V1', JSON.stringify({ ben: true }));
     mockStorage.set('daterra_language', 'pt');
     mockStorage.set('daterra_theme', 'mono');
 
-    // Executa a lógica de purga
+    // Executa a lógica de purga alinhada com SENSITIVE_LOCAL_STORAGE_KEYS
     const sensitiveKeys = [
       'daterra_auth',
       'daterra_pending_auth',
+      'daterra_cobranding_config',
       'daterra_co_branding',
       'daterra_pre_inspection_history_v1',
       'DATERRA_ACTIVE_WEATHER_LOCATION',
-      'daterra_weather_cache_v1',
-      'daterra_freguesias_cache_v1',
+      'DATERRA_WEATHER_CACHE_STORE_V1',
+      'DATERRA_WEATHER_CACHE_V2',
+      'DATERRA_FREGUESIA_COORDS_CACHE_V1',
       'daterra_chat_subscriptions',
       'daterra_simulated_tier',
       'daterra_mock_env'
@@ -89,9 +96,12 @@ describe('SEC-16: Zero-Leakage no Logout e Isolamento em Dispositivos Partilhado
 
     // Validações
     assert.equal(mockStorage.has('daterra_auth'), false, 'daterra_auth deve ser eliminado');
-    assert.equal(mockStorage.has('daterra_co_branding'), false, 'daterra_co_branding deve ser eliminado');
+    assert.equal(mockStorage.has('daterra_cobranding_config'), false, 'daterra_cobranding_config deve ser eliminado');
     assert.equal(mockStorage.has('daterra_pre_inspection_history_v1'), false, 'pré-inspeções devem ser eliminadas');
     assert.equal(mockStorage.has('DATERRA_ACTIVE_WEATHER_LOCATION'), false, 'GPS/clima deve ser eliminado');
+    assert.equal(mockStorage.has('DATERRA_WEATHER_CACHE_STORE_V1'), false, 'cache meteorológica V1 deve ser eliminada');
+    assert.equal(mockStorage.has('DATERRA_WEATHER_CACHE_V2'), false, 'cache meteorológica V2 deve ser eliminada');
+    assert.equal(mockStorage.has('DATERRA_FREGUESIA_COORDS_CACHE_V1'), false, 'cache freguesias deve ser eliminada');
 
     // Definições de hardware/máquina intocadas
     assert.equal(mockStorage.get('daterra_language'), 'pt', 'daterra_language deve ser preservado');

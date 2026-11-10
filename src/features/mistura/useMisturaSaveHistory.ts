@@ -1,10 +1,12 @@
 import { useState } from 'react';
-import { db } from '../../db/db';
+import { useAuth } from '../../context/AuthContext';
 import { enqueueMutation } from '../../services/outbox/outboxService';
 import { generateIdempotencyKey } from '../../services/integrations/centralgestMapper';
+import { saveMixHistoryForUser } from './mixHistoryStorage';
 import type { MixingSequenceAnalysis } from './index';
 
 export function useMisturaSaveHistory() {
+  const { user } = useAuth();
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const saveToHistory = async (
@@ -13,13 +15,20 @@ export function useMisturaSaveHistory() {
     sequenceAnalysis: MixingSequenceAnalysis
   ) => {
     try {
+      const effectiveUserId = user?.id || user?.uid;
+      if (!effectiveUserId) {
+        setToastMessage('Sessão inválida. Volte a autenticar-se antes de gravar.');
+        setTimeout(() => setToastMessage(null), 3000);
+        return;
+      }
+
       if (selectedIds.length === 0) {
         setToastMessage('Selecione pelo menos uma formulação antes de gravar.');
         setTimeout(() => setToastMessage(null), 3000);
         return;
       }
 
-      await db.mix_history.add({
+      await saveMixHistoryForUser(effectiveUserId, {
         date: new Date().toISOString(),
         title: `Calda ${tankCapacityL} L (${selectedIds.length} produtos)`,
         selected_formulation_ids: selectedIds,
@@ -32,6 +41,7 @@ export function useMisturaSaveHistory() {
         entityId: generateIdempotencyKey(),
         entityType: 'mixture',
         operation: 'CREATE',
+        userId: effectiveUserId,
         payload: {
           tankCapacityL,
           selectedFormulationIds: selectedIds,

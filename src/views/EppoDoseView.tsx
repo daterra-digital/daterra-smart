@@ -12,7 +12,12 @@ import {
   HelpCircle,
   FileDown
 } from 'lucide-react';
-import { db } from '../db/db';
+import { useAuth } from '../context/AuthContext';
+import {
+  listEppoHistoryForUser,
+  addEppoHistoryForUser,
+  deleteEppoHistoryForUser
+} from '../features/ajuste-dose/eppoHistoryStorage';
 import { getStoredCoBrandingConfig } from '../features/smart-debito/coBrandingStorage';
 import {
   CanopyGeometryCard,
@@ -41,6 +46,8 @@ const INITIAL_INPUTS: EppoDoseInputs = {
 };
 
 export const EppoDoseView: React.FC = () => {
+  const { user } = useAuth();
+  const effectiveUserId = user?.id || user?.uid;
   const navigate = useNavigate();
   const [inputs, setInputs] = useState<EppoDoseInputs>(INITIAL_INPUTS);
   const [activeStep, setActiveStep] = useState<1 | 2 | 3>(1);
@@ -50,8 +57,8 @@ export const EppoDoseView: React.FC = () => {
 
   const results = useMemo(() => calculateEppoDoseHarmony(inputs), [inputs]);
   const historyRecords = useLiveQuery(
-    () => db.eppo_history.orderBy('date').reverse().toArray(),
-    [],
+    () => listEppoHistoryForUser(effectiveUserId),
+    [effectiveUserId],
     []
   );
 
@@ -66,7 +73,12 @@ export const EppoDoseView: React.FC = () => {
   };
 
   const handleSave = async () => {
-    await db.eppo_history.add({
+    if (!effectiveUserId) {
+      setToastMessage('Sessão inválida. Volte a autenticar-se para guardar.');
+      setTimeout(() => setToastMessage(null), 3000);
+      return;
+    }
+    await addEppoHistoryForUser(effectiveUserId, {
       date: new Date().toISOString(),
       inputs,
       results
@@ -78,7 +90,7 @@ export const EppoDoseView: React.FC = () => {
   };
 
   const handleDeleteRecord = async (id: number) => {
-    await db.eppo_history.delete(id);
+    await deleteEppoHistoryForUser(id, effectiveUserId);
   };
 
   const handleExportPdf = async () => {

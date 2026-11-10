@@ -13,6 +13,7 @@ import {
 import { useTranslation } from '../../context/LanguageContext';
 import { isLocalhost } from '../../utils/environment';
 import { HeaderLanguageDropdown } from './HeaderLanguageDropdown';
+import { OutboxSimulationNotice } from './OutboxSimulationNotice';
 
 interface PrivateDesktopNavProps {
   userFullName: string;
@@ -123,6 +124,9 @@ export const PrivateDesktopNav: React.FC<PrivateDesktopNavProps> = ({
             </>
           )}
         </div>
+
+        {/* Indicador compacto de estado de sincronização */}
+        <OutboxSimulationNotice variant="desktop" />
 
         {/* Seletor de Idioma (Dropdown) */}
         <HeaderLanguageDropdown />

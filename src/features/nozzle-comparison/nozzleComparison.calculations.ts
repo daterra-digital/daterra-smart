@@ -17,7 +17,7 @@ import type {
   AlternativeSearchResult,
   DropletSpectrumMeasurement
 } from './nozzleComparison.types';
-import { getLabMeasurementEvidence } from './labEvidenceData';
+import { getLabMeasurementEvidence } from './labEvidenceData.ts';
 
 /**
  * Tabela Normativa de Classes de Gotas segundo as normas BCPC / ASABE S572.1 e ISO 25358

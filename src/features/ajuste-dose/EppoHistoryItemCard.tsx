@@ -1,6 +1,6 @@
 import React from 'react';
 import { Trash2, Scale, RotateCcw, FileDown } from 'lucide-react';
-import type { EppoHistoryRecord } from '../../db/db';
+import type { EppoHistoryRecord } from '../ajuste-dose-eppo/types/eppoHistory';
 import type { EppoDoseInputs, EppoDoseResults } from './types';
 import { formatEppoNum } from './calculations';
 import { generateEppoPdfReport } from './eppoPdfGenerator';

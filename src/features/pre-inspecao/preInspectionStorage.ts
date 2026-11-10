@@ -3,9 +3,11 @@ import type { PreInspectionSavedRecord } from './types/inspecaoTypes';
 export type { PreInspectionSavedRecord };
 
 const STORAGE_KEY = 'daterra_pre_inspection_history_v1';
+const MAX_RECORDS_PER_USER = 50;
 
-export function loadPreInspectionHistory(): PreInspectionSavedRecord[] {
+function readAllRawRecords(): PreInspectionSavedRecord[] {
   try {
+    if (typeof localStorage === 'undefined') return [];
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return [];
     const parsed = JSON.parse(raw);
@@ -15,31 +17,51 @@ export function loadPreInspectionHistory(): PreInspectionSavedRecord[] {
   }
 }
 
-export function savePreInspectionRecord(
-  payload: Omit<PreInspectionSavedRecord, 'id' | 'dateIso'>
-): PreInspectionSavedRecord[] {
-  const existing = loadPreInspectionHistory();
-  const newRecord: PreInspectionSavedRecord = {
-    ...payload,
-    id: `pre_insp_${Date.now()}`,
-    dateIso: new Date().toISOString()
-  };
-  const updated = [newRecord, ...existing].slice(0, 50);
+function writeAllRawRecords(records: PreInspectionSavedRecord[]): void {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
+    }
   } catch {
-    // Fallback silencioso caso o localStorage esteja cheio
+    // Silencia falha de quota em modo privado
   }
-  return updated;
 }
 
-export function deletePreInspectionRecord(id: string): PreInspectionSavedRecord[] {
-  const existing = loadPreInspectionHistory();
-  const updated = existing.filter((r) => r.id !== id);
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-  } catch {
-    // Fallback silencioso
+export function loadPreInspectionHistory(userId?: string | null): PreInspectionSavedRecord[] {
+  const scopedUid = typeof userId === 'string' ? userId.trim() : '';
+  if (!scopedUid) return [];
+  return readAllRawRecords().filter((r) => r.userId === scopedUid);
+}
+
+export function savePreInspectionRecord(
+  payload: Omit<PreInspectionSavedRecord, 'id' | 'dateIso'>,
+  userId?: string | null
+): PreInspectionSavedRecord[] {
+  const scopedUid = (typeof userId === 'string' ? userId : payload.userId || '').trim();
+  if (!scopedUid) {
+    throw new Error('Sessão de utilizador obrigatória para guardar pré-inspeção.');
   }
-  return updated;
+
+  const all = readAllRawRecords();
+  const newRecord: PreInspectionSavedRecord = {
+    ...payload,
+    userId: scopedUid,
+    id: `pre_insp_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+    dateIso: new Date().toISOString()
+  };
+
+  const userRecords = [newRecord, ...all.filter((r) => r.userId === scopedUid)].slice(0, MAX_RECORDS_PER_USER);
+  const otherRecords = all.filter((r) => r.userId !== scopedUid);
+  writeAllRawRecords([...userRecords, ...otherRecords]);
+  return userRecords;
+}
+
+export function deletePreInspectionRecord(id: string, userId?: string | null): PreInspectionSavedRecord[] {
+  const scopedUid = typeof userId === 'string' ? userId.trim() : '';
+  if (!scopedUid) return [];
+
+  const all = readAllRawRecords();
+  const updatedAll = all.filter((r) => !(r.id === id && r.userId === scopedUid));
+  writeAllRawRecords(updatedAll);
+  return updatedAll.filter((r) => r.userId === scopedUid);
 }

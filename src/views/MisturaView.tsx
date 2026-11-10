@@ -2,7 +2,6 @@ import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CheckCircle2 } from 'lucide-react';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { db } from '../db/db';
 import { DaterraKeypad } from '../components/DaterraKeypad';
 import { useTranslation } from '../context/LanguageContext';
 import {
@@ -16,9 +15,13 @@ import { MisturaHeader } from '../features/mistura/MisturaHeader';
 import { MisturaResultCard } from '../features/mistura/MisturaResultCard';
 import { MisturaFooterBar } from '../features/mistura/MisturaFooterBar';
 import { useMisturaSaveHistory } from '../features/mistura/useMisturaSaveHistory';
+import { countMixHistoryForUser } from '../features/mistura/mixHistoryStorage';
+import { useAuth } from '../context/AuthContext';
 
 export const MisturaView: React.FC = () => {
   const { t } = useTranslation();
+  const { user } = useAuth();
+  const effectiveUserId = user?.id || user?.uid;
   const navigate = useNavigate();
   const [selectedIds, setSelectedIds] = useState<string[]>(['PH', 'WG', 'SC', 'EC', 'MOL']);
   const [tankCapacityL, setTankCapacityL] = useState<number>(1000);
@@ -30,12 +33,11 @@ export const MisturaView: React.FC = () => {
   const historyCount =
     useLiveQuery(async () => {
       try {
-        if (!db || !db.mix_history) return 0;
-        return await db.mix_history.count();
+        return await countMixHistoryForUser(effectiveUserId);
       } catch {
         return 0;
       }
-    }, []) ?? 0;
+    }, [effectiveUserId]) ?? 0;
 
   const sequenceAnalysis = useMemo(() => generateMixingSequence(selectedIds, tankCapacityL), [selectedIds, tankCapacityL]);
   const productSteps = useMemo(() => sequenceAnalysis.steps.filter((s) => !s.isWater), [sequenceAnalysis.steps]);

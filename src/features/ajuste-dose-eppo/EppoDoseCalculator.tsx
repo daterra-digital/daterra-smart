@@ -97,6 +97,7 @@ export const EppoDoseCalculator: React.FC = () => {
     if (!calcResult.isValid) return showToast('Insira dimensões vegetativas válidas.');
     try {
       const res = await syncCultureTelemetryToProfile({
+        userId: effectiveUserId,
         cultureId: inputs.selectedCultureId,
         cultureName: inputs.selectedCultureName,
         lwaReal: calcResult.lwaReal,

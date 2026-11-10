@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { X, History } from 'lucide-react';
-import type { EppoHistoryRecord } from '../../db/db';
+import type { EppoHistoryRecord } from '../ajuste-dose-eppo/types/eppoHistory';
 import type { EppoDoseInputs, EppoDoseResults } from './types';
 import { EppoEquivalencesModal } from './EppoEquivalencesModal';
 import { EppoHistoryItemCard } from './EppoHistoryItemCard';

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   History,
   X,
@@ -9,8 +9,14 @@ import {
   ArrowRight,
   FolderOpen
 } from 'lucide-react';
-import { db, type MixHistoryRecord } from '../../db/db';
+import type { MixHistoryRecord } from './types/mixHistory';
 import { FORMULATIONS_BY_ID } from './data';
+import { useAuth } from '../../context/AuthContext';
+import {
+  listMixHistoryForUser,
+  deleteMixHistoryForUser,
+  clearMixHistoryForUser
+} from './mixHistoryStorage';
 
 interface MixHistoryModalProps {
   isOpen: boolean;
@@ -23,19 +29,17 @@ export const MixHistoryModal: React.FC<MixHistoryModalProps> = ({
   onClose,
   onLoadMix
 }) => {
+  const { user } = useAuth();
+  const effectiveUserId = user?.id || user?.uid;
   const [historyItems, setHistoryItems] = useState<MixHistoryRecord[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isConfirmingClearAll, setIsConfirmingClearAll] = useState<boolean>(false);
   const [statusMessage, setStatusMessage] = useState<string>('');
 
-  const loadHistory = async () => {
+  const loadHistory = useCallback(async () => {
     setIsLoading(true);
     try {
-      if (!db || !db.mix_history) {
-        setHistoryItems([]);
-        return;
-      }
-      const records = await db.mix_history.orderBy('date').reverse().toArray();
+      const records = await listMixHistoryForUser(effectiveUserId);
       setHistoryItems(records || []);
     } catch (err) {
       console.error('Erro ao ler histórico de misturas:', err);
@@ -43,7 +47,7 @@ export const MixHistoryModal: React.FC<MixHistoryModalProps> = ({
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [effectiveUserId]);
 
   useEffect(() => {
     if (isOpen) {
@@ -51,12 +55,13 @@ export const MixHistoryModal: React.FC<MixHistoryModalProps> = ({
       setIsConfirmingClearAll(false);
       setStatusMessage('');
     }
-  }, [isOpen]);
+  }, [isOpen, loadHistory]);
 
   const handleDeleteItem = async (id?: number) => {
     if (!id) return;
     try {
-      await db.mix_history.delete(id);
+      const deleted = await deleteMixHistoryForUser(id, effectiveUserId);
+      if (!deleted) return;
       setStatusMessage('Registo eliminado com sucesso.');
       loadHistory();
       setTimeout(() => setStatusMessage(''), 3000);
@@ -67,10 +72,10 @@ export const MixHistoryModal: React.FC<MixHistoryModalProps> = ({
 
   const handleClearAll = async () => {
     try {
-      await db.mix_history.clear();
+      await clearMixHistoryForUser(effectiveUserId);
       setHistoryItems([]);
       setIsConfirmingClearAll(false);
-      setStatusMessage('Todo o histórico de misturas foi limpo.');
+      setStatusMessage('O histórico do utilizador foi limpo.');
       setTimeout(() => setStatusMessage(''), 3000);
     } catch (err) {
       console.error('Erro ao limpar histórico:', err);
