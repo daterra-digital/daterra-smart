@@ -17,6 +17,8 @@ export type Profile = {
   city: string | null;
   plan: 'free' | 'plus' | 'pro' | 'ultra' | 'enterprise';
   credits?: number;
+  newsletter_subscribed?: boolean;
+  platform_notifications_enabled?: boolean;
   co_branding?: CoBrandingConfig;
   created_at: string;
   updated_at: string;
