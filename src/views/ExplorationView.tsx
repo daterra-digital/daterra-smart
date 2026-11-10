@@ -5,8 +5,11 @@ import {
   Info, CheckCircle2, Layers, Sliders, ChevronDown, Check
 } from 'lucide-react';
 import { db } from '../db/db';
+import type { ProfileCulture, ProfileEquipment, ProfileNozzle, ProfileCalibration } from '../db/types';
 import { MicrolearningModal } from '../components/MicrolearningModal';
 import { useLanguage } from '../context/LanguageContext';
+import { useAuth } from '../context/AuthContext';
+import { saveScopedCulture, saveScopedEquipment, saveScopedNozzle, saveScopedCalibration, deleteScopedProfile } from '../features/perfis/services/profileStorageService';
 
 export type ProfileTab = 'cultura' | 'equipamento' | 'bicos' | 'calibracao';
 
@@ -46,6 +49,8 @@ export const ExplorationView: React.FC<ExplorationViewProps> = ({
   hideTabs = false
 }) => {
   const { t } = useLanguage();
+  const { user } = useAuth();
+  const effectiveUserId = user?.id || user?.uid || '';
   const [internalActiveTab, setInternalActiveTab] = useState<ProfileTab>('cultura');
   const activeTab = controlledActiveTab !== undefined ? controlledActiveTab : internalActiveTab;
   const setActiveTab = (tab: ProfileTab) => {
@@ -64,11 +69,23 @@ export const ExplorationView: React.FC<ExplorationViewProps> = ({
     setMicroModalOpen(true);
   };
 
-  // Carregar dados IndexedDB via Dexie
-  const cultures = useLiveQuery(() => db.profiles_cultures.toArray(), []);
-  const equipments = useLiveQuery(() => db.profiles_equipment.toArray(), []);
-  const nozzles = useLiveQuery(() => db.profiles_nozzles.toArray(), []);
-  const calibrations = useLiveQuery(() => db.profiles_calibrations.toArray(), []);
+  // Carregar apenas dados autorizados do utilizador em sessão (SEC-REM-01)
+  const cultures = useLiveQuery<ProfileCulture[]>(
+    () => (effectiveUserId ? db.profiles_cultures.where('userId').equals(effectiveUserId).toArray() : []),
+    [effectiveUserId]
+  ) || [];
+  const equipments = useLiveQuery<ProfileEquipment[]>(
+    () => (effectiveUserId ? db.profiles_equipment.where('userId').equals(effectiveUserId).toArray() : []),
+    [effectiveUserId]
+  ) || [];
+  const nozzles = useLiveQuery<ProfileNozzle[]>(
+    () => (effectiveUserId ? db.profiles_nozzles.where('userId').equals(effectiveUserId).toArray() : []),
+    [effectiveUserId]
+  ) || [];
+  const calibrations = useLiveQuery<ProfileCalibration[]>(
+    () => (effectiveUserId ? db.profiles_calibrations.where('userId').equals(effectiveUserId).toArray() : []),
+    [effectiveUserId]
+  ) || [];
 
   // ---------------------------------------------------------------------------
   // ESTADOS FORMULÁRIO 1: CULTURA
@@ -209,13 +226,13 @@ export const ExplorationView: React.FC<ExplorationViewProps> = ({
   const [calibDropletSize] = useState('180');
   const [calibTotalFlow, setCalibTotalFlow] = useState('12,36');
 
-  // Gravar no IndexedDB
+  // Gravar no IndexedDB com titularidade autenticada (SEC-REM-01)
   const handleSaveCulture = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!cultName) return;
+    if (!cultName || !effectiveUserId) return;
     const parseNum = (val: string) => parseFloat(val.replace(',', '.')) || 0;
 
-    await db.profiles_cultures.add({
+    await saveScopedCulture(effectiveUserId, {
       name: cultName,
       crop_type: cultType,
       variety: cultVariety,
@@ -238,14 +255,14 @@ export const ExplorationView: React.FC<ExplorationViewProps> = ({
 
   const handleSaveEquipment = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!eqName) return;
+    if (!eqName || !effectiveUserId) return;
     const parseNum = (val: string) => parseFloat(val.replace(',', '.')) || 0;
 
     const finalModel = eqModelSelect === 'outro' ? eqModelCustom : eqModelSelect;
     const finalPumpModel = eqPumpModelSelect === 'outro' ? eqPumpModelCustom : eqPumpModelSelect;
     const finalCommandModel = eqCommandModelSelect === 'outro' ? eqCommandModelCustom : eqCommandModelSelect;
 
-    await db.profiles_equipment.add({
+    await saveScopedEquipment(effectiveUserId, {
       name: eqName,
       manufacturer: eqManufacturer,
       model: finalModel,
@@ -317,10 +334,11 @@ export const ExplorationView: React.FC<ExplorationViewProps> = ({
 
   const handleSaveNozzle = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!effectiveUserId) return;
     const parseNum = (val: string) => parseFloat(val.replace(',', '.')) || 0;
     const selectedEq = equipments?.find(eq => eq.id === parseInt(nozzleEqId));
 
-    await db.profiles_nozzles.add({
+    await saveScopedNozzle(effectiveUserId, {
       equipment_id: selectedEq?.id,
       equipment_name: selectedEq?.name || 'Geral',
       manufacturer: nozzleManufacturer,
@@ -339,6 +357,7 @@ export const ExplorationView: React.FC<ExplorationViewProps> = ({
 
   const handleSaveCalibration = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!effectiveUserId) return;
     const parseNum = (val: string) => parseFloat(val.replace(',', '.')) || 0;
     const v = parseNum(calibSpeed) || 6.5;
     const w = parseNum(calibWidth) || 2.2;
@@ -349,7 +368,7 @@ export const ExplorationView: React.FC<ExplorationViewProps> = ({
     const selectedEq = equipments?.find(eq => eq.id === parseInt(calibEqId));
     const selectedNz = nozzles?.find(nz => nz.id === parseInt(calibNozzleId));
 
-    await db.profiles_calibrations.add({
+    await saveScopedCalibration(effectiveUserId, {
       equipment_id: selectedEq?.id,
       equipment_name: selectedEq?.name || 'Atomizador Principal',
       nozzle_id: selectedNz?.id,
@@ -686,7 +705,7 @@ export const ExplorationView: React.FC<ExplorationViewProps> = ({
                           </span>
                         </div>
                         <button
-                          onClick={() => c.id && db.profiles_cultures.delete(c.id)}
+                          onClick={() => c.id && effectiveUserId && deleteScopedProfile(effectiveUserId, 'cultures', c.id)}
                           className="p-2 text-rose-600 hover:bg-rose-100 rounded-xl transition-colors shrink-0"
                           title={t('exploration.culture.deleteCrop', 'Eliminar cultura')}
                         >
@@ -1421,7 +1440,7 @@ export const ExplorationView: React.FC<ExplorationViewProps> = ({
                       )}
                     </div>
                     <button
-                      onClick={() => eq.id && db.profiles_equipment.delete(eq.id)}
+                      onClick={() => eq.id && effectiveUserId && deleteScopedProfile(effectiveUserId, 'equipment', eq.id)}
                       className="p-2 text-rose-600 hover:bg-rose-100 rounded-xl transition-colors"
                       title={t('exploration.equipment.deleteEquipment', 'Eliminar equipamento')}
                     >
@@ -1594,7 +1613,7 @@ export const ExplorationView: React.FC<ExplorationViewProps> = ({
                       </span>
                     </div>
                     <button
-                      onClick={() => nz.id && db.profiles_nozzles.delete(nz.id)}
+                      onClick={() => nz.id && effectiveUserId && deleteScopedProfile(effectiveUserId, 'nozzles', nz.id)}
                       className="p-2 text-rose-600 hover:bg-rose-100 rounded-xl transition-colors"
                       title={t('exploration.nozzles.deleteNozzle', 'Eliminar bico')}
                     >
@@ -1766,7 +1785,7 @@ export const ExplorationView: React.FC<ExplorationViewProps> = ({
                       </span>
                     </div>
                     <button
-                      onClick={() => cl.id && db.profiles_calibrations.delete(cl.id)}
+                      onClick={() => cl.id && effectiveUserId && deleteScopedProfile(effectiveUserId, 'calibrations', cl.id)}
                       className="p-2 text-rose-600 hover:bg-rose-100 rounded-xl transition-colors"
                       title={t('exploration.deleteCalibration', 'Eliminar calibração')}
                     >

@@ -18,6 +18,7 @@ export interface CalculationHistoryItem {
 
 export interface ProfileCulture {
   id?: number;
+  userId?: string;
   name: string;
   area_ha: number;
   crop_type: string;
@@ -42,6 +43,7 @@ export interface ProfileCulture {
 
 export interface ProfileEquipment {
   id?: number;
+  userId?: string;
   name: string;
   manufacturer?: string;
   model?: string;
@@ -121,6 +123,7 @@ export interface ProfileEquipment {
 
 export interface ProfileNozzle {
   id?: number;
+  userId?: string;
   equipment_id?: number;
   equipment_name?: string;
   manufacturer: string;
@@ -136,6 +139,7 @@ export interface ProfileNozzle {
 
 export interface ProfileCalibration {
   id?: number;
+  userId?: string;
   equipment_id?: number;
   equipment_name?: string;
   nozzle_id?: number;

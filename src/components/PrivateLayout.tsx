@@ -9,6 +9,7 @@ import { BottomNavigationBar } from './BottomNavigationBar';
 import { PrivateDesktopNav } from './layout/PrivateDesktopNav';
 import { PrivateNavDrawer } from './layout/PrivateNavDrawer';
 import { HeaderLanguageDropdown } from './layout/HeaderLanguageDropdown';
+import { drainOutbox, getPendingMutationsCount } from '../services/outbox/outboxService';
 
 export const PrivateLayout: React.FC = () => {
   const { user, profile, logout } = useAuth();
@@ -38,9 +39,39 @@ export const PrivateLayout: React.FC = () => {
     };
   }, []);
 
+  const [pendingSyncWarning, setPendingSyncWarning] = useState<string | null>(null);
+  const [isSyncingBeforeLogout, setIsSyncingBeforeLogout] = useState(false);
+
   const handleLogout = async () => {
-    await logout();
+    const res = await logout();
+    if (!res.success && res.hasPendingSync) {
+      setPendingSyncWarning(res.message || 'Existem alterações por sincronizar. Ligue-se à internet e sincronize antes de terminar sessão.');
+      return;
+    }
     navigate('/');
+  };
+
+  const handleCancelLogout = () => {
+    setPendingSyncWarning(null);
+  };
+
+  const handleSyncAndLogout = async () => {
+    if (!navigator.onLine) return;
+    setIsSyncingBeforeLogout(true);
+    try {
+      const currentUserId = user?.id || user?.uid;
+      await drainOutbox(undefined, currentUserId);
+      const remaining = await getPendingMutationsCount(currentUserId);
+      if (remaining === 0) {
+        setPendingSyncWarning(null);
+        await logout({ force: true });
+        navigate('/');
+      }
+    } catch (err) {
+      console.error('Erro ao sincronizar antes de terminar sessão:', err);
+    } finally {
+      setIsSyncingBeforeLogout(false);
+    }
   };
 
   const isCalculatorActive =
@@ -121,6 +152,45 @@ export const PrivateLayout: React.FC = () => {
       )}
 
       <BottomNavigationBar />
+
+      {pendingSyncWarning && (
+        <div
+          role="alertdialog"
+          aria-modal="true"
+          aria-labelledby="logout-warning-title"
+          aria-describedby="logout-warning-desc"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+        >
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border border-amber-200 space-y-4">
+            <h3 id="logout-warning-title" className="text-lg font-bold text-gray-900 flex items-center gap-2">
+              <span aria-hidden="true">⚠️</span> Alterações por Sincronizar
+            </h3>
+            <p id="logout-warning-desc" className="text-sm text-gray-700">
+              {pendingSyncWarning}
+            </p>
+            <div className="flex flex-col sm:flex-row items-center justify-end gap-3 pt-2">
+              <button
+                type="button"
+                onClick={handleCancelLogout}
+                className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors cursor-pointer"
+                autoFocus
+              >
+                Voltar
+              </button>
+              {isOnline && (
+                <button
+                  type="button"
+                  onClick={handleSyncAndLogout}
+                  disabled={isSyncingBeforeLogout}
+                  className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-white bg-daterra-primary hover:bg-emerald-900 rounded-xl transition-colors cursor-pointer disabled:opacity-50"
+                >
+                  {isSyncingBeforeLogout ? 'A Sincronizar...' : 'Sincronizar e Sair'}
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

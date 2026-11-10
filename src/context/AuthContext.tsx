@@ -20,6 +20,7 @@ import {
 } from '../services/auth/pendingAuthStorage';
 
 import { clearLocalSessionData } from '../services/auth/sessionCleanupService';
+import { setOutboxSessionUser, getPendingMutationsCount } from '../services/outbox/outboxService';
 
 export type AuthUser = {
   id: string;
@@ -51,7 +52,7 @@ export interface AuthContextType {
   requestMagicLink: (data: PendingRegistrationData, captchaToken?: string) => Promise<{ error: string | null }>;
   completeMagicLinkSignIn: (emailOverride?: string) => Promise<{ error: string | null; needsEmail?: boolean }>;
   signInWithGoogle: (options?: GoogleSignInOptions) => Promise<{ error: string | null; message?: string }>;
-  logout: () => Promise<void>;
+  logout: (options?: { force?: boolean }) => Promise<{ success: boolean; hasPendingSync?: boolean; message?: string }>;
   refreshProfile: () => Promise<void>;
   clearLocalSessionData: (options?: { purgeAll?: boolean }) => Promise<{ success: boolean }>;
 }
@@ -146,9 +147,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const unsubscribe = onAuthStateChanged(auth, async (fbUser) => {
       clearTimeout(authTimeout);
       if (fbUser) {
+        setOutboxSessionUser(fbUser.uid);
         const loadedProfile = await ensureAndLoadProfile(fbUser);
         if (isMounted) setUser(mapFirebaseUser(fbUser, loadedProfile));
       } else if (isMounted) {
+        setOutboxSessionUser(null);
         setUser(null);
         setProfile(null);
       }
@@ -282,8 +285,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const logout = async (): Promise<void> => {
+  const logout = async (options?: { force?: boolean }): Promise<{ success: boolean; hasPendingSync?: boolean; message?: string }> => {
     const currentUserId = user?.id || user?.uid;
+
+    // Se for logout voluntário (não forçado), verificar se existem dados locais não sincronizados
+    if (!options?.force && currentUserId) {
+      const pendingCount = await getPendingMutationsCount(currentUserId);
+      if (pendingCount > 0) {
+        return {
+          success: false,
+          hasPendingSync: true,
+          message: 'Existem alterações por sincronizar. Ligue-se à internet e sincronize antes de terminar sessão.'
+        };
+      }
+    }
+
+    setOutboxSessionUser(null);
     try {
       await clearLocalSessionData(currentUserId);
     } catch (err) {
@@ -293,6 +310,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     clearPendingAuth();
     setUser(null);
     setProfile(null);
+    return { success: true };
   };
 
   const handleManualSessionCleanup = async (options?: { purgeAll?: boolean }) => {

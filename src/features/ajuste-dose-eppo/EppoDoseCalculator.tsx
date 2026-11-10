@@ -36,8 +36,14 @@ export const EppoDoseCalculator: React.FC = () => {
   const [isGuideOpen, setIsGuideOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  const cultures = useLiveQuery(() => db.profiles_cultures?.toArray() ?? [], []) ?? [];
-  const equipments = useLiveQuery(() => db.profiles_equipment?.toArray() ?? [], []) ?? [];
+  const cultures = useLiveQuery<ProfileCulture[]>(
+    () => (effectiveUserId ? db.profiles_cultures.where('userId').equals(effectiveUserId).toArray() : []),
+    [effectiveUserId]
+  ) ?? [];
+  const equipments = useLiveQuery<ProfileEquipment[]>(
+    () => (effectiveUserId ? db.profiles_equipment.where('userId').equals(effectiveUserId).toArray() : []),
+    [effectiveUserId]
+  ) ?? [];
 
   const calcResult = useMemo(() => calculateEppoDoseComprehensive(
     inputs.doseRotulo, inputs.alturaM, inputs.entrelinhaM, inputs.treatmentMode,

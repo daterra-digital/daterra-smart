@@ -86,12 +86,18 @@ describe('Camada 4: Persistência First-Offline & Sincronização Assíncrona (M
       originalUpdate = db.mutation_outbox.update;
       originalAdd = db.mutation_outbox.add;
 
-      // Mock da tabela Dexie para execução determinística em Node
+      // Mock da tabela Dexie para execução determinística em Node (alinhado com contrato Dexie Collection e SEC-02)
       db.mutation_outbox.where = (field) => {
         return {
-          equals: (val) => ({
-            toArray: async () => mockStore.filter(item => item[field] === val)
-          })
+          equals: (val) => {
+            const matches = mockStore.filter(item => item[field] === val);
+            return {
+              filter: (predicate) => ({
+                toArray: async () => matches.filter(predicate)
+              }),
+              toArray: async () => matches
+            };
+          }
         };
       };
 
@@ -112,11 +118,11 @@ describe('Camada 4: Persistência First-Offline & Sincronização Assíncrona (M
     });
 
     test('Drena com sucesso 3 mutações pendentes quando reconectado à rede', async () => {
-      // 1. Simulação: 3 mutações acumuladas offline na Outbox
+      // 1. Simulação: 3 mutações acumuladas offline na Outbox com utilizador autenticado (SEC-02)
       mockStore = [
-        { id: 101, entityId: 'c1', entityType: 'calibration', operation: 'CREATE', synced: 0, attempts: 0, updatedAt: '2026-10-24T10:00:00Z', payload: { speed: 6.5 } },
-        { id: 102, entityId: 'c2', entityType: 'calculation', operation: 'CREATE', synced: 0, attempts: 0, updatedAt: '2026-10-24T10:05:00Z', payload: { dose: 1.5 } },
-        { id: 103, entityId: 'c3', entityType: 'caderno_campo', operation: 'UPDATE', synced: 0, attempts: 0, updatedAt: '2026-10-24T10:10:00Z', payload: { notes: 'Tratamento Concluído' } }
+        { id: 101, entityId: 'c1', entityType: 'calibration', operation: 'CREATE', synced: 0, attempts: 0, updatedAt: '2026-10-24T10:00:00Z', userId: 'user-op-1', payload: { speed: 6.5 } },
+        { id: 102, entityId: 'c2', entityType: 'calculation', operation: 'CREATE', synced: 0, attempts: 0, updatedAt: '2026-10-24T10:05:00Z', userId: 'user-op-1', payload: { dose: 1.5 } },
+        { id: 103, entityId: 'c3', entityType: 'caderno_campo', operation: 'UPDATE', synced: 0, attempts: 0, updatedAt: '2026-10-24T10:10:00Z', userId: 'user-op-1', payload: { notes: 'Tratamento Concluído' } }
       ];
 
       const processedIds = [];
@@ -125,8 +131,8 @@ describe('Camada 4: Persistência First-Offline & Sincronização Assíncrona (M
         return true;
       };
 
-      // 2. Executar drenagem (como ocorreria no evento 'online' ou Background Sync)
-      const result = await drainOutbox(mockRemoteHandler);
+      // 2. Executar drenagem para o utilizador autenticado (SEC-REM-01 Fail-Safe)
+      const result = await drainOutbox(mockRemoteHandler, 'user-op-1');
 
       assert.equal(result.processed, 3, 'Deve processar exatamente as 3 mutações');
       assert.equal(result.succeeded, 3, 'Todas as 3 devem ter sucesso');
@@ -142,7 +148,7 @@ describe('Camada 4: Persistência First-Offline & Sincronização Assíncrona (M
 
     test('Tratamento de falha transitória com retry e registo de erro', async () => {
       mockStore = [
-        { id: 201, entityId: 'm1', entityType: 'mixture', operation: 'CREATE', synced: 0, attempts: 0, updatedAt: '2026-10-24T11:00:00Z', payload: { p1: 'Cobre' } }
+        { id: 201, entityId: 'm1', entityType: 'mixture', operation: 'CREATE', synced: 0, attempts: 0, updatedAt: '2026-10-24T11:00:00Z', userId: 'user-op-1', payload: { p1: 'Cobre' } }
       ];
 
       // Simulação: Servidor remoto rejeita temporariamente
@@ -152,7 +158,7 @@ describe('Camada 4: Persistência First-Offline & Sincronização Assíncrona (M
         throw new Error('503 Service Unavailable');
       };
 
-      const result = await drainOutbox(failingRemoteHandler);
+      const result = await drainOutbox(failingRemoteHandler, 'user-op-1');
 
       assert.equal(result.processed, 1);
       assert.equal(result.succeeded, 0);

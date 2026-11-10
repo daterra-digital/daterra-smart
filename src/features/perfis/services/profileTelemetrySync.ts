@@ -23,11 +23,13 @@ export interface EquipmentEfficiencyUpdate {
  */
 export async function syncCultureTelemetry(
   cultureId: number,
-  telemetry: CultureTelemetryUpdate
+  telemetry: CultureTelemetryUpdate,
+  userId?: string
 ): Promise<boolean> {
   try {
     const existing = await db.profiles_cultures.get(cultureId);
     if (!existing) return false;
+    if (userId && existing.userId && existing.userId !== userId) return false;
 
     const now = new Date().toISOString();
     const updateData: Record<string, any> = {
@@ -42,7 +44,7 @@ export async function syncCultureTelemetry(
 
     await db.profiles_cultures.update(cultureId, updateData);
 
-    // Registo de mutação offline (LWW)
+    // Registo de mutação offline (LWW) com titularidade
     await db.mutation_outbox.add({
       entityId: String(cultureId),
       entityType: 'profile_culture',
@@ -50,7 +52,8 @@ export async function syncCultureTelemetry(
       payload: updateData,
       synced: 0,
       updatedAt: now,
-      attempts: 0
+      attempts: 0,
+      userId: userId || existing.userId
     });
 
     return true;
@@ -66,11 +69,13 @@ export async function syncCultureTelemetry(
  */
 export async function syncEquipmentEfficiency(
   equipmentId: number,
-  efficiency: EquipmentEfficiencyUpdate
+  efficiency: EquipmentEfficiencyUpdate,
+  userId?: string
 ): Promise<boolean> {
   try {
     const existing = await db.profiles_equipment.get(equipmentId);
     if (!existing) return false;
+    if (userId && existing.userId && existing.userId !== userId) return false;
 
     const now = new Date().toISOString();
     const updateData: Record<string, any> = {
@@ -83,7 +88,7 @@ export async function syncEquipmentEfficiency(
 
     await db.profiles_equipment.update(equipmentId, updateData);
 
-    // Registo de mutação offline (LWW)
+    // Registo de mutação offline (LWW) com titularidade
     await db.mutation_outbox.add({
       entityId: String(equipmentId),
       entityType: 'profile_equipment',
@@ -91,7 +96,8 @@ export async function syncEquipmentEfficiency(
       payload: updateData,
       synced: 0,
       updatedAt: now,
-      attempts: 0
+      attempts: 0,
+      userId: userId || existing.userId
     });
 
     return true;

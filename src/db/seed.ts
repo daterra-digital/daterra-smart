@@ -84,38 +84,8 @@ export async function seedMicrolearningIfEmpty(db: DaterraDatabase) {
     ]);
   }
 
-  // Seed inicial de perfis
-  const culturesCount = await db.profiles_cultures.count();
-  if (culturesCount === 0) {
-    await db.profiles_cultures.bulkAdd([
-      { name: 'Vinha da Encosta', crop_type: 'Vinha', variety: 'Touriga Nacional', area_ha: 4.5, row_distance_m: 2.2, phenological_stage: 'Floração', location: 'Quinta do Vale' },
-      { name: 'Pomar Gala', crop_type: 'Macieira', variety: 'Royal Gala', area_ha: 8.2, row_distance_m: 4.0, phenological_stage: 'Vingamento', location: 'Gouveia' }
-    ]);
-  }
-
-  const equipCount = await db.profiles_equipment.count();
-  if (equipCount === 0) {
-    await db.profiles_equipment.bulkAdd([
-      { name: 'Atomizador Tomix 1000L', manufacturer: 'Tomix', model: 'Tornado 1000', tank_capacity_l: 1000, clean_water_tank_l: 100, max_pressure_bar: 20, recommended_pressure_bar: 12, nozzle_type: 'Albuz ATR Amarelo' },
-      { name: 'Pulverizador Barra Rocha 600L', manufacturer: 'Rocha', model: 'Hydra 600', tank_capacity_l: 600, clean_water_tank_l: 60, max_pressure_bar: 15, recommended_pressure_bar: 3, nozzle_type: 'Lechler IDK Azul' }
-    ]);
-  }
-
-  const nozzleCount = await db.profiles_nozzles.count();
-  if (nozzleCount === 0) {
-    await db.profiles_nozzles.bulkAdd([
-      { manufacturer: 'Albuz', model: 'ATR 80', color: 'Amarelo', iso_classification: 'ISO 10625', nozzle_type: 'Cone Oco', spray_angle: '80°', working_pressure_bar: 10, nominal_flow_lmin: 1.03 },
-      { manufacturer: 'Lechler', model: 'IDK', color: 'Azul', iso_classification: 'ISO 10625', nozzle_type: 'Injeção de Ar', spray_angle: '110°', working_pressure_bar: 3, nominal_flow_lmin: 1.20 }
-    ]);
-  }
-
-  const calibCount = await db.profiles_calibrations.count();
-  if (calibCount === 0) {
-    await db.profiles_calibrations.bulkAdd([
-      { working_speed_kmh: 6.5, working_pressure_bar: 10, working_width_m: 2.2, active_nozzles_count: 12, total_flow_lmin: 12.36, calculated_spray_volume_lha: 518.88 },
-      { working_speed_kmh: 5.0, working_pressure_bar: 3, working_width_m: 12.0, active_nozzles_count: 24, total_flow_lmin: 28.80, calculated_spray_volume_lha: 288.00 }
-    ]);
-  }
+  // Perfis de exploração (SEC-REM-01): Nunca criar perfis de demonstração sem proprietário.
+  // Perfis pertencem exclusivamente aos utilizadores autenticados.
 
   const activeSubstancesCount = await db.active_substances.count();
   if (activeSubstancesCount < INITIAL_ACTIVE_SUBSTANCES.length) {

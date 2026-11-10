@@ -4,6 +4,7 @@ import { generateIdempotencyKey } from '../../services/integrations/centralgestM
 import type { CropStructure } from './eppoDoseDataMapper.ts';
 
 export interface SyncCultureTelemetryParams {
+  userId?: string;
   cultureId?: number;
   cultureName?: string;
   lwaReal: number;
@@ -52,11 +53,17 @@ export async function syncCultureTelemetryToProfile(
   if (targetId) {
     const existing = await db.profiles_cultures.get(targetId);
     if (existing) {
+      if (params.userId && existing.userId && existing.userId !== params.userId) {
+        throw new Error('Acesso negado: o perfil de cultura pertence a outro utilizador.');
+      }
       targetName = existing.name;
     }
   } else if (cultureName) {
     const existing = await db.profiles_cultures.where('name').equalsIgnoreCase(cultureName).first();
     if (existing && existing.id) {
+      if (params.userId && existing.userId && existing.userId !== params.userId) {
+        throw new Error('Acesso negado: o perfil de cultura pertence a outro utilizador.');
+      }
       targetId = existing.id;
       targetName = existing.name;
     }
@@ -84,6 +91,7 @@ export async function syncCultureTelemetryToProfile(
       crop_type: isGlobular ? 'Pomar' : 'Vinha',
       area_ha: 1.0,
       phenological_stage: phenologicalStage,
+      userId: params.userId,
       ...telemetryPayload
     });
     targetId = Number(insertedId);
@@ -115,8 +123,14 @@ export async function syncCultureTelemetryToProfile(
  */
 export async function syncEquipmentEfficiencyFactor(
   equipmentId: number,
-  efficiencyFactor: number
+  efficiencyFactor: number,
+  userId?: string
 ): Promise<void> {
+  const existing = await db.profiles_equipment.get(equipmentId);
+  if (userId && existing && existing.userId && existing.userId !== userId) {
+    throw new Error('Acesso negado: o equipamento pertence a outro utilizador.');
+  }
+
   await db.profiles_equipment.update(equipmentId, {
     efficiency_correction_factor: efficiencyFactor
   });

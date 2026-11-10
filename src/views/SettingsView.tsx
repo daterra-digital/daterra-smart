@@ -378,45 +378,52 @@ export const SettingsView: React.FC = () => {
     setTimeout(() => setFeedbackMsg(''), 3500);
   };
 
-  // ZONA DE PERIGO - Ações Destrutivas
+  const effectiveUserId = user?.id || user?.uid || '';
+
+  // ZONA DE PERIGO - Ações Destrutivas Scoped (SEC-REM-01)
   const handleDeleteCultures = async () => {
-    if (window.confirm(t('settings.confirmDeleteCultures', 'Tem a certeza que deseja apagar TODOS os perfis de cultura? Esta ação é irreversível.'))) {
-      await db.profiles_cultures.clear();
+    if (!effectiveUserId) return;
+    if (window.confirm(t('settings.confirmDeleteCultures', 'Tem a certeza que deseja apagar os seus perfis de cultura? Esta ação é irreversível.'))) {
+      await db.profiles_cultures.where('userId').equals(effectiveUserId).delete();
       setFeedbackMsg(t('settings.culturesDeleted', 'Perfis de cultura eliminados com sucesso.'));
       setTimeout(() => setFeedbackMsg(''), 3500);
     }
   };
 
   const handleDeleteEquipments = async () => {
-    if (window.confirm(t('settings.confirmDeleteEquipments', 'Tem a certeza que deseja apagar TODOS os perfis de equipamento? Esta ação é irreversível.'))) {
-      await db.profiles_equipment.clear();
+    if (!effectiveUserId) return;
+    if (window.confirm(t('settings.confirmDeleteEquipments', 'Tem a certeza que deseja apagar os seus perfis de equipamento? Esta ação é irreversível.'))) {
+      await db.profiles_equipment.where('userId').equals(effectiveUserId).delete();
       setFeedbackMsg(t('settings.equipmentsDeleted', 'Perfis de equipamento eliminados com sucesso.'));
       setTimeout(() => setFeedbackMsg(''), 3500);
     }
   };
 
   const handleDeleteNozzles = async () => {
-    if (window.confirm(t('settings.confirmDeleteNozzles', 'Tem a certeza que deseja apagar TODOS os bicos guardados? Esta ação é irreversível.'))) {
-      await db.profiles_nozzles.clear();
+    if (!effectiveUserId) return;
+    if (window.confirm(t('settings.confirmDeleteNozzles', 'Tem a certeza que deseja apagar os seus bicos guardados? Esta ação é irreversível.'))) {
+      await db.profiles_nozzles.where('userId').equals(effectiveUserId).delete();
       setFeedbackMsg(t('settings.nozzlesDeleted', 'Perfis de bicos eliminados com sucesso.'));
       setTimeout(() => setFeedbackMsg(''), 3500);
     }
   };
 
   const handleDeleteCalibrations = async () => {
-    if (window.confirm(t('settings.confirmDeleteCalibrations', 'Tem a certeza que deseja apagar TODAS as fichas de calibração? Esta ação é irreversível.'))) {
-      await db.profiles_calibrations.clear();
+    if (!effectiveUserId) return;
+    if (window.confirm(t('settings.confirmDeleteCalibrations', 'Tem a certeza que deseja apagar as suas fichas de calibração? Esta ação é irreversível.'))) {
+      await db.profiles_calibrations.where('userId').equals(effectiveUserId).delete();
       setFeedbackMsg(t('settings.calibrationsDeleted', 'Fichas de calibração eliminadas com sucesso.'));
       setTimeout(() => setFeedbackMsg(''), 3500);
     }
   };
 
   const handleDeleteAllData = async () => {
-    if (window.confirm(t('settings.confirmDeleteAllData', 'ATENÇÃO CRÍTICA: Deseja apagar TODOS os dados da exploração do IndexedDB? Esta ação não pode ser desfeita!'))) {
-      await db.profiles_cultures.clear();
-      await db.profiles_equipment.clear();
-      await db.profiles_nozzles.clear();
-      await db.profiles_calibrations.clear();
+    if (!effectiveUserId) return;
+    if (window.confirm(t('settings.confirmDeleteAllData', 'ATENÇÃO CRÍTICA: Deseja apagar TODOS os seus dados de exploração? Esta ação não pode ser desfeita!'))) {
+      await db.profiles_cultures.where('userId').equals(effectiveUserId).delete();
+      await db.profiles_equipment.where('userId').equals(effectiveUserId).delete();
+      await db.profiles_nozzles.where('userId').equals(effectiveUserId).delete();
+      await db.profiles_calibrations.where('userId').equals(effectiveUserId).delete();
       setFeedbackMsg(t('settings.allDataDeleted', 'Todos os dados da plataforma foram eliminados do IndexedDB local.'));
       setTimeout(() => setFeedbackMsg(''), 3500);
     }

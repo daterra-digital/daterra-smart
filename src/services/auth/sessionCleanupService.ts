@@ -51,7 +51,9 @@ export async function clearUserIndexedDbData(
   userId?: string,
   options?: CleanupSessionOptions
 ): Promise<void> {
-  const isPurgeAll = Boolean(options?.purgeAll || !userId || userId.trim() === '');
+  const isPurgeAll = Boolean(options?.purgeAll);
+  const targetUserIdCheck = userId?.trim();
+  if (!targetUserIdCheck && !isPurgeAll) return;
   const targetUserId = userId?.trim();
 
   // Lista estrita de tabelas de utilizador / exploração agrícola

@@ -43,8 +43,8 @@ export class DaterraDatabase extends Dexie {
   // Persistência First-Offline (Mutation Outbox)
   mutation_outbox!: Table<MutationOutboxRecord, number>;
 
-  constructor() {
-    super('DaterraSmartDB');
+  constructor(databaseName = 'DaterraSmartDB') {
+    super(databaseName);
 
     // Versão 3 legada
     this.version(3).stores({

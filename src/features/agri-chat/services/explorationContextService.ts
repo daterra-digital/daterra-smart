@@ -4,19 +4,22 @@ import type { ProfileCulture, ProfileEquipment, ProfileNozzle, ProfileCalibratio
 import type { ActiveExplorationContext } from '../types';
 
 export const explorationContextService = {
-  // Carregar todos os perfis gravados no IndexedDB
-  async loadUserExplorationProfiles(): Promise<{
+  // Carregar perfis autorizados do utilizador autenticado (SEC-REM-01)
+  async loadUserExplorationProfiles(userId?: string | null): Promise<{
     cultures: ProfileCulture[];
     equipments: ProfileEquipment[];
     nozzles: ProfileNozzle[];
     calibrations: ProfileCalibration[];
   }> {
+    if (!userId || userId.trim() === '') {
+      return { cultures: [], equipments: [], nozzles: [], calibrations: [] };
+    }
     try {
       const [cultures, equipments, nozzles, calibrations] = await Promise.all([
-        db.profiles_cultures.toArray(),
-        db.profiles_equipment.toArray(),
-        db.profiles_nozzles.toArray(),
-        db.profiles_calibrations.toArray()
+        db.profiles_cultures.where('userId').equals(userId).toArray(),
+        db.profiles_equipment.where('userId').equals(userId).toArray(),
+        db.profiles_nozzles.where('userId').equals(userId).toArray(),
+        db.profiles_calibrations.where('userId').equals(userId).toArray()
       ]);
       return { cultures, equipments, nozzles, calibrations };
     } catch (err) {
