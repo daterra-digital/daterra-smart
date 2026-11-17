@@ -1,3 +1,4 @@
+import fs from 'node:fs';
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
@@ -7,6 +8,14 @@ export default defineConfig({
   base: process.env.VITE_BASE_URL || (process.env.DEPLOY_TARGET === 'cpanel' ? '/' : '/daterra-smart/'),
   plugins: [
     react(),
+    {
+      name: 'spa-fallback-404',
+      closeBundle() {
+        if (fs.existsSync('dist/index.html')) {
+          fs.copyFileSync('dist/index.html', 'dist/404.html');
+        }
+      }
+    },
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: [

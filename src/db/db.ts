@@ -13,14 +13,19 @@ import type {
   ProfileCalibration,
   MicrolearningContent,
   InstalledToolItem,
-  MutationOutboxRecord
+  MutationOutboxRecord,
+  ProfileCropMoment, ProfileMomentRevision, ProfileCustomOption
 } from './types.ts';
+import { V11_STORES, upgradeDaterraDbToV11 } from './dbCultureMigration.ts';
 
 export * from './types.ts';
 
 export class DaterraDatabase extends Dexie {
   calculation_history!: Table<CalculationHistoryItem>;
   profiles_cultures!: Table<ProfileCulture>;
+  profile_crop_moments!: Table<ProfileCropMoment>;
+  profile_moment_revisions!: Table<ProfileMomentRevision>;
+  profile_custom_options!: Table<ProfileCustomOption>;
   profiles_equipment!: Table<ProfileEquipment>;
   profiles_nozzles!: Table<ProfileNozzle>;
   profiles_calibrations!: Table<ProfileCalibration>;
@@ -181,6 +186,8 @@ export class DaterraDatabase extends Dexie {
       });
       console.log('[DaterraSmartDB] Migrado com sucesso para a Versão 10 (Segregação por Utilizador SEC-02 ativa).');
     });
+
+    this.version(11).stores(V11_STORES).upgrade(upgradeDaterraDbToV11);
   }
 }
 

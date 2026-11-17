@@ -25,7 +25,7 @@ O LWA quantifica a área geométrica externa da sebe, mas não mede o número de
 Deve recalcular sempre que a vegetação alterar significativamente a sua altura ao longo do ciclo vegetativo (abrolhamento, floração, fecho de cachos, vingamento) ou imediatamente a seguir a intervenções em verde como a desponta ou desfolha.
 
 ## Porque é que o LWA não é, por si só, uma dose de produto fitofarmacêutico?
-O LWA é uma grandeza puramente bio-geométrica (superfície foliar) e não uma prescrição química. Não substitui o cálculo da calda nem define a concentração de produto comercial a deitar na cuba do pulverizador.
+O LWA é uma grandeza puramente bio-geométrica (superfície foliar) e não uma prescrição química. Não substitui o cálculo da calda nem define a concentração de produto comercial a deitar no depósito do pulverizador.
 
 ## Qual é o aviso de responsabilidade técnica e boas práticas fitossanitárias?
 Este cálculo é uma ferramenta de apoio técnico ao aplicador e técnico responsável. Não dispensa a leitura atenta das condições de utilização e precauções constantes do rótulo oficial homologado pela DGAV. Para formação e certificação oficial em proteção integrada, consulte os módulos disponíveis na Academia DATERRA.

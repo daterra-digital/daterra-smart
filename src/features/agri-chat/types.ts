@@ -35,6 +35,10 @@ export interface ActiveExplorationContext {
   canopyHeightM?: number;
   canopyWidthM?: number;
   trainingSystem?: string;
+  phenologicalStage?: string;
+  lwaM2Ha?: number;
+  trvM3Ha?: number;
+  recommendedSprayVolumeLHa?: number;
   equipmentId?: number;
   equipmentName?: string;
   tankCapacityL?: number;

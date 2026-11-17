@@ -120,7 +120,7 @@ export const PrivateDesktopNav: React.FC<PrivateDesktopNavProps> = ({
           ) : (
             <>
               <WifiOff className="w-3.5 h-3.5" />
-              <span>{t('common.offlineIndexedDb', 'Modo Offline (IndexedDB Ativo)')}</span>
+              <span>{t('common.offlineIndexedDb', 'Modo Offline')}</span>
             </>
           )}
         </div>

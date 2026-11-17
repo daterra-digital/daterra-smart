@@ -108,7 +108,7 @@ export const IRD_DRIFT_SENSITIVITY_FALLBACK_SCORES = Object.freeze({
 });
 
 /**
- * Regras fail-closed e limiares operacionais DGAV / EPPO vigentes no projeto.
+ * Regras fail-closed e limiares operacionais EPPO e de boas práticas vigentes no projeto.
  */
 export const IRD_FAIL_CLOSED_RULES = Object.freeze({
   requireExplicitWeatherInputs: true,
@@ -176,5 +176,5 @@ export const IRD_LEGAL_DISCLAIMER: IrdLegalDisclaimer = Object.freeze({
   isLegalComplianceCertificate: false,
   dgavSifitoPrevails: true,
   statementPt:
-    'O Índice de Risco de Deriva (IRD) é um indicador heurístico de apoio à decisão e não constitui certificação legal nem ensaio de conformidade com a norma ISO 22866. Prevalecem sempre as condições, distâncias de segurança e restrições do rótulo oficial do produto fitofarmacêutico homologado pela DGAV (portal SIFITO), bem como a verificação meteorológica presencial no campo.'
+    'O Índice de Risco de Deriva (IRD) é um indicador heurístico de apoio à decisão e não constitui certificação legal nem ensaio de conformidade com a norma ISO 22866. Prevalecem sempre as indicações do rótulo oficial do produto fitofarmacêutico, bem como a verificação meteorológica presencial no campo.'
 });

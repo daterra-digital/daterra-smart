@@ -108,7 +108,7 @@ describe('SEC-16: Zero-Leakage no Logout e Isolamento em Dispositivos Partilhado
     assert.equal(mockStorage.get('daterra_theme'), 'mono', 'daterra_theme deve ser preservado');
   });
 
-  it('5. clearUserIndexedDbData deve mapear as 10 tabelas de utilizador e preservar dicionários', () => {
+  it('5. clearUserIndexedDbData deve mapear as 13 tabelas de utilizador e preservar dicionários', () => {
     const serviceSource = fs.readFileSync(path.resolve('src/services/auth/sessionCleanupService.ts'), 'utf8');
 
     const expectedUserTables = [
@@ -118,6 +118,9 @@ describe('SEC-16: Zero-Leakage no Logout e Isolamento em Dispositivos Partilhado
       'mix_history',
       'eppo_history',
       'profiles_cultures',
+      'profile_crop_moments',
+      'profile_moment_revisions',
+      'profile_custom_options',
       'profiles_equipment',
       'profiles_nozzles',
       'profiles_calibrations',

@@ -4,7 +4,9 @@ import {
   BLOCKED_TOOL_IDS_IN_PAGES,
   CANONICAL_TOOL_ROUTES,
   BLOCKED_PAGES_ROUTES,
-  ROUTE_ALIASES
+  ROUTE_ALIASES,
+  isIrdEnabledForEnv,
+  isWeatherDriftTabEnabledForEnv
 } from './releasePolicyRoutes.ts';
 
 export {
@@ -12,7 +14,9 @@ export {
   BLOCKED_TOOL_IDS_IN_PAGES,
   CANONICAL_TOOL_ROUTES,
   BLOCKED_PAGES_ROUTES,
-  ROUTE_ALIASES
+  ROUTE_ALIASES,
+  isIrdEnabledForEnv,
+  isWeatherDriftTabEnabledForEnv
 };
 
 export type DaterraEnvironment = 'pages' | 'staging' | 'development';

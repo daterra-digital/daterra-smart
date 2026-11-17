@@ -1,182 +1,170 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
-import { useWeather } from '../weather/hooks/useWeather';
+import { ChevronLeft } from 'lucide-react';
+import { WeatherLocationSearchDropdown } from '../weather/components/WeatherLocationSearchDropdown.tsx';
 import { NOZZLES_DATABASE } from '../nozzle-comparison/nozzleComparison.data.ts';
-import type { CalculationHistoryRecord } from '../../types/calculator.ts';
-import { DaterraKeypad, type KeypadValidationRules } from '../../components/DaterraKeypad';
-import { calculateDriftRiskIndex } from './irdEngine.ts';
-import { buildNozzleInputFromCatalog, resolveNozzleDriftProfile } from './irdNozzleAdapter.ts';
-import { listIrdHistory, saveIrdAssessment, softDeleteIrdAssessment } from './irdHistoryAdapter.ts';
+import { DaterraKeypad } from '../../components/DaterraKeypad';
 import { IRD_VERSIONS } from './irdConfig.ts';
-import type { IrdExposureInput, IrdInput, IrdNozzleInput, IrdOperationInput, IrdWeatherInput, IrdWeatherSource } from './irdTypes.ts';
-import { IrdResultCard } from './IrdResultCard';
-import { IrdParameterPanel, type ParameterKeypadField } from './IrdParameterPanel';
-import { IrdWeatherPanel, type WeatherKeypadField } from './IrdWeatherPanel';
-import { IrdDropletPanel, type IrdDropletUiMode } from './IrdDropletPanel';
-import { IrdHistoryModal } from './IrdHistoryModal';
+import { buildIrdGuideContext } from './irdGuideContextBuilder.ts';
+import type { IrdGuideTopicId } from './irdGuideSections.ts';
+import { IRD_KEYPAD_META } from './irdKeypadMeta.ts';
+import type { IrdEvaluationLevel } from './irdOriginTypes.ts';
+import { buildIrdPrimaryMessage, buildIrdSaveAvailability, isIrdPartialAssessment } from './irdPresentationHelper.ts';
+import { buildPreSaveSummary } from './irdPreSaveBuilder.ts';
+import type { IrdQuickAccordionState } from './IrdQuickAccordions.tsx';
+import { useIrdCalculatorController } from './useIrdCalculatorController.ts';
+import { IrdActionFooter } from './IrdActionFooter.tsx';
 import { IrdGuideModal } from './IrdGuideModal';
+import { IrdHistoryModal } from './IrdHistoryModal';
+import { IrdLevelProgressionCard } from './IrdLevelProgressionCard';
+import { IrdPersistentResultSummary } from './IrdPersistentResultSummary';
+import { IrdProfilesOnlyPanel } from './IrdProfilesOnlyPanel';
+import { IrdQuickEvalPanel } from './IrdQuickEvalPanel';
+import { IrdResultCard } from './IrdResultCard';
+import { IrdWeatherPanel } from './IrdWeatherPanel';
 
-type AnyKeypadField = ParameterKeypadField | WeatherKeypadField | 'representativeDropletDiameterUm' | 'measuredDv10Um' | 'measuredDv50Um' | 'measuredDv90Um' | 'measurementPressureBar';
-
-const KEYPAD_META: Record<AnyKeypadField, { label: string; unit: string; presets: number[]; rules: KeypadValidationRules }> = {
-  workingPressureBar: { label: 'Pressão de trabalho', unit: 'bar', presets: [2, 3, 5, 10], rules: { required: true, min: 0.1, max: 50, allowDecimal: true, maxDecimals: 1 } },
-  travelSpeedKmh: { label: 'Velocidade de avanço', unit: 'km/h', presets: [4, 6, 8, 10], rules: { required: true, min: 0.5, max: 40, allowDecimal: true, maxDecimals: 1 } },
-  boomOrReleaseHeightM: { label: 'Altura de aplicação', unit: 'm', presets: [0.5, 0.7, 1.0, 1.5], rules: { required: true, min: 0.1, max: 15, allowDecimal: true, maxDecimals: 2 } },
-  distanceToSensitiveAreaM: { label: 'Distância a zona sensível', unit: 'm', presets: [5, 10, 20, 50], rules: { required: true, min: 0, max: 10000, allowDecimal: true, maxDecimals: 1 } },
-  labelMinBufferM: { label: 'Zona tampão do rótulo SIFITO', unit: 'm', presets: [5, 10, 15, 20], rules: { required: true, min: 0, max: 10000, allowDecimal: true, maxDecimals: 1 } },
-  windSpeedKmh: { label: 'Vento médio (anemómetro)', unit: 'km/h', presets: [3, 6, 10, 14], rules: { required: true, min: 0, max: 150, allowDecimal: true, maxDecimals: 1 } },
-  windGustsKmh: { label: 'Rajada de vento', unit: 'km/h', presets: [5, 10, 15, 20], rules: { required: true, min: 0, max: 200, allowDecimal: true, maxDecimals: 1 } },
-  temperatureC: { label: 'Temperatura do ar', unit: '°C', presets: [15, 20, 25, 30], rules: { required: true, min: -20, max: 55, allowDecimal: true, maxDecimals: 1, allowNegative: true } },
-  relativeHumidityPct: { label: 'Humidade relativa', unit: '%', presets: [40, 55, 70, 85], rules: { required: true, min: 1, max: 100, allowDecimal: true, maxDecimals: 0 } },
-  precipitationMm: { label: 'Precipitação', unit: 'mm/h', presets: [0, 0.2, 1], rules: { required: true, min: 0, max: 500, allowDecimal: true, maxDecimals: 1 } },
-  representativeDropletDiameterUm: { label: 'Diâmetro representativo', unit: 'µm', presets: [200, 280, 350, 450], rules: { required: true, min: 15, max: 2500, allowDecimal: true, maxDecimals: 0 } },
-  measuredDv10Um: { label: 'DV10 medido', unit: 'µm', presets: [90, 140, 180, 220], rules: { required: true, min: 15, max: 2500, allowDecimal: true, maxDecimals: 0 } },
-  measuredDv50Um: { label: 'DV50 medido', unit: 'µm', presets: [220, 300, 380, 450], rules: { required: true, min: 15, max: 2500, allowDecimal: true, maxDecimals: 0 } },
-  measuredDv90Um: { label: 'DV90 medido', unit: 'µm', presets: [400, 500, 620, 750], rules: { required: true, min: 15, max: 2500, allowDecimal: true, maxDecimals: 0 } },
-  measurementPressureBar: { label: 'Pressão de ref. da medição', unit: 'bar', presets: [2, 3, 5, 10], rules: { required: true, min: 0.1, max: 50, allowDecimal: true, maxDecimals: 1 } }
-};
+const LEVEL_TABS: ReadonlyArray<{ id: IrdEvaluationLevel; label: string }> = [
+  { id: 'level1_meteo', label: '1. Só Meteorologia' },
+  { id: 'level2_quick', label: '2. Rápida (Manual)' },
+  { id: 'level3_profiles', label: '3. Detalhada (Perfis)' }
+];
 
 export const IrdCalculatorView: React.FC = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
-  const effectiveUserId = user?.id || user?.uid || null;
-  const { data: weatherData, isLoading: weatherLoading, error: weatherError, currentLocation, refreshWeather } = useWeather();
-
-  const [isOffline, setIsOffline] = useState<boolean>(() => typeof navigator !== 'undefined' ? !navigator.onLine : false);
-  const [cultureLabel, setCultureLabel] = useState<string>('Vinha · Floração / Vegetação plena');
-  const [selectedNozzleId, setSelectedNozzleId] = useState<string>('');
-  const [nozzleDraft, setNozzleDraft] = useState<IrdNozzleInput>({ workingPressureBar: null, hasAirSleeve: false });
-  const [operation, setOperation] = useState<IrdOperationInput>({ applicationDomain: 'horizontal_boom', travelSpeedKmh: 6, boomOrReleaseHeightM: 0.5 });
-  const [exposure, setExposure] = useState<IrdExposureInput>({ distanceToSensitiveAreaM: null, labelMinBufferM: null, hasDownwindSensitiveTarget: false });
-  const [manualSource, setManualSource] = useState<IrdWeatherSource | null>(null);
-  const [manualWeather, setManualWeather] = useState<IrdWeatherInput>({ windSpeedKmh: null, windGustsKmh: null, temperatureC: null, relativeHumidityPct: null, precipitationMm: 0, weatherSource: 'manual_field', weatherAgeMinutes: 0 });
-  const [isDropletOpen, setIsDropletOpen] = useState(false);
-  const [dropletMode, setDropletMode] = useState<IrdDropletUiMode>('rotary');
-  const [activeKeypad, setActiveKeypad] = useState<{ field: AnyKeypadField; initialValue: string } | null>(null);
-  const [historyRecords, setHistoryRecords] = useState<CalculationHistoryRecord[]>([]);
-  const [isHistoryLoading, setIsHistoryLoading] = useState(false);
-  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
-  const [isGuideOpen, setIsGuideOpen] = useState(false);
-  const [statusToast, setStatusToast] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const c = useIrdCalculatorController();
+  const { weatherCtx } = c;
+  const [guideTopic, setGuideTopic] = useState<IrdGuideTopicId | null>(null);
+  const [quickAccordions, setQuickAccordions] = useState<IrdQuickAccordionState>({ nozzle: false, expo: false, context: false });
+  const [profileCultOpen, setProfileCultOpen] = useState(false);
+  const [weatherCompOpen, setWeatherCompOpen] = useState(false);
+  const [isResultOffscreen, setIsResultOffscreen] = useState(false);
+  const resultObserverRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    const syncNet = () => setIsOffline(!navigator.onLine);
-    window.addEventListener('online', syncNet);
-    window.addEventListener('offline', syncNet);
-    return () => { window.removeEventListener('online', syncNet); window.removeEventListener('offline', syncNet); };
-  }, []);
+    setIsResultOffscreen(false);
+    const el = resultObserverRef.current;
+    if (!el || typeof IntersectionObserver === 'undefined') return;
+    const obs = new IntersectionObserver(([entry]) => setIsResultOffscreen(!entry.isIntersecting), { rootMargin: '-88px 0px 0px 0px', threshold: 0 });
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [c.evaluationLevel]);
 
-  const loadHistory = useCallback(async () => {
-    setIsHistoryLoading(true);
-    try { setHistoryRecords(await listIrdHistory(effectiveUserId)); } finally { setIsHistoryLoading(false); }
-  }, [effectiveUserId]);
-
-  useEffect(() => { void loadHistory(); }, [loadHistory]);
-
-  const catalogNozzle = useMemo(() => (selectedNozzleId ? NOZZLES_DATABASE.find((n) => n.id === selectedNozzleId) : undefined), [selectedNozzleId]);
-  const activeWeather = useMemo<IrdWeatherInput>(() => {
-    const ageMin = weatherData?.fetchedAt ? Math.max(0, Math.round((Date.now() - new Date(weatherData.fetchedAt).getTime()) / 60000)) : null;
-    const src: IrdWeatherSource = manualSource ?? (weatherData ? (weatherData.current.isCached ? 'open_meteo_cache' : 'open_meteo_live') : 'manual_field');
-    if (src === 'manual_field') return { ...manualWeather, weatherSource: 'manual_field', weatherAgeMinutes: 0 };
-    const c = weatherData?.current;
-    return { windSpeedKmh: c?.windSpeedKmh ?? null, windGustsKmh: c?.windGustsKmh ?? null, temperatureC: c?.temperatureC ?? null, relativeHumidityPct: c?.humidityPercent ?? null, precipitationMm: c?.precipitationMm ?? 0, weatherSource: src, weatherAgeMinutes: ageMin, weatherTimestamp: weatherData?.fetchedAt ?? null };
-  }, [manualSource, manualWeather, weatherData]);
-
-  const mergedNozzle = useMemo<IrdNozzleInput>(() => (catalogNozzle ? { ...buildNozzleInputFromCatalog(catalogNozzle, nozzleDraft.workingPressureBar, Boolean(nozzleDraft.hasAirSleeve)), ...nozzleDraft } : nozzleDraft), [catalogNozzle, nozzleDraft]);
-  const resolvedProfile = useMemo(() => (typeof mergedNozzle.workingPressureBar === 'number' && mergedNozzle.workingPressureBar > 0 ? resolveNozzleDriftProfile(mergedNozzle, mergedNozzle.workingPressureBar, catalogNozzle) : null), [mergedNozzle, catalogNozzle]);
-  const irdInput = useMemo<IrdInput>(() => ({ weather: activeWeather, nozzle: mergedNozzle, operation, exposure }), [activeWeather, mergedNozzle, operation, exposure]);
-  const result = useMemo(() => calculateDriftRiskIndex(irdInput, catalogNozzle), [irdInput, catalogNozzle]);
-
-  const handleKeypadConfirm = (val: number) => {
-    if (!activeKeypad) return;
-    const f = activeKeypad.field;
-    if (f === 'windSpeedKmh' || f === 'windGustsKmh' || f === 'temperatureC' || f === 'relativeHumidityPct' || f === 'precipitationMm') {
-      setManualSource('manual_field');
-      setManualWeather((p) => ({ windSpeedKmh: p.windSpeedKmh ?? activeWeather.windSpeedKmh, windGustsKmh: p.windGustsKmh ?? activeWeather.windGustsKmh, temperatureC: p.temperatureC ?? activeWeather.temperatureC, relativeHumidityPct: p.relativeHumidityPct ?? activeWeather.relativeHumidityPct, precipitationMm: p.precipitationMm ?? activeWeather.precipitationMm ?? 0, weatherSource: 'manual_field', weatherAgeMinutes: 0, [f]: val }));
-    } else if (f === 'travelSpeedKmh' || f === 'boomOrReleaseHeightM') setOperation((p) => ({ ...p, [f]: val }));
-    else if (f === 'distanceToSensitiveAreaM' || f === 'labelMinBufferM') setExposure((p) => ({ ...p, [f]: val }));
-    else setNozzleDraft((p) => ({ ...p, [f]: val }));
-    setActiveKeypad(null);
+  const openGuideTopic = (topic: IrdGuideTopicId | null) => {
+    setGuideTopic(topic);
+    c.setIsGuideOpen(true);
   };
 
-  const handleSaveHistory = async () => {
-    if (result.status !== 'CALCULATED') {
-      setStatusToast({ type: 'error', text: 'Complete pressão e meteorologia antes de guardar no histórico local.' });
-      return;
-    }
-    try {
-      await saveIrdAssessment(effectiveUserId, irdInput, result, { name: `${cultureLabel} (${currentLocation.name})` });
-      await loadHistory();
-      setStatusToast({ type: 'success', text: 'Avaliação guardada em calculation_history_v2 (syncStatus: local_only).' });
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : '';
-      setStatusToast({ type: 'error', text: msg === 'history_quota_exceeded' ? 'Limite de 20 avaliações atingido.' : (msg || 'Erro ao guardar avaliação.') });
-    }
-  };
+  const preSaveSummary = useMemo(
+    () => buildPreSaveSummary({ evaluationLevel: c.evaluationLevel, ctx: c.ctx, result: c.result, weatherEval: c.weatherEval, weatherSourceLabel: c.weatherSummary.sourceLabel, nozzle: c.nozzle, culture: c.culture, missingOpFields: c.missingOpFields }),
+    [c.evaluationLevel, c.ctx, c.result, c.weatherEval, c.weatherSummary.sourceLabel, c.nozzle, c.culture, c.missingOpFields]
+  );
 
-  const handleDeleteHistory = async (id: string) => { await softDeleteIrdAssessment(id, effectiveUserId); await loadHistory(); };
+  const guideContext = useMemo(
+    () => buildIrdGuideContext({ evaluationLevel: c.evaluationLevel, ctx: c.ctx, result: c.result, weatherEval: c.weatherEval, preSaveSummary, heightModeLabelPt: c.heightModeLabelPt, airAssistNotePt: c.airAssistNotePt, nozzleState: c.nozzle, hasCatalogNozzle: Boolean(c.ctx.catalogNozzle) }),
+    [c.evaluationLevel, c.ctx, c.result, c.weatherEval, preSaveSummary, c.heightModeLabelPt, c.airAssistNotePt, c.nozzle]
+  );
+
+  const primaryMsg = useMemo(
+    () => buildIrdPrimaryMessage({ evaluationLevel: c.evaluationLevel, assessmentLevelSnapshot: c.ctx.assessmentLevelSnapshot, result: c.result, weatherEval: c.weatherEval, weatherSummary: c.weatherSummary, blockingGapsPt: c.ctx.blockingGapsPt, missingOpFields: c.missingOpFields }),
+    [c.evaluationLevel, c.ctx.assessmentLevelSnapshot, c.result, c.weatherEval, c.weatherSummary, c.ctx.blockingGapsPt, c.missingOpFields]
+  );
+
+  const saveAvailability = useMemo(
+    () => buildIrdSaveAvailability(c.effectiveUserId, c.evaluationLevel, c.result, c.ctx.blockingGapsPt),
+    [c.effectiveUserId, c.evaluationLevel, c.result, c.ctx.blockingGapsPt]
+  );
+
+  const isPartial = c.evaluationLevel !== 'level1_meteo' && isIrdPartialAssessment(c.result, c.ctx.assessmentLevelSnapshot);
+  const isBlockingModalOpen = Boolean(c.activeKeypad || c.isHistoryOpen || c.isGuideOpen);
 
   return (
-    <div className="max-w-3xl mx-auto px-3 sm:px-5 py-4 pb-28 space-y-4">
-      <header className="space-y-2">
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <button type="button" onClick={() => navigate('/ferramentas')} className="touch-target px-3.5 rounded-xl bg-white border border-slate-300 text-xs sm:text-sm font-bold text-[#114037]">&lt; Voltar às Ferramentas</button>
-          <div className="flex items-center gap-1.5">
-            <span className="px-3 py-1 rounded-full bg-[#eef8f0] text-[#114037] border border-emerald-300 text-xs font-extrabold">Ferramenta Ativa</span>
-            <span className="px-2.5 py-1 rounded-full bg-white border border-slate-300 text-slate-700 text-xs font-semibold">Versão heurística {IRD_VERSIONS.formulaVersion}</span>
+    <div className="w-full max-w-7xl mx-auto space-y-5 pb-40 md:pb-32 animate-fade-in">
+      <header className="bg-white rounded-3xl px-4 sm:px-5 py-4 border border-slate-200 shadow-soft flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+        <div className="flex items-start sm:items-center gap-3 min-w-0">
+          <button type="button" onClick={() => navigate('/ferramentas')} className="touch-target px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl flex items-center gap-1.5 text-xs font-bold cursor-pointer shrink-0">
+            <ChevronLeft className="w-4 h-4 text-[#114037]" aria-hidden="true" /><span>Voltar</span>
+          </button>
+          <div className="h-8 w-[1px] bg-slate-200 hidden sm:block" />
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
+              <h1 className="text-lg sm:text-xl font-black text-[#114037]">Índice de Risco de Deriva (IRD)</h1>
+              <span className="text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-950 border border-amber-400">RC · {IRD_VERSIONS.formulaVersion}</span>
+            </div>
+            <p className="text-xs text-slate-600">Leitura meteorológica imediata com aprofundamento operacional em 3 níveis</p>
           </div>
         </div>
-        <div>
-          <p className="text-xs font-extrabold tracking-widest uppercase text-[#1D734B]">PULVERIZAÇÃO</p>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-[#0F172A]">Índice de Risco de Deriva</h1>
-          <p className="text-sm text-slate-700">Apoio à decisão para pulverização · <strong className="text-[#114037]">O rótulo DGAV/SIFITO prevalece sempre.</strong></p>
+        <div className="flex flex-wrap items-center gap-2">
+          <WeatherLocationSearchDropdown currentLocation={weatherCtx.currentLocation} onSelectLocation={weatherCtx.selectLocation} onUseGps={weatherCtx.useGpsLocation} />
         </div>
       </header>
-      {statusToast && <div role="alert" className={`rounded-2xl px-4 py-3 text-xs sm:text-sm font-bold border ${statusToast.type === 'success' ? 'bg-emerald-50 border-emerald-300 text-emerald-950' : 'bg-rose-50 border-rose-300 text-rose-950'}`}>{statusToast.text}</div>}
-      <IrdResultCard result={result} isLoading={weatherLoading && !weatherData && manualSource !== 'manual_field'} />
-      <IrdParameterPanel
-        cultureLabel={cultureLabel} windDirectionLabel={weatherData?.current.windDirectionText || ''} catalogNozzles={NOZZLES_DATABASE}
-        selectedNozzleId={selectedNozzleId} nozzle={mergedNozzle} operation={operation} exposure={exposure}
-        onChangeCultureLabel={setCultureLabel}
-        onSelectNozzle={(id) => { setSelectedNozzleId(id); setNozzleDraft((p) => ({ ...p, nozzleId: id || null })); }}
-        onChangeOperation={(patch) => setOperation((p) => ({ ...p, ...patch }))}
-        onToggleAirSleeve={() => setNozzleDraft((p) => ({ ...p, hasAirSleeve: !p.hasAirSleeve }))}
-        onToggleDownwind={() => setExposure((p) => ({ ...p, hasDownwindSensitiveTarget: !p.hasDownwindSensitiveTarget }))}
-        onOpenKeypad={(field) => setActiveKeypad({ field, initialValue: String(field === 'workingPressureBar' ? (mergedNozzle.workingPressureBar ?? '') : field === 'travelSpeedKmh' || field === 'boomOrReleaseHeightM' ? (operation[field] ?? '') : (exposure[field] ?? '')) })}
-        onClearOptionalExposure={(field) => setExposure((p) => ({ ...p, [field]: null }))}
-      />
-      <IrdWeatherPanel
-        weather={activeWeather} isOffline={isOffline} isWeatherLoading={weatherLoading} weatherError={weatherError} locationName={currentLocation.name}
-        onChangeSource={(src) => { setManualSource(src); if (src === 'manual_field') setManualWeather({ ...activeWeather, weatherSource: 'manual_field', weatherAgeMinutes: 0 }); }}
-        onRefreshWeather={() => { setManualSource(null); refreshWeather(); }}
-        onOpenKeypad={(field) => setActiveKeypad({ field, initialValue: String(activeWeather[field] ?? '') })}
-      />
-      <IrdDropletPanel
-        isOpen={isDropletOpen} mode={dropletMode} nozzle={nozzleDraft} resolvedProfile={resolvedProfile}
-        onToggleOpen={() => setIsDropletOpen((v) => !v)}
-        onModeChange={(m) => { setDropletMode(m); setNozzleDraft((p) => ({ ...p, representativeDropletDiameterUm: null, measuredDv10Um: null, measuredDv50Um: null, measuredDv90Um: null })); }}
-        onChangeFields={(patch) => setNozzleDraft((p) => ({ ...p, ...patch }))}
-        onOpenKeypad={(field) => setActiveKeypad({ field, initialValue: String(nozzleDraft[field] ?? '') })}
-        onClear={() => setNozzleDraft((p) => ({ ...p, representativeDropletDiameterUm: null, measuredDv10Um: null, measuredDv50Um: null, measuredDv90Um: null, measurementSource: null, measurementPressureBar: null, measurementDate: null, measurementConfidence: null }))}
-      />
-      <footer className="fixed bottom-0 inset-x-0 bg-white border-t-2 border-slate-200 px-3 py-2.5 z-30">
-        <div className="max-w-3xl mx-auto flex items-center gap-2.5">
-          <button type="button" onClick={() => void handleSaveHistory()} className="touch-target flex-1 rounded-xl bg-[#3CA64C] hover:bg-[#339341] text-white text-sm font-extrabold px-4">Guardar Histórico</button>
-          <button type="button" onClick={() => setIsHistoryOpen(true)} className="touch-target rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-900 text-sm font-extrabold px-4 border border-slate-300">Histórico ({historyRecords.length})</button>
-          <button type="button" onClick={() => setIsGuideOpen(true)} className="touch-target rounded-xl bg-slate-100 hover:bg-slate-200 text-[#114037] text-sm font-extrabold px-4 border border-slate-300">Guia</button>
+
+      <nav aria-label="Nível de avaliação IRD" className="bg-white rounded-2xl p-1.5 border border-slate-200 shadow-soft">
+        <div role="tablist" className="grid grid-cols-1 sm:grid-cols-3 gap-1.5">
+          {LEVEL_TABS.map((tab) => {
+            const active = c.evaluationLevel === tab.id;
+            return (
+              <button key={tab.id} type="button" role="tab" aria-selected={active} onClick={() => c.setEvaluationLevel(tab.id)} className={`touch-target px-3 py-2 rounded-xl text-xs font-extrabold transition cursor-pointer ${active ? 'bg-[#114037] text-white shadow-sm' : 'bg-slate-50 text-slate-700 hover:bg-slate-100 border border-slate-200'}`}>
+                {tab.label}
+              </button>
+            );
+          })}
         </div>
-      </footer>
-      {activeKeypad && (
-        <DaterraKeypad
-          isOpen onClose={() => setActiveKeypad(null)} initialValue={activeKeypad.initialValue}
-          initialUnit={KEYPAD_META[activeKeypad.field].unit} label={KEYPAD_META[activeKeypad.field].label}
-          commonValues={KEYPAD_META[activeKeypad.field].presets} validationRules={KEYPAD_META[activeKeypad.field].rules}
-          onConfirm={handleKeypadConfirm}
+      </nav>
+
+      {c.statusToast && <div role="alert" className={`rounded-2xl px-4 py-3 text-xs sm:text-sm font-bold border ${c.statusToast.type === 'success' ? 'bg-emerald-50 border-emerald-300 text-emerald-950' : 'bg-rose-50 border-rose-300 text-rose-950'}`}>{c.statusToast.text}</div>}
+
+      <IrdPersistentResultSummary
+        evaluationLevel={c.evaluationLevel} assessmentLevelSnapshot={c.ctx.assessmentLevelSnapshot}
+        result={c.result} weatherEval={c.weatherEval} blockingGapsCount={c.ctx.blockingGapsPt.length}
+        primaryMsg={primaryMsg} isPartial={isPartial}
+        visibleOnScroll={isResultOffscreen && !isBlockingModalOpen}
+        keypadEditingLabel={c.activeKeypad ? IRD_KEYPAD_META[c.activeKeypad.field].label : null}
+      />
+
+      <div ref={resultObserverRef}>
+        <IrdResultCard
+          evaluationLevel={c.evaluationLevel} assessmentLevelSnapshot={c.ctx.assessmentLevelSnapshot}
+          result={c.result} isLoading={weatherCtx.isLoading && !weatherCtx.data && c.manualSource !== 'manual_field'}
+          weatherEval={c.weatherEval} weatherSummary={c.weatherSummary}
+          missingOperationalFields={c.missingOpFields} blockingGapsPt={c.ctx.blockingGapsPt}
+          onSwitchToQuickManual={c.switchToQuickFromProfiles}
+          onEditManualWeather={() => c.setIsWeatherDrawerOpen((v) => !v)}
+          onOpenGuideTopic={openGuideTopic}
         />
-      )}
-      <IrdHistoryModal isOpen={isHistoryOpen} records={historyRecords} isLoading={isHistoryLoading} userId={effectiveUserId} onClose={() => setIsHistoryOpen(false)} onDelete={(id) => void handleDeleteHistory(id)} />
-      <IrdGuideModal isOpen={isGuideOpen} onClose={() => setIsGuideOpen(false)} />
+      </div>
+
+      <div className="space-y-4">
+        {c.isWeatherDrawerOpen && (
+          <IrdWeatherPanel
+            weather={c.activeWeather} isOffline={c.isOffline} isWeatherLoading={weatherCtx.isLoading} weatherError={weatherCtx.error} locationName={weatherCtx.currentLocation.name}
+            isComplementaryOpen={weatherCompOpen} onToggleComplementary={() => setWeatherCompOpen((v) => !v)} onOpenGuideTopic={openGuideTopic}
+            onChangeSource={(src) => { c.setManualSource(src); if (src === 'manual_field') c.setManualWeather({ ...c.activeWeather, weatherSource: 'manual_field', weatherAgeMinutes: 0 }); }}
+            onRefreshWeather={() => { c.setManualSource(null); weatherCtx.refreshWeather(); }} onOpenKeypad={c.openFieldKeypad}
+          />
+        )}
+        {c.evaluationLevel === 'level1_meteo' && <IrdLevelProgressionCard currentLevel={c.evaluationLevel} isLoggedIn={Boolean(c.effectiveUserId)} hasWeatherValid={c.weatherEval?.status === 'VALID'} onSelectLevel={c.setEvaluationLevel} />}
+        {c.evaluationLevel === 'level2_quick' && (
+          <IrdQuickEvalPanel
+            catalogNozzles={NOZZLES_DATABASE} culture={c.culture} equipment={c.equipment} nozzle={c.nozzle} calibration={c.calibration} exposure={c.exposure} resolvedProfile={c.resolvedProfile}
+            accordions={quickAccordions} onToggleAccordion={(k) => setQuickAccordions((p) => ({ ...p, [k]: !p[k] }))} onOpenGuideTopic={openGuideTopic}
+            onChangeCulture={c.setCulture} onChangeEquipment={c.setEquipment} onChangeNozzle={c.setNozzle} onChangeCalibration={c.setCalibration} onChangeExposure={c.setExposure} onOpenKeypad={c.openFieldKeypad}
+          />
+        )}
+        {c.evaluationLevel === 'level3_profiles' && (
+          <IrdProfilesOnlyPanel
+            userId={c.effectiveUserId} cultures={c.cultures} equipments={c.equipments} profileNozzles={c.profileNozzles} calibrations={c.calibrations} catalogNozzles={NOZZLES_DATABASE}
+            culture={c.culture} equipment={c.equipment} nozzle={c.nozzle} calibration={c.calibration} blockingGapsPt={c.ctx.blockingGapsPt}
+            isCultAccordionOpen={profileCultOpen} onToggleCultAccordion={() => setProfileCultOpen((v) => !v)}
+            onChangeCulture={c.setCulture} onChangeEquipment={c.setEquipment} onChangeNozzle={c.setNozzle} onChangeCalibration={c.setCalibration} onSwitchToQuickManual={c.switchToQuickFromProfiles}
+          />
+        )}
+        <p className="text-xs font-semibold text-slate-700">Prevalecem sempre as indicações do rótulo oficial do produto fitofarmacêutico. O histórico é guardado neste dispositivo.</p>
+      </div>
+
+      <IrdActionFooter saveAvailability={saveAvailability} historyCount={c.historyRecords.length} isHidden={isBlockingModalOpen} onSave={() => void c.handleSaveHistory()} onOpenHistory={() => c.setIsHistoryOpen(true)} onOpenGuide={() => openGuideTopic(null)} />
+      {c.activeKeypad && <DaterraKeypad isOpen onClose={() => c.setActiveKeypad(null)} initialValue={c.activeKeypad.initialValue} initialUnit={IRD_KEYPAD_META[c.activeKeypad.field].unit} label={IRD_KEYPAD_META[c.activeKeypad.field].label} commonValues={IRD_KEYPAD_META[c.activeKeypad.field].presets} validationRules={IRD_KEYPAD_META[c.activeKeypad.field].rules} onConfirm={c.handleKeypadConfirm} />}
+      <IrdHistoryModal isOpen={c.isHistoryOpen} records={c.historyRecords} isLoading={c.isHistoryLoading} userId={c.effectiveUserId} onClose={() => c.setIsHistoryOpen(false)} onDelete={c.deleteHistoryRecord} />
+      <IrdGuideModal isOpen={c.isGuideOpen} initialTopic={guideTopic} guideContext={guideContext} onClose={() => c.setIsGuideOpen(false)} />
     </div>
   );
 };

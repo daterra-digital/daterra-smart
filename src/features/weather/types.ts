@@ -13,6 +13,20 @@ export interface SprayEvaluation {
   humidityPercent: number;
 }
 
+export interface WeatherTelemetryQuality {
+  readonly isComplete: boolean;
+  readonly isGustEstimated: boolean;
+  readonly hasRealGustReading: boolean;
+  readonly missingFields: readonly string[];
+  readonly precipUnit: 'mm';
+  readonly precipTemporalKind: 'hourly_accumulated' | 'current_interval_accumulated';
+  readonly rawTemperatureC: number | null;
+  readonly rawHumidityPercent: number | null;
+  readonly rawWindSpeedKmh: number | null;
+  readonly rawWindGustsKmh: number | null;
+  readonly rawPrecipitationMm: number | null;
+}
+
 export interface CurrentWeather {
   temperatureC: number;
   apparentTempC: number;
@@ -30,6 +44,7 @@ export interface CurrentWeather {
   sprayEvaluation: SprayEvaluation;
   updatedAt: string;
   isCached?: boolean;
+  telemetryQuality?: WeatherTelemetryQuality;
 }
 
 export interface HourlyForecastItem {
@@ -47,6 +62,7 @@ export interface HourlyForecastItem {
   weatherCode: number;
   weatherLabel: string;
   sprayEvaluation: SprayEvaluation;
+  telemetryQuality?: WeatherTelemetryQuality;
 }
 
 export interface DailyForecastItem {
@@ -82,4 +98,6 @@ export interface FullWeatherData {
   daily: DailyForecastItem[];
   bioclimatic: BioclimaticMetrics;
   fetchedAt: string;
+  timezone?: string;
+  utcOffsetSeconds?: number;
 }

@@ -1,6 +1,6 @@
 /**
  * DATERRA Smart - Guardião Legal e Operacional do IRD (Fase 1)
- * Bloqueios fail-closed e declaração vinculativa da supremacia do rótulo DGAV/SIFITO.
+ * Bloqueios fail-closed e declaração vinculativa da supremacia do rótulo oficial do produto fitofarmacêutico.
  */
 
 import type { IrdApplicationDomain, IrdInput, IrdLegalBlock, IrdLegalVerdict, IrdNotice } from './irdTypes.ts';
@@ -54,35 +54,35 @@ function collectBlocks(
     blocks.push({
       code: 'LEGAL_LABEL_BUFFER_VIOLATION',
       messagePt: `Distância informada (${dist} m) inferior à zona tampão mínima do rótulo (${labelBuffer} m).`,
-      legalBasisPt: 'Rótulo oficial DGAV/SIFITO e Lei n.º 26/2013.'
+      legalBasisPt: 'Rótulo oficial do produto fitofarmacêutico e legislação aplicável.'
     });
   }
   if (precip > IRD_FAIL_CLOSED_RULES.maxPrecipitationAllowedMm) {
     blocks.push({
       code: 'ACTIVE_RAIN_WASH_BLOCK',
       messagePt: `Precipitação ativa (${precip} mm/h) excede o limite operacional de 0,2 mm/h.`,
-      legalBasisPt: 'DGAV — Boas Práticas Fitossanitárias.'
+      legalBasisPt: 'Boas práticas fitossanitárias na aplicação de produtos.'
     });
   }
   if (wind > windLimitKmh) {
     blocks.push({
       code: 'EXCESSIVE_WIND_BLOCK',
       messagePt: `Vento (${wind} km/h) excede o limite operacional (${windLimitKmh} km/h).`,
-      legalBasisPt: 'DGAV — Código de Conduta na Aplicação de Produtos Fitofarmacêuticos.'
+      legalBasisPt: 'Boas práticas na aplicação de produtos fitofarmacêuticos.'
     });
   }
   if (gusts > IRD_FAIL_CLOSED_RULES.maxGustLimitKmh) {
     blocks.push({
       code: 'EXCESSIVE_GUST_BLOCK',
       messagePt: `Rajadas (${gusts} km/h) excedem o limite de segurança (${IRD_FAIL_CLOSED_RULES.maxGustLimitKmh} km/h).`,
-      legalBasisPt: 'DGAV — Código de Conduta na Aplicação de Produtos Fitofarmacêuticos.'
+      legalBasisPt: 'Boas práticas na aplicação de produtos fitofarmacêuticos.'
     });
   }
   if (meteo.deltaTC > IRD_FAIL_CLOSED_RULES.maxDeltaTAllowedC) {
     blocks.push({
       code: 'CRITICAL_DELTA_T_BLOCK',
       messagePt: `Delta T (${meteo.deltaTC} °C) > 10,0 °C provoca evaporação crítica das gotas.`,
-      legalBasisPt: 'EPPO / DGAV — Recomendações psicrométricas de aplicação.'
+      legalBasisPt: 'EPPO — Recomendações psicrométricas de aplicação.'
     });
   }
   if (typeof pMax === 'number' && pMax > 0 && pressure > pMax * IRD_FAIL_CLOSED_RULES.overpressureBlockFactor) {
@@ -105,7 +105,7 @@ function collectWarnings(
     {
       code: 'LABEL_SUPREMACY_DGAV_SIFITO',
       severity: 'info',
-      messagePt: 'Prevalecem sempre as indicações, doses e zonas tampão do rótulo oficial DGAV / SIFITO.'
+      messagePt: 'Prevalecem sempre as indicações do rótulo oficial do produto fitofarmacêutico.'
     },
     {
       code: 'NOT_ISO_22866_CERTIFIED',

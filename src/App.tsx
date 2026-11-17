@@ -9,6 +9,7 @@ import { ProtectedRoute, PublicRoute } from './components/RouteGuards';
 import { UpgradeModal, TierRouteGuard } from './components/gating';
 import { EnvironmentRouteGuard } from './components/EnvironmentRouteGuard';
 import { getDaterraEnvironment } from './utils/releasePolicy';
+import { isIrdEnabledForEnv } from './utils/releasePolicyRoutes';
 import { IrdCalculatorView } from './features/ird/IrdCalculatorView';
 
 import { LandingView } from './views/LandingView';
@@ -104,7 +105,7 @@ export const AppContent: React.FC = () => {
             <Route path="/ferramentas/aplicacao-manual" element={<AplicacaoManualCalculator />} />
             <Route path="/tools/aplicacao-manual" element={<AplicacaoManualCalculator />} />
             <Route path="/tools/calc_aplicacao_manual" element={<AplicacaoManualCalculator />} />
-            <Route path="/ferramentas/risco-deriva" element={getDaterraEnvironment() === 'development' ? <IrdCalculatorView /> : <Navigate to="/ferramentas" replace />} />
+            <Route path="/ferramentas/risco-deriva" element={isIrdEnabledForEnv(getDaterraEnvironment()) ? <IrdCalculatorView /> : <Navigate to="/ferramentas" replace />} />
 
             {/* Ferramentas Restritas ao Plano PRO (Gated via TierRouteGuard) */}
             <Route element={<TierRouteGuard requiredTier="pro" />}>

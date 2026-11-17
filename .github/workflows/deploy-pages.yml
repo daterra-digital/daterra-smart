@@ -86,6 +86,9 @@ jobs:
           VITE_AGROMONITORING_KEY: ${{ secrets.VITE_AGROMONITORING_KEY }}
           VITE_MOODLE_API_URL: ${{ secrets.VITE_MOODLE_API_URL }}
 
+      - name: Fallback SPA para GitHub Pages (404.html)
+        run: cp dist/index.html dist/404.html
+
       - name: Gerar Manifesto da Release Publicada
         env:
           APPROVED_REF: ${{ inputs.approved_commit }}

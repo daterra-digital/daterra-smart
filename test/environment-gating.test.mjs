@@ -8,6 +8,12 @@ import {
   GITHUB_PAGES_ALLOWED_TOOL_IDS,
   isToolAllowedInCurrentEnv
 } from '../src/utils/environment.ts';
+import {
+  BLOCKED_TOOL_IDS_IN_PAGES,
+  BLOCKED_PAGES_ROUTES,
+  isIrdEnabledForEnv,
+  isWeatherDriftTabEnabledForEnv
+} from '../src/utils/releasePolicyRoutes.ts';
 
 describe('Controlo de Ambiente & Publicação GitHub Pages', () => {
 
@@ -46,7 +52,8 @@ describe('Controlo de Ambiente & Publicação GitHub Pages', () => {
       'clima_estacao_agricola',
       'smart_debito',
       'calc_volume_calda_trv',
-      'calc_calibracao_pulverizador'
+      'calc_calibracao_pulverizador',
+      'calc_ird'
     ];
 
     for (const toolId of hiddenTools) {
@@ -61,6 +68,17 @@ describe('Controlo de Ambiente & Publicação GitHub Pages', () => {
   test('3. Função isToolAllowedInCurrentEnv está definida e valida ferramentas homologadas', () => {
     assert.equal(typeof isToolAllowedInCurrentEnv, 'function');
     assert.equal(isToolAllowedInCurrentEnv('calc_dose'), true);
+  });
+
+  test('4. IRD permitido em V-DEV e V-RC, rota legada bloqueada em V-PAGES e aba Deriva ativa em Meteorologia (V-PAGES e V-RC)', () => {
+    assert.equal(BLOCKED_TOOL_IDS_IN_PAGES.has('calc_ird'), true);
+    assert.equal(BLOCKED_PAGES_ROUTES['/ferramentas/risco-deriva'], 'calc_ird');
+    assert.equal(isIrdEnabledForEnv('development'), true);
+    assert.equal(isIrdEnabledForEnv('staging'), true);
+    assert.equal(isIrdEnabledForEnv('pages'), false);
+    assert.equal(isWeatherDriftTabEnabledForEnv('development'), true);
+    assert.equal(isWeatherDriftTabEnabledForEnv('staging'), true);
+    assert.equal(isWeatherDriftTabEnabledForEnv('pages'), true);
   });
 
 });

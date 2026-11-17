@@ -18,7 +18,7 @@ export const READY_TOOL_IDS = new Set<string>([
 ]);
 
 /**
- * 8 Ferramentas em Desenvolvimento / Avaliação bloqueadas no GitHub Pages
+ * 8 Ferramentas em Desenvolvimento / Avaliação bloqueadas no GitHub Pages e Produção
  */
 export const BLOCKED_TOOL_IDS_IN_PAGES = new Set<string>([
   'calc_calibracao_pulverizador',
@@ -30,6 +30,17 @@ export const BLOCKED_TOOL_IDS_IN_PAGES = new Set<string>([
   'satelite_ndvi',
   'calc_volume_calda_trv'
 ]);
+
+/**
+ * Permite o módulo IRD em desenvolvimento (V-DEV) e avaliação RC/staging (V-RC), bloqueando V-PAGES e V-PROD
+ */
+export const isIrdEnabledForEnv = (env: string): boolean => env === 'development' || env === 'staging';
+
+/**
+ * Permite o submenu/aba Deriva no módulo Meteorologia em V-DEV, V-RC e V-PAGES
+ */
+export const isWeatherDriftTabEnabledForEnv = (env: string): boolean =>
+  env === 'development' || env === 'staging' || env === 'pages';
 
 /**
  * Mapeamento das rotas canónicas e ferramentas associadas

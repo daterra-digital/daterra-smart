@@ -790,7 +790,7 @@
     "resultUnavailable": "Resultado indisponível. Verifique se todos os campos foram preenchidos corretamente.",
     "setPreset": "Definir {{value}} {{unit}}",
     "helpAbout": "Ajuda sobre {{label}}",
-    "offlineIndexedDb": "Modo Offline (IndexedDB Ativo)",
+    "offlineIndexedDb": "Modo Offline",
     "onlinePwa": "Online (PWA)",
     "logout": "Terminar Sessão",
     "activeSession": "Sessão Ativa",

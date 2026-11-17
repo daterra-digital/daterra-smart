@@ -45,7 +45,11 @@ export const ExplorationProfileDropdowns: React.FC<ExplorationProfileDropdownsPr
               rowDistanceM: cult?.row_distance_m,
               canopyHeightM: cult?.canopy_height_m,
               canopyWidthM: cult?.canopy_width_m,
-              trainingSystem: cult?.training_system
+              trainingSystem: cult?.training_system,
+              phenologicalStage: cult?.phenological_stage,
+              lwaM2Ha: cult?.last_lwa_m2_ha,
+              trvM3Ha: cult?.last_trv_m3_ha,
+              recommendedSprayVolumeLHa: cult?.last_spray_volume_lha
             });
           }}
           className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 shadow-2xs focus:border-daterra-accent outline-none min-h-[42px]"

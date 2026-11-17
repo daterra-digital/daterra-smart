@@ -141,6 +141,8 @@ export function resolveNozzleDriftProfile(inputNozzle: IrdNozzleInput, workingPr
   const pressureMinBar = catalogNozzle?.pressureMinBar ?? inputNozzle.pressureMinBar ?? undefined;
   const pressureMaxBar = catalogNozzle?.pressureMaxBar ?? inputNozzle.pressureMaxBar ?? undefined;
   const referencePressureBar = catalogNozzle?.referencePressureBar ?? inputNozzle.referencePressureBar ?? undefined;
+  const mp = inputNozzle.measurementPressureBar;
+  const userRefPressure = typeof mp === 'number' && Number.isFinite(mp) && mp > 0 && mp <= 50 ? mp : undefined;
   const interpolated = catalogNozzle ? interpolateDropletSpectrum(catalogNozzle, workingPressureBar) : undefined;
   const validClass = [interpolated?.effectiveDropletClass, pickCatalogDropletClass(catalogNozzle, workingPressureBar), inputNozzle.dropletClass].find(isDropletClassCode);
   const sharedMeta = { isAirInduction, pressureMinBar, pressureMaxBar, referencePressureBar, dropletClass: validClass };
@@ -149,7 +151,7 @@ export function resolveNozzleDriftProfile(inputNozzle: IrdNozzleInput, workingPr
   const userTry = tryResolveUserDroplet(inputNozzle, nozzleType);
   if (userTry.resolved) {
     const u = userTry.resolved;
-    return { ...sharedMeta, ...u, dropletConfidence: u.confidence, dv10Um: u.dv10UsedUm, dv50Um: u.dv50UsedUm, fallbackFlags, warnings };
+    return { ...sharedMeta, referencePressureBar: referencePressureBar ?? userRefPressure, ...u, dropletConfidence: u.confidence, dv10Um: u.dv10UsedUm, dv50Um: u.dv50UsedUm, fallbackFlags, warnings };
   }
   if (userTry.invalidReason) {
     fallbackFlags.push('USER_DROPLET_MEASUREMENT_INVALID_IGNORED');

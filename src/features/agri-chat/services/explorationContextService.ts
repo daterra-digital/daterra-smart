@@ -1,7 +1,7 @@
 // src/features/agri-chat/services/explorationContextService.ts
-import { db } from '../../../db/db';
-import type { ProfileCulture, ProfileEquipment, ProfileNozzle, ProfileCalibration } from '../../../db/db';
-import type { ActiveExplorationContext } from '../types';
+import { db } from '../../../db/db.ts';
+import type { ProfileCulture, ProfileEquipment, ProfileNozzle, ProfileCalibration } from '../../../db/db.ts';
+import type { ActiveExplorationContext } from '../types.ts';
 
 export const explorationContextService = {
   // Carregar perfis autorizados do utilizador autenticado (SEC-REM-01)
@@ -40,10 +40,14 @@ export const explorationContextService = {
       const cropDetails = [
         ctx.cropType ? `Cultura: ${ctx.cropType}` : '',
         ctx.variety ? `Variedade: ${ctx.variety}` : '',
+        ctx.phenologicalStage ? `Estádio Fenológico: ${ctx.phenologicalStage}` : '',
         ctx.rowDistanceM ? `Entrelinha: ${ctx.rowDistanceM}m` : '',
         ctx.canopyHeightM ? `Altura da Copa: ${ctx.canopyHeightM}m` : '',
         ctx.canopyWidthM ? `Largura da Copa: ${ctx.canopyWidthM}m` : '',
-        ctx.trainingSystem ? `Condução: ${ctx.trainingSystem}` : ''
+        ctx.trainingSystem ? `Condução: ${ctx.trainingSystem}` : '',
+        ctx.lwaM2Ha ? `LWA: ${ctx.lwaM2Ha} m²/ha` : '',
+        ctx.trvM3Ha ? `TRV: ${ctx.trvM3Ha} m³/ha` : '',
+        ctx.recommendedSprayVolumeLHa ? `Calda Recomendada EPPO: ${ctx.recommendedSprayVolumeLHa} L/ha` : ''
       ].filter(Boolean).join(' | ');
 
       lines.push(`- Parcela/Cultura: "${ctx.cultureName}" (${cropDetails})`);

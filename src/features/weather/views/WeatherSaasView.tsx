@@ -12,9 +12,13 @@ import { WeeklyForecastGrid } from '../components/WeeklyForecastGrid.tsx';
 import { SprayChartsModule } from '../components/charts/SprayChartsModule.tsx';
 import { WeatherTechnicalGuideModal } from '../components/WeatherTechnicalGuideModal.tsx';
 import { WeatherLocationSearchDropdown } from '../components/WeatherLocationSearchDropdown.tsx';
+import { WeatherDriftView } from '../components/WeatherDriftView.tsx';
 import { aggregateWeeklySpraySchedule, type ActiveMachineContext } from '../weatherWeekAggregator.ts';
+import { getDaterraEnvironment } from '../../../utils/releasePolicy.ts';
+import { isWeatherDriftTabEnabledForEnv } from '../../../utils/releasePolicyRoutes.ts';
 
 export const WeatherSaasView: React.FC = () => {
+  const allowDriftTab = isWeatherDriftTabEnabledForEnv(getDaterraEnvironment());
   const {
     data, isLoading, error, currentLocation,
     selectLocation, useGpsLocation, refreshWeather
@@ -54,7 +58,7 @@ export const WeatherSaasView: React.FC = () => {
   const isGeneralMode = activeMode === 'meteorologia';
 
   return (
-    <div className="space-y-6 animate-fade-in pb-12">
+    <div className="w-full max-w-full min-w-0 overflow-x-hidden space-y-6 animate-fade-in pb-12">
       {/* Topo da SaaS: Cabeçalho com Navegação, Localidade, Modo e Guia Técnico */}
       <div className="bg-white rounded-3xl border border-slate-200 p-5 sm:p-6 shadow-soft space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -76,11 +80,13 @@ export const WeatherSaasView: React.FC = () => {
             </div>
 
             <h1 className="text-2xl sm:text-3xl font-black text-daterra-primary">
-              {isGeneralMode ? 'Meteorologia' : 'Meteorologia Agrícola'}
+              {isGeneralMode ? 'Meteorologia' : activeMode === 'deriva' ? 'Meteorologia — Deriva' : 'Meteorologia Agrícola'}
             </h1>
             <p className="text-xs text-slate-500">
               {isGeneralMode
                 ? 'Previsão meteorológica detalhada e condições bioclimáticas da exploração'
+                : activeMode === 'deriva'
+                ? 'Avaliação exclusivamente meteorológica das condições de deriva, sem exigir perfil de máquina'
                 : 'Janelas de oportunidade fitossanitária com base em meteorologia e perfis da exploração'}
             </p>
           </div>
@@ -117,32 +123,26 @@ export const WeatherSaasView: React.FC = () => {
           </div>
         </div>
 
-        {/* Barra de Alternância Acessível entre Modos [Meteorologia] [Pulverização] */}
         <div className="pt-2 border-t border-slate-100 flex items-center justify-between flex-wrap gap-3">
           <WeatherModeToggle
             activeMode={activeMode}
             onChangeMode={setActiveMode}
+            showDriftTab={allowDriftTab}
           />
           <span className="text-[11px] text-slate-400 font-medium">
-            {isGeneralMode
-              ? 'Modo geral predefinido • Seleção diária ativa'
-              : 'Modo especializado • Modelos de deriva e perfis'}
+            {isGeneralMode ? 'Modo geral predefinido • Seleção diária ativa' : activeMode === 'deriva' ? 'Apenas leitura atmosférica de deriva' : 'Modo especializado • Modelos de deriva e perfis'}
           </span>
         </div>
       </div>
 
-      {/* ========================================================================= */}
-      {/* VISTA 1: MODO METEOROLOGIA (Geral Predefinido)                            */}
-      {/* ========================================================================= */}
       {isGeneralMode ? (
         <WeatherGeneralView
           selectedDateIso={selectedDateIso}
           onSelectDate={setSelectedDateIso}
         />
+      ) : activeMode === 'deriva' && allowDriftTab ? (
+        <WeatherDriftView data={data} isLoading={isLoading} error={error} locationName={currentLocation.name} selectedDateIso={selectedDateIso} />
       ) : (
-        /* ======================================================================= */
-        /* VISTA 2: MODO PULVERIZAÇÃO (Especializado Preservado)                   */
-        /* ======================================================================= */
         <div
           role="tabpanel"
           id="panel-weather-mode-pulverizacao"

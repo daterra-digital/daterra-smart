@@ -55,6 +55,9 @@ describe('Telemetria Agronómica Bidirecional: Perfis de Cultura e Equipamento',
       return newId;
     };
     db.profiles_cultures.where = (field) => ({
+      equals: (val) => ({
+        toArray: async () => mockCultures.filter(c => c[field] === val)
+      }),
       equalsIgnoreCase: (val) => ({
         first: async () => mockCultures.find(c => String(c[field]).toLowerCase() === String(val).toLowerCase())
       })
@@ -137,10 +140,12 @@ describe('Telemetria Agronómica Bidirecional: Perfis de Cultura e Equipamento',
         crop_type: 'Vinha',
         area_ha: 2.0,
         canopy_height_m: 1.2,
-        row_distance_m: 2.5
+        row_distance_m: 2.5,
+        userId: 'uid-test-1'
       });
 
       const result = await syncCultureTelemetryToProfile({
+        userId: 'uid-test-1',
         cultureId: Number(cultureId),
         cultureName: 'Vinha do Alto',
         lwaReal: 12000,
@@ -164,20 +169,25 @@ describe('Telemetria Agronómica Bidirecional: Perfis de Cultura e Equipamento',
 
       const outbox = await db.mutation_outbox.toArray();
       assert.equal(outbox.length, 1);
+      assert.equal(outbox[0].entityId, String(cultureId));
       assert.equal(outbox[0].entityType, 'culture');
       assert.equal(outbox[0].operation, 'UPDATE');
+      assert.equal(outbox[0].userId, 'uid-test-1');
       assert.equal(outbox[0].synced, 0, 'Mutação deve iniciar com status offline pendente');
       assert.equal(outbox[0].payload.last_lwa_m2_ha, 12000);
+      assert.ok(outbox[0].payload.idempotencyKey);
     });
 
     test('2.2. Atualização em condução globular persiste simultaneamente LWA e TRV', async () => {
       const cultureId = await db.profiles_cultures.add({
         name: 'Pomar de Macieiras',
         crop_type: 'Pomar',
-        area_ha: 5.0
+        area_ha: 5.0,
+        userId: 'uid-test-1'
       });
 
       await syncCultureTelemetryToProfile({
+        userId: 'uid-test-1',
         cultureId: Number(cultureId),
         lwaReal: 10000,
         trvReal: 6667,
@@ -196,6 +206,7 @@ describe('Telemetria Agronómica Bidirecional: Perfis de Cultura e Equipamento',
 
     test('2.3. Se não existir perfil selecionado, cria novo registo e mutação CREATE', async () => {
       const result = await syncCultureTelemetryToProfile({
+        userId: 'uid-test-1',
         cultureName: 'Nova Parcela 2026',
         lwaReal: 9600,
         alturaM: 1.2,
@@ -211,10 +222,13 @@ describe('Telemetria Agronómica Bidirecional: Perfis de Cultura e Equipamento',
       assert.ok(created);
       assert.equal(created.name, 'Nova Parcela 2026');
       assert.equal(created.last_lwa_m2_ha, 9600);
+      assert.equal(created.userId, 'uid-test-1');
 
       const outbox = await db.mutation_outbox.toArray();
       assert.equal(outbox.length, 1);
+      assert.equal(outbox[0].entityId, String(result.cultureId));
       assert.equal(outbox[0].operation, 'CREATE');
+      assert.equal(outbox[0].userId, 'uid-test-1');
       assert.equal(outbox[0].payload.name, 'Nova Parcela 2026');
     });
   });
@@ -223,10 +237,11 @@ describe('Telemetria Agronómica Bidirecional: Perfis de Cultura e Equipamento',
     test('3.1. syncEquipmentEfficiencyFactor atualiza o fator e enfileira na Outbox', async () => {
       const eqId = await db.profiles_equipment.add({
         name: 'Pulverizador de Túnel com Recuperação',
-        tank_capacity_l: 2000
+        tank_capacity_l: 2000,
+        userId: 'uid-test-1'
       });
 
-      await syncEquipmentEfficiencyFactor(Number(eqId), 0.85);
+      await syncEquipmentEfficiencyFactor(Number(eqId), 0.85, 'uid-test-1');
 
       const updated = await db.profiles_equipment.get(eqId);
       assert.ok(updated);
@@ -234,8 +249,10 @@ describe('Telemetria Agronómica Bidirecional: Perfis de Cultura e Equipamento',
 
       const outbox = await db.mutation_outbox.toArray();
       assert.equal(outbox.length, 1);
+      assert.equal(outbox[0].entityId, String(eqId));
       assert.equal(outbox[0].entityType, 'equipment');
       assert.equal(outbox[0].operation, 'UPDATE');
+      assert.equal(outbox[0].userId, 'uid-test-1');
       assert.equal(outbox[0].payload.efficiency_correction_factor, 0.85);
     });
   });

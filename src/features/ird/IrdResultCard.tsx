@@ -1,185 +1,177 @@
 import React from 'react';
-import { AlertTriangle, ShieldAlert, CheckCircle2 } from 'lucide-react';
-import type { IrdDropletSource, IrdResult, IrdRiskClass } from './irdTypes.ts';
-import { IRD_CLASS_BANDS, IRD_LEGAL_DISCLAIMER } from './irdConfig.ts';
+import { AlertTriangle, CheckCircle2, Info, ShieldAlert } from 'lucide-react';
+import type { DriftReadingEvaluation } from '../weather/utils/weatherDriftTypes.ts';
+import type { IrdAssessmentLevelSnapshot, IrdEvaluationLevel } from './irdOriginTypes.ts';
+import type { IrdGuideTopicId } from './irdGuideSections.ts';
+import {
+  buildIrdPrimaryMessage,
+  getIrdDisplayRiskLabel,
+  getIrdModeDisplayName,
+  isIrdPartialAssessment
+} from './irdPresentationHelper.ts';
+import type { IrdResult, IrdRiskClass } from './irdTypes.ts';
+import { IrdMeteoChips } from './IrdMeteoChips.tsx';
 
 interface IrdResultCardProps {
+  readonly evaluationLevel?: IrdEvaluationLevel;
+  readonly assessmentLevelSnapshot?: IrdAssessmentLevelSnapshot | null;
   readonly result: IrdResult | null;
   readonly isLoading: boolean;
+  readonly weatherEval?: DriftReadingEvaluation | null;
+  readonly weatherSummary?: { readonly sourceLabel: string; readonly locationName: string; readonly isStaleCache: boolean; readonly isLegacyCache?: boolean } | null;
+  readonly missingOperationalFields?: readonly string[];
+  readonly blockingGapsPt?: readonly string[];
+  readonly onSwitchToQuickManual?: () => void;
+  readonly onEditManualWeather?: () => void;
+  readonly onOpenGuideTopic?: (topic: IrdGuideTopicId) => void;
 }
 
-const CLASS_BADGE_CSS: Record<IrdRiskClass, string> = {
+const CLASS_CSS: Record<IrdRiskClass, string> = {
   BAIXO: 'bg-emerald-300 text-slate-950',
   MODERADO: 'bg-amber-300 text-slate-950',
   ELEVADO: 'bg-orange-400 text-slate-950',
   CRITICO_BLOQUEADO: 'bg-rose-500 text-white'
 };
 
-const SUB_ITEMS: ReadonlyArray<{ key: 'meteo' | 'espectro' | 'operacao' | 'exposicao'; label: string }> = [
-  { key: 'meteo', label: 'Meteorologia' },
-  { key: 'espectro', label: 'Espectro' },
-  { key: 'operacao', label: 'Operação' },
-  { key: 'exposicao', label: 'Exposição' }
-];
+const METEO_CSS: Record<string, string> = {
+  BAIXO: 'bg-emerald-300 text-slate-950',
+  MODERADO: 'bg-amber-300 text-slate-950',
+  ELEVADO: 'bg-orange-400 text-slate-950',
+  CRITICO: 'bg-rose-500 text-white'
+};
 
-function formatDropletOriginLabel(source: IrdDropletSource): string {
-  if (
-    source === 'calibration_profile' ||
-    source === 'manufacturer_spec' ||
-    source === 'lab_certificate' ||
-    source === 'user_declared'
-  ) {
-    return 'Medição do utilizador';
+export const IrdResultCard: React.FC<IrdResultCardProps> = ({
+  evaluationLevel = 'level1_meteo',
+  assessmentLevelSnapshot,
+  result,
+  isLoading,
+  weatherEval,
+  weatherSummary,
+  missingOperationalFields = [],
+  blockingGapsPt = [],
+  onSwitchToQuickManual,
+  onEditManualWeather,
+  onOpenGuideTopic
+}) => {
+  if (isLoading) {
+    return (
+      <section role="status" aria-live="polite" aria-label="A carregar leitura meteorológica" className="w-full bg-[#114037] text-white rounded-3xl p-4 sm:p-5 shadow-floating">
+        <div className="space-y-3 animate-pulse" aria-busy="true">
+          <div className="h-4 w-44 bg-white/25 rounded" />
+          <div className="h-12 w-32 bg-white/25 rounded-2xl" />
+          <div className="h-3 w-full bg-white/20 rounded-full" />
+        </div>
+      </section>
+    );
   }
-  if (source === 'conservative_fallback') return 'Fallback conservador';
-  return 'Catálogo';
-}
 
-function getBarColor(score: number): string {
-  if (score <= 25) return 'bg-emerald-300';
-  if (score <= 50) return 'bg-amber-300';
-  if (score <= 75) return 'bg-orange-400';
-  return 'bg-rose-400';
-}
+  const primaryMsg = buildIrdPrimaryMessage({
+    evaluationLevel,
+    assessmentLevelSnapshot,
+    result,
+    weatherEval,
+    weatherSummary,
+    blockingGapsPt,
+    missingOpFields: missingOperationalFields
+  });
 
-export const IrdResultCard: React.FC<IrdResultCardProps> = ({ result, isLoading }) => {
-  const isCalculated = result?.status === 'CALCULATED';
-  const score = isCalculated ? result.irdScore : null;
-  const riskClass = result?.irdClass ?? 'CRITICO_BLOQUEADO';
-  const badgeLabel = isCalculated ? IRD_CLASS_BANDS[riskClass].labelPt : 'DADOS INCOMPLETOS';
+  if (evaluationLevel === 'level1_meteo') {
+    const valid = weatherEval?.status === 'VALID';
+    const score = valid && weatherEval?.score !== null && weatherEval?.score !== undefined ? weatherEval.score : null;
+    const markerLeft = score !== null ? `${Math.min(98, Math.max(2, score))}%` : '0%';
+    return (
+      <section role="region" aria-label="Resultado do modo Só Meteorologia" className="w-full bg-[#114037] text-white rounded-3xl p-4 sm:p-5 shadow-floating border border-[#1D734B] space-y-3">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+            <span className="font-mono-numbers text-4xl sm:text-5xl font-extrabold leading-none">{score !== null ? score : '—'}</span>
+            <div className="space-y-0.5 min-w-0">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-[11px] uppercase tracking-wider text-emerald-200 font-bold">1. Só Meteorologia · Escala 10–100</span>
+                <span className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-extrabold uppercase ${valid && weatherEval?.band ? METEO_CSS[weatherEval.band] : 'bg-slate-200 text-slate-900'}`}>
+                  {valid && weatherEval ? weatherEval.bandLabelPt : 'Sem leitura'}
+                </span>
+              </div>
+              <p className="text-xs text-emerald-100 font-medium leading-snug">
+                {valid && weatherEval ? weatherEval.dominantFactorPt : weatherSummary ? `${weatherSummary.sourceLabel} · ${weatherSummary.locationName}` : 'Sem dados válidos'}
+              </p>
+            </div>
+          </div>
+          <div className="flex flex-wrap items-center gap-2 sm:justify-end">
+            {weatherSummary && <span className="text-[11px] text-emerald-100/90 font-medium">{weatherSummary.sourceLabel} · {weatherSummary.locationName}</span>}
+            {onEditManualWeather && <button type="button" onClick={onEditManualWeather} className="touch-target px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 text-xs font-bold text-white cursor-pointer">Editar meteorologia</button>}
+          </div>
+        </div>
+        <div className="relative h-2.5 rounded-full overflow-hidden flex bg-white/20" aria-label="Escala visual meteorológica de 10 a 100">
+          <div className="w-1/4 bg-emerald-400" /><div className="w-1/4 bg-amber-300" /><div className="w-1/4 bg-orange-400" /><div className="w-1/4 bg-rose-500" />
+          {score !== null && <div className="absolute top-0 bottom-0 w-2 bg-white ring-2 ring-slate-950 rounded" style={{ left: `calc(${markerLeft} - 4px)` }} />}
+        </div>
+        {valid && weatherEval && <IrdMeteoChips weatherEval={weatherEval} />}
+        {primaryMsg.text && (
+          <div role={primaryMsg.kind === 'critical' || primaryMsg.kind === 'incomplete' ? 'alert' : 'status'} className="rounded-2xl px-3.5 py-2 text-xs font-semibold bg-black/25 border border-white/20 flex items-start gap-2 text-amber-100">
+            <AlertTriangle className="w-4 h-4 text-amber-300 shrink-0 mt-0.5" aria-hidden="true" />
+            <span>{primaryMsg.text}</span>
+          </div>
+        )}
+      </section>
+    );
+  }
+
+  const calcResult = result?.status === 'CALCULATED' && blockingGapsPt.length === 0 ? result : null;
+  const score = calcResult ? calcResult.irdScore : null;
+  const riskClass = calcResult ? calcResult.irdClass : null;
+  const badgeLabel = riskClass ? getIrdDisplayRiskLabel(riskClass) : 'Avaliação indisponível';
   const markerLeft = score !== null ? `${Math.min(98, Math.max(2, score))}%` : '0%';
+  const isPartial = isIrdPartialAssessment(calcResult, assessmentLevelSnapshot);
+  const subIndexItems = calcResult
+    ? ([
+        ['meteo', 'Meteorologia (35%)', calcResult.subIndices.meteo],
+        ['espectro', 'Espectro (30%)', calcResult.subIndices.espectro],
+        ['operacao', 'Operação (20%)', calcResult.subIndices.operacao],
+        ['exposicao', 'Exposição (15%)', calcResult.subIndices.exposicao]
+      ] as const)
+    : [];
 
   return (
-    <section
-      role="status"
-      aria-live="polite"
-      aria-label="Resultado do Índice de Risco de Deriva"
-      className="bg-[#114037] text-white rounded-3xl p-5 sm:p-6 shadow-floating space-y-4"
-    >
-      {isLoading ? (
-        <div className="space-y-3 animate-pulse" aria-busy="true">
-          <div className="h-4 w-48 bg-white/25 rounded" />
-          <div className="h-16 w-36 bg-white/25 rounded-2xl" />
-          <div className="h-3.5 w-full bg-white/20 rounded-full" />
+    <section role="region" aria-label={`Resultado: ${getIrdModeDisplayName(evaluationLevel, assessmentLevelSnapshot)}`} className="w-full bg-[#114037] text-white rounded-3xl p-4 sm:p-5 shadow-floating border border-[#1D734B] space-y-3">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5">
+        <div className="flex items-center gap-3.5 min-w-0">
+          <span className="font-mono-numbers text-4xl sm:text-5xl font-extrabold leading-none shrink-0">{score !== null ? score : '—'}</span>
+          <div className="space-y-1 min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-[11px] uppercase tracking-wider text-emerald-200 font-bold">{getIrdModeDisplayName(evaluationLevel, assessmentLevelSnapshot)} · Escala 1–100</span>
+              <span className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-extrabold uppercase ${riskClass ? CLASS_CSS[riskClass] : 'bg-slate-200 text-slate-900'}`}>{badgeLabel}</span>
+              {isPartial && <span className="px-2 py-0.5 rounded-full bg-amber-300 text-slate-950 text-[10px] font-black uppercase">Avaliação parcial</span>}
+            </div>
+            {weatherSummary && <div className="text-[11px] text-emerald-100/90 truncate">{weatherSummary.locationName} · {weatherSummary.sourceLabel}</div>}
+          </div>
         </div>
-      ) : (
-        <>
-          <div className="flex flex-wrap items-end justify-between gap-4">
-            <div className="space-y-1">
-              <span className="text-xs uppercase tracking-wider text-emerald-100 font-bold">
-                Índice Composto (Escala 1–100)
-              </span>
-              <div className="flex items-center gap-3.5">
-                <span className="font-mono-numbers text-6xl sm:text-7xl font-extrabold leading-none tracking-tight text-white">
-                  {score !== null ? score : '--'}
-                </span>
-                <div className="space-y-1">
-                  <span
-                    className={`inline-block px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-extrabold uppercase tracking-wide ${
-                      isCalculated ? CLASS_BADGE_CSS[riskClass] : 'bg-slate-200 text-slate-900'
-                    }`}
-                  >
-                    {badgeLabel}
-                  </span>
-                  <div className="text-xs sm:text-sm font-bold text-white flex items-center gap-1.5">
-                    {result?.legalVerdict === 'PERMITIDO_CONFORME_ROTULO' ? (
-                      <CheckCircle2 className="w-4 h-4 text-emerald-300 shrink-0" />
-                    ) : (
-                      <ShieldAlert className="w-4 h-4 text-amber-300 shrink-0" />
-                    )}
-                    <span>
-                      {isCalculated ? result.legalVerdict.replace(/_/g, ' · ') : 'BLOQUEADO · FAIL-CLOSED'}
-                    </span>
-                  </div>
-                </div>
-              </div>
+        {onEditManualWeather && <button type="button" onClick={onEditManualWeather} className="touch-target self-start sm:self-center px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 text-xs font-bold text-white cursor-pointer shrink-0">Meteorologia</button>}
+      </div>
+      <div className="relative h-2.5 rounded-full overflow-hidden flex bg-white/20" aria-label="Escala visual do índice de 1 a 100">
+        <div className="w-1/4 bg-emerald-400" /><div className="w-1/4 bg-amber-300" /><div className="w-1/4 bg-orange-400" /><div className="w-1/4 bg-rose-500" />
+        {score !== null && <div className="absolute top-0 bottom-0 w-2 bg-white ring-2 ring-slate-950 rounded" style={{ left: `calc(${markerLeft} - 4px)` }} />}
+      </div>
+      {subIndexItems.length > 0 && (
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-0.5">
+          {subIndexItems.map(([key, label, value]) => (
+            <div key={key} className="bg-white/10 rounded-xl px-3 py-2 flex sm:block items-center justify-between gap-2">
+              <div className="text-[11px] text-emerald-100 font-semibold leading-tight">{label}</div>
+              <div className="font-mono-numbers text-sm sm:text-base font-extrabold text-white">{value.toFixed(1)}</div>
             </div>
-
-            {isCalculated && (
-              <div className="bg-white/10 border border-white/20 rounded-2xl px-3.5 py-2.5 text-xs space-y-1">
-                <div className="text-emerald-100 font-semibold">Origem do diâmetro usado:</div>
-                <div className="font-extrabold text-white text-sm">
-                  {formatDropletOriginLabel(result.derived.dropletSource)} · Confiança {result.derived.dropletConfidence}
-                </div>
-              </div>
-            )}
+          ))}
+        </div>
+      )}
+      {primaryMsg.text && (
+        <div role={primaryMsg.kind === 'critical' || primaryMsg.kind === 'incomplete' ? 'alert' : 'status'} className={`rounded-2xl px-3.5 py-2 text-xs flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border ${primaryMsg.kind === 'critical' ? 'bg-rose-950/75 border-rose-300/60 text-rose-50' : primaryMsg.kind === 'incomplete' ? 'bg-amber-950/60 border-amber-300/60 text-amber-50' : 'bg-black/25 border-white/20 text-emerald-50'}`}>
+          <div className="font-bold flex items-start sm:items-center gap-2 leading-snug min-w-0">
+            {primaryMsg.kind === 'critical' ? <AlertTriangle className="w-4 h-4 text-rose-300 shrink-0 mt-0.5 sm:mt-0" aria-hidden="true" /> : primaryMsg.kind === 'incomplete' ? <ShieldAlert className="w-4 h-4 text-amber-300 shrink-0 mt-0.5 sm:mt-0" aria-hidden="true" /> : primaryMsg.kind === 'ok' ? <CheckCircle2 className="w-4 h-4 text-emerald-300 shrink-0" aria-hidden="true" /> : <Info className="w-4 h-4 text-amber-300 shrink-0" aria-hidden="true" />}
+            <span>{primaryMsg.text}</span>
           </div>
-
-          {/* Régua semafórica 0-100 */}
-          <div className="space-y-1.5">
-            <div className="relative h-4 rounded-full overflow-hidden flex bg-white/20" aria-label="Régua semafórica de 0 a 100">
-              <div className="w-1/4 bg-emerald-400" />
-              <div className="w-1/4 bg-amber-300" />
-              <div className="w-1/4 bg-orange-400" />
-              <div className="w-1/4 bg-rose-500" />
-              {score !== null && (
-                <div
-                  className="absolute top-0 bottom-0 w-2 bg-white ring-2 ring-slate-950 rounded"
-                  style={{ left: `calc(${markerLeft} - 4px)` }}
-                />
-              )}
-            </div>
-            <div className="flex justify-between text-xs font-mono-numbers font-bold text-emerald-50">
-              <span>1 BAIXO</span>
-              <span>26 MODERADO</span>
-              <span>51 ELEVADO</span>
-              <span>76–100 CRÍTICO</span>
-            </div>
+          <div className="flex flex-wrap items-center gap-3 shrink-0">
+            {onOpenGuideTopic && primaryMsg.hasMoreDetails && <button type="button" onClick={() => onOpenGuideTopic('details')} className="font-extrabold underline text-emerald-200 hover:text-white cursor-pointer">Ver detalhes no Guia Técnico</button>}
+            {primaryMsg.canSwitchToQuickManual && onSwitchToQuickManual && <button type="button" onClick={onSwitchToQuickManual} className="px-2.5 py-1 rounded-lg bg-white text-slate-950 font-extrabold cursor-pointer">Mudar para Rápida (Manual)</button>}
           </div>
-
-          {isCalculated && (
-            <div className="pt-2 border-t border-white/15 space-y-2">
-              <div className="text-xs font-bold uppercase tracking-wider text-emerald-100">
-                Decomposição secundária por fator
-              </div>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                {SUB_ITEMS.map((item) => {
-                  const val = result.subIndices[item.key];
-                  return (
-                    <div key={item.key} className="bg-white/10 rounded-xl px-3 py-2 space-y-1">
-                      <div className="flex items-center justify-between text-xs">
-                        <span className="text-emerald-100 font-semibold">{item.label}</span>
-                        <span className="font-mono-numbers font-bold text-white">{val.toFixed(1)}</span>
-                      </div>
-                      <div className="h-1.5 rounded-full bg-white/15 overflow-hidden">
-                        <div className={`h-full ${getBarColor(val)}`} style={{ width: `${val}%` }} />
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
-          {result && result.blocks.length > 0 && (
-            <div role="alert" className="bg-rose-950/70 border border-rose-300/60 rounded-2xl p-3 text-xs sm:text-sm space-y-1 text-white">
-              <div className="font-extrabold flex items-center gap-1.5 text-rose-200">
-                <AlertTriangle className="w-4 h-4 shrink-0" />
-                <span>Bloqueio Ativo (Fail-Closed):</span>
-              </div>
-              {result.blocks.map((b) => (
-                <p key={b.code}>• {b.messagePt}</p>
-              ))}
-            </div>
-          )}
-
-          {isCalculated && result.warnings.some((w) => w.severity === 'warning') && (
-            <div className="bg-black/25 border border-white/15 rounded-2xl px-3.5 py-2.5 text-xs space-y-1 text-emerald-50">
-              {result.warnings
-                .filter((w) => w.severity === 'warning')
-                .map((w) => (
-                  <p key={w.code}>• {w.messagePt}</p>
-                ))}
-            </div>
-          )}
-
-          <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-emerald-100 border-t border-white/15 pt-2.5">
-            <span>
-              Indicador heurístico ({IRD_LEGAL_DISCLAIMER.isIso22866Certified ? '' : 'não é certificação legal nem ISO 22866'}).
-            </span>
-            <strong>O rótulo DGAV/SIFITO prevalece sempre.</strong>
-          </div>
-        </>
+        </div>
       )}
     </section>
   );

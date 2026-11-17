@@ -1,159 +1,161 @@
 // src/features/perfis/services/profileStorageService.ts
-/**
- * DATERRA Smart - Serviço de Armazenamento e Isolamento de Perfis (SEC-REM-01)
- * Segregação por utilizador, validação de titularidade e blindagem contra fuga de dados.
- * (< 200 LOC)
- */
+// Serviço de Armazenamento e Isolamento de Perfis (SEC-REM-01, <= 200 LOC).
 import { db } from '../../../db/db.ts';
 import type { ProfileCulture, ProfileEquipment, ProfileNozzle, ProfileCalibration } from '../../../db/types.ts';
-import { LEGACY_UNASSIGNED_MARKER } from '../../../types/calculator.ts';
+import { assertValidOwnerId, isOwnedByUser, isValidOwnerId, stripUndefinedFields } from './profileOwnership.ts';
+import { deleteCultureCascadeScoped, deleteAllUserCulturesSafely } from './cultureDeletionService.ts';
+
+type ProfileTableKey = 'cultures' | 'equipment' | 'nozzles' | 'calibrations';
+
+function resolveProfileTable(database: typeof db, table: ProfileTableKey) {
+  if (table === 'cultures') return database.profiles_cultures;
+  if (table === 'equipment') return database.profiles_equipment;
+  if (table === 'nozzles') return database.profiles_nozzles;
+  return database.profiles_calibrations;
+}
 
 let activeDb = db;
-export function setProfileStorageDb(customDb?: typeof db): void {
-  activeDb = customDb || db;
-}
-
-export function isValidUserId(userId?: string | null): userId is string {
-  return typeof userId === 'string' && userId.trim() !== '' && userId !== LEGACY_UNASSIGNED_MARKER;
-}
+export function setProfileStorageDb(customDb?: typeof db): void { activeDb = customDb || db; }
+export function getActiveProfileDb(): typeof db { return activeDb; }
+export function isValidUserId(userId?: string | null): userId is string { return isValidOwnerId(userId); }
 
 // 1. LEITURAS SCOPED (Apenas perfis do utilizador autenticado)
 export async function getScopedCultures(userId?: string | null): Promise<ProfileCulture[]> {
   if (!isValidUserId(userId)) return [];
-  return activeDb.profiles_cultures.where('userId').equals(userId).toArray();
+  return activeDb.profiles_cultures.where('userId').equals(userId.trim()).toArray();
 }
 
 export async function getScopedEquipment(userId?: string | null): Promise<ProfileEquipment[]> {
   if (!isValidUserId(userId)) return [];
-  return activeDb.profiles_equipment.where('userId').equals(userId).toArray();
+  return activeDb.profiles_equipment.where('userId').equals(userId.trim()).toArray();
 }
 
 export async function getScopedNozzles(userId?: string | null): Promise<ProfileNozzle[]> {
   if (!isValidUserId(userId)) return [];
-  return activeDb.profiles_nozzles.where('userId').equals(userId).toArray();
+  return activeDb.profiles_nozzles.where('userId').equals(userId.trim()).toArray();
 }
 
 export async function getScopedCalibrations(userId?: string | null): Promise<ProfileCalibration[]> {
   if (!isValidUserId(userId)) return [];
-  return activeDb.profiles_calibrations.where('userId').equals(userId).toArray();
+  return activeDb.profiles_calibrations.where('userId').equals(userId.trim()).toArray();
 }
 
 // 2. GRAVAÇÕES SCOPED COM VALIDAÇÃO DE TITULARIDADE E RELAÇÕES
 export async function saveScopedCulture(
   userId: string | null | undefined,
-  data: Omit<ProfileCulture, 'id' | 'userId'>,
+  data: Omit<ProfileCulture, 'id' | 'userId'> | Partial<Omit<ProfileCulture, 'id' | 'userId'>>,
   id?: number
 ): Promise<number> {
-  if (!isValidUserId(userId)) {
-    throw new Error('Sessão inválida: utilizador não autenticado para gravar perfil de cultura.');
-  }
+  const ownerId = assertValidOwnerId(userId, 'Sessão inválida: utilizador não autenticado para gravar perfil de cultura.');
+  const cleanData = stripUndefinedFields(data);
 
   if (id) {
     return activeDb.transaction('rw', activeDb.profiles_cultures, async () => {
       const existing = await activeDb.profiles_cultures.get(id);
-      if (!existing || existing.userId !== userId) {
+      if (!isOwnedByUser(existing, ownerId)) {
         throw new Error('Acesso negado: perfil de cultura não pertence ao utilizador autenticado.');
       }
-      await activeDb.profiles_cultures.update(id, { ...data, userId });
+      await activeDb.profiles_cultures.update(id, { ...cleanData, userId: ownerId });
       return id;
     });
   }
 
-  const newId = await activeDb.profiles_cultures.add({ ...data, userId });
+  const newId = await activeDb.profiles_cultures.add({ ...(cleanData as Omit<ProfileCulture, 'id' | 'userId'>), userId: ownerId });
   return Number(newId);
 }
 
 export async function saveScopedEquipment(
   userId: string | null | undefined,
-  data: Omit<ProfileEquipment, 'id' | 'userId'>,
+  data: Omit<ProfileEquipment, 'id' | 'userId'> | Partial<Omit<ProfileEquipment, 'id' | 'userId'>>,
   id?: number
 ): Promise<number> {
-  if (!isValidUserId(userId)) {
-    throw new Error('Sessão inválida: utilizador não autenticado para gravar equipamento.');
-  }
+  const ownerId = assertValidOwnerId(userId, 'Sessão inválida: utilizador não autenticado para gravar equipamento.');
+  const cleanData = stripUndefinedFields(data);
 
   if (id) {
     return activeDb.transaction('rw', activeDb.profiles_equipment, async () => {
       const existing = await activeDb.profiles_equipment.get(id);
-      if (!existing || existing.userId !== userId) {
+      if (!isOwnedByUser(existing, ownerId)) {
         throw new Error('Acesso negado: equipamento não pertence ao utilizador autenticado.');
       }
-      await activeDb.profiles_equipment.update(id, { ...data, userId });
+      await activeDb.profiles_equipment.update(id, { ...cleanData, userId: ownerId });
       return id;
     });
   }
 
-  const newId = await activeDb.profiles_equipment.add({ ...data, userId });
+  const newId = await activeDb.profiles_equipment.add({ ...(cleanData as Omit<ProfileEquipment, 'id' | 'userId'>), userId: ownerId });
   return Number(newId);
 }
 
 export async function saveScopedNozzle(
   userId: string | null | undefined,
-  data: Omit<ProfileNozzle, 'id' | 'userId'>,
+  data: Omit<ProfileNozzle, 'id' | 'userId'> | Partial<Omit<ProfileNozzle, 'id' | 'userId'>>,
   id?: number
 ): Promise<number> {
-  if (!isValidUserId(userId)) {
-    throw new Error('Sessão inválida: utilizador não autenticado para gravar bico.');
-  }
+  const ownerId = assertValidOwnerId(userId, 'Sessão inválida: utilizador não autenticado para gravar bico.');
+  const cleanData = stripUndefinedFields(data);
 
   return activeDb.transaction('rw', [activeDb.profiles_nozzles, activeDb.profiles_equipment], async () => {
-    if (data.equipment_id) {
-      const eq = await activeDb.profiles_equipment.get(data.equipment_id);
-      if (!eq || eq.userId !== userId) {
+    if (cleanData.equipment_id) {
+      const eq = await activeDb.profiles_equipment.get(cleanData.equipment_id);
+      if (!isOwnedByUser(eq, ownerId)) {
         throw new Error('Acesso negado: o equipamento associado não pertence ao utilizador.');
       }
     }
 
     if (id) {
       const existing = await activeDb.profiles_nozzles.get(id);
-      if (!existing || existing.userId !== userId) {
+      if (!isOwnedByUser(existing, ownerId)) {
         throw new Error('Acesso negado: bico não pertence ao utilizador autenticado.');
       }
-      await activeDb.profiles_nozzles.update(id, { ...data, userId });
+      await activeDb.profiles_nozzles.update(id, { ...cleanData, userId: ownerId });
       return id;
     }
 
-    const newId = await activeDb.profiles_nozzles.add({ ...data, userId });
+    const newId = await activeDb.profiles_nozzles.add({ ...(cleanData as Omit<ProfileNozzle, 'id' | 'userId'>), userId: ownerId });
     return Number(newId);
   });
 }
 
 export async function saveScopedCalibration(
   userId: string | null | undefined,
-  data: Omit<ProfileCalibration, 'id' | 'userId'>,
+  data: Omit<ProfileCalibration, 'id' | 'userId'> | Partial<Omit<ProfileCalibration, 'id' | 'userId'>>,
   id?: number
 ): Promise<number> {
-  if (!isValidUserId(userId)) {
-    throw new Error('Sessão inválida: utilizador não autenticado para gravar calibração.');
-  }
+  const ownerId = assertValidOwnerId(userId, 'Sessão inválida: utilizador não autenticado para gravar calibração.');
+  const cleanData = stripUndefinedFields(data);
 
   return activeDb.transaction('rw', [activeDb.profiles_calibrations, activeDb.profiles_equipment, activeDb.profiles_nozzles], async () => {
-    if (data.equipment_id) {
-      const eq = await activeDb.profiles_equipment.get(data.equipment_id);
-      if (!eq || eq.userId !== userId) {
+    const existing = id ? await activeDb.profiles_calibrations.get(id) : undefined;
+    if (id && !isOwnedByUser(existing, ownerId)) {
+      throw new Error('Acesso negado: calibração não pertence ao utilizador autenticado.');
+    }
+
+    const effectiveEquipmentId = cleanData.equipment_id !== undefined ? cleanData.equipment_id : existing?.equipment_id;
+    const effectiveNozzleId = cleanData.nozzle_id !== undefined ? cleanData.nozzle_id : existing?.nozzle_id;
+
+    if (effectiveEquipmentId) {
+      const eq = await activeDb.profiles_equipment.get(effectiveEquipmentId);
+      if (!isOwnedByUser(eq, ownerId)) {
         throw new Error('Acesso negado: o equipamento associado não pertence ao utilizador.');
       }
     }
-    if (data.nozzle_id) {
-      const nz = await activeDb.profiles_nozzles.get(data.nozzle_id);
-      if (!nz || nz.userId !== userId) {
+    if (effectiveNozzleId) {
+      const nz = await activeDb.profiles_nozzles.get(effectiveNozzleId);
+      if (!isOwnedByUser(nz, ownerId)) {
         throw new Error('Acesso negado: o bico associado não pertence ao utilizador.');
       }
-      if (data.equipment_id && nz.equipment_id && nz.equipment_id !== data.equipment_id) {
+      if (effectiveEquipmentId && nz.equipment_id && nz.equipment_id !== effectiveEquipmentId) {
         throw new Error('Incompatibilidade: o bico selecionado pertence a outro equipamento.');
       }
     }
 
     if (id) {
-      const existing = await activeDb.profiles_calibrations.get(id);
-      if (!existing || existing.userId !== userId) {
-        throw new Error('Acesso negado: calibração não pertence ao utilizador autenticado.');
-      }
-      await activeDb.profiles_calibrations.update(id, { ...data, userId });
+      await activeDb.profiles_calibrations.update(id, { ...cleanData, userId: ownerId });
       return id;
     }
 
-    const newId = await activeDb.profiles_calibrations.add({ ...data, userId });
+    const newId = await activeDb.profiles_calibrations.add({ ...(cleanData as Omit<ProfileCalibration, 'id' | 'userId'>), userId: ownerId });
     return Number(newId);
   });
 }
@@ -161,19 +163,17 @@ export async function saveScopedCalibration(
 // 3. ELIMINAÇÕES SCOPED
 export async function deleteScopedProfile(
   userId: string | null | undefined,
-  table: 'cultures' | 'equipment' | 'nozzles' | 'calibrations',
+  table: ProfileTableKey,
   id: number
 ): Promise<boolean> {
   if (!isValidUserId(userId) || !id) return false;
-
-  const targetTable = table === 'cultures' ? activeDb.profiles_cultures
-    : table === 'equipment' ? activeDb.profiles_equipment
-    : table === 'nozzles' ? activeDb.profiles_nozzles
-    : activeDb.profiles_calibrations;
+  const ownerId = userId.trim();
+  if (table === 'cultures') return deleteCultureCascadeScoped(activeDb, ownerId, id);
+  const targetTable = resolveProfileTable(activeDb, table);
 
   return activeDb.transaction('rw', targetTable, async () => {
     const existing = await targetTable.get(id);
-    if (!existing || existing.userId !== userId) {
+    if (!isOwnedByUser(existing, ownerId)) {
       return false;
     }
     await targetTable.delete(id);
@@ -183,14 +183,9 @@ export async function deleteScopedProfile(
 
 export async function deleteUserProfilesBatch(
   userId: string | null | undefined,
-  table: 'cultures' | 'equipment' | 'nozzles' | 'calibrations'
+  table: ProfileTableKey
 ): Promise<number> {
   if (!isValidUserId(userId)) return 0;
-
-  const targetTable = table === 'cultures' ? activeDb.profiles_cultures
-    : table === 'equipment' ? activeDb.profiles_equipment
-    : table === 'nozzles' ? activeDb.profiles_nozzles
-    : activeDb.profiles_calibrations;
-
-  return targetTable.where('userId').equals(userId).delete();
+  if (table === 'cultures') return (await deleteAllUserCulturesSafely(activeDb, userId.trim())).deletedCultures;
+  return resolveProfileTable(activeDb, table).where('userId').equals(userId.trim()).delete();
 }

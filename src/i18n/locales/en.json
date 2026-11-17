@@ -153,6 +153,7 @@
     "trainingSystemPlaceholder": "e.g., Single Cordon",
     "rowSpacingM": "Row Spacing (m)",
     "growthStage": "Phenological Stage",
+    "phenologicalStageCard": "Phenological stage",
     "stages": {
       "flowering": "Flowering",
       "veraison": "Veraison / Ripening",
@@ -1165,7 +1166,7 @@
     "resultUnavailable": "Result unavailable. Please check that all fields are filled correctly.",
     "setPreset": "Set {{value}} {{unit}}",
     "helpAbout": "Help with {{label}}",
-    "offlineIndexedDb": "Offline Mode (IndexedDB Active)",
+    "offlineIndexedDb": "Offline Mode",
     "onlinePwa": "Online (PWA)",
     "logout": "Log Out",
     "activeSession": "Active Session",

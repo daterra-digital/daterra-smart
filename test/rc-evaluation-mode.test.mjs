@@ -41,6 +41,7 @@ describe('Modo de Avaliação de Release Candidate (V-RC)', () => {
     assert.ok(!CANONICAL_PAGES_TOOL_IDS.has('calc_calibracao_pulverizador'), 'Calibração deve ser RC');
     assert.ok(!CANONICAL_PAGES_TOOL_IDS.has('calc_eppo'), 'EPPO deve ser RC');
     assert.ok(!CANONICAL_PAGES_TOOL_IDS.has('calc_debito_total'), 'Débito Total deve ser RC');
+    assert.ok(!CANONICAL_PAGES_TOOL_IDS.has('calc_ird'), 'IRD deve ser RC e não Pages');
   });
 
   it('2. package.json deve conter script dev:rc com porto 5175 e versão 1.0.1-rc1', () => {
@@ -74,10 +75,12 @@ describe('Modo de Avaliação de Release Candidate (V-RC)', () => {
 
     assert.equal(getToolReleaseBadge('ajuste_dose_eppo'), null, 'Deve suprimir etiqueta PAGES no github.io');
     assert.equal(getToolReleaseBadge('drone_buffer_zone'), null, 'Deve suprimir etiqueta RC no github.io');
+    assert.equal(getToolReleaseBadge('calc_ird'), null, 'Deve suprimir etiqueta RC do IRD no github.io');
 
     // Simula cPanel
     globalThis.window.location.hostname = 'smart.daterra.com.pt';
     assert.equal(getToolReleaseBadge('ajuste_dose_eppo'), null, 'Deve suprimir etiqueta PAGES no cPanel');
+    assert.equal(getToolReleaseBadge('calc_ird'), null, 'Deve suprimir etiqueta RC do IRD no cPanel');
 
     // Simula localhost :5175 (Modo RC ativo)
     globalThis.window.location.hostname = 'localhost';
@@ -102,6 +105,7 @@ describe('Modo de Avaliação de Release Candidate (V-RC)', () => {
     assert.equal(getToolReleaseBadge('calc_debito_total'), 'RC', 'Débito Total deve ter RC');
     assert.equal(getToolReleaseBadge('drone_buffer_zone'), 'RC', 'Drone Buffer Zone deve ter RC');
     assert.equal(getToolReleaseBadge('smart_debito'), 'RC', 'Smart Débito deve ter RC');
+    assert.equal(getToolReleaseBadge('calc_ird'), 'RC', 'IRD deve ter etiqueta RC em localhost:5175');
   });
 
   it('5. ToolsView não deve conter a ferramenta inexistente Caderno de Campo Digital', () => {
@@ -158,6 +162,7 @@ describe('Modo de Avaliação de Release Candidate (V-RC)', () => {
 
     const weather = fs.readFileSync(path.resolve('src/features/weather/views/WeatherSaasView.tsx'), 'utf8');
     assert.ok(weather.includes('bg-amber-100 text-amber-950 border border-amber-400'), 'WeatherSaasView RC deve ser âmbar');
+    assert.ok(weather.includes('isWeatherDriftTabEnabledForEnv'), 'WeatherSaasView deve ativar aba Deriva via isWeatherDriftTabEnabledForEnv em V-PAGES e V-RC');
 
     const settingsSubmenu = fs.readFileSync(path.resolve('src/features/settings/SettingsSubmenuNav.tsx'), 'utf8');
     assert.ok(!settingsSubmenu.includes('bg-blue-100 text-blue-700'), 'SettingsSubmenuNav não deve ter etiquetas azuis');

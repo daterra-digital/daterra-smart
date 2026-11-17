@@ -2,6 +2,8 @@
 // Serviço First-Offline de sincronização de telemetria agronómica para Perfis (Plano PRO)
 
 import { db } from '../../../db/db.ts';
+import type { ProfileCulture, ProfileEquipment } from '../../../db/types.ts';
+import { isOwnedByUser, isValidOwnerId } from './profileOwnership.ts';
 
 export interface CultureTelemetryUpdate {
   lwa_m2_ha?: number;
@@ -24,39 +26,44 @@ export interface EquipmentEfficiencyUpdate {
 export async function syncCultureTelemetry(
   cultureId: number,
   telemetry: CultureTelemetryUpdate,
-  userId?: string
+  userId?: string | null
 ): Promise<boolean> {
+  if (!isValidOwnerId(userId) || !Number.isFinite(cultureId) || cultureId <= 0) {
+    return false;
+  }
+  const ownerId = userId.trim();
+
   try {
-    const existing = await db.profiles_cultures.get(cultureId);
-    if (!existing) return false;
-    if (userId && existing.userId && existing.userId !== userId) return false;
+    return await db.transaction('rw', [db.profiles_cultures, db.mutation_outbox], async () => {
+      const existing = await db.profiles_cultures.get(cultureId);
+      if (!isOwnedByUser(existing, ownerId)) return false;
 
-    const now = new Date().toISOString();
-    const updateData: Record<string, any> = {
-      last_calculated_at: now,
-      last_calculator_id: telemetry.calculator_id
-    };
+      const now = new Date().toISOString();
+      const updateData: Partial<ProfileCulture> = {
+        last_calculated_at: now,
+        last_calculator_id: telemetry.calculator_id
+      };
 
-    if (telemetry.lwa_m2_ha !== undefined) updateData.last_lwa_m2_ha = telemetry.lwa_m2_ha;
-    if (telemetry.trv_m3_ha !== undefined) updateData.last_trv_m3_ha = telemetry.trv_m3_ha;
-    if (telemetry.spray_volume_lha !== undefined) updateData.last_spray_volume_lha = telemetry.spray_volume_lha;
-    if (telemetry.phenological_stage) updateData.last_phenological_stage = telemetry.phenological_stage;
+      if (telemetry.lwa_m2_ha !== undefined) updateData.last_lwa_m2_ha = telemetry.lwa_m2_ha;
+      if (telemetry.trv_m3_ha !== undefined) updateData.last_trv_m3_ha = telemetry.trv_m3_ha;
+      if (telemetry.spray_volume_lha !== undefined) updateData.last_spray_volume_lha = telemetry.spray_volume_lha;
+      if (telemetry.phenological_stage) updateData.last_phenological_stage = telemetry.phenological_stage;
 
-    await db.profiles_cultures.update(cultureId, updateData);
+      await db.profiles_cultures.update(cultureId, updateData);
 
-    // Registo de mutação offline (LWW) com titularidade
-    await db.mutation_outbox.add({
-      entityId: String(cultureId),
-      entityType: 'culture',
-      operation: 'UPDATE',
-      payload: updateData,
-      synced: 0,
-      updatedAt: now,
-      attempts: 0,
-      userId: userId || existing.userId
+      await db.mutation_outbox.add({
+        entityId: String(cultureId),
+        entityType: 'culture',
+        operation: 'UPDATE',
+        payload: updateData,
+        synced: 0,
+        updatedAt: now,
+        attempts: 0,
+        userId: ownerId
+      });
+
+      return true;
     });
-
-    return true;
   } catch (err) {
     console.error('[profileTelemetrySync] Erro ao sincronizar telemetria da cultura:', err);
     return false;
@@ -70,37 +77,42 @@ export async function syncCultureTelemetry(
 export async function syncEquipmentEfficiency(
   equipmentId: number,
   efficiency: EquipmentEfficiencyUpdate,
-  userId?: string
+  userId?: string | null
 ): Promise<boolean> {
+  if (!isValidOwnerId(userId) || !Number.isFinite(equipmentId) || equipmentId <= 0) {
+    return false;
+  }
+  const ownerId = userId.trim();
+
   try {
-    const existing = await db.profiles_equipment.get(equipmentId);
-    if (!existing) return false;
-    if (userId && existing.userId && existing.userId !== userId) return false;
+    return await db.transaction('rw', [db.profiles_equipment, db.mutation_outbox], async () => {
+      const existing = await db.profiles_equipment.get(equipmentId);
+      if (!isOwnedByUser(existing, ownerId)) return false;
 
-    const now = new Date().toISOString();
-    const updateData: Record<string, any> = {
-      machine_efficiency_pct: efficiency.efficiency_pct,
-      last_calibrated_at: now
-    };
+      const now = new Date().toISOString();
+      const updateData: Partial<ProfileEquipment> = {
+        machine_efficiency_pct: efficiency.efficiency_pct,
+        last_calibrated_at: now
+      };
 
-    if (efficiency.speed_kmh !== undefined) updateData.last_working_speed_kmh = efficiency.speed_kmh;
-    if (efficiency.flow_lmin !== undefined) updateData.last_total_flow_lmin = efficiency.flow_lmin;
+      if (efficiency.speed_kmh !== undefined) updateData.last_working_speed_kmh = efficiency.speed_kmh;
+      if (efficiency.flow_lmin !== undefined) updateData.last_total_flow_lmin = efficiency.flow_lmin;
 
-    await db.profiles_equipment.update(equipmentId, updateData);
+      await db.profiles_equipment.update(equipmentId, updateData);
 
-    // Registo de mutação offline (LWW) com titularidade
-    await db.mutation_outbox.add({
-      entityId: String(equipmentId),
-      entityType: 'equipment',
-      operation: 'UPDATE',
-      payload: updateData,
-      synced: 0,
-      updatedAt: now,
-      attempts: 0,
-      userId: userId || existing.userId
+      await db.mutation_outbox.add({
+        entityId: String(equipmentId),
+        entityType: 'equipment',
+        operation: 'UPDATE',
+        payload: updateData,
+        synced: 0,
+        updatedAt: now,
+        attempts: 0,
+        userId: ownerId
+      });
+
+      return true;
     });
-
-    return true;
   } catch (err) {
     console.error('[profileTelemetrySync] Erro ao sincronizar eficiência do equipamento:', err);
     return false;

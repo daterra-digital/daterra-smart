@@ -18,6 +18,7 @@ import { ExplorationView, type ProfileTab as ExplorationTab } from './Exploratio
 import { SettingsSubmenuNav, type SettingsSubmenu } from '../features/settings/SettingsSubmenuNav';
 import { SettingsNotificationsTab } from '../features/settings/SettingsNotificationsTab';
 import { RgpdDeleteAccountButton } from '../features/settings/RgpdDeleteAccountButton';
+import { deleteAllUserCulturesSafely } from '../features/perfis/services/cultureDeletionService';
 import type { Profile } from '../types/profile';
 import type { CoBrandingConfig } from '../features/smart-debito/types';
 import {
@@ -94,6 +95,7 @@ export const SettingsView: React.FC = () => {
   const [isLoadingProfile, setIsLoadingProfile] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [dangerErrorMsg, setDangerErrorMsg] = useState('');
 
   // Estados locais dos campos do formulário
   const [firstName, setFirstName] = useState('');
@@ -383,10 +385,19 @@ export const SettingsView: React.FC = () => {
   // ZONA DE PERIGO - Ações Destrutivas Scoped (SEC-REM-01)
   const handleDeleteCultures = async () => {
     if (!effectiveUserId) return;
+    setDangerErrorMsg('');
     if (window.confirm(t('settings.confirmDeleteCultures', 'Tem a certeza que deseja apagar os seus perfis de cultura? Esta ação é irreversível.'))) {
-      await db.profiles_cultures.where('userId').equals(effectiveUserId).delete();
-      setFeedbackMsg(t('settings.culturesDeleted', 'Perfis de cultura eliminados com sucesso.'));
-      setTimeout(() => setFeedbackMsg(''), 3500);
+      try {
+        await deleteAllUserCulturesSafely(db, effectiveUserId);
+        setFeedbackMsg(t('settings.culturesDeleted', 'Perfis de cultura eliminados com sucesso.'));
+        setTimeout(() => setFeedbackMsg(''), 3500);
+      } catch (err) {
+        setDangerErrorMsg(
+          err instanceof Error
+            ? t('settings.deleteCulturesBlocked', err.message)
+            : t('settings.deleteCulturesBlocked', 'Não foi possível apagar os perfis de cultura devido a dependências ativas.')
+        );
+      }
     }
   };
 
@@ -419,35 +430,53 @@ export const SettingsView: React.FC = () => {
 
   const handleDeleteAllData = async () => {
     if (!effectiveUserId) return;
+    setDangerErrorMsg('');
     if (window.confirm(t('settings.confirmDeleteAllData', 'ATENÇÃO CRÍTICA: Deseja apagar TODOS os seus dados de exploração? Esta ação não pode ser desfeita!'))) {
-      await db.profiles_cultures.where('userId').equals(effectiveUserId).delete();
-      await db.profiles_equipment.where('userId').equals(effectiveUserId).delete();
-      await db.profiles_nozzles.where('userId').equals(effectiveUserId).delete();
-      await db.profiles_calibrations.where('userId').equals(effectiveUserId).delete();
+      await db.transaction(
+        'rw',
+        [
+          db.profiles_cultures,
+          db.profile_crop_moments,
+          db.profile_moment_revisions,
+          db.profile_custom_options,
+          db.profiles_equipment,
+          db.profiles_nozzles,
+          db.profiles_calibrations
+        ],
+        async () => {
+          await db.profile_moment_revisions.where('userId').equals(effectiveUserId).delete();
+          await db.profile_crop_moments.where('userId').equals(effectiveUserId).delete();
+          await db.profile_custom_options.where('userId').equals(effectiveUserId).delete();
+          await db.profiles_cultures.where('userId').equals(effectiveUserId).delete();
+          await db.profiles_equipment.where('userId').equals(effectiveUserId).delete();
+          await db.profiles_nozzles.where('userId').equals(effectiveUserId).delete();
+          await db.profiles_calibrations.where('userId').equals(effectiveUserId).delete();
+        }
+      );
       setFeedbackMsg(t('settings.allDataDeleted', 'Todos os dados da plataforma foram eliminados do IndexedDB local.'));
       setTimeout(() => setFeedbackMsg(''), 3500);
     }
   };
 
   return (
-    <div className="space-y-8 animate-fade-in pb-12">
+    <div className="space-y-3 animate-fade-in pb-8">
       
       {/* CABEÇALHO PRINCIPAL DAS DEFINIÇÕES (Verde Principal #114037) */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 sm:p-8 rounded-3xl shadow-soft border border-slate-200">
-        <div>
-          <span className="text-xs font-extrabold uppercase tracking-widest text-[#1D734B] block mb-1">
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 bg-white p-4 rounded-2xl shadow-soft border border-slate-200">
+        <div className="min-w-0">
+          <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#1D734B] block">
             {t('nav.settings')}
           </span>
-          <h1 className="text-fluid-title font-black text-[#114037]">
+          <h1 className="text-lg sm:text-xl font-black text-[#114037] leading-tight">
             {t('settings.title')}
           </h1>
-          <p className="text-xs text-slate-500 font-medium mt-1">
+          <p className="text-[11px] text-slate-500 font-medium mt-0.5">
             {t('settings.subtitle')}
           </p>
         </div>
 
-        <div className="flex items-center gap-2.5 bg-slate-100 px-4 py-2.5 rounded-2xl border border-slate-200 text-slate-700 text-xs font-extrabold font-mono-numbers">
-          <User className="w-4 h-4 text-[#1D734B]" />
+        <div className="flex items-center gap-2.5 bg-slate-100 px-4 py-2.5 rounded-2xl border border-slate-200 text-slate-700 text-xs font-extrabold font-mono-numbers shrink-0">
+          <User className="w-4 h-4 text-[#1D734B] shrink-0" />
           <span>ID: {user?.id || t('common.states.loading', 'A carregar...')}</span>
         </div>
       </div>
@@ -457,6 +486,12 @@ export const SettingsView: React.FC = () => {
         <div className="p-4 bg-[#3CA64C] text-white font-bold text-xs rounded-2xl shadow-md flex items-center gap-3 animate-fade-in">
           <CheckCircle2 className="w-5 h-5 shrink-0" />
           <span>{feedbackMsg}</span>
+        </div>
+      )}
+      {dangerErrorMsg && (
+        <div className="p-4 bg-red-50 text-red-800 border border-red-200 font-bold text-xs rounded-2xl shadow-sm flex items-center gap-3 animate-fade-in">
+          <AlertTriangle className="w-5 h-5 shrink-0 text-red-600" />
+          <span>{dangerErrorMsg}</span>
         </div>
       )}
 
@@ -1126,7 +1161,7 @@ export const SettingsView: React.FC = () => {
       {/* SUB-MENU 2: EXPLORAÇÃO AGRÍCOLA (Cultura, Equipamentos, Bicos, Calibração) */}
       {/* ========================================================================= */}
       {activeSubmenu === 'exploracao' && (
-        <div className="space-y-6 animate-fade-in">
+        <div className="space-y-3 animate-fade-in">
           <ExplorationView
             embedded={true}
             hideHeader={true}

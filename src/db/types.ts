@@ -1,5 +1,6 @@
 // src/db/types.ts
 // Interfaces canónicas do modelo de dados local Dexie.js da DATERRA Smart
+export * from './cultureTypes.ts';
 
 export interface CalculationHistoryItem {
   id?: number;
@@ -20,10 +21,16 @@ export interface ProfileCulture {
   id?: number;
   userId?: string;
   name: string;
-  area_ha: number;
+  area_ha?: number;
   crop_type: string;
+  culture_key?: string;
+  season_label?: string;
   variety?: string;
+  variety_option_id?: string;
+  installation_system?: string;
+  installation_option_id?: string;
   training_system?: string;
+  conduction_option_id?: string;
   spacing?: string;
   row_distance_m?: number;
   phenological_stage?: string;
@@ -31,7 +38,14 @@ export interface ProfileCulture {
   canopy_height_m?: number;
   lai?: number;
   location?: string;
-
+  country_code?: string;
+  admin_region?: string;
+  municipality?: string;
+  parish?: string;
+  notes?: string;
+  active_moment_id?: number;
+  created_at?: string;
+  updated_at?: string;
   // Telemetria Agronómica consolidada (EPPO PP 1/239) - Versão 9 (Pro Tier)
   last_lwa_m2_ha?: number;
   last_trv_m3_ha?: number;
@@ -129,9 +143,9 @@ export interface ProfileNozzle {
   manufacturer: string;
   model: string;
   color: string;
-  iso_classification: string;
+  iso_classification?: string;
   nozzle_type: string;
-  spray_angle: string;
+  spray_angle?: string;
   working_pressure_bar: number;
   tabulated_flow_lmin?: number;
   nominal_flow_lmin: number;
@@ -147,7 +161,7 @@ export interface ProfileCalibration {
   working_speed_kmh: number;
   working_pressure_bar: number;
   working_width_m: number;
-  active_nozzles_count: number;
+  active_nozzles_count?: number;
   droplet_size_um?: number;
   total_flow_lmin: number;
   calculated_spray_volume_lha: number;

@@ -19,6 +19,7 @@ import { concentracaoCalculatorConfig } from '../features/calculators/definition
 import { VelocidadeTrabalhoView } from '../features/calculators/velocidade-trabalho';
 import { isToolAllowedInCurrentEnv } from '../utils/environment';
 import { getDaterraEnvironment } from '../utils/releasePolicy';
+import { isIrdEnabledForEnv } from '../utils/releasePolicyRoutes';
 import { useSubscription } from '../context/SubscriptionContext';
 import { PRO_TOOL_IDS } from '../types/subscription';
 import { ToolCard } from '../components/tools/ToolCard';
@@ -121,7 +122,7 @@ const TOOLS_CATALOG: ToolModule[] = [
     id: 'calc_ird',
     name: 'Índice de Risco de Deriva (IRD)',
     category: 'Pulverização',
-    description: 'Apoio heurístico à decisão de deriva na pulverização (prevalece o rótulo DGAV/SIFITO).',
+    description: 'Apoio à pulverização. Prevalecem sempre as indicações do rótulo oficial do produto fitofarmacêutico.',
     icon: CloudSun,
     isCore: true,
     caminho: '/ferramentas/risco-deriva',
@@ -377,7 +378,7 @@ export const ToolsView: React.FC = () => {
 
   // Abrir uma Ferramenta / Funcionalidade
   const handleOpenTool = (toolId: string) => {
-    if (!isToolAllowedInCurrentEnv(toolId) || (toolId === 'calc_ird' && getDaterraEnvironment() !== 'development')) {
+    if (!isToolAllowedInCurrentEnv(toolId) || (toolId === 'calc_ird' && !isIrdEnabledForEnv(getDaterraEnvironment()))) {
       return;
     }
     if (PRO_TOOL_IDS.has(toolId) && !isPro) {
@@ -422,8 +423,8 @@ export const ToolsView: React.FC = () => {
 
   // Catálogo de ferramentas visíveis no ambiente atual (filtrado para 10 ferramentas homologadas no GitHub Pages)
   const visibleCatalog = useMemo(() => {
-    const isDevEnv = getDaterraEnvironment() === 'development';
-    return TOOLS_CATALOG.filter(tool => isToolAllowedInCurrentEnv(tool.id) && (tool.id !== 'calc_ird' || isDevEnv));
+    const allowIrd = isIrdEnabledForEnv(getDaterraEnvironment());
+    return TOOLS_CATALOG.filter(tool => isToolAllowedInCurrentEnv(tool.id) && (tool.id !== 'calc_ird' || allowIrd));
   }, []);
 
   // Filtro Dinâmico do Catálogo de Ferramentas (Ordenado Alfabeticamente A-Z)
@@ -621,7 +622,7 @@ export const ToolsView: React.FC = () => {
   }
 
   if (currentViewTool === 'calc_ird') {
-    return getDaterraEnvironment() === 'development'
+    return isIrdEnabledForEnv(getDaterraEnvironment())
       ? <Navigate to="/ferramentas/risco-deriva" replace />
       : <Navigate to="/ferramentas" replace />;
   }

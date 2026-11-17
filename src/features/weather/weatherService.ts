@@ -1,5 +1,11 @@
 // src/features/weather/weatherService.ts
-import type { FullWeatherData, CurrentWeather, HourlyForecastItem, DailyForecastItem } from './types.ts';
+import type {
+  FullWeatherData,
+  CurrentWeather,
+  HourlyForecastItem,
+  DailyForecastItem,
+  WeatherTelemetryQuality
+} from './types.ts';
 import {
   calculateDeltaT,
   calculateVpd,
@@ -60,6 +66,8 @@ export function saveActiveWeatherLocation(loc: WeatherLocation): void {
 }
 
 interface OpenMeteoApiResponse {
+  timezone?: string;
+  utc_offset_seconds?: number;
   current: {
     time: string;
     temperature_2m: number;
@@ -148,32 +156,76 @@ export async function fetchWeatherData(
   }
 }
 
-function transformOpenMeteoResponse(
+function isFiniteNum(v: unknown): v is number {
+  return typeof v === 'number' && Number.isFinite(v);
+}
+
+function assessTelemetryQuality(
+  rawTemp: unknown,
+  rawRh: unknown,
+  rawWind: unknown,
+  rawGust: unknown,
+  rawPrecip: unknown,
+  precipTemporalKind: WeatherTelemetryQuality['precipTemporalKind']
+): WeatherTelemetryQuality {
+  const missingFields: string[] = [];
+  if (!isFiniteNum(rawTemp)) missingFields.push('temperature_2m');
+  if (!isFiniteNum(rawRh)) missingFields.push('relative_humidity_2m');
+  if (!isFiniteNum(rawWind)) missingFields.push('wind_speed_10m');
+  if (!isFiniteNum(rawPrecip)) missingFields.push('precipitation');
+  const hasRealGustReading = isFiniteNum(rawGust);
+  return {
+    isComplete: missingFields.length === 0,
+    isGustEstimated: !hasRealGustReading,
+    hasRealGustReading,
+    missingFields,
+    precipUnit: 'mm',
+    precipTemporalKind,
+    rawTemperatureC: isFiniteNum(rawTemp) ? rawTemp : null,
+    rawHumidityPercent: isFiniteNum(rawRh) ? rawRh : null,
+    rawWindSpeedKmh: isFiniteNum(rawWind) ? rawWind : null,
+    rawWindGustsKmh: hasRealGustReading ? rawGust : null,
+    rawPrecipitationMm: isFiniteNum(rawPrecip) ? rawPrecip : null
+  };
+}
+
+export function transformOpenMeteoResponse(
   data: OpenMeteoApiResponse,
   coords: { latitude: number; longitude: number; locationName?: string }
 ): FullWeatherData {
   const cur = data.current;
-  const temp = cur.temperature_2m;
-  const rh = cur.relative_humidity_2m;
-  const wind = Math.round(cur.wind_speed_10m * 10) / 10;
-  const gusts = Math.round((cur.wind_gusts_10m || cur.wind_speed_10m * 1.2) * 10) / 10;
-  const dewPoint = cur.dew_point_2m ?? calculateDewPoint(temp, rh);
+  const curQuality = assessTelemetryQuality(
+    cur.temperature_2m,
+    cur.relative_humidity_2m,
+    cur.wind_speed_10m,
+    cur.wind_gusts_10m,
+    cur.precipitation,
+    'current_interval_accumulated'
+  );
+  const temp = curQuality.rawTemperatureC ?? 0;
+  const rh = curQuality.rawHumidityPercent ?? 0;
+  const wind = Math.round((curQuality.rawWindSpeedKmh ?? 0) * 10) / 10;
+  const gusts = Math.round(
+    (curQuality.rawWindGustsKmh ?? (curQuality.rawWindSpeedKmh ?? 0) * 1.2) * 10
+  ) / 10;
+  const curPrecip = curQuality.rawPrecipitationMm ?? 0;
+  const dewPoint = isFiniteNum(cur.dew_point_2m) ? cur.dew_point_2m : calculateDewPoint(temp, rh);
   const deltaT = calculateDeltaT(temp, rh);
   const vpd = calculateVpd(temp, rh);
   const windDirText = getWindDirectionText(cur.wind_direction_10m);
   const weatherLabel = getWmoWeatherLabel(cur.weather_code);
 
-  const sprayEvaluation = evaluateSprayWindow(deltaT, wind, gusts, rh, cur.precipitation);
+  const sprayEvaluation = evaluateSprayWindow(deltaT, wind, gusts, rh, curPrecip);
 
   const current: CurrentWeather = {
     temperatureC: Math.round(temp),
-    apparentTempC: Math.round(cur.apparent_temperature ?? temp),
+    apparentTempC: Math.round(isFiniteNum(cur.apparent_temperature) ? cur.apparent_temperature : temp),
     humidityPercent: Math.round(rh),
     windSpeedKmh: Math.round(wind),
     windDirectionDeg: cur.wind_direction_10m,
     windDirectionText: windDirText,
     windGustsKmh: Math.round(gusts),
-    precipitationMm: cur.precipitation,
+    precipitationMm: curPrecip,
     weatherCode: cur.weather_code,
     weatherLabel,
     dewPointC: dewPoint,
@@ -181,7 +233,8 @@ function transformOpenMeteoResponse(
     vpdKpa: vpd,
     sprayEvaluation,
     updatedAt: new Date().toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' }),
-    isCached: false
+    isCached: false,
+    telemetryQuality: curQuality
   };
 
   const hourlyFull: HourlyForecastItem[] = [];
@@ -193,14 +246,24 @@ function transformOpenMeteoResponse(
 
   for (let i = 0; i < data.hourly.time.length; i++) {
     const hTime = data.hourly.time[i];
-    const hTemp = data.hourly.temperature_2m[i];
-    const hRh = data.hourly.relative_humidity_2m[i];
-    const hWind = Math.round(data.hourly.wind_speed_10m[i]);
-    const hGusts = Math.round(data.hourly.wind_gusts_10m[i] || hWind * 1.2);
+    const hQuality = assessTelemetryQuality(
+      data.hourly.temperature_2m?.[i],
+      data.hourly.relative_humidity_2m?.[i],
+      data.hourly.wind_speed_10m?.[i],
+      data.hourly.wind_gusts_10m?.[i],
+      data.hourly.precipitation?.[i],
+      'hourly_accumulated'
+    );
+    const hTemp = hQuality.rawTemperatureC ?? 0;
+    const hRh = hQuality.rawHumidityPercent ?? 0;
+    const hWind = Math.round(hQuality.rawWindSpeedKmh ?? 0);
+    const hGusts = Math.round(
+      hQuality.rawWindGustsKmh ?? ((hQuality.rawWindSpeedKmh ?? 0) * 1.2)
+    );
     const hDeltaT = calculateDeltaT(hTemp, hRh);
     const hVpd = data.hourly.vapour_pressure_deficit?.[i] ?? calculateVpd(hTemp, hRh);
-    const hRain = data.hourly.precipitation[i] || 0;
-    const hProb = data.hourly.precipitation_probability[i] || 0;
+    const hRain = hQuality.rawPrecipitationMm ?? 0;
+    const hProb = isFiniteNum(data.hourly.precipitation_probability?.[i]) ? data.hourly.precipitation_probability[i] : 0;
     const hCode = data.hourly.weather_code[i];
 
     const d = new Date(hTime);
@@ -211,7 +274,7 @@ function transformOpenMeteoResponse(
       timeFormatted,
       temperatureC: Math.round(hTemp),
       humidityPercent: Math.round(hRh),
-      dewPointC: data.hourly.dew_point_2m[i] ?? calculateDewPoint(hTemp, hRh),
+      dewPointC: isFiniteNum(data.hourly.dew_point_2m?.[i]) ? data.hourly.dew_point_2m[i] : calculateDewPoint(hTemp, hRh),
       deltaT: hDeltaT,
       vpdKpa: Math.round(hVpd * 100) / 100,
       windSpeedKmh: hWind,
@@ -220,7 +283,8 @@ function transformOpenMeteoResponse(
       precipitationMm: hRain,
       weatherCode: hCode,
       weatherLabel: getWmoWeatherLabel(hCode),
-      sprayEvaluation: evaluateSprayWindow(hDeltaT, hWind, hGusts, hRh, hRain)
+      sprayEvaluation: evaluateSprayWindow(hDeltaT, hWind, hGusts, hRh, hRain),
+      telemetryQuality: hQuality
     });
   }
 
@@ -283,6 +347,8 @@ function transformOpenMeteoResponse(
       et0MmDay: et0,
       rainNextHoursMm: Math.round(rainNext12h * 10) / 10
     },
-    fetchedAt: new Date().toISOString()
+    fetchedAt: new Date().toISOString(),
+    timezone: data.timezone,
+    utcOffsetSeconds: data.utc_offset_seconds
   };
 }

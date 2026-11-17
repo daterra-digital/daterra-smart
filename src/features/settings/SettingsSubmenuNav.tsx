@@ -82,12 +82,12 @@ export const SettingsSubmenuNav: React.FC<SettingsSubmenuNavProps> = ({
   const { t } = useLanguage();
 
   return (
-    <div className="w-full max-w-full overflow-hidden space-y-3">
+    <div className="w-full max-w-full overflow-hidden space-y-2">
       {/* LINHA 1: Menus Principais de Definições */}
       <div
         role="tablist"
         aria-label={t('settings.navAriaLabel', 'Navegação de Definições')}
-        className="w-full max-w-full flex items-center gap-2 border-b border-slate-200 pb-3 overflow-x-auto scrollbar-none touch-pan-x"
+        className="w-full max-w-full flex items-center gap-2 border-b border-slate-200 pb-2 overflow-x-auto scrollbar-none touch-pan-x"
       >
         {SETTINGS_MENUS.map((menu) => {
           const Icon = menu.icon;
@@ -123,7 +123,7 @@ export const SettingsSubmenuNav: React.FC<SettingsSubmenuNavProps> = ({
         <div
           role="tablist"
           aria-label={t('exploration.tabsAriaLabel', 'Submenus da Exploração Agrícola')}
-          className="w-full max-w-full flex items-center gap-2 border-b border-emerald-200/80 pb-3 overflow-x-auto scrollbar-none touch-pan-x animate-fade-in bg-emerald-50/50 p-2 rounded-2xl"
+          className="w-full max-w-full flex items-center gap-2 border-b border-emerald-200/80 overflow-x-auto scrollbar-none touch-pan-x animate-fade-in bg-emerald-50/50 p-1.5 rounded-xl"
         >
           {EXPLORATION_TABS.map((tab) => {
             const Icon = tab.icon;
