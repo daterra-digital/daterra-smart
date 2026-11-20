@@ -5,10 +5,14 @@ import React from 'react';
 import { AlertTriangle, Pencil, Ruler } from 'lucide-react';
 import type { CanopyDensityTierId, CanopyThicknessTierId, ProfileCropMoment } from '../../../db/types.ts';
 import type { CultureMomentDraftState, CultureV11FormState } from '../services/cultureFormState';
+import type { CultureKeypadField } from '../services/cultureKeypadHelpers';
 import { evaluateCultureMomentMetrics } from '../services/cultureEngineCompatibility';
+import { DENSITY_3D_OPTIONS, TARGET_2D_OPTIONS, THICKNESS_3D_OPTIONS } from '../data/cultureGeometryOptions';
+import { CultureGeometryPanel } from './CultureGeometryPanel';
+import { SearchableRoundedDropdown } from './SearchableRoundedDropdown';
 import { NumericKeypadField } from './NumericKeypadField';
 
-export type MeasurementKeypadField = 'rowDistance' | 'canopyHeight' | 'canopyWidth' | 'lai';
+export type MeasurementKeypadField = CultureKeypadField;
 
 export interface CultureMeasurementsAccordionProps {
   mode?: 'card' | 'editor';
@@ -21,6 +25,7 @@ export interface CultureMeasurementsAccordionProps {
   onOpenKeypad: (field: MeasurementKeypadField) => void;
   onClearFormField: (field: 'rowDistance') => void;
   onUpdateMoment: (patch: Partial<CultureMomentDraftState>) => void;
+  onUpdateForm?: (patch: Partial<CultureV11FormState>) => void;
 }
 
 const parsePos = (v: string): number | undefined => {
@@ -36,7 +41,7 @@ const THICKNESS_LABELS: Record<CanopyThicknessTierId, string> = {
 
 export const CultureMeasurementsAccordion: React.FC<CultureMeasurementsAccordionProps> = ({
   mode = 'card', form, activeMoment, momentDraft, hasPendingCustomOption, fieldErrors,
-  onEditMeasurements, onOpenKeypad, onClearFormField, onUpdateMoment
+  onEditMeasurements, onOpenKeypad, onClearFormField, onUpdateMoment, onUpdateForm
 }) => {
   const rowDistanceM = parsePos(form.rowDistance);
   const canopyHeightM = mode === 'editor' ? parsePos(momentDraft.canopyHeight) : (activeMoment?.canopyHeightM ?? parsePos(momentDraft.canopyHeight));
@@ -75,60 +80,64 @@ export const CultureMeasurementsAccordion: React.FC<CultureMeasurementsAccordion
 
   if (mode === 'editor') {
     const isVinhaWithWidth = form.cropKey === 'vinha' && canopyWidthM !== undefined;
+    const thickOpt = THICKNESS_3D_OPTIONS.find((o) => o.id === momentDraft.thicknessTierManual);
+    const densOpt = DENSITY_3D_OPTIONS.find((o) => o.id === momentDraft.densityTier);
     return (
       <div className="space-y-4">
-        <NumericKeypadField label="Distância entrelinha (m)" value={form.rowDistance} unit="m"
-          helperText="Dimensão estrutural da parcela; alterar no futuro não muda momentos anteriores."
-          errorMsg={fieldErrors.rowDistance} onOpenKeypad={() => onOpenKeypad('rowDistance')} onClear={() => onClearFormField('rowDistance')} />
-        <NumericKeypadField label="Altura da vegetação / copa (m)" value={momentDraft.canopyHeight} unit="m"
-          errorMsg={fieldErrors.canopyHeight} onOpenKeypad={() => onOpenKeypad('canopyHeight')} onClear={() => onUpdateMoment({ canopyHeight: '' })} />
-        <NumericKeypadField label="Largura / espessura da copa (m)" value={momentDraft.canopyWidth} unit="m"
-          errorMsg={fieldErrors.canopyWidth} onOpenKeypad={() => onOpenKeypad('canopyWidth')} onClear={() => onUpdateMoment({ canopyWidth: '' })} />
-        {isVinhaWithWidth && metrics.derivedThicknessTier ? (
-          <div className="p-3 rounded-2xl bg-emerald-50 border border-emerald-200 text-xs text-[#114037] font-semibold">
-            Espessura LWA-V sugerida pela largura medida: <span className="font-black">{THICKNESS_LABELS[metrics.derivedThicknessTier]}</span>
-          </div>
-        ) : (
-          <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1.5">Espessura qualitativa da parede foliar</label>
-            <select value={momentDraft.thicknessTierManual || ''}
-              onChange={(e) => onUpdateMoment({ thicknessTierManual: (e.target.value || undefined) as CanopyThicknessTierId | undefined })}
-              className="w-full min-h-[48px] px-4 py-2.5 rounded-2xl border border-slate-300 bg-white text-xs font-semibold">
-              <option value="">Não indicada</option>
-              <option value="estreita">Estreita (&lt; 0,50 m)</option>
-              <option value="media">Média (0,50 a 0,80 m)</option>
-              <option value="larga">Larga (&gt; 0,80 m)</option>
-            </select>
-          </div>
+        <CultureGeometryPanel form={form} fieldErrors={fieldErrors} onUpdate={onUpdateForm ?? (() => {})} onOpenKeypad={onOpenKeypad} />
+        {form.geometryMode !== '2D' && (
+          <>
+            <NumericKeypadField label="Distância entrelinha (m)" value={form.rowDistance} unit="m"
+              helperText="Dimensão estrutural da parcela; alterar no futuro não muda momentos anteriores."
+              errorMsg={fieldErrors.rowDistance} onOpenKeypad={() => onOpenKeypad('rowDistance')} onClear={() => onClearFormField('rowDistance')} />
+            <NumericKeypadField label="Altura da vegetação / copa (m)" value={momentDraft.canopyHeight} unit="m"
+              errorMsg={fieldErrors.canopyHeight} onOpenKeypad={() => onOpenKeypad('canopyHeight')} onClear={() => onUpdateMoment({ canopyHeight: '' })} />
+            <NumericKeypadField label="Largura / espessura da copa (m)" value={momentDraft.canopyWidth} unit="m"
+              errorMsg={fieldErrors.canopyWidth} onOpenKeypad={() => onOpenKeypad('canopyWidth')} onClear={() => onUpdateMoment({ canopyWidth: '' })} />
+            {isVinhaWithWidth && metrics.derivedThicknessTier ? (
+              <div className="p-3 rounded-2xl bg-emerald-50 border border-emerald-200 text-xs text-[#114037] font-semibold">
+                Espessura LWA-V sugerida pela largura medida: <span className="font-black">{THICKNESS_LABELS[metrics.derivedThicknessTier]}</span>
+              </div>
+            ) : (
+              <SearchableRoundedDropdown label="Espessura qualitativa da parede foliar" placeholder="Não indicada"
+                value={thickOpt?.label ?? ''} selectedId={momentDraft.thicknessTierManual || ''} options={THICKNESS_3D_OPTIONS}
+                onClear={() => onUpdateMoment({ thicknessTierManual: undefined })}
+                onSelectOption={(opt) => onUpdateMoment({ thicknessTierManual: opt.id as CanopyThicknessTierId })} />
+            )}
+            <SearchableRoundedDropdown label="Densidade da copa" placeholder="Não indicada"
+              value={densOpt?.label ?? ''} selectedId={momentDraft.densityTier || ''} options={DENSITY_3D_OPTIONS}
+              onClear={() => onUpdateMoment({ densityTier: undefined })}
+              onSelectOption={(opt) => onUpdateMoment({ densityTier: opt.id as CanopyDensityTierId })} />
+            <NumericKeypadField label="Índice de Área Foliar (LAI)" value={momentDraft.lai} helperText="Opcional."
+              errorMsg={fieldErrors.lai} onOpenKeypad={() => onOpenKeypad('lai')} onClear={() => onUpdateMoment({ lai: '' })} />
+            {eppoBanner}
+          </>
         )}
-        <div>
-          <label className="block text-xs font-bold text-slate-700 mb-1.5">Densidade da copa</label>
-          <select value={momentDraft.densityTier || ''}
-            onChange={(e) => onUpdateMoment({ densityTier: (e.target.value || undefined) as CanopyDensityTierId | undefined })}
-            className="w-full min-h-[48px] px-4 py-2.5 rounded-2xl border border-slate-300 bg-white text-xs font-semibold">
-            <option value="">Não indicada</option>
-            <option value="aberta">Aberta</option>
-            <option value="moderada">Moderada</option>
-            <option value="densa">Densa</option>
-          </select>
-        </div>
-        <NumericKeypadField label="Índice de Área Foliar (LAI)" value={momentDraft.lai} helperText="Opcional."
-          errorMsg={fieldErrors.lai} onOpenKeypad={() => onOpenKeypad('lai')} onClear={() => onUpdateMoment({ lai: '' })} />
-        {eppoBanner}
       </div>
     );
   }
 
   const hasParcel = Boolean(form.editingCultureId || form.cropKey || form.name);
   const effThickness = thicknessVal ?? metrics.derivedThicknessTier;
-  const cells = [
-    { label: 'Entrelinha', value: rowDistanceM !== undefined ? `${String(rowDistanceM).replace('.', ',')} m` : 'Não indicada' },
-    { label: 'Altura copa', value: canopyHeightM !== undefined ? `${String(canopyHeightM).replace('.', ',')} m` : 'Não medida' },
-    { label: 'Largura copa', value: canopyWidthM !== undefined ? `${String(canopyWidthM).replace('.', ',')} m` : 'Não medida' },
-    { label: 'Espessura', value: effThickness ? THICKNESS_LABELS[effThickness] : 'Não indicada' },
-    { label: 'Densidade', value: densityVal ? densityVal.charAt(0).toUpperCase() + densityVal.slice(1) : 'Não indicada' },
-    { label: 'LAI', value: laiVal !== undefined ? String(laiVal).replace('.', ',') : 'Não indicado' }
-  ];
+  const h2d = Number(form.cropHeight2dCm.trim().replace(',', '.'));
+  const boomTargetCm = form.cropHeight2dCm.trim() && Number.isFinite(h2d) && h2d > 0 ? Math.round(h2d + 50) : null;
+  const cells = form.geometryMode === '2D'
+    ? [
+        { label: 'Modo', value: '2D (Arvense / Hortícola)' },
+        { label: 'Altura média', value: form.cropHeight2dCm ? `${form.cropHeight2dCm} cm` : 'Não medida' },
+        { label: 'Altura barra alvo', value: boomTargetCm !== null ? `${boomTargetCm} cm` : 'H + 50 cm' },
+        { label: 'Cobertura / IAF', value: form.groundCover2dPct ? `${form.groundCover2dPct}%` : 'Não indicada' },
+        { label: 'Alvo', value: TARGET_2D_OPTIONS.find((o) => o.id === form.applicationTarget2d)?.label || 'Não indicado' },
+        { label: 'Volume ref. 2D', value: form.referenceVolume2dLha ? `${form.referenceVolume2dLha} L/ha` : 'Não indicado' }
+      ]
+    : [
+        { label: 'Entrelinha', value: rowDistanceM !== undefined ? `${String(rowDistanceM).replace('.', ',')} m` : 'Não indicada' },
+        { label: 'Altura copa', value: canopyHeightM !== undefined ? `${String(canopyHeightM).replace('.', ',')} m` : 'Não medida' },
+        { label: 'Largura copa', value: canopyWidthM !== undefined ? `${String(canopyWidthM).replace('.', ',')} m` : 'Não medida' },
+        { label: 'Espessura', value: effThickness ? THICKNESS_LABELS[effThickness] : 'Não indicada' },
+        { label: 'Densidade', value: densityVal ? densityVal.charAt(0).toUpperCase() + densityVal.slice(1) : 'Não indicada' },
+        { label: 'LAI', value: laiVal !== undefined ? String(laiVal).replace('.', ',') : 'Não indicado' }
+      ];
 
   return (
     <div className="bg-white p-5 sm:p-6 rounded-3xl shadow-soft border border-slate-200 flex flex-col justify-between space-y-4 h-full">

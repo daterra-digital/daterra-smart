@@ -60,10 +60,11 @@ export async function hasLocalUserData(
   ];
 
   try {
-    const counts = await Promise.all(
-      userDataTables.map((table) => table.where('userId').equals(ownerId).count())
-    );
-    const dbCount = counts.reduce((sum, n) => sum + n, 0);
+    const [indexedCounts, equipmentsV12Count] = await Promise.all([
+      Promise.all(userDataTables.map((table) => table.where('userId').equals(ownerId).count())),
+      targetDb.equipments.filter((row) => row.userId === ownerId).count()
+    ]);
+    const dbCount = indexedCounts.reduce((sum, n) => sum + n, 0) + equipmentsV12Count;
     const preInsp = countPreInspectionRecords(ownerId, storage);
     const totalCount = dbCount + preInsp.count;
 

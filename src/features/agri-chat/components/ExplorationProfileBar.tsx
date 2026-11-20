@@ -4,6 +4,9 @@ import { Tractor, ChevronDown, ChevronUp } from 'lucide-react';
 import type { ProfileCulture, ProfileEquipment, ProfileNozzle, ProfileCalibration } from '../../../db/db';
 import type { ActiveExplorationContext } from '../types';
 import { ExplorationProfileDropdowns } from './ExplorationProfileDropdowns';
+import { EquipmentContextChip, type EquipmentContextChipProps } from './EquipmentContextChip';
+import { NozzleContextChip, type NozzleContextChipProps } from './NozzleContextChip';
+import { AgronomicMentionPills, type AgronomicMentionPillItem } from './AgronomicMentionPills.tsx';
 
 interface ExplorationProfileBarProps {
   cultures: ProfileCulture[];
@@ -14,6 +17,9 @@ interface ExplorationProfileBarProps {
   isContextEnabled: boolean;
   onToggleContext: (enabled: boolean) => void;
   onUpdateContext: (updates: Partial<ActiveExplorationContext>) => void;
+  equipmentContext?: EquipmentContextChipProps;
+  nozzleContext?: NozzleContextChipProps;
+  agronomicMentions?: AgronomicMentionPillItem[];
 }
 
 export const ExplorationProfileBar: React.FC<ExplorationProfileBarProps> = ({
@@ -24,10 +30,15 @@ export const ExplorationProfileBar: React.FC<ExplorationProfileBarProps> = ({
   activeContext,
   isContextEnabled,
   onToggleContext,
-  onUpdateContext
+  onUpdateContext,
+  equipmentContext,
+  nozzleContext,
+  agronomicMentions = []
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
-  const hasProfiles = cultures.length > 0 || equipments.length > 0;
+  const hasEquipmentV12 = (equipmentContext?.items.length ?? 0) > 0;
+  const hasNozzleV12 = (nozzleContext?.items.length ?? 0) > 0;
+  const hasProfiles = cultures.length > 0 || equipments.length > 0 || hasEquipmentV12 || hasNozzleV12;
 
   return (
     <div className="bg-emerald-900/10 border-b border-emerald-800/20 px-4 py-2.5 text-xs sm:text-sm shrink-0">
@@ -84,6 +95,21 @@ export const ExplorationProfileBar: React.FC<ExplorationProfileBarProps> = ({
             </>
           )}
         </div>
+      )}
+
+      {/* Pílulas de menção rápida @cultura @equipamento @bico @calibracao */}
+      {isContextEnabled && agronomicMentions.length > 0 && (
+        <AgronomicMentionPills items={agronomicMentions} compact />
+      )}
+
+      {/* Chip selecionável @equipamento (Dexie v12) */}
+      {isContextEnabled && equipmentContext && hasEquipmentV12 && (
+        <EquipmentContextChip {...equipmentContext} compact />
+      )}
+
+      {/* Chip selecionável @bico (Dexie v12) */}
+      {isContextEnabled && nozzleContext && hasNozzleV12 && (
+        <NozzleContextChip {...nozzleContext} compact />
       )}
 
       {/* Grelha de Seletores (componente dedicado) */}

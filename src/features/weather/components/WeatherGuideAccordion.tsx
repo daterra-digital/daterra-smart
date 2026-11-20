@@ -71,7 +71,7 @@ export const WeatherGuideAccordion: React.FC<WeatherGuideAccordionProps> = ({
             </div>
           </div>
 
-          {/* Citações e Fontes Oficiais */}
+          {/* Citações e Fontes de Referência */}
           {item.sourceCitations && item.sourceCitations.length > 0 && (
             <div className="pt-2 border-t border-slate-200/60 flex flex-wrap items-center gap-1.5 text-[10px] text-slate-500">
               <span className="font-bold flex items-center gap-1 text-slate-600">

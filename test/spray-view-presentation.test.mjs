@@ -150,7 +150,7 @@ describe('T6.2 — Apresentação e Integração da Vista Pulverização', () =>
       workingPressureBar: 2.5
     });
     assert.equal(fullInfo.modeLabel, 'Contexto Selecionado');
-    assert.equal(fullInfo.pressureLabel, '2.5 bar');
+    assert.equal(fullInfo.pressureLabel, '2,5 bar');
     assert.equal(fullInfo.hasPressure, true);
   });
 

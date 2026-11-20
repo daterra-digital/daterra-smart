@@ -17,7 +17,13 @@ export const CULTURE_CATALOG_OPTIONS: CatalogSelectOption[] = [
   { id: 'cerejeira', label: 'Cerejeira' },
   { id: 'amendoeira', label: 'Amendoeira' },
   { id: 'citrinos', label: 'Citrinos' },
-  { id: 'oliveira', label: 'Oliveira' }
+  { id: 'oliveira', label: 'Oliveira' },
+  { id: 'milho', label: 'Milho (Arvense 2D)' },
+  { id: 'trigo', label: 'Trigo / Cereais (2D)' },
+  { id: 'batata', label: 'Batata (2D)' },
+  { id: 'tomate_industria', label: 'Tomate de Indústria (2D)' },
+  { id: 'horticolas', label: 'Hortícolas (2D)' },
+  { id: 'pastagem', label: 'Pastagem / Forrageiras (2D)' }
 ];
 
 // Mantido vazio até validação técnica explícita de castas/cultivares; utilizador adiciona via opção local.

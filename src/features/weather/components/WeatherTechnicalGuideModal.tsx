@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { X, BookOpen, Search } from 'lucide-react';
 import { GUIDE_TOPICS, searchGuideQuestions, type GuideTopicId } from '../data/weatherGuideData.ts';
 import { WeatherGuideAccordion } from './WeatherGuideAccordion.tsx';
+import { WeatherIrdGuideCard } from './WeatherIrdGuideCard.tsx';
 
 interface WeatherTechnicalGuideModalProps {
   isOpen: boolean;
@@ -153,6 +154,9 @@ export const WeatherTechnicalGuideModal: React.FC<WeatherTechnicalGuideModalProp
 
         {/* Lista de Acordeões com Scroll */}
         <div className="p-4 sm:p-6 overflow-y-auto space-y-2.5 flex-1 bg-slate-50/30">
+          {(activeTopic === 'all' || activeTopic === 'indicadores' || /ird|deriva|200|stull|bico|uav/i.test(searchQuery)) && (
+            <WeatherIrdGuideCard />
+          )}
           {filteredQuestions.length === 0 ? (
             <div className="p-8 text-center text-slate-500 text-xs">
               Nenhuma pergunta encontrada com o critério indicado.

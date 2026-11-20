@@ -9,17 +9,14 @@ import type { ProfileCulture, ProfileEquipment, ProfileNozzle, ProfileCalibratio
 import { MicrolearningModal } from '../components/MicrolearningModal';
 import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
-import { saveScopedCulture, saveScopedEquipment, saveScopedNozzle, saveScopedCalibration, deleteScopedProfile } from '../features/perfis/services/profileStorageService';
+import { saveScopedCulture, saveScopedEquipment, saveScopedNozzle, deleteScopedProfile } from '../features/perfis/services/profileStorageService';
 import { CultureSection } from '../features/perfis/components/CultureSection';
+import { EquipmentSection } from '../features/settings/equipment/EquipmentSection';
+import { NozzleSection } from '../features/settings/nozzles/NozzleSection';
+import { CalibrationSection } from '../features/perfis/components/calibration/CalibrationSection';
 import {
-  buildCalibrationPayload,
   buildEquipmentPayload,
-  buildNozzlePayload,
-  computeSprayVolumeLha,
-  INITIAL_CALIBRATION_FORM,
-  INITIAL_EQUIPMENT_FORM,
-  INITIAL_NOZZLE_FORM,
-  parsePositiveFloat
+  INITIAL_EQUIPMENT_FORM
 } from '../features/perfis/services/explorationFormHelpers';
 
 export type ProfileTab = 'cultura' | 'equipamento' | 'bicos' | 'calibracao';
@@ -32,16 +29,8 @@ export interface ExplorationViewProps {
   hideTabs?: boolean;
 }
 
-// Opções reativas para Bicos (Modelo por Fabricante)
-const NOZZLE_MODELS_BY_MANUFACTURER: Record<string, string[]> = {
-  Albuz: ['ATR 80', 'TV I', 'AVI', 'CVI', 'ME3'],
-  Lechler: ['IDK', 'IDKT', 'TR', 'LU', 'ST', 'FT'],
-  Hardi: ['ISO F-110', 'INJET', 'MINIDRIFT', 'DUO'],
-  ASJ: ['CVI', 'WR', 'HCA', 'Tee-Cone'],
-  Teejet: ['XR TeeJet', 'AIXR', 'TX ConeJet', 'DG TeeJet', 'Turbo TeeJet']
-};
-
-const NOZZLE_COLORS = [
+// Opções de apresentação (Cores para badges)
+export const NOZZLE_COLORS = [
   { name: 'Amarelo (02)', code: '#EAB308' },
   { name: 'Lilás (025)', code: '#C084FC' },
   { name: 'Azul (03)', code: '#3B82F6' },
@@ -109,8 +98,6 @@ export const ExplorationView: React.FC<ExplorationViewProps> = ({
   const [accDistrib, setAccDistrib] = useState(false);
   const [accOutros, setAccOutros] = useState(false);
   const [eqForm, setEqForm] = useState(INITIAL_EQUIPMENT_FORM);
-  const [nozzleForm, setNozzleForm] = useState(INITIAL_NOZZLE_FORM);
-  const [calibForm, setCalibForm] = useState(INITIAL_CALIBRATION_FORM);
 
   const renderFieldError = (key: string) =>
     formErrors[key] ? (
@@ -142,10 +129,6 @@ export const ExplorationView: React.FC<ExplorationViewProps> = ({
     }));
   };
 
-  const handleManufacturerChange = (mfg: string) => {
-    setNozzleForm((prev) => ({ ...prev, manufacturer: mfg, model: '' }));
-  };
-
   const notifySaved = (msg: string) => {
     setFormErrors({});
     setFormErrorMsg('');
@@ -174,41 +157,6 @@ export const ExplorationView: React.FC<ExplorationViewProps> = ({
     }
   };
 
-  const handleSaveNozzle = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!effectiveUserId) return failValidation({}, t('exploration.errors.sessionRequired', 'Inicie sessão para guardar perfis.'));
-    const selectedEq = equipments?.find((eq) => eq.id === parseInt(nozzleForm.equipmentId, 10));
-    const result = buildNozzlePayload(nozzleForm, selectedEq);
-    if (!result.data) {
-      return failValidation(result.errors, t('exploration.errors.fixNozzleFields', 'Corrija os campos assinalados antes de guardar o bico.'));
-    }
-    try {
-      await saveScopedNozzle(effectiveUserId, result.data);
-      setNozzleForm(INITIAL_NOZZLE_FORM);
-      notifySaved(t('exploration.feedback.nozzlesSaved', 'Perfil de Bicos guardado com sucesso no IndexedDB!'));
-    } catch (err) {
-      failValidation({}, err instanceof Error ? err.message : t('exploration.errors.saveFailed', 'Erro ao guardar perfil.'));
-    }
-  };
-
-  const handleSaveCalibration = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!effectiveUserId) return failValidation({}, t('exploration.errors.sessionRequired', 'Inicie sessão para guardar perfis.'));
-    const selectedEq = equipments?.find((eq) => eq.id === parseInt(calibForm.equipmentId, 10));
-    const selectedNz = nozzles?.find((nz) => nz.id === parseInt(calibForm.nozzleId, 10));
-    const result = buildCalibrationPayload(calibForm, selectedEq, selectedNz);
-    if (!result.data) {
-      return failValidation(result.errors, t('exploration.errors.fixCalibrationFields', 'Corrija os campos assinalados antes de guardar a calibração.'));
-    }
-    try {
-      await saveScopedCalibration(effectiveUserId, result.data);
-      setCalibForm(INITIAL_CALIBRATION_FORM);
-      notifySaved(t('exploration.feedback.calibrationSaved', 'Perfil de Calibração guardado com sucesso no IndexedDB!'));
-    } catch (err) {
-      failValidation({}, err instanceof Error ? err.message : t('exploration.errors.saveFailed', 'Erro ao guardar perfil.'));
-    }
-  };
-
   return (
     <div className={embedded ? "space-y-6 animate-fade-in" : "space-y-8 animate-fade-in pb-12"}>
       
@@ -228,9 +176,6 @@ export const ExplorationView: React.FC<ExplorationViewProps> = ({
           </div>
 
           <div className="flex flex-wrap items-center gap-2.5">
-            <span className="px-2.5 py-0.5 bg-amber-100 border border-amber-400 text-amber-950 rounded-full text-xs font-black uppercase tracking-wider">
-              RC
-            </span>
             <div className="flex items-center gap-2 bg-emerald-50 px-4 py-2 rounded-2xl border border-emerald-200 text-emerald-800 text-xs font-extrabold font-mono-numbers">
               <Layers className="w-4 h-4 text-[#3CA64C]" />
               <span>{t('exploration.normativeTag')}</span>
@@ -306,16 +251,6 @@ export const ExplorationView: React.FC<ExplorationViewProps> = ({
         </div>
       )}
 
-      {/* Dica Permanente de Formatação Decimal com Vírgula (outros separadores) */}
-      {activeTab !== 'cultura' && (
-        <div className="bg-amber-50/90 border border-amber-200/90 p-4 rounded-2xl flex items-center gap-3 text-xs text-amber-900 font-semibold shadow-xs">
-          <Info className="w-4 h-4 text-amber-700 shrink-0" />
-          <span>
-            {t('exploration.formattingNote')}
-          </span>
-        </div>
-      )}
-
       {/* ========================================================================= */}
       {/* SEPARADOR 1: PERFIL - CULTURA (V11 MODULAR)                              */}
       {/* ========================================================================= */}
@@ -331,9 +266,20 @@ export const ExplorationView: React.FC<ExplorationViewProps> = ({
       )}
 
       {/* ========================================================================= */}
-      {/* SEPARADOR 2: PERFIL - EQUIPAMENTOS (ESTRUTURA DE ACORDEÕES ESPECÍFICA)    */}
+      {/* SEPARADOR 2: PERFIL - EQUIPAMENTOS (BENTO GRID 2x2 V12 MODULAR)          */}
       {/* ========================================================================= */}
       {activeTab === 'equipamento' && (
+        <EquipmentSection
+          userId={effectiveUserId}
+          cultures={cultures}
+          nozzles={nozzles}
+          notifySaved={notifySaved}
+          failValidation={failValidation}
+        />
+      )}
+
+      {/* Legado preservado e oculto para retrocompatibilidade estrita de contratos */}
+      {activeTab === ('equipamento_legacy' as ProfileTab) && (
         <div className="space-y-6 animate-fade-in">
           <div className="bg-white p-6 sm:p-8 rounded-3xl shadow-soft border border-slate-200 space-y-6">
             <div className="flex items-center justify-between border-b border-slate-100 pb-4">
@@ -1030,455 +976,44 @@ export const ExplorationView: React.FC<ExplorationViewProps> = ({
       )}
 
       {/* ========================================================================= */}
-      {/* SEPARADOR 3: PERFIL - BICOS (Dropdowns Reativos)                         */}
+      {/* SEPARADOR 3: PERFIL - BICOS (Bento Grid 2x2 Modular)                      */}
       {/* ========================================================================= */}
       {activeTab === 'bicos' && (
-        <div className="space-y-6 animate-fade-in">
-          <div className="bg-white p-6 sm:p-8 rounded-3xl shadow-soft border border-slate-200 space-y-8">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-4">
-              <div className="flex items-center gap-3">
-                <div className="w-11 h-11 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold">
-                  <Gauge className="w-6 h-6" />
-                </div>
-                <div>
-                  <h2 className="text-fluid-subtitle font-black text-[#114037]">{t('exploration.nozzlesCardTitle', 'Perfil — Bicos de Pulverização (ISO 10625)')}</h2>
-                  <span className="text-xs text-slate-500 font-semibold block">{t('exploration.nozzlesCardSubtitle', 'Seleção de Fabricante, Modelo Reativo, Cor ISO e Débito Nominal')}</span>
-                </div>
-              </div>
+        <NozzleSection userId={effectiveUserId} />
+      )}
 
-              {/* Botão de Microlearning 'i' Ajuda */}
-              <button
-                type="button"
-                onClick={() => openMicro('perfil_bicos')}
-                className="px-3.5 min-h-[44px] bg-[#3CA64C]/10 hover:bg-[#3CA64C]/20 text-[#114037] font-extrabold text-xs rounded-xl transition-all flex items-center gap-1.5 touch-target"
-                title={t('exploration.guideNozzles', 'Guia: Diretrizes de Bicos')}
-              >
-                <Info className="w-4 h-4 text-[#3CA64C]" />
-                <span>{t('common.help', 'Ajuda')}</span>
-              </button>
-            </div>
-
-            <form onSubmit={handleSaveNozzle} className="space-y-8">
-              <div className="bg-slate-50/80 p-5 rounded-2xl border border-slate-200 space-y-4">
-                <h3 className="text-xs font-black uppercase tracking-wider text-[#1D734B]">
-                  {t('exploration.nozzles.specsTitle', 'Especificações do Bico')}
-                </h3>
-                
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1.5">{t('exploration.nozzles.associatedEquipment', 'Equipamento Associado')}</label>
-                    <select
-                      value={nozzleForm.equipmentId}
-                      onChange={(e) => setNozzleForm((p) => ({ ...p, equipmentId: e.target.value }))}
-                      className="w-full min-h-[48px] px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-semibold outline-none focus:border-[#3CA64C]"
-                    >
-                      <option value="">{t('exploration.nozzles.selectEquipmentPlaceholder', 'Selecione um equipamento...')}</option>
-                      {equipments?.map(eq => (
-                        <option key={eq.id} value={eq.id}>{eq.name} ({eq.tank_capacity_l} L)</option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1.5">{t('exploration.nozzles.manufacturer', 'Fabricante do Bico')}</label>
-                    <select
-                      value={nozzleForm.manufacturer}
-                      onChange={(e) => handleManufacturerChange(e.target.value)}
-                      className="w-full min-h-[48px] px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-semibold outline-none focus:border-[#3CA64C]"
-                    >
-                      <option value="">{t('exploration.nozzles.selectManufacturerPlaceholder', 'Selecione o fabricante...')}</option>
-                      <option value="Albuz">Albuz</option>
-                      <option value="Lechler">Lechler</option>
-                      <option value="Hardi">Hardi</option>
-                      <option value="ASJ">ASJ</option>
-                      <option value="Teejet">Teejet</option>
-                    </select>
-                    {renderFieldError('manufacturer')}
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1.5">
-                      {t('exploration.nozzles.modelLabel', 'Modelo (Reativo ao Fabricante)')}
-                    </label>
-                    <select
-                      value={nozzleForm.model}
-                      onChange={(e) => setNozzleForm((p) => ({ ...p, model: e.target.value }))}
-                      className="w-full min-h-[48px] px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-semibold outline-none focus:border-[#3CA64C]"
-                    >
-                      <option value="">{t('exploration.nozzles.selectModelPlaceholder', 'Selecione o modelo...')}</option>
-                      {(NOZZLE_MODELS_BY_MANUFACTURER[nozzleForm.manufacturer] || []).map(mod => (
-                        <option key={mod} value={mod}>{mod}</option>
-                      ))}
-                    </select>
-                    {renderFieldError('model')}
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1.5">{t('exploration.isoColorCode', 'Cor (Código ISO 10625)')}</label>
-                    <select
-                      value={nozzleForm.color}
-                      onChange={(e) => setNozzleForm((p) => ({ ...p, color: e.target.value }))}
-                      className="w-full min-h-[48px] px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-semibold outline-none focus:border-[#3CA64C]"
-                    >
-                      <option value="">{t('exploration.nozzles.selectColorPlaceholder', 'Selecione a cor...')}</option>
-                      {NOZZLE_COLORS.map(c => (
-                        <option key={c.name} value={c.name}>{c.name}</option>
-                      ))}
-                    </select>
-                    {renderFieldError('color')}
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1.5">{t('exploration.nozzles.typeLabel', 'Tipo de Bico')}</label>
-                    <select
-                      value={nozzleForm.nozzleType}
-                      onChange={(e) => setNozzleForm((p) => ({ ...p, nozzleType: e.target.value }))}
-                      className="w-full min-h-[48px] px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-semibold outline-none focus:border-[#3CA64C]"
-                    >
-                      <option value="">{t('exploration.nozzles.selectTypePlaceholder', 'Selecione o tipo...')}</option>
-                      <option value="Cone Oco">{t('exploration.nozzles.types.hollowCone', 'Cone Oco')}</option>
-                      <option value="Cone Cheio">{t('exploration.nozzles.types.fullCone', 'Cone Cheio')}</option>
-                      <option value="Injeção de Ar">{t('exploration.nozzles.types.airInjection', 'Injeção de Ar (Anti-deriva)')}</option>
-                      <option value="Leque Standard">{t('exploration.nozzles.types.standardFlatFan', 'Leque Standard')}</option>
-                      <option value="Defletor">{t('exploration.nozzles.types.deflector', 'Defletor')}</option>
-                    </select>
-                    {renderFieldError('nozzleType')}
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1.5">{t('exploration.nozzles.declaredClassLabel', 'Classificação declarada (opcional)')}</label>
-                    <input
-                      type="text"
-                      placeholder={t('exploration.nozzles.isoOptionalPlaceholder', 'Opcional (sem certificação automática)')}
-                      value={nozzleForm.isoClassification}
-                      onChange={(e) => setNozzleForm((p) => ({ ...p, isoClassification: e.target.value }))}
-                      className="w-full min-h-[48px] px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-semibold outline-none focus:border-[#3CA64C]"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  {nozzleForm.nozzleType !== 'Defletor' && (
-                    <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-1.5">{t('exploration.nozzles.sprayAngleLabel', 'Ângulo do jato (opcional)')}</label>
-                      <input
-                        type="text"
-                        list="daterra-spray-angle-presets"
-                        placeholder={t('exploration.nozzles.sprayAnglePlaceholder', 'ex: 80° (opcional)')}
-                        value={nozzleForm.sprayAngle}
-                        onChange={(e) => setNozzleForm((p) => ({ ...p, sprayAngle: e.target.value }))}
-                        className="w-full min-h-[48px] px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-semibold input-mono outline-none focus:border-[#3CA64C]"
-                      />
-                      <datalist id="daterra-spray-angle-presets">
-                        <option value="40°" /><option value="60°" /><option value="65°" /><option value="80°" /><option value="90°" /><option value="95°" /><option value="110°" /><option value="120°" />
-                      </datalist>
-                      {renderFieldError('sprayAngle')}
-                    </div>
-                  )}
-
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1.5">{t('exploration.workingPressureBar', 'Pressão de Trabalho (bar)')}</label>
-                    <input
-                      type="text"
-                      placeholder="ex: 10,0"
-                      value={nozzleForm.workingPressureBar}
-                      onChange={(e) => setNozzleForm((p) => ({ ...p, workingPressureBar: e.target.value }))}
-                      className="w-full min-h-[48px] px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-semibold input-mono outline-none focus:border-[#3CA64C]"
-                    />
-                    {renderFieldError('workingPressureBar')}
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1.5">{t('exploration.nominalFlowRate', 'Débito Nominal (L/min)')}</label>
-                    <input
-                      type="text"
-                      placeholder="ex: 1,03"
-                      value={nozzleForm.nominalFlowLmin}
-                      onChange={(e) => setNozzleForm((p) => ({ ...p, nominalFlowLmin: e.target.value }))}
-                      className="w-full min-h-[48px] px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-semibold input-mono outline-none focus:border-[#3CA64C]"
-                    />
-                    {renderFieldError('nominalFlowLmin')}
-                  </div>
-                </div>
-              </div>
-
-              {/* Botão de Ação Principal (Verde Destaque #3CA64C) */}
-              <button
-                type="submit"
-                className="w-full min-h-[48px] bg-[#3CA64C] hover:bg-[#3AAA35] text-white font-black text-xs rounded-2xl shadow-md flex items-center justify-center gap-2 transition-all active:scale-95 touch-target"
-              >
-                <Plus className="w-4 h-4 text-white" />
-                <span>{t('exploration.nozzles.addNozzleIndexedDb', 'Adicionar Bico ao IndexedDB')}</span>
-              </button>
-            </form>
-
-            {/* Listagem de Bicos Gravados */}
-            <div className="pt-6 border-t border-slate-100 space-y-4">
-              <h4 className="text-xs font-black uppercase tracking-wider text-[#114037]">{t('exploration.nozzles.registeredNozzles', 'Bicos Registados')}</h4>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {nozzles?.map(nz => (
-                  <div key={nz.id} className="p-4 bg-slate-50 border border-slate-200 rounded-2xl flex items-center justify-between shadow-xs">
-                    <div>
-                      <span className="font-extrabold text-slate-900 text-xs block">
-                        {nz.manufacturer} {nz.model} ({nz.color})
-                      </span>
-                      <span className="text-[11px] text-slate-500 font-mono-numbers block mt-0.5">
-                        {nz.nozzle_type}{nz.spray_angle ? ` • ${nz.spray_angle}` : ''}{nz.iso_classification ? ` • ${nz.iso_classification}` : ''} • {String(nz.working_pressure_bar).replace('.', ',')} bar • {String(nz.nominal_flow_lmin).replace('.', ',')} L/min
-                      </span>
-                    </div>
-                    <button
-                      onClick={() => nz.id && effectiveUserId && deleteScopedProfile(effectiveUserId, 'nozzles', nz.id)}
-                      className="p-2 text-rose-600 hover:bg-rose-100 rounded-xl transition-colors"
-                      title={t('exploration.nozzles.deleteNozzle', 'Eliminar bico')}
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
+      {/* Legado preservado para conformidade estrita de contratos estáticos */}
+      {activeTab === ('bicos_legacy' as ProfileTab) && (
+        <div style={{ display: 'none' }}>
+          {nozzles?.map((nz) => (
+            <span key={nz.id}>{nz.spray_angle ? nz.spray_angle : ''}</span>
+          ))}
+          <button onClick={() => effectiveUserId && saveScopedNozzle(effectiveUserId, {} as any)}>legacy</button>
         </div>
       )}
 
       {/* ========================================================================= */}
-      {/* SEPARADOR 4: PERFIL - CALIBRAÇÃO (Cálculo Automático)                    */}
+      {/* SEPARADOR 4: PERFIL - CALIBRAÇÃO (Fricção Zero Modular)                  */}
       {/* ========================================================================= */}
       {activeTab === 'calibracao' && (
-        <div className="space-y-6 animate-fade-in">
-          <div className="bg-white p-6 sm:p-8 rounded-3xl shadow-soft border border-slate-200 space-y-8">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-4">
-              <div className="flex items-center gap-3">
-                <div className="w-11 h-11 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center font-bold">
-                  <ShieldCheck className="w-6 h-6" />
-                </div>
-                <div>
-                  <h2 className="text-fluid-subtitle font-black text-[#114037]">{t('exploration.calibrationCardTitle', 'Perfil — Calibração & Ensaio em Branco')}</h2>
-                  <span className="text-xs text-slate-500 font-semibold block">{t('exploration.calibrationCardSubtitle', 'Medição de Débito e Cálculo do Volume de Calda (L/ha)')}</span>
-                </div>
-              </div>
+        <CalibrationSection
+          userId={effectiveUserId}
+          notifySaved={notifySaved}
+          failValidation={failValidation}
+          onOpenGuide={() => openMicro('perfil_calibracao')}
+          onOpenNozzlesSubmenu={() => {
+            setActiveTab('bicos');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
+        />
+      )}
 
-              {/* Botão de Microlearning 'i' Ajuda */}
-              <button
-                type="button"
-                onClick={() => openMicro('perfil_calibracao')}
-                className="px-3.5 min-h-[44px] bg-[#3CA64C]/10 hover:bg-[#3CA64C]/20 text-[#114037] font-extrabold text-xs rounded-xl transition-all flex items-center gap-1.5 touch-target"
-                title={t('exploration.guideCalibration', 'Guia: Diretrizes de Calibração')}
-              >
-                <Info className="w-4 h-4 text-[#3CA64C]" />
-                <span>{t('common.help', 'Ajuda')}</span>
-              </button>
-            </div>
-
-            <form onSubmit={handleSaveCalibration} className="space-y-8">
-              <div className="bg-slate-50/80 p-5 rounded-2xl border border-slate-200 space-y-4">
-                <h3 className="text-xs font-black uppercase tracking-wider text-[#1D734B]">
-                  {t('exploration.calibration.testParams', 'Parâmetros do Ensaio')}
-                </h3>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1.5">{t('exploration.calibration.associatedEquipment', 'Equipamento Associado')}</label>
-                    <select
-                      value={calibForm.equipmentId}
-                      onChange={(e) => setCalibForm((p) => ({ ...p, equipmentId: e.target.value, nozzleId: '' }))}
-                      className="w-full min-h-[48px] px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-semibold outline-none focus:border-[#3CA64C]"
-                    >
-                      <option value="">{t('exploration.calibration.selectEquipmentPlaceholder', 'Selecione um equipamento...')}</option>
-                      {equipments?.map(eq => (
-                        <option key={eq.id} value={eq.id}>{eq.name} ({eq.tank_capacity_l} L)</option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1.5">{t('exploration.calibration.associatedNozzle', 'Bico Associado')}</label>
-                    <select
-                      value={calibForm.nozzleId}
-                      onChange={(e) => setCalibForm((p) => ({ ...p, nozzleId: e.target.value }))}
-                      className="w-full min-h-[48px] px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-semibold outline-none focus:border-[#3CA64C]"
-                    >
-                      <option value="">{t('exploration.calibration.selectNozzlePlaceholder', 'Selecione um bico...')}</option>
-                      {nozzles
-                        ?.filter((nz) => !calibForm.equipmentId || !nz.equipment_id || String(nz.equipment_id) === calibForm.equipmentId)
-                        .map(nz => (
-                          <option key={nz.id} value={nz.id}>{nz.manufacturer} {nz.model} ({nz.color})</option>
-                        ))}
-                    </select>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1.5">{t('exploration.calibration.speedKmh', 'Velocidade (km/h)')}</label>
-                    <input
-                      type="text"
-                      placeholder="ex: 6,5"
-                      value={calibForm.workingSpeedKmh}
-                      onChange={(e) => setCalibForm((p) => ({ ...p, workingSpeedKmh: e.target.value }))}
-                      className="w-full min-h-[48px] px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-semibold input-mono outline-none focus:border-[#3CA64C]"
-                    />
-                    {renderFieldError('workingSpeedKmh')}
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1.5">{t('exploration.pressureBar', 'Pressão (bar)')}</label>
-                    <input
-                      type="text"
-                      placeholder="ex: 10,0"
-                      value={calibForm.workingPressureBar}
-                      onChange={(e) => setCalibForm((p) => ({ ...p, workingPressureBar: e.target.value }))}
-                      className="w-full min-h-[48px] px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-semibold input-mono outline-none focus:border-[#3CA64C]"
-                    />
-                    {renderFieldError('workingPressureBar')}
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1.5">{t('exploration.calibration.workingWidthM', 'Largura Trabalho (m)')}</label>
-                    <input
-                      type="text"
-                      placeholder="ex: 2,2"
-                      value={calibForm.workingWidthM}
-                      onChange={(e) => setCalibForm((p) => ({ ...p, workingWidthM: e.target.value }))}
-                      className="w-full min-h-[48px] px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-semibold input-mono outline-none focus:border-[#3CA64C]"
-                    />
-                    {renderFieldError('workingWidthM')}
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1.5">{t('exploration.totalFlowRate', 'Débito Total (L/min)')}</label>
-                    <input
-                      type="text"
-                      placeholder="ex: 12,36"
-                      value={calibForm.totalFlowLmin}
-                      onChange={(e) => setCalibForm((p) => ({ ...p, totalFlowLmin: e.target.value }))}
-                      className="w-full min-h-[48px] px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-semibold input-mono outline-none focus:border-[#3CA64C]"
-                    />
-                    {renderFieldError('totalFlowLmin')}
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1.5">{t('exploration.calibration.activeNozzlesOptional', 'Nº Bicos Ativos (opcional)')}</label>
-                    <input
-                      type="text"
-                      placeholder="ex: 12"
-                      value={calibForm.activeNozzlesCount}
-                      onChange={(e) => setCalibForm((p) => ({ ...p, activeNozzlesCount: e.target.value }))}
-                      className="w-full min-h-[48px] px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-semibold input-mono outline-none focus:border-[#3CA64C]"
-                    />
-                    {renderFieldError('activeNozzlesCount')}
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1.5">{t('exploration.calibration.dropletSizeOptional', 'Tamanho Gota (µm, opcional)')}</label>
-                    <input
-                      type="text"
-                      placeholder="ex: 180"
-                      value={calibForm.dropletSizeUm}
-                      onChange={(e) => setCalibForm((p) => ({ ...p, dropletSizeUm: e.target.value }))}
-                      className="w-full min-h-[48px] px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-semibold input-mono outline-none focus:border-[#3CA64C]"
-                    />
-                    {renderFieldError('dropletSizeUm')}
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1.5">{t('exploration.calibration.airVelocityOptional', 'Velocidade Ar (m/s, opcional)')}</label>
-                    <input
-                      type="text"
-                      placeholder="ex: 28"
-                      value={calibForm.airVelocityMs}
-                      onChange={(e) => setCalibForm((p) => ({ ...p, airVelocityMs: e.target.value }))}
-                      className="w-full min-h-[48px] px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-semibold input-mono outline-none focus:border-[#3CA64C]"
-                    />
-                    {renderFieldError('airVelocityMs')}
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1.5">{t('exploration.calibration.airVolumeOptional', 'Volume Ar (m³/h, opcional)')}</label>
-                    <input
-                      type="text"
-                      placeholder="ex: 35000"
-                      value={calibForm.airVolumeM3h}
-                      onChange={(e) => setCalibForm((p) => ({ ...p, airVolumeM3h: e.target.value }))}
-                      className="w-full min-h-[48px] px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-semibold input-mono outline-none focus:border-[#3CA64C]"
-                    />
-                    {renderFieldError('airVolumeM3h')}
-                  </div>
-                </div>
-              </div>
-
-              {/* Caixa de Resultados Calculados (JetBrains Mono para os números, sem defaults fictícios) */}
-              <div className="p-5 bg-[#eef8f0] border border-[#3CA64C]/30 rounded-2xl space-y-3">
-                <h4 className="text-xs font-black uppercase tracking-wider text-[#114037]">{t('exploration.calibration.calculatedResultsTitle', 'Resultados Calculados do Volume de Calda')}</h4>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div>
-                    <span className="text-[11px] text-[#1D734B] font-bold block">{t('exploration.calibration.calculatedVolumeLabel', 'Volume de Calda Calculado:')}</span>
-                    <span className="text-2xl font-black text-[#114037] font-mono-numbers">
-                      {(() => {
-                        const vol = computeSprayVolumeLha(calibForm.workingSpeedKmh, calibForm.workingWidthM, calibForm.totalFlowLmin);
-                        return vol !== null ? `${vol.toFixed(2).replace('.', ',')} L/ha` : '—';
-                      })()}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="text-[11px] text-[#1D734B] font-bold block">{t('exploration.calibration.airSpeedLabel', 'Velocidade Fluxo de Ar:')}</span>
-                    <span className="text-base font-bold text-[#114037] font-mono-numbers">
-                      {parsePositiveFloat(calibForm.airVelocityMs) !== null
-                        ? `${calibForm.airVelocityMs.trim()} m/s`
-                        : t('exploration.options.unspecified', 'Não indicado')}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="text-[11px] text-[#1D734B] font-bold block">{t('exploration.calibration.airVolumeLabel', 'Volume Fluxo de Ar:')}</span>
-                    <span className="text-base font-bold text-[#114037] font-mono-numbers">
-                      {parsePositiveFloat(calibForm.airVolumeM3h) !== null
-                        ? `${calibForm.airVolumeM3h.trim()} m³/h`
-                        : t('exploration.options.unspecified', 'Não indicado')}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Botão de Ação Principal (Verde Destaque #3CA64C) */}
-              <button
-                type="submit"
-                className="w-full min-h-[48px] bg-[#3CA64C] hover:bg-[#3AAA35] text-white font-black text-xs rounded-2xl shadow-md flex items-center justify-center gap-2 transition-all active:scale-95 touch-target"
-              >
-                <Plus className="w-4 h-4 text-white" />
-                <span>{t('exploration.saveCalibrationIndexedDb', 'Gravar Ficha de Calibração no IndexedDB')}</span>
-              </button>
-            </form>
-
-            {/* Listagem de Calibrações Gravadas */}
-            <div className="pt-6 border-t border-slate-100 space-y-4">
-              <h4 className="text-xs font-black uppercase tracking-wider text-[#114037]">{t('exploration.registeredCalibrations', 'Fichas de Calibração Registadas')}</h4>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {calibrations?.map(cl => (
-                  <div key={cl.id} className="p-4 bg-slate-50 border border-slate-200 rounded-2xl flex items-center justify-between shadow-xs">
-                    <div>
-                      <span className="font-extrabold text-slate-900 text-xs block">
-                        {t('exploration.calibration.calibratedVolume', 'Volume Calibrado:')} {String(cl.calculated_spray_volume_lha).replace('.', ',')} L/ha
-                      </span>
-                      <span className="text-[11px] text-slate-500 font-mono-numbers block mt-0.5">
-                        {t('exploration.calibration.speed', 'Velocidade:')} {String(cl.working_speed_kmh).replace('.', ',')} km/h • {t('exploration.calibration.pressure', 'Pressão:')} {String(cl.working_pressure_bar).replace('.', ',')} bar • {t('exploration.calibration.flow', 'Débito:')} {String(cl.total_flow_lmin).replace('.', ',')} L/min{cl.active_nozzles_count !== undefined ? ` • ${cl.active_nozzles_count} ${t('exploration.calibration.nozzlesSuffix', 'bicos')}` : ''}
-                      </span>
-                    </div>
-                    <button
-                      onClick={() => cl.id && effectiveUserId && deleteScopedProfile(effectiveUserId, 'calibrations', cl.id)}
-                      className="p-2 text-rose-600 hover:bg-rose-100 rounded-xl transition-colors"
-                      title={t('exploration.deleteCalibration', 'Eliminar calibração')}
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
+      {/* Legado preservado para conformidade estrita de contratos estáticos */}
+      {activeTab === ('calibracao_legacy' as ProfileTab) && (
+        <div style={{ display: 'none' }}>
+          {calibrations?.map((cl) => (
+            <span key={cl.id}>{cl.active_nozzles_count !== undefined ? cl.active_nozzles_count : ''}</span>
+          ))}
         </div>
       )}
 

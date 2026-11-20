@@ -68,19 +68,23 @@ describe('SEC-REM-01: Isolamento Local dos Perfis por Utilizador', () => {
     assert.ok(content.includes('saveScopedCulture'), 'Deve usar saveScopedCulture');
     assert.ok(content.includes('saveScopedEquipment'), 'Deve usar saveScopedEquipment');
     assert.ok(content.includes('saveScopedNozzle'), 'Deve usar saveScopedNozzle');
-    assert.ok(content.includes('saveScopedCalibration'), 'Deve usar saveScopedCalibration');
+    assert.ok(content.includes('<CalibrationSection'), 'Deve delegar calibrações a CalibrationSection');
+    const calCtrl = fs.readFileSync(path.resolve('src/features/perfis/hooks/useCalibrationController.ts'), 'utf8');
+    assert.ok(calCtrl.includes('saveCalibrationAuditRecord'), 'Deve usar saveCalibrationAuditRecord scoped');
+    assert.ok(calCtrl.includes('deleteCalibrationAuditRecord'), 'Deve usar deleteCalibrationAuditRecord scoped');
     assert.ok(content.includes('deleteScopedProfile'), 'Deve usar deleteScopedProfile');
   });
 
-  it('3. WeatherContextAccordion e WeatherContextBar devem filtrar perfis por effectiveUserId', () => {
+  it('3. WeatherContextAccordion e WeatherContextBar devem filtrar perfis por utilizador com guardião de propriedade', () => {
     const accordionPath = path.resolve('src/features/weather/components/WeatherContextAccordion.tsx');
-    assert.ok(fs.existsSync(accordionPath));
-    const accContent = fs.readFileSync(accordionPath, 'utf8');
+    const hookPath = path.resolve('src/features/weather/hooks/useWeatherProfilesContext.ts');
+    const loaderPath = path.resolve('src/features/weather/utils/weatherProfileLoader.ts');
+    assert.ok(fs.existsSync(accordionPath) && fs.existsSync(hookPath) && fs.existsSync(loaderPath));
+    const accContent = fs.readFileSync(accordionPath, 'utf8') + '\n' + fs.readFileSync(hookPath, 'utf8') + '\n' + fs.readFileSync(loaderPath, 'utf8');
 
-    assert.ok(accContent.includes("db.profiles_cultures.where('userId').equals(effectiveUserId)"), 'Accordion cultura scoped');
-    assert.ok(accContent.includes("db.profiles_equipment.where('userId').equals(effectiveUserId)"), 'Accordion equipamento scoped');
-    assert.ok(accContent.includes("db.profiles_nozzles.where('userId').equals(effectiveUserId)"), 'Accordion bicos scoped');
-    assert.ok(accContent.includes("db.profiles_calibrations.where('userId').equals(effectiveUserId)"), 'Accordion calibrações scoped');
+    assert.ok(accContent.includes('isLocalOrOwnedByUser') && accContent.includes('isValidOwnerId'), 'Accordion deve filtrar registos por guardião de propriedade');
+    assert.ok(accContent.includes('loadScopedWeatherCultures') && accContent.includes('loadScopedWeatherCalibrations'), 'Hook deve usar loaders scoped para culturas e calibrações');
+    assert.ok(accContent.includes('loadScopedWeatherEquipments') && accContent.includes('loadScopedWeatherNozzles'), 'Hook deve usar loaders scoped para equipamentos e bicos');
     assert.ok(accContent.includes('onContextChange(null)'), 'Accordion deve limpar contexto ao mudar de conta/logout');
 
     const barPath = path.resolve('src/features/weather/components/WeatherContextBar.tsx');

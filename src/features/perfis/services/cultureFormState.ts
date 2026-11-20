@@ -4,12 +4,19 @@
 import type {
   CanopyDensityTierId,
   CanopyThicknessTierId,
+  Culture2DTargetMode,
+  Culture3DConductionMode,
+  Culture3DGroundCoverMode,
+  CultureGeometryMode,
   CultureMomentMeasurementSource,
+  CultureWindbreakBarrier,
   ProfileCropMoment,
   ProfileCulture
 } from '../../../db/types.ts';
 import { isChronologicallyLatest, todayIsoCivil } from './cultureDateUtils.ts';
 import { CULTURE_CATALOG_OPTIONS } from '../data/cultureCatalogData.ts';
+import { inferCultureGeometryMode } from '../data/cultureGeometryOptions.ts';
+import { buildCultureKeypadConfig, type CultureKeypadField } from './cultureKeypadHelpers.ts';
 
 /** Cartões da vista Bento que abrem o Editor Focado. */
 export type CultureEditorCard = 'parcel_core' | 'parcel_data' | 'parcel_location' | 'moment' | 'measurements';
@@ -51,27 +58,28 @@ export interface CultureV11FormState {
   municipality: string;
   parish: string;
   notes: string;
+  geometryMode: CultureGeometryMode;
+  cropHeight2dCm: string;
+  groundCover2dPct: string;
+  applicationTarget2d: Culture2DTargetMode | '';
+  referenceVolume2dLha: string;
+  interrowCover3d: Culture3DGroundCoverMode | '';
+  conductionMode3d: Culture3DConductionMode | '';
+  cleanTrunkHeightM: string;
+  windbreakBarrier: CultureWindbreakBarrier | '';
+  sensitiveZoneDistanceM: string;
+  rowAzimuthDeg: string;
+  parcelSlopePct: string;
 }
 
 export function createInitialCultureForm(): CultureV11FormState {
   return {
-    name: '',
-    cropKey: '',
-    cropLabel: '',
-    area: '',
-    varietyOptionId: '',
-    varietyLabel: '',
-    seasonLabel: '',
-    installationOptionId: '',
-    installationLabel: '',
-    conductionOptionId: '',
-    conductionLabel: '',
-    rowDistance: '',
-    countryCode: 'PT',
-    adminRegion: '',
-    municipality: '',
-    parish: '',
-    notes: ''
+    name: '', cropKey: '', cropLabel: '', area: '', varietyOptionId: '', varietyLabel: '', seasonLabel: '',
+    installationOptionId: '', installationLabel: '', conductionOptionId: '', conductionLabel: '', rowDistance: '',
+    countryCode: 'PT', adminRegion: '', municipality: '', parish: '', notes: '',
+    geometryMode: '3D', cropHeight2dCm: '', groundCover2dPct: '', applicationTarget2d: '', referenceVolume2dLha: '',
+    interrowCover3d: '', conductionMode3d: '', cleanTrunkHeightM: '',
+    windbreakBarrier: '', sensitiveZoneDistanceM: '', rowAzimuthDeg: '', parcelSlopePct: ''
   };
 }
 
@@ -96,12 +104,12 @@ export function formatNumField(value: number | undefined): string {
 }
 
 export function parseOptionalPositiveNum(
-  raw: string,
+  raw: string | undefined,
   fieldKey: string,
   label: string,
   errors: Record<string, string>
 ): number | undefined {
-  const trimmed = raw.trim();
+  const trimmed = (raw ?? '').trim();
   if (!trimmed) return undefined;
   const num = Number(trimmed.replace(',', '.'));
   if (!Number.isFinite(num) || num <= 0) {
@@ -119,25 +127,28 @@ export function resolveCropKeyFromCulture(c: ProfileCulture): string {
 }
 
 export function mapCultureToFormState(c: ProfileCulture): CultureV11FormState {
+  const cropKey = resolveCropKeyFromCulture(c);
+  const hasWoody = Boolean(c.last_trv_m3_ha || c.last_lwa_m2_ha || c.row_distance_m || c.canopy_height_m);
   return {
-    editingCultureId: c.id,
-    name: c.name || '',
-    cropKey: resolveCropKeyFromCulture(c),
-    cropLabel: c.crop_type || '',
-    area: formatNumField(c.area_ha),
-    varietyOptionId: c.variety_option_id || '',
-    varietyLabel: c.variety || '',
-    seasonLabel: c.season_label || '',
-    installationOptionId: c.installation_option_id || '',
-    installationLabel: c.installation_system || '',
-    conductionOptionId: c.conduction_option_id || '',
-    conductionLabel: c.training_system || '',
-    rowDistance: formatNumField(c.row_distance_m),
-    countryCode: c.country_code || 'PT',
-    adminRegion: c.admin_region || '',
-    municipality: c.municipality || '',
-    parish: c.parish || '',
-    notes: c.notes || ''
+    editingCultureId: c.id, name: c.name || '', cropKey, cropLabel: c.crop_type || '',
+    area: formatNumField(c.area_ha), varietyOptionId: c.variety_option_id || '', varietyLabel: c.variety || '',
+    seasonLabel: c.season_label || '', installationOptionId: c.installation_option_id || '',
+    installationLabel: c.installation_system || '', conductionOptionId: c.conduction_option_id || '',
+    conductionLabel: c.training_system || '', rowDistance: formatNumField(c.row_distance_m),
+    countryCode: c.country_code || 'PT', adminRegion: c.admin_region || '',
+    municipality: c.municipality || '', parish: c.parish || '', notes: c.notes || '',
+    geometryMode: inferCultureGeometryMode(cropKey, c.crop_type, c.geometry_mode, hasWoody),
+    cropHeight2dCm: formatNumField(c.crop_height_2d_cm),
+    groundCover2dPct: formatNumField(c.ground_cover_2d_pct),
+    applicationTarget2d: c.application_target_2d || '',
+    referenceVolume2dLha: formatNumField(c.reference_volume_2d_lha),
+    interrowCover3d: c.interrow_cover_3d || '',
+    conductionMode3d: c.conduction_mode_3d || '',
+    cleanTrunkHeightM: formatNumField(c.clean_trunk_height_m),
+    windbreakBarrier: c.windbreak_barrier || '',
+    sensitiveZoneDistanceM: formatNumField(c.sensitive_zone_distance_m),
+    rowAzimuthDeg: formatNumField(c.row_azimuth_deg),
+    parcelSlopePct: formatNumField(c.parcel_slope_pct)
   };
 }
 
@@ -165,21 +176,9 @@ export function mapMomentToDraftState(m: ProfileCropMoment, moments?: ProfileCro
 }
 
 export function getCultureKeypadConfig(
-  field: 'area' | 'rowDistance' | 'canopyHeight' | 'canopyWidth' | 'lai',
+  field: CultureKeypadField,
   form: CultureV11FormState,
   momentDraft: CultureMomentDraftState
-): { label: string; unit: string; initialValue: string; commonValues: number[] } {
-  if (field === 'area') {
-    return { label: 'Área da parcela (ha)', unit: 'ha', initialValue: form.area, commonValues: [1, 2.5, 5, 10, 25, 50] };
-  }
-  if (field === 'rowDistance') {
-    return { label: 'Distância entrelinha (m)', unit: 'm', initialValue: form.rowDistance, commonValues: [1.8, 2.2, 2.5, 3, 4, 6] };
-  }
-  if (field === 'canopyHeight') {
-    return { label: 'Altura da vegetação / copa (m)', unit: 'm', initialValue: momentDraft.canopyHeight, commonValues: [0.8, 1.2, 1.5, 2, 2.5, 3] };
-  }
-  if (field === 'canopyWidth') {
-    return { label: 'Largura / espessura da copa (m)', unit: 'm', initialValue: momentDraft.canopyWidth, commonValues: [0.4, 0.6, 0.8, 1.2, 2, 3] };
-  }
-  return { label: 'Índice de Área Foliar (LAI)', unit: '', initialValue: momentDraft.lai, commonValues: [0.5, 1, 1.5, 2, 3, 4] };
+) {
+  return buildCultureKeypadConfig(field, form, momentDraft);
 }

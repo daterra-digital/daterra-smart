@@ -30,7 +30,14 @@ export const explorationContextService = {
 
   // Montar bloco de texto estruturado para enriquecer a prompt da IA
   formatContextForPrompt(ctx?: ActiveExplorationContext): string {
-    if (!ctx || (!ctx.cultureName && !ctx.equipmentName && !ctx.nozzleName)) {
+    if (ctx?.agronomicContextSummary?.trim()) {
+      return ctx.agronomicContextSummary;
+    }
+    const isEquipmentEnabled = ctx?.equipmentContextActive !== false;
+    const hasEquipmentAi = Boolean(isEquipmentEnabled && ctx?.equipmentAiSummary);
+    const hasLegacyEquipment = Boolean(isEquipmentEnabled && !hasEquipmentAi && ctx?.equipmentName);
+
+    if (!ctx || (!ctx.cultureName && !hasEquipmentAi && !hasLegacyEquipment && !ctx.nozzleName)) {
       return '';
     }
 
@@ -53,7 +60,9 @@ export const explorationContextService = {
       lines.push(`- Parcela/Cultura: "${ctx.cultureName}" (${cropDetails})`);
     }
 
-    if (ctx.equipmentName) {
+    if (hasEquipmentAi && ctx.equipmentAiSummary) {
+      lines.push(`- Contexto @equipamento: ${ctx.equipmentAiSummary}`);
+    } else if (hasLegacyEquipment && ctx.equipmentName) {
       const eqDetails = [
         ctx.tankCapacityL ? `Capacidade do Depósito: ${ctx.tankCapacityL}L` : '',
         ctx.pumpType ? `Bomba: ${ctx.pumpType}` : ''

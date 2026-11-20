@@ -6,6 +6,7 @@ import { ChevronDown } from 'lucide-react';
 import type { CatalogSelectOption } from '../data/cultureCatalogData';
 import { findSimilarOptionLabels } from '../services/cultureCustomOptionStorage';
 import { SearchableDropdownMenu } from './SearchableDropdownMenu';
+import { useDropdownPortalPosition } from './useDropdownPortalPosition';
 
 export interface SearchableRoundedDropdownProps {
   label: string;
@@ -19,6 +20,7 @@ export interface SearchableRoundedDropdownProps {
   emptyCatalogHint?: string;
   allowCustomAdd?: boolean;
   customAddHint?: string;
+  usePortal?: boolean;
   onSelectOption: (option: CatalogSelectOption) => void;
   onClear?: () => void;
   onCreateCustomOption?: (label: string) => Promise<CatalogSelectOption | null>;
@@ -31,11 +33,10 @@ export const SearchableRoundedDropdown: React.FC<SearchableRoundedDropdownProps>
   const {
     label, required, value, selectedId, options, placeholder = 'Selecionar...',
     disabled = false, disabledHint, emptyCatalogHint, allowCustomAdd = false,
-    customAddHint, onSelectOption, onClear, onCreateCustomOption, onRenameCustomOption, errorMsg, testId
+    customAddHint, usePortal = true, onSelectOption, onClear, onCreateCustomOption, onRenameCustomOption, errorMsg, testId
   } = props;
 
   const [isOpen, setIsOpen] = useState(false);
-  const [openUp, setOpenUp] = useState(false);
   const [query, setQuery] = useState('');
   const [activeIndex, setActiveIndex] = useState(0);
   const [similarPrompt, setSimilarPrompt] = useState<{ label: string; matches: string[] } | null>(null);
@@ -46,7 +47,9 @@ export const SearchableRoundedDropdown: React.FC<SearchableRoundedDropdownProps>
   const [localError, setLocalError] = useState('');
 
   const containerRef = useRef<HTMLDivElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const { openUp, portalStyle } = useDropdownPortalPosition(containerRef, isOpen, usePortal);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -56,7 +59,9 @@ export const SearchableRoundedDropdown: React.FC<SearchableRoundedDropdownProps>
   useEffect(() => {
     if (!isOpen) return;
     const closeOutside = (e: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) setIsOpen(false);
+      const target = e.target as Node;
+      if (containerRef.current?.contains(target) || menuRef.current?.contains(target)) return;
+      setIsOpen(false);
     };
     document.addEventListener('mousedown', closeOutside);
     return () => document.removeEventListener('mousedown', closeOutside);
@@ -64,13 +69,7 @@ export const SearchableRoundedDropdown: React.FC<SearchableRoundedDropdownProps>
 
   const toggleOpen = () => {
     if (disabled) return;
-    if (!isOpen && containerRef.current && typeof window !== 'undefined') {
-      const rect = containerRef.current.getBoundingClientRect();
-      const spaceBelow = window.innerHeight - rect.bottom;
-      const spaceAbove = rect.top - 72;
-      setOpenUp(spaceBelow < 240 && spaceAbove > spaceBelow);
-      setTimeout(() => searchInputRef.current?.focus(), 20);
-    }
+    if (!isOpen) setTimeout(() => searchInputRef.current?.focus(), 20);
     setSimilarPrompt(null);
     setLocalError('');
     setIsOpen((p) => !p);
@@ -132,47 +131,50 @@ export const SearchableRoundedDropdown: React.FC<SearchableRoundedDropdownProps>
   };
 
   return (
-    <div ref={containerRef} className="relative" data-testid={testId}>
-      <div className="flex items-center justify-between mb-1.5">
-        <label className="block text-xs font-bold text-slate-700">{label} {required && <span className="text-rose-600">*</span>}</label>
+    <div ref={containerRef} data-testid={testId}>
+      <div className="flex items-center justify-between mb-1.5 min-h-[20px]">
+        <label className="block text-xs font-semibold text-[#114037]">{label} {required && <span className="text-red-600">*</span>}</label>
         {value && onClear && !disabled && (
           <button type="button" onClick={onClear} className="text-[11px] font-semibold text-slate-500 hover:text-slate-800 px-1.5 py-0.5 rounded-lg">Limpar</button>
         )}
       </div>
 
-      <button
-        type="button" disabled={disabled} aria-haspopup="listbox" aria-expanded={isOpen}
-        onClick={toggleOpen} onKeyDown={handleKeyDown}
-        className={`w-full min-h-[48px] px-4 py-2.5 rounded-2xl border text-left flex items-center justify-between gap-2 transition-colors ${
-          disabled ? 'bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed'
-            : isOpen ? 'bg-white border-[#3CA64C] ring-2 ring-[#3CA64C]/20 text-slate-900'
-            : 'bg-white border-slate-300 hover:border-slate-400 text-slate-900'
-        }`}
-      >
-        <span className={`text-xs font-semibold truncate ${value ? 'text-slate-900' : 'text-slate-400'}`}>
-          {disabled && disabledHint ? disabledHint : value || placeholder}
-        </span>
-        <ChevronDown className={`w-4 h-4 shrink-0 text-slate-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
-      </button>
+      <div className="relative">
+        <button
+          type="button" disabled={disabled} aria-haspopup="listbox" aria-expanded={isOpen}
+          onClick={toggleOpen} onKeyDown={handleKeyDown}
+          className={`w-full min-h-[44px] px-4 py-2.5 rounded-xl border text-left flex items-center justify-between gap-2 transition-colors outline-none ${
+            disabled ? 'bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed'
+              : isOpen ? 'bg-white border-[#114037] ring-2 ring-[#114037]/15 text-slate-900'
+              : 'bg-white border-slate-200 hover:border-slate-300 focus:border-[#114037] focus:ring-2 focus:ring-[#114037]/15 text-slate-900'
+          }`}
+        >
+          <span className={`text-xs font-medium truncate ${value ? 'text-slate-900' : 'text-slate-400'}`}>
+            {disabled && disabledHint ? disabledHint : value || placeholder}
+          </span>
+          <ChevronDown className={`w-4 h-4 shrink-0 text-slate-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+        </button>
+
+        {isOpen && (
+          <SearchableDropdownMenu
+            openUp={openUp} menuRef={menuRef} portalStyle={portalStyle} query={query}
+            onQueryChange={(q) => { setQuery(q); setActiveIndex(0); setSimilarPrompt(null); }}
+            searchInputRef={searchInputRef} filtered={filtered} totalCount={options.length} emptyCatalogHint={emptyCatalogHint}
+            selectedId={selectedId} selectedLabel={value} activeIndex={activeIndex} onKeyDown={handleKeyDown}
+            onSelect={(opt) => { onSelectOption(opt); setIsOpen(false); }} editingOption={editingOption}
+            onStartEdit={(id, lbl) => setEditingOption({ id, text: lbl })}
+            onChangeEditText={(text) => setEditingOption((prev) => (prev ? { ...prev, text } : null))}
+            onSubmitEdit={handleRenameSubmit} onCancelEdit={() => setEditingOption(null)}
+            similarPrompt={similarPrompt} onConfirmSimilar={() => similarPrompt && handleConfirmCreate(similarPrompt.label, true)}
+            onCancelSimilar={() => setSimilarPrompt(null)} localError={localError} allowCustomAdd={allowCustomAdd}
+            hasCreator={Boolean(onCreateCustomOption)} isAddingInline={isAddingInline} inlineLabel={inlineLabel}
+            customAddHint={customAddHint} busy={busy} onStartInlineAdd={() => setIsAddingInline(true)}
+            onChangeInlineLabel={setInlineLabel} onTriggerCreate={(lbl) => handleConfirmCreate(lbl)}
+          />
+        )}
+      </div>
 
       {errorMsg && <p role="alert" className="mt-1 text-xs font-semibold text-rose-700">{errorMsg}</p>}
-
-      {isOpen && (
-        <SearchableDropdownMenu
-          openUp={openUp} query={query} onQueryChange={(q) => { setQuery(q); setActiveIndex(0); setSimilarPrompt(null); }}
-          searchInputRef={searchInputRef} filtered={filtered} totalCount={options.length} emptyCatalogHint={emptyCatalogHint}
-          selectedId={selectedId} selectedLabel={value} activeIndex={activeIndex} onKeyDown={handleKeyDown}
-          onSelect={(opt) => { onSelectOption(opt); setIsOpen(false); }} editingOption={editingOption}
-          onStartEdit={(id, lbl) => setEditingOption({ id, text: lbl })}
-          onChangeEditText={(text) => setEditingOption((prev) => (prev ? { ...prev, text } : null))}
-          onSubmitEdit={handleRenameSubmit} onCancelEdit={() => setEditingOption(null)}
-          similarPrompt={similarPrompt} onConfirmSimilar={() => similarPrompt && handleConfirmCreate(similarPrompt.label, true)}
-          onCancelSimilar={() => setSimilarPrompt(null)} localError={localError} allowCustomAdd={allowCustomAdd}
-          hasCreator={Boolean(onCreateCustomOption)} isAddingInline={isAddingInline} inlineLabel={inlineLabel}
-          customAddHint={customAddHint} busy={busy} onStartInlineAdd={() => setIsAddingInline(true)}
-          onChangeInlineLabel={setInlineLabel} onTriggerCreate={(lbl) => handleConfirmCreate(lbl)}
-        />
-      )}
     </div>
   );
 };

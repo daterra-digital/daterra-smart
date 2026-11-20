@@ -6,27 +6,19 @@ import {
   type SubscriptionContextType,
   TIER_RANK
 } from '../types/subscription';
+import { resolveNormalizedUserPlan } from '../utils/userPlanNormalizer';
 
 const SIMULATED_TIER_STORAGE_KEY = 'daterra_simulated_tier';
 
 const SubscriptionContext = createContext<SubscriptionContextType | undefined>(undefined);
 
-const mapPlanToTier = (plan?: string | null): UserTier => {
-  if (!plan) return 'free';
-  const normalized = plan.toLowerCase().trim();
-  if (normalized === 'pro' || normalized === 'plus') return 'pro';
-  if (normalized === 'ultra') return 'ultra';
-  if (normalized === 'enterprise' || normalized === 'corporate') return 'corporate';
-  return 'free';
-};
-
 export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { profile } = useAuth();
-  
-  // Nível real baseado no perfil autenticado
+
+  // Nível real reativo baseado no documento Firestore (plan / subscriptionPlan / tier + status)
   const currentTier = useMemo<UserTier>(() => {
-    return mapPlanToTier(profile?.plan);
-  }, [profile?.plan]);
+    return resolveNormalizedUserPlan(profile as Record<string, unknown> | null).tier;
+  }, [profile]);
 
   // Nível simulado (estritamente ativo em desenvolvimento para testes rápidos)
   const isDevMode = Boolean(import.meta.env?.DEV);

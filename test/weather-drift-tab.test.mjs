@@ -40,7 +40,6 @@ const { WeatherDriftChartSvg } = await import('../src/features/weather/component
 const { WeatherDriftView } = await import('../src/features/weather/components/WeatherDriftView.tsx');
 const { setMockNow } = await import('../src/features/weather/services/weatherTimeService.ts');
 const { computeMeteoSubIndex } = await import('../src/features/ird/irdSubIndices.ts');
-const { isWeatherDriftTabEnabledForEnv } = await import('../src/utils/releasePolicyRoutes.ts');
 
 function mockApiPayload(overrides = {}) {
   return {
@@ -98,19 +97,14 @@ describe('Fase A — Meteorologia > Deriva (MET-01..MET-05)', () => {
     assert.equal(computeMeteoSubIndex({ windSpeedKmh: 4, windGustsKmh: 6, temperatureC: 20, relativeHumidityPct: 65, precipitationMm: 0, weatherSource: 'open_meteo_live' }).rawScore > 0, true);
   });
 
-  it('2. SVG tem navegação por teclado, eixos/unidades explícitas, faixas comutáveis com lacunas partidas e zero alteração de cálculo', () => {
+  it('2. SVG tem navegação por teclado, eixos 0–200% (base 100%), lacunas partidas e zero alteração de cálculo', () => {
     const res = transformOpenMeteoResponse(mockApiPayload(), { latitude: 41.16, longitude: -7.78, locationName: 'Peso da Régua' });
     const series = buildHourlyDriftSeries(res.hourlyFull, '2026-11-10T09:00', '2026-11-10');
 
     const baseSvg = renderToStaticMarkup(React.createElement(WeatherDriftChartSvg, { points: series, selectedIndex: 0, onSelectIndex: () => {}, timezoneLabel: 'Europe/Lisbon' }));
-    assert.equal((baseSvg.match(/<path /g) || []).length, 2, 'Base sem séries extra gera exatamente 2 segmentos');
-    assert.ok(baseSvg.includes('role="slider"') && baseSvg.includes('tabindex="0"') && baseSvg.includes('adimensional'));
-
-    const allSvg = renderToStaticMarkup(React.createElement(WeatherDriftChartSvg, {
-      points: series, selectedIndex: 0, onSelectIndex: () => {}, activeSeries: ['wind', 'deltaT', 'humidity', 'precip'], timezoneLabel: 'Europe/Lisbon'
-    }));
-    assert.ok(allSvg.includes('km/h') && allSvg.includes('°C') && allSvg.includes('100%') && allSvg.includes('mm'));
-    assert.ok((allSvg.match(/<path /g) || []).length > 6, 'Todas as faixas partem nas lacunas sem ligar segmentos');
+    assert.equal((baseSvg.match(/<path /g) || []).length, 2, 'Curva parte nas lacunas sem ligar segmentos (exatamente 2 segmentos)');
+    assert.ok(baseSvg.includes('role="slider"') && baseSvg.includes('tabindex="0"') && baseSvg.includes('0–200%'));
+    assert.ok(baseSvg.includes('200%') && baseSvg.includes('100%') && !baseSvg.includes('Vento (km/h)'), 'Gráfico único sem sub-gráficos empilhados');
   });
 
   it('3. WeatherDriftView remove botões horários, usa aria-pressed, título claro de janelas e respeita <= 200 LOC', () => {
@@ -130,13 +124,15 @@ describe('Fase A — Meteorologia > Deriva (MET-01..MET-05)', () => {
     assert.ok(viewHtml.includes('Confirme as condições no local e as indicações do rótulo'));
     assert.ok(!viewHtml.includes('Potencial Meteorológico Heurístico · Agora'), 'Título principal evita termo heurístico');
 
-    assert.equal(isWeatherDriftTabEnabledForEnv('pages'), true, 'Aba Deriva deve estar ativa em V-PAGES');
-    assert.equal(isWeatherDriftTabEnabledForEnv('staging'), true, 'Aba Deriva deve estar ativa em V-RC');
-    const togglePages = renderToStaticMarkup(React.createElement(WeatherModeToggle, { activeMode: 'deriva', onChangeMode: () => {}, showDriftTab: isWeatherDriftTabEnabledForEnv('pages') }));
-    const toggleHidden = renderToStaticMarkup(React.createElement(WeatherModeToggle, { activeMode: 'meteorologia', onChangeMode: () => {}, showDriftTab: false }));
-    assert.ok(togglePages.includes('tab-weather-mode-deriva') && !toggleHidden.includes('tab-weather-mode-deriva'));
+    const toggleUnified = renderToStaticMarkup(React.createElement(WeatherModeToggle, { activeMode: 'pulverizacao', onChangeMode: () => {} }));
+    assert.ok(
+      toggleUnified.includes('tab-weather-mode-meteorologia')
+      && toggleUnified.includes('tab-weather-mode-pulverizacao')
+      && !toggleUnified.includes('tab-weather-mode-deriva'),
+      'WeatherModeToggle deve apresentar apenas 2 abas limpas (Meteorologia e Pulverização & Deriva)'
+    );
 
-    for (const f of ['src/features/weather/views/WeatherSaasView.tsx', 'src/features/weather/components/WeatherModeToggle.tsx', 'src/features/weather/utils/weatherDriftTypes.ts', 'src/features/weather/utils/weatherDriftEvaluator.ts', 'src/features/weather/components/charts/WeatherDriftChartSvg.tsx', 'src/features/weather/components/charts/WeatherDriftSeriesTracks.tsx', 'src/features/weather/components/WeatherDriftWindowsCard.tsx', 'src/features/weather/components/WeatherDriftTechPanel.tsx', 'src/features/weather/components/WeatherDriftView.tsx']) {
+    for (const f of ['src/features/weather/views/WeatherSaasView.tsx', 'src/features/weather/components/WeatherModeToggle.tsx', 'src/features/weather/components/WeatherDriftSection.tsx', 'src/features/weather/utils/weatherDriftTypes.ts', 'src/features/weather/utils/weatherDriftEvaluator.ts', 'src/features/weather/components/charts/WeatherDriftChartSvg.tsx', 'src/features/weather/components/charts/WeatherDriftSeriesTracks.tsx', 'src/features/weather/components/WeatherDriftWindowsCard.tsx', 'src/features/weather/components/WeatherDriftTechPanel.tsx', 'src/features/weather/components/WeatherDriftView.tsx']) {
       const lines = fs.readFileSync(path.resolve(f), 'utf8').split('\n').length;
       assert.ok(lines <= 200, `${f} excede 200 LOC (${lines})`);
     }

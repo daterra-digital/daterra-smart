@@ -1,35 +1,21 @@
 // src/features/weather/weatherWeekAggregator.ts
 import type { HourlyForecastItem, DailyForecastItem, SprayDecisionLevel } from './types.ts';
 import { evaluateSprayWindow } from './weatherCalculations.ts';
+import { getEffectiveDateIso, getEffectiveNow } from './services/weatherTimeService.ts';
+import { evaluateHourWithProfileContext } from './utils/irdOperationalThresholds.ts';
 
 export interface ActiveMachineContext {
-  cultureId?: number | null;
-  cultureName?: string | null;
-  equipmentId?: number | null;
-  equipmentName?: string | null;
-  hasAirSleeve?: boolean;
-  nozzleId?: number | null;
-  nozzleName?: string | null;
-  nozzleType?: string | null;
-  calibrationId?: number | null;
-  calibrationName?: string | null;
-  workingPressureBar?: number | null;
-  dropletSizeUm?: number | null;
+  cultureId?: number | null; cultureName?: string | null; equipmentId?: number | null; equipmentName?: string | null;
+  equipmentTypeLabel?: string | null; hasAirSleeve?: boolean; nozzleId?: number | null; nozzleName?: string | null;
+  nozzleType?: string | null; calibrationId?: number | string | null; calibrationName?: string | null;
+  workingPressureBar?: number | null; dropletSizeUm?: number | null; combinedIrdPct?: number | null;
+  parcelRiskPct?: number | null; baseMeteoScore?: number | null; acceptableIrdLimitPct?: number | null; isUavEquipment?: boolean;
 }
 
 export interface DaySprayWindowSummary {
-  dateIso: string;
-  dayLabel: string;
-  level: SprayDecisionLevel;
-  badgeLabel: string;
-  bestWindowText: string;
-  limitingFactor: string;
-  maxTempC: number;
-  minTempC: number;
-  windSpeedMaxKmh: number;
-  precipitationSumMm: number;
-  weatherCode: number;
-  weatherLabel: string;
+  dateIso: string; dayLabel: string; level: SprayDecisionLevel; badgeLabel: string; bestWindowText: string;
+  limitingFactor: string; isWindowClosed?: boolean; maxTempC: number; minTempC: number;
+  windSpeedMaxKmh: number; precipitationSumMm: number; weatherCode: number; weatherLabel: string;
 }
 
 export interface WeeklySpraySchedule {
@@ -52,17 +38,10 @@ export function formatFullPortugueseDate(dateIso: string): string {
     const weekdays = ['Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado'];
     const months = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
     return `${weekdays[date.getDay()]}, ${date.getDate()} de ${months[date.getMonth()]}`;
-  } catch {
-    return dateIso;
-  }
+  } catch { return dateIso; }
 }
 
-export function getContextCompleteness(ctx?: ActiveMachineContext | null): {
-  status: 'reference' | 'partial' | 'complete';
-  label: string;
-  isComplete: boolean;
-  missingFields: string[];
-} {
+export function getContextCompleteness(ctx?: ActiveMachineContext | null): { status: 'reference' | 'partial' | 'complete'; label: string; isComplete: boolean; missingFields: string[] } {
   if (!ctx || (!ctx.equipmentId && !ctx.nozzleId && !ctx.cultureId && !ctx.calibrationId)) {
     return { status: 'reference', label: 'Referência Meteorológica', isComplete: false, missingFields: ['Equipamento', 'Bico', 'Calibração'] };
   }
@@ -70,11 +49,8 @@ export function getContextCompleteness(ctx?: ActiveMachineContext | null): {
   if (!ctx.equipmentId) missing.push('Equipamento');
   if (!ctx.nozzleId) missing.push('Bico');
   if (!ctx.calibrationId && ctx.workingPressureBar == null) missing.push('Calibração/Pressão');
-
   const countSelected = 3 - missing.length;
-  if (missing.length > 0) {
-    return { status: 'partial', label: `Contexto Parcial (${countSelected}/3)`, isComplete: false, missingFields: missing };
-  }
+  if (missing.length > 0) return { status: 'partial', label: `Contexto Parcial (${countSelected}/3)`, isComplete: false, missingFields: missing };
   return { status: 'complete', label: 'Contexto Completo (3/3)', isComplete: true, missingFields: [] };
 }
 
@@ -91,10 +67,12 @@ export function aggregateWeeklySpraySchedule(
     dropletSizeUm: context.dropletSizeUm ?? undefined
   } : undefined;
 
-  const evaluatedHours = hourly.map(h => ({
-    ...h,
-    sprayEvaluation: evaluateSprayWindow(h.deltaT, h.windSpeedKmh, h.windGustsKmh, h.humidityPercent, h.precipitationMm, equipmentOptions)
-  }));
+  const hasProfileAdjustment = Boolean(context && (context.calibrationId || context.cultureId));
+  const evaluatedHours = hourly.map(h => {
+    const rawEval = evaluateSprayWindow(h.deltaT, h.windSpeedKmh, h.windGustsKmh, h.humidityPercent, h.precipitationMm, equipmentOptions);
+    const sprayEvaluation = hasProfileAdjustment ? evaluateHourWithProfileContext(rawEval, h, context).evaluation : rawEval;
+    return { ...h, sprayEvaluation };
+  });
 
   const hoursByDate: Record<string, typeof evaluatedHours> = {};
   evaluatedHours.forEach(h => {
@@ -103,7 +81,9 @@ export function aggregateWeeklySpraySchedule(
     hoursByDate[k].push(h);
   });
 
-  const dailyWindows: DaySprayWindowSummary[] = daily.map(d => {
+  const effectiveTodayIso = getEffectiveDateIso();
+  const effectiveHour = getEffectiveNow().getHours();
+  const dailyWindows: DaySprayWindowSummary[] = daily.map((d, idx) => {
     const k = d.dateIso.split('T')[0];
     const opHours = (hoursByDate[k] || []).filter(h => {
       const hNum = parseInt(h.timeFormatted.split(':')[0], 10);
@@ -111,11 +91,15 @@ export function aggregateWeeklySpraySchedule(
     });
 
     if (opHours.length === 0) {
+      const isTodayEntry = k === effectiveTodayIso || (idx === 0 && (d.dayLabel || '').toLowerCase().startsWith('hoje'));
+      const isClosedToday = hourly.length > 0 && isTodayEntry && (effectiveHour >= OPERATIONAL_END_HOUR || k < effectiveTodayIso);
       return {
-        dateIso: d.dateIso, dayLabel: d.dayLabel, level: 'unfavorable', badgeLabel: 'Sem Dados',
-        bestWindowText: 'Sem dados horários', limitingFactor: 'Previsão horária limitada',
-        maxTempC: d.maxTempC, minTempC: d.minTempC, windSpeedMaxKmh: d.windSpeedMaxKmh,
-        precipitationSumMm: d.precipitationSumMm, weatherCode: d.weatherCode, weatherLabel: d.weatherLabel
+        dateIso: d.dateIso, dayLabel: d.dayLabel, level: 'unfavorable',
+        badgeLabel: isClosedToday ? 'Janela Encerrada' : 'Sem Dados',
+        bestWindowText: isClosedToday ? 'Sem horas restantes hoje' : 'Sem dados horários',
+        limitingFactor: isClosedToday ? 'Horário operacional 06:00–20:00 concluído' : 'Previsão horária limitada',
+        isWindowClosed: isClosedToday, maxTempC: d.maxTempC, minTempC: d.minTempC,
+        windSpeedMaxKmh: d.windSpeedMaxKmh, precipitationSumMm: d.precipitationSumMm, weatherCode: d.weatherCode, weatherLabel: d.weatherLabel
       };
     }
 

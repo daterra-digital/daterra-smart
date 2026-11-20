@@ -9,6 +9,7 @@ import {
   type ChartLayout,
   type ChartScaleResult
 } from '../../utils/weatherChartUtils.ts';
+import { findClosestPointIndexByClientX } from '../../utils/weatherChartAxisHelpers.ts';
 import { WeatherChartAxes } from './WeatherChartAxes.tsx';
 import { WeatherChartTooltip } from './WeatherChartTooltip.tsx';
 
@@ -23,8 +24,8 @@ interface WeatherChartSvgProps {
 
 const LAYOUT: ChartLayout = {
   width: 680,
-  height: 240,
-  padding: { top: 26, right: 48, bottom: 34, left: 48 }
+  height: 244,
+  padding: { top: 28, right: 48, bottom: 34, left: 48 }
 };
 
 export const WeatherChartSvg: React.FC<WeatherChartSvgProps> = ({
@@ -43,13 +44,11 @@ export const WeatherChartSvg: React.FC<WeatherChartSvgProps> = ({
   const gusts = hours.map((h) => h.windGustsKmh);
   const hums = hours.map((h) => h.humidityPercent);
 
-  // Escalas matemáticas com proteções contra divisão por zero
   const tempScale = calcChartScale(temps, { padRange: 2 });
   const rainScale = calcChartScale(rains, { forceZeroMin: true, padRange: 1 });
   const windScale = calcChartScale([...winds, ...gusts], { forceZeroMin: true, padRange: 5 });
   const pctScale: ChartScaleResult = { min: 0, max: 100, range: 100, step: 25, ticks: [0, 25, 50, 75, 100] };
 
-  // Coordenadas projetadas
   const tempPts = calcPointCoordinates(temps, tempScale, LAYOUT);
   const rainPts = calcPointCoordinates(rains, rainScale, LAYOUT);
   const probPts = calcPointCoordinates(probs, pctScale, LAYOUT);
@@ -60,28 +59,33 @@ export const WeatherChartSvg: React.FC<WeatherChartSvgProps> = ({
   const baseY = LAYOUT.height - LAYOUT.padding.bottom;
   const barWidth = Math.max(6, Math.min(22, (LAYOUT.width / count) * 0.45));
 
-  // Ponto ativo para inspeção
   const activePts = metric === 'humidade' ? humPts : metric === 'vento' ? windPts : tempPts;
   const activePt = selectedIndex != null && activePts[selectedIndex] ? activePts[selectedIndex] : null;
   const activeHour = selectedIndex != null && hours[selectedIndex] ? hours[selectedIndex] : null;
+  const activeXs = activePts.map((pt) => pt.x);
 
-  const handlePointerMove = useCallback((e: React.PointerEvent<SVGSVGElement>) => {
-    if (!svgRef.current || !activePts.length) return;
-    const rect = svgRef.current.getBoundingClientRect();
-    if (!rect.width) return;
-    const svgX = ((e.clientX - rect.left) / rect.width) * LAYOUT.width;
+  const selectByClientX = useCallback(
+    (clientX: number) => {
+      const closestIdx = findClosestPointIndexByClientX(svgRef.current, clientX, LAYOUT.width, activeXs);
+      if (closestIdx !== null && closestIdx !== selectedIndex) onSelectIndex(closestIdx);
+    },
+    [activeXs, selectedIndex, onSelectIndex]
+  );
 
-    let closestIdx = 0;
-    let minDiff = Infinity;
-    for (let i = 0; i < activePts.length; i++) {
-      const diff = Math.abs(activePts[i].x - svgX);
-      if (diff < minDiff) {
-        minDiff = diff;
-        closestIdx = i;
-      }
-    }
-    if (closestIdx !== selectedIndex) onSelectIndex(closestIdx);
-  }, [activePts, selectedIndex, onSelectIndex]);
+  const handlePointer = useCallback(
+    (e: React.PointerEvent<SVGSVGElement>) => {
+      selectByClientX(e.clientX);
+    },
+    [selectByClientX]
+  );
+
+  const handleTouch = useCallback(
+    (e: React.TouchEvent<SVGSVGElement>) => {
+      const touch = e.touches[0];
+      if (touch) selectByClientX(touch.clientX);
+    },
+    [selectByClientX]
+  );
 
   if (!hours.length) return null;
 
@@ -90,12 +94,15 @@ export const WeatherChartSvg: React.FC<WeatherChartSvgProps> = ({
       <svg
         ref={svgRef}
         viewBox={`0 0 ${LAYOUT.width} ${LAYOUT.height}`}
-        className="w-full min-w-[500px] h-auto select-none cursor-crosshair"
+        className="w-full min-w-0 sm:min-w-[500px] h-auto select-none cursor-crosshair touch-pan-y"
+        style={{ touchAction: 'pan-y' }}
         role="img"
         aria-label={`Gráfico de evolução horária para ${metric}`}
-        onPointerMove={handlePointerMove}
+        onPointerDown={handlePointer}
+        onPointerMove={handlePointer}
+        onTouchStart={handleTouch}
+        onTouchMove={handleTouch}
       >
-        {/* Eixos X e Y com Ticks Numéricos e Unidades */}
         <WeatherChartAxes
           layout={LAYOUT}
           metric={metric}
@@ -107,7 +114,6 @@ export const WeatherChartSvg: React.FC<WeatherChartSvgProps> = ({
           hours={hours}
         />
 
-        {/* 1. Modo RESUMO: Linha Temp (°C) + Barras Chuva (mm) */}
         {metric === 'resumo' && (
           <>
             {rainPts.map((pt, i) => (
@@ -126,7 +132,6 @@ export const WeatherChartSvg: React.FC<WeatherChartSvgProps> = ({
           </>
         )}
 
-        {/* 2. Modo TEMPERATURA: Linha com preenchimento suave */}
         {metric === 'temperatura' && (
           <>
             <path d={generateSvgAreaPath(tempPts, baseY)} className="fill-amber-500/15" />
@@ -134,7 +139,6 @@ export const WeatherChartSvg: React.FC<WeatherChartSvgProps> = ({
           </>
         )}
 
-        {/* 3. Modo CHUVA: Barras mm + Linha Probabilidade % */}
         {metric === 'chuva' && (
           <>
             {rainPts.map((pt, i) => (
@@ -152,7 +156,6 @@ export const WeatherChartSvg: React.FC<WeatherChartSvgProps> = ({
           </>
         )}
 
-        {/* 4. Modo VENTO: Velocidade contínua + Rajadas tracejadas */}
         {metric === 'vento' && (
           <>
             <path d={generateSvgLinePath(gustPts)} fill="none" stroke="#94a3b8" strokeWidth="1.5" strokeDasharray="4,4" />
@@ -161,7 +164,6 @@ export const WeatherChartSvg: React.FC<WeatherChartSvgProps> = ({
           </>
         )}
 
-        {/* 5. Modo HUMIDADE: Linha percentual */}
         {metric === 'humidade' && (
           <>
             <path d={generateSvgAreaPath(humPts, baseY)} className="fill-teal-600/15" />
@@ -169,7 +171,6 @@ export const WeatherChartSvg: React.FC<WeatherChartSvgProps> = ({
           </>
         )}
 
-        {/* Pontos Visíveis e Tooltip Ancorado */}
         {activePts.map((pt, i) => (
           <circle
             key={`pt-${i}`}

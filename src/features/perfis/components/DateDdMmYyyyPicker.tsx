@@ -1,5 +1,5 @@
 // src/features/perfis/components/DateDdMmYyyyPicker.tsx
-// Seletor de data civil sempre visível no formato DD-MM-AAAA com validação de calendário real (<= 200 LOC).
+// Seletor de data civil sempre visível no formato DD-MM-AAAA com calendário inline sem cortes (<= 200 LOC).
 
 import React, { useEffect, useRef, useState } from 'react';
 import { Calendar } from 'lucide-react';
@@ -26,6 +26,7 @@ export const DateDdMmYyyyPicker: React.FC<DateDdMmYyyyPickerProps> = ({
   );
   const [errorMsg, setErrorMsg] = useState('');
   const [calendarOpen, setCalendarOpen] = useState(false);
+  const calendarContainerRef = useRef<HTMLDivElement>(null);
   const validityRef = useRef(onValidityChange);
   validityRef.current = onValidityChange;
 
@@ -40,6 +41,12 @@ export const DateDdMmYyyyPicker: React.FC<DateDdMmYyyyPickerProps> = ({
       validityRef.current?.(!required);
     }
   }, [isoValue, required]);
+
+  useEffect(() => {
+    if (calendarOpen && calendarContainerRef.current) {
+      calendarContainerRef.current.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    }
+  }, [calendarOpen]);
 
   const handleTextChange = (raw: string) => {
     const cleaned = raw.replace(/[^\d-/]/g, '').slice(0, 10);
@@ -71,9 +78,10 @@ export const DateDdMmYyyyPicker: React.FC<DateDdMmYyyyPickerProps> = ({
   };
 
   return (
-    <div className="space-y-1.5">
-      <label className="block text-xs font-bold text-slate-700">
-        {label} {required && <span className="text-rose-600">*</span>}
+    <div ref={calendarContainerRef} className="space-y-1.5">
+      <label className="block text-xs font-semibold text-[#114037] whitespace-nowrap truncate">
+        {label}
+        {required && <span className="text-rose-600 ml-0.5">*</span>}
       </label>
 
       <div className="flex items-center gap-2">
@@ -84,32 +92,31 @@ export const DateDdMmYyyyPicker: React.FC<DateDdMmYyyyPickerProps> = ({
           value={textValue}
           onChange={(e) => handleTextChange(e.target.value)}
           aria-label={`${label} (DD-MM-AAAA)`}
-          className="flex-1 min-h-[48px] px-4 py-2.5 rounded-2xl border border-slate-300 bg-white text-xs font-mono-numbers font-bold text-slate-900 outline-none focus:border-[#3CA64C]"
+          className="flex-1 h-[44px] px-4 rounded-xl border border-slate-200 bg-white text-xs font-mono-numbers font-bold text-slate-900 outline-none focus:border-[#114037]"
         />
-        <div className="relative">
-          <button
-            type="button"
-            aria-haspopup="dialog"
-            aria-expanded={calendarOpen}
-            onClick={() => setCalendarOpen((p) => !p)}
-            className="min-h-[48px] px-3.5 rounded-2xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 flex items-center justify-center gap-1.5 text-xs font-bold touch-target"
-            title="Abrir calendário"
-          >
-            <Calendar className="w-4 h-4 text-[#1D734B]" />
-          </button>
-          {calendarOpen && (
-            <DaterraCalendarPopover
-              isoValue={isoValue}
-              onClose={() => setCalendarOpen(false)}
-              onSelectIso={(iso) => {
-                setErrorMsg('');
-                onValidityChange?.(true);
-                onChangeIso(iso);
-              }}
-            />
-          )}
-        </div>
+        <button
+          type="button"
+          aria-haspopup="dialog"
+          aria-expanded={calendarOpen}
+          onClick={() => setCalendarOpen((p) => !p)}
+          className="h-[44px] px-3.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 flex items-center justify-center gap-1.5 text-xs font-bold touch-target shrink-0"
+          title="Abrir calendário"
+        >
+          <Calendar className="w-4 h-4 text-[#1D734B]" />
+        </button>
       </div>
+
+      {calendarOpen && (
+        <DaterraCalendarPopover
+          isoValue={isoValue}
+          onClose={() => setCalendarOpen(false)}
+          onSelectIso={(iso) => {
+            setErrorMsg('');
+            onValidityChange?.(true);
+            onChangeIso(iso);
+          }}
+        />
+      )}
 
       {isoValue === null && !textValue && (
         <p className="text-[11px] font-medium text-amber-800 bg-amber-50 border border-amber-200 rounded-xl px-3 py-1.5">

@@ -5,13 +5,16 @@ import daterraLogo from '../assets/daterra-logo.svg';
 import { Footer } from './Footer';
 import { HeaderLanguageDropdown } from './layout/HeaderLanguageDropdown';
 import { useTranslation } from '../context/LanguageContext';
+import { useAuth } from '../context/AuthContext';
 
 export const PublicLayout: React.FC = () => {
   const { t } = useTranslation();
+  const { isAuthenticated } = useAuth();
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const isActive = (path: string) => location.pathname === path;
+  const logoTarget = isAuthenticated ? '/dashboard' : '/';
 
   return (
     <div className="min-h-screen flex flex-col bg-[#F2F2F2]">
@@ -38,27 +41,30 @@ export const PublicLayout: React.FC = () => {
 
       {/* Header Público com daterra-logo.svg */}
       <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-xs">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center gap-2">
           {/* Logo DATERRA no Topo */}
-          <Link to="/" className="flex items-center gap-3 group">
+          <Link to={logoTarget} className="min-h-[44px] inline-flex items-center gap-2 shrink-0 group">
             <img
-              src={daterraLogo}
+              src={`${import.meta.env.BASE_URL.replace(/\/$/, '')}/daterra-logo.svg`}
               alt="DATERRA Logo"
-              className="h-12 w-auto object-contain"
+              className="h-11 sm:h-12 w-auto object-contain shrink-0"
+              onError={(e) => {
+                if (e.currentTarget.src !== daterraLogo) e.currentTarget.src = daterraLogo;
+              }}
             />
           </Link>
 
-          {/* Menu Desktop */}
-          <nav className="hidden md:flex items-center gap-8 text-sm font-semibold">
+          {/* Menu Desktop alinhado à direita com margem igual */}
+          <nav className="ml-auto hidden md:flex items-center gap-2 text-sm font-semibold">
             <Link
               to="/"
-              className={`transition-colors ${isActive('/') ? 'text-daterra-accent font-bold' : 'text-slate-700 hover:text-daterra-primary'}`}
+              className={`px-3 py-2 rounded-xl whitespace-nowrap shrink-0 transition-colors touch-target flex items-center ${isActive('/') ? 'text-daterra-accent font-bold bg-emerald-50/70' : 'text-slate-700 hover:text-daterra-primary hover:bg-slate-100/80'}`}
             >
               {t('nav.home', 'Início')}
             </Link>
             <Link
               to="/sobre"
-              className={`transition-colors ${isActive('/sobre') ? 'text-daterra-accent font-bold' : 'text-slate-700 hover:text-daterra-primary'}`}
+              className={`px-3 py-2 rounded-xl whitespace-nowrap shrink-0 transition-colors touch-target flex items-center ${isActive('/sobre') ? 'text-daterra-accent font-bold bg-emerald-50/70' : 'text-slate-700 hover:text-daterra-primary hover:bg-slate-100/80'}`}
             >
               {t('nav.about', 'Sobre')}
             </Link>
@@ -66,7 +72,7 @@ export const PublicLayout: React.FC = () => {
               href="https://academia.daterra.com.pt"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-slate-700 hover:text-daterra-primary transition-colors"
+              className="px-3 py-2 rounded-xl whitespace-nowrap shrink-0 text-slate-700 hover:text-daterra-primary hover:bg-slate-100/80 transition-colors touch-target flex items-center"
             >
               {t('nav.academy', 'Academia')}
             </a>
@@ -76,15 +82,15 @@ export const PublicLayout: React.FC = () => {
 
             <Link
               to="/login"
-              className="px-5 py-2.5 bg-daterra-primary hover:bg-daterra-primary-hover text-white rounded-xl font-bold flex items-center gap-2 transition-all shadow-md active:scale-95 touch-target"
+              className="px-4 py-2.5 bg-daterra-primary hover:bg-daterra-primary-hover text-white rounded-xl font-bold flex items-center gap-2 whitespace-nowrap shrink-0 transition-all shadow-md active:scale-95 touch-target"
             >
-              <LogIn className="w-4 h-4 text-daterra-accent" />
+              <LogIn className="w-4 h-4 text-daterra-accent shrink-0" />
               <span>{t('nav.login', 'Login')}</span>
             </Link>
           </nav>
 
           {/* Controles Mobile */}
-          <div className="flex md:hidden items-center gap-2">
+          <div className="ml-auto flex md:hidden items-center gap-2 shrink-0">
             <HeaderLanguageDropdown variant="light" />
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}

@@ -3,6 +3,8 @@ import React from 'react';
 import { Clock, ShieldCheck, Sun, CloudRain, CloudSun, Cloud } from 'lucide-react';
 import type { HourlyForecastItem } from '../types';
 
+import { formatDecimalPt } from '../utils/windDirection';
+
 interface HourlySprayPlannerProps {
   hourly: HourlyForecastItem[];
 }
@@ -69,13 +71,14 @@ export const HourlySprayPlanner: React.FC<HourlySprayPlannerProps> = ({ hourly }
 
                 <div className="my-1.5">{getWeatherIcon(h.weatherCode)}</div>
 
-                <div className="text-xs font-black text-slate-900 font-mono-numbers">
-                  {h.temperatureC}°C
+                <div className="text-sm font-black text-slate-900 font-mono-numbers tabular-nums">
+                  {formatDecimalPt(h.temperatureC)}°C
                 </div>
 
-                <div className="text-[10px] text-slate-600 font-mono-numbers my-1 space-y-0.5">
-                  <div>ΔT: <strong>{h.deltaT}°C</strong></div>
-                  <div>V: <strong>{h.windSpeedKmh}k/h</strong></div>
+                <div className="text-[11px] text-slate-700 font-mono-numbers tabular-nums my-1 space-y-0.5">
+                  <div>{formatDecimalPt(h.windSpeedKmh)} km/h</div>
+                  <div>ΔT: <strong>{formatDecimalPt(h.deltaT)}°C</strong></div>
+                  {h.precipitationMm > 0 && <div className="text-sky-700 font-bold">{formatDecimalPt(h.precipitationMm)} mm</div>}
                 </div>
 
                 <div

@@ -121,7 +121,7 @@ export const SprayChartsModule: React.FC<SprayChartsModuleProps> = ({ selectedDa
           </div>
 
           {selectedHour && (
-            <div className="text-xs bg-slate-50 border border-slate-200 px-3 py-1 rounded-xl text-slate-700 font-mono-numbers">
+            <div className="text-xs bg-slate-50 border border-slate-200 px-2.5 py-1.5 rounded-xl text-slate-700 font-mono-numbers">
               <strong className="text-slate-900 font-bold">{selectedHour.timeFormatted}:</strong>{' '}
               {activeMetric === 'deltaT' && `ΔT ${selectedHour.deltaT}°C`}
               {activeMetric === 'vento' && `${selectedHour.windSpeedKmh} km/h (raj. ${selectedHour.windGustsKmh} km/h)`}

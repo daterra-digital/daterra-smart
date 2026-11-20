@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../../db/db.ts';
+import { getActiveAgronomicSelection } from '../../db/activeSelectionStorage.ts';
 import type { ProfileCalibration, ProfileCulture, ProfileEquipment, ProfileNozzle } from '../../db/types.ts';
 import { useAuth } from '../../context/AuthContext';
 import { useWeather } from '../weather/hooks/useWeather';
@@ -58,30 +59,26 @@ export function useIrdCalculatorController() {
 
   useEffect(() => {
     const syncNet = () => setIsOffline(!navigator.onLine);
-    window.addEventListener('online', syncNet);
-    window.addEventListener('offline', syncNet);
+    window.addEventListener('online', syncNet); window.addEventListener('offline', syncNet);
     return () => { window.removeEventListener('online', syncNet); window.removeEventListener('offline', syncNet); };
   }, []);
-
   useEffect(() => {
+    const sel = getActiveAgronomicSelection(effectiveUserId);
     setEvaluationLevel('level1_meteo'); setIsWeatherDrawerOpen(false); setActiveKeypad(null);
-    setCulture(createInitialCultureState()); setEquipment(createInitialEquipmentState());
-    setNozzle(createInitialNozzleState()); setCalibration(createInitialCalibrationState());
+    setCulture({ ...createInitialCultureState(), selectedProfileId: sel?.cultureParcelId ?? '' });
+    setEquipment({ ...createInitialEquipmentState(), selectedProfileId: sel?.equipmentId ?? '' });
+    setNozzle({ ...createInitialNozzleState(), selectedProfileId: sel?.nozzleProfileId ?? '' });
+    setCalibration({ ...createInitialCalibrationState(), selectedProfileId: sel?.calibrationId ?? '' });
     setExposure(createInitialExposureState()); setManualSource(null);
     setManualWeather(createInitialWeatherManual()); setHistoryRecords([]);
     setIsHistoryOpen(false); setIsGuideOpen(false); setStatusToast(null);
   }, [effectiveUserId]);
-
   useEffect(() => {
-    setManualSource(null);
-    setManualWeather(createInitialWeatherManual());
-    setExposure(createInitialExposureState());
+    setManualSource(null); setManualWeather(createInitialWeatherManual()); setExposure(createInitialExposureState());
     setActiveKeypad((curr) => (curr && ['windSpeedKmh', 'windGustsKmh', 'temperatureC', 'relativeHumidityPct', 'precipitationMm', 'distanceToSensitiveAreaM', 'labelMinBufferM'].includes(curr.field) ? null : curr));
   }, [currentLocation.id, currentLocation.latitude, currentLocation.longitude]);
-
   const loadHistory = useCallback(async () => {
-    const reqId = ++historyReqRef.current;
-    setIsHistoryLoading(true);
+    const reqId = ++historyReqRef.current; setIsHistoryLoading(true);
     try {
       const list = await listIrdHistory(effectiveUserId);
       if (historyReqRef.current === reqId) setHistoryRecords(list);
@@ -90,15 +87,13 @@ export function useIrdCalculatorController() {
     }
   }, [effectiveUserId]);
   useEffect(() => { void loadHistory(); }, [loadHistory]);
-
   const weatherAgeMin = useMemo(() => (weatherData?.fetchedAt ? Math.max(0, Math.round((Date.now() - new Date(weatherData.fetchedAt).getTime()) / 60000)) : null), [weatherData?.fetchedAt]);
   const activeWeather = useMemo(() => buildActiveWeatherInput(manualSource, manualWeather, weatherData, weatherAgeMin), [manualSource, manualWeather, weatherData, weatherAgeMin]);
   const weatherEval = useMemo(() => buildWeatherDriftEval(manualSource, activeWeather, weatherData, weatherAgeMin), [manualSource, activeWeather, weatherData, weatherAgeMin]);
-
   const ctx = useMemo(() => resolveActiveIrdContext({
-    evaluationLevel, activeWeather, culture, equipment, nozzle, calibration, exposure, locationName: currentLocation.name,
+    evaluationLevel, userId: effectiveUserId, activeWeather, culture, equipment, nozzle, calibration, exposure, locationName: currentLocation.name,
     profiles: { cultures, equipments, profileNozzles, calibrations, catalog: NOZZLES_DATABASE }
-  }), [evaluationLevel, activeWeather, culture, equipment, nozzle, calibration, exposure, currentLocation.name, cultures, equipments, profileNozzles, calibrations]);
+  }), [evaluationLevel, effectiveUserId, activeWeather, culture, equipment, nozzle, calibration, exposure, currentLocation.name, cultures, equipments, profileNozzles, calibrations]);
 
   const resolvedProfile = useMemo(() => {
     const n = ctx.irdInput.nozzle;

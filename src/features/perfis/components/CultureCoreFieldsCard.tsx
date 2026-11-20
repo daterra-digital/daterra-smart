@@ -98,15 +98,15 @@ export const CultureCoreFieldsCard: React.FC<CultureCoreFieldsCardProps> = ({
     )}
 
     <div>
-      <label className="block text-xs font-bold text-slate-700 mb-1.5">
-        Nome da parcela <span className="text-rose-600">*</span>
+      <label className="block text-xs font-semibold text-[#114037] mb-1.5">
+        Nome da parcela <span className="text-red-600">*</span>
       </label>
       <input
         type="text"
         value={form.name}
         onChange={(e) => onUpdateForm({ name: e.target.value })}
         placeholder="Ex: Vinha Norte, Talhão A"
-        className="w-full min-h-[48px] px-4 py-2.5 rounded-2xl border border-slate-300 bg-white text-xs font-semibold outline-none focus:border-[#3CA64C]"
+        className="w-full min-h-[44px] px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-xs font-medium text-slate-900 placeholder:text-slate-400 outline-none focus:border-[#114037] focus:ring-2 focus:ring-[#114037]/15"
       />
       {fieldErrors.name && <p role="alert" className="mt-1 text-xs font-semibold text-rose-700">{fieldErrors.name}</p>}
     </div>
@@ -115,8 +115,7 @@ export const CultureCoreFieldsCard: React.FC<CultureCoreFieldsCardProps> = ({
       label="Área da parcela (ha)"
       value={form.area}
       unit="ha"
-      placeholder="Opcional — tocar para introduzir"
-      helperText="Opcional. Nunca é preenchida automaticamente com valores fictícios."
+      placeholder="Ex: 2,50"
       errorMsg={fieldErrors.area}
       onOpenKeypad={onOpenAreaKeypad}
       onClear={() => onUpdateForm({ area: '' })}

@@ -11,18 +11,25 @@ import {
   getPortugalRegionOptions
 } from '../data/cultureLocationData';
 import type { CultureV11FormState } from '../services/cultureFormState';
+import type { CultureKeypadField } from '../services/cultureKeypadHelpers';
+import { WINDBREAK_OPTIONS } from '../data/cultureGeometryOptions';
+import { CultureSpatialContextFields } from './CultureSpatialContextFields';
 import { SearchableRoundedDropdown } from './SearchableRoundedDropdown';
 
 export interface CultureLocationAccordionProps {
   mode?: 'subsection' | 'editor';
   form: CultureV11FormState;
+  fieldErrors?: Record<string, string>;
   onUpdate: (patch: Partial<CultureV11FormState>) => void;
+  onOpenKeypad?: (field: CultureKeypadField) => void;
 }
 
 export const CultureLocationAccordion: React.FC<CultureLocationAccordionProps> = ({
   mode = 'subsection',
   form,
-  onUpdate
+  fieldErrors = {},
+  onUpdate,
+  onOpenKeypad
 }) => {
   const isPortugal = (form.countryCode || 'PT') === 'PT';
   const countryLabel = COUNTRY_OPTIONS.find((c) => c.code === (form.countryCode || 'PT'))?.label || 'Portugal';
@@ -91,36 +98,39 @@ export const CultureLocationAccordion: React.FC<CultureLocationAccordionProps> =
         ) : (
           <div className="space-y-3">
             <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1.5">Região / Estado</label>
+              <label className="block text-xs font-semibold text-[#114037] mb-1.5">Região / Estado</label>
               <input
                 type="text"
                 value={form.adminRegion}
                 onChange={(e) => onUpdate({ adminRegion: e.target.value })}
                 placeholder="Ex: Andaluzia, Bordéus..."
-                className="w-full min-h-[48px] px-4 py-2.5 rounded-2xl border border-slate-300 bg-white text-xs font-semibold outline-none focus:border-[#3CA64C]"
+                className="w-full min-h-[44px] px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-xs font-medium text-slate-900 placeholder:text-slate-400 outline-none focus:border-[#114037] focus:ring-2 focus:ring-[#114037]/15"
               />
             </div>
             <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1.5">Município / Cidade</label>
+              <label className="block text-xs font-semibold text-[#114037] mb-1.5">Município / Cidade</label>
               <input
                 type="text"
                 value={form.municipality}
                 onChange={(e) => onUpdate({ municipality: e.target.value })}
                 placeholder="Ex: Jerez de la Frontera..."
-                className="w-full min-h-[48px] px-4 py-2.5 rounded-2xl border border-slate-300 bg-white text-xs font-semibold outline-none focus:border-[#3CA64C]"
+                className="w-full min-h-[44px] px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-xs font-medium text-slate-900 placeholder:text-slate-400 outline-none focus:border-[#114037] focus:ring-2 focus:ring-[#114037]/15"
               />
             </div>
             <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1.5">Localidade / Zona</label>
+              <label className="block text-xs font-semibold text-[#114037] mb-1.5">Localidade / Zona</label>
               <input
                 type="text"
                 value={form.parish}
                 onChange={(e) => onUpdate({ parish: e.target.value })}
                 placeholder="Opcional"
-                className="w-full min-h-[48px] px-4 py-2.5 rounded-2xl border border-slate-300 bg-white text-xs font-semibold outline-none focus:border-[#3CA64C]"
+                className="w-full min-h-[44px] px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-xs font-medium text-slate-900 placeholder:text-slate-400 outline-none focus:border-[#114037] focus:ring-2 focus:ring-[#114037]/15"
               />
             </div>
           </div>
+        )}
+        {onOpenKeypad && (
+          <CultureSpatialContextFields form={form} fieldErrors={fieldErrors} onUpdate={onUpdate} onOpenKeypad={onOpenKeypad} />
         )}
       </div>
     );
@@ -138,6 +148,14 @@ export const CultureLocationAccordion: React.FC<CultureLocationAccordionProps> =
     { label: isPortugal ? 'Concelho' : 'Município', value: form.municipality || 'Não indicado' },
     { label: isPortugal ? 'Freguesia' : 'Localidade', value: form.parish || 'Não indicada' }
   ];
+
+  const wbLabel = WINDBREAK_OPTIONS.find((o) => o.id === form.windbreakBarrier)?.label;
+  const spatialSummary = [
+    wbLabel,
+    form.sensitiveZoneDistanceM ? `Zona sens.: ${form.sensitiveZoneDistanceM} m` : '',
+    form.rowAzimuthDeg ? `Azimute: ${form.rowAzimuthDeg}°` : '',
+    form.parcelSlopePct ? `Declive: ${form.parcelSlopePct}%` : ''
+  ].filter(Boolean).join(' · ');
 
   return (
     <div className="pt-3.5 border-t border-slate-100 space-y-2.5">
@@ -159,6 +177,9 @@ export const CultureLocationAccordion: React.FC<CultureLocationAccordionProps> =
           </div>
         ))}
       </dl>
+      {spatialSummary && (
+        <p className="text-[11px] text-slate-600 font-medium">{spatialSummary}</p>
+      )}
     </div>
   );
 };

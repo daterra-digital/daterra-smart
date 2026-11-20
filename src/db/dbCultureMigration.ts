@@ -22,6 +22,18 @@ export const V11_STORES = {
   profile_custom_options: '++id, localId, userId, category, cultureKey, normalizedKey, [userId+category], [userId+category+normalizedKey]'
 };
 
+export const V12_STORES = {
+  ...V11_STORES,
+  equipments: 'id, type, name, lastUpdatedAt'
+};
+
+export const V13_STORES = {
+  ...V12_STORES,
+  profiles_calibrations: '++id, userId, equipmentId, nozzleProfileId, cultureParcelId, updatedAt, equipment_id, nozzle_id',
+  equipments: 'id, userId, type, name, lastUpdatedAt'
+};
+
+
 /**
  * Migração conservadora Dexie v10 -> v11:
  * - Cria momentos legados sem data (observedAt: null) apenas para culturas com titular válido e dados vegetativos.

@@ -281,8 +281,8 @@ describe('Fase 0 (0.7 & 0.8): Newsletter Opcao B e Background Sync Opcao B', () 
     assert.ok(noticeSrc.includes('aria-expanded'));
     assert.ok(noticeSrc.includes('min-h-[48px]'));
     assert.ok(noticeSrc.includes('touch-target'));
-    assert.ok(desktopNavSrc.includes('<OutboxSimulationNotice variant="desktop"'));
-    assert.ok(mobileNavSrc.includes('<OutboxSimulationNotice variant="mobile"'));
+    assert.ok(!desktopNavSrc.includes('<OutboxSimulationNotice'), 'Barra superior desktop não deve exibir etiqueta Simulação CentralGest');
+    assert.ok(!mobileNavSrc.includes('<OutboxSimulationNotice'), 'Drawer mobile não deve exibir etiqueta Simulação CentralGest');
     assert.ok(desktopNavSrc.split('\n').length < 200);
   });
 

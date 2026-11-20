@@ -151,18 +151,18 @@ describe('Modo de Avaliação de Release Candidate (V-RC)', () => {
     assert.ok(toolCard.includes('bg-emerald-100 text-emerald-950 border border-emerald-400'), 'ToolCard PAGES deve usar esmeralda alto contraste');
 
     const nav = fs.readFileSync(path.resolve('src/components/layout/PrivateDesktopNav.tsx'), 'utf8');
-    assert.ok(nav.includes('bg-amber-400 text-slate-950'), 'PrivateDesktopNav RC deve usar âmbar de alto contraste sobre fundo escuro');
+    assert.ok(!nav.includes('>RC<'), 'PrivateDesktopNav não deve exibir badges RC em Assistente/Academia');
     assert.ok(!nav.includes('bg-blue-500/20 text-blue-200'), 'PrivateDesktopNav não deve conter badge azul');
 
     const drawer = fs.readFileSync(path.resolve('src/components/layout/PrivateNavDrawer.tsx'), 'utf8');
-    assert.ok(drawer.includes('bg-amber-400 text-slate-950'), 'PrivateNavDrawer RC deve usar âmbar de alto contraste');
+    assert.ok(!drawer.includes('>RC<') && !drawer.includes('>\n            RC\n'), 'PrivateNavDrawer não deve exibir badges RC em Assistente/Academia');
 
     const academy = fs.readFileSync(path.resolve('src/views/AcademyView.tsx'), 'utf8');
     assert.ok(academy.includes('bg-amber-100 border border-amber-400 text-amber-950'), 'AcademyView RC deve ser âmbar');
 
     const weather = fs.readFileSync(path.resolve('src/features/weather/views/WeatherSaasView.tsx'), 'utf8');
-    assert.ok(weather.includes('bg-amber-100 text-amber-950 border border-amber-400'), 'WeatherSaasView RC deve ser âmbar');
-    assert.ok(weather.includes('isWeatherDriftTabEnabledForEnv'), 'WeatherSaasView deve ativar aba Deriva via isWeatherDriftTabEnabledForEnv em V-PAGES e V-RC');
+    assert.ok(!weather.includes('>RC<'), 'WeatherSaasView não deve exibir etiqueta RC em Meteorologia/Pulverização');
+    assert.ok(weather.includes('WeatherDriftSection') && weather.includes("tab === 'pulverizacao' || tab === 'deriva'"), 'WeatherSaasView deve unificar Deriva em Pulverização e redirecionar ?tab=deriva');
 
     const settingsSubmenu = fs.readFileSync(path.resolve('src/features/settings/SettingsSubmenuNav.tsx'), 'utf8');
     assert.ok(!settingsSubmenu.includes('bg-blue-100 text-blue-700'), 'SettingsSubmenuNav não deve ter etiquetas azuis');
@@ -176,6 +176,15 @@ describe('Modo de Avaliação de Release Candidate (V-RC)', () => {
     assert.ok(toolsView.includes('Ferramentas Homologadas'), 'ToolsView deve ter cabeçalho de grupo homologado');
     assert.ok(toolsView.includes('Candidatas a Publicação — Novidades'), 'ToolsView deve ter cabeçalho de novidades RC');
     assert.ok(toolsView.includes('border-t-2 border-dashed border-slate-200'), 'ToolsView deve conter linha separadora entre grupos');
+  });
+
+  it('11. Assistente permanece oculto por defeito (V-PAGES) e só ativa com VITE_ENABLE_ASSISTANT === "true"', () => {
+    const deskNav = fs.readFileSync(path.resolve('src/components/layout/PrivateDesktopNav.tsx'), 'utf8');
+    const drawerNav = fs.readFileSync(path.resolve('src/components/layout/PrivateNavDrawer.tsx'), 'utf8');
+    const appSrc = fs.readFileSync(path.resolve('src/App.tsx'), 'utf8');
+    assert.ok(deskNav.includes("import.meta.env.VITE_ENABLE_ASSISTANT === 'true'"), 'Desktop nav deve condicionar Assistente por VITE_ENABLE_ASSISTANT');
+    assert.ok(drawerNav.includes("import.meta.env.VITE_ENABLE_ASSISTANT === 'true'"), 'Drawer mobile deve condicionar Assistente por VITE_ENABLE_ASSISTANT');
+    assert.ok(appSrc.includes("import.meta.env.VITE_ENABLE_ASSISTANT === 'true'") && appSrc.includes('/assistente/*'), 'App.tsx deve redirecionar /assistente e /assistente/* quando flag inativa');
   });
 
 });

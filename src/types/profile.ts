@@ -15,7 +15,16 @@ export type Profile = {
   address: string | null;
   postal_code: string | null;
   city: string | null;
-  plan: 'free' | 'plus' | 'pro' | 'ultra' | 'enterprise';
+  plan: 'free' | 'plus' | 'pro' | 'ultra' | 'enterprise' | string;
+  subscriptionPlan?: string;
+  tier?: string;
+  status?: string;
+  subscriptionStatus?: string;
+  subscription?: {
+    plan?: string;
+    tier?: string;
+    status?: string;
+  };
   credits?: number;
   newsletter_subscribed?: boolean;
   platform_notifications_enabled?: boolean;

@@ -70,7 +70,7 @@ export default defineConfig({
         skipWaiting: true,
         clientsClaim: true,
         cleanupOutdatedCaches: true,
-        maximumFileSizeToCacheInBytes: 4 * 1024 * 1024,
+        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
         runtimeCaching: [
           {
@@ -116,7 +116,7 @@ export default defineConfig({
           if (id.includes('node_modules/react') || id.includes('node_modules/react-dom') || id.includes('node_modules/react-router')) {
             return 'react-vendor';
           }
-          if (id.includes('node_modules/dexie')) {
+          if (id.includes('node_modules/dexie') || id.includes('node_modules/zod')) {
             return 'dexie-vendor';
           }
           if (id.includes('nozzleComparison.data')) {

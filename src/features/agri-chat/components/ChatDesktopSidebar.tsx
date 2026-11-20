@@ -5,38 +5,26 @@ import type { Skill, SkillId, ActiveExplorationContext } from '../types';
 import { SKILLS_CATALOG } from '../data/skillsCatalog';
 import type { ProfileCulture, ProfileEquipment, ProfileNozzle, ProfileCalibration } from '../../../db/db';
 import { ExplorationProfileDropdowns } from './ExplorationProfileDropdowns';
+import { EquipmentContextChip, type EquipmentContextChipProps } from './EquipmentContextChip';
+import { NozzleContextChip, type NozzleContextChipProps } from './NozzleContextChip';
+import { AgronomicMentionPills, type AgronomicMentionPillItem } from './AgronomicMentionPills.tsx';
 
 interface ChatDesktopSidebarProps {
-  activeSkillId: SkillId;
-  unlockedSkills: Record<SkillId, boolean>;
-  onSelectSkill: (id: SkillId) => void;
-  onRequestUnlock: (skill: Skill) => void;
-  cultures: ProfileCulture[];
-  equipments: ProfileEquipment[];
-  nozzles: ProfileNozzle[];
-  calibrations: ProfileCalibration[];
-  activeContext: ActiveExplorationContext;
-  isContextEnabled: boolean;
-  onToggleContext: (enabled: boolean) => void;
-  onUpdateContext: (updates: Partial<ActiveExplorationContext>) => void;
+  activeSkillId: SkillId; unlockedSkills: Record<SkillId, boolean>; onSelectSkill: (id: SkillId) => void; onRequestUnlock: (skill: Skill) => void;
+  cultures: ProfileCulture[]; equipments: ProfileEquipment[]; nozzles: ProfileNozzle[]; calibrations: ProfileCalibration[];
+  activeContext: ActiveExplorationContext; isContextEnabled: boolean; onToggleContext: (enabled: boolean) => void;
+  onUpdateContext: (updates: Partial<ActiveExplorationContext>) => void; equipmentContext?: EquipmentContextChipProps;
+  nozzleContext?: NozzleContextChipProps; agronomicMentions?: AgronomicMentionPillItem[];
 }
 
 export const ChatDesktopSidebar: React.FC<ChatDesktopSidebarProps> = ({
-  activeSkillId,
-  unlockedSkills,
-  onSelectSkill,
-  onRequestUnlock,
-  cultures,
-  equipments,
-  nozzles,
-  calibrations,
-  activeContext,
-  isContextEnabled,
-  onToggleContext,
-  onUpdateContext
+  activeSkillId, unlockedSkills, onSelectSkill, onRequestUnlock, cultures, equipments, nozzles, calibrations,
+  activeContext, isContextEnabled, onToggleContext, onUpdateContext, equipmentContext, nozzleContext, agronomicMentions = []
 }) => {
   const [isEditingContext, setIsEditingContext] = useState(false);
-  const hasProfiles = cultures.length > 0 || equipments.length > 0;
+  const hasEquipmentV12 = (equipmentContext?.items.length ?? 0) > 0;
+  const hasNozzleV12 = (nozzleContext?.items.length ?? 0) > 0;
+  const hasProfiles = cultures.length > 0 || equipments.length > 0 || hasEquipmentV12 || hasNozzleV12;
 
   return (
     <aside className="hidden lg:flex lg:col-span-4 flex-col gap-3.5 bg-white rounded-3xl border border-slate-200 p-4 shadow-soft overflow-hidden h-full">
@@ -103,6 +91,10 @@ export const ChatDesktopSidebar: React.FC<ChatDesktopSidebarProps> = ({
                   {activeContext.calibrationPressureBar ? `${activeContext.calibrationPressureBar} bar` : '—'} • {activeContext.calibrationSpeedKmh ? `${activeContext.calibrationSpeedKmh} km/h` : '—'}
                 </span>
               </div>
+
+              {agronomicMentions.length > 0 && <AgronomicMentionPills items={agronomicMentions} />}
+              {equipmentContext && hasEquipmentV12 && <EquipmentContextChip {...equipmentContext} />}
+              {nozzleContext && hasNozzleV12 && <NozzleContextChip {...nozzleContext} />}
 
               {hasProfiles && (
                 <button

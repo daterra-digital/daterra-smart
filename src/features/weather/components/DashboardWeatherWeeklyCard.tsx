@@ -137,7 +137,7 @@ export const DashboardWeatherWeeklyCard: React.FC<DashboardWeatherWeeklyCardProp
       {!hideFooter && (
         <div className="pt-3 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
           <Link
-            to="/meteorologia"
+            to="/meteorologia?tab=pulverizacao"
             className="group flex items-center gap-2 text-xs sm:text-sm font-bold text-slate-700 hover:text-daterra-primary transition-colors py-1 touch-target"
             title="Ver janelas e recomendações fitossanitárias na Meteorologia"
           >

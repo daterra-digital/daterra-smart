@@ -1,4 +1,6 @@
 // src/features/agri-chat/types.ts
+import type { EquipmentType } from '../../schemas/equipment.schema.ts';
+import type { ActiveAgronomicContext } from '../../types/calibration-audit.ts';
 
 export type SkillId = 
   | 'geral'
@@ -40,7 +42,17 @@ export interface ActiveExplorationContext {
   trvM3Ha?: number;
   recommendedSprayVolumeLHa?: number;
   equipmentId?: number;
+  equipmentRecordId?: string;
   equipmentName?: string;
+  equipmentType?: EquipmentType;
+  equipmentTypeBadge?: '2D' | '3D' | 'UAV' | 'Manual';
+  equipmentOperationalSummary?: string;
+  equipmentAirSummary?: string;
+  equipmentIppBadge?: string;
+  equipmentIppTone?: 'emerald' | 'amber' | 'rose' | 'slate';
+  equipmentIppSummary?: string;
+  equipmentAiSummary?: string;
+  equipmentContextActive?: boolean;
   tankCapacityL?: number;
   pumpType?: string;
   nozzleName?: string;
@@ -48,6 +60,13 @@ export interface ActiveExplorationContext {
   calibrationSpeedKmh?: number;
   calibrationPressureBar?: number;
   calibrationVolumeLHa?: number;
+  nozzleProfileId?: string;
+  nozzleProfileSummary?: string;
+  nozzleContextActive?: boolean;
+  cultureContextActive?: boolean;
+  calibrationContextActive?: boolean;
+  agronomicContext?: ActiveAgronomicContext;
+  agronomicContextSummary?: string;
 }
 
 export interface ChatActionCard {

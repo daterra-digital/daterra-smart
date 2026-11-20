@@ -1,30 +1,35 @@
 import React, { useState, useEffect, type FormEvent } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { 
-  User, Info, 
+  User, 
   Download, Upload, CheckCircle2, 
-  AlertTriangle, ShieldAlert,
-  Building2, Palette, Image as ImageIcon
+  AlertTriangle, ShieldAlert
 } from 'lucide-react';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from '../db/db';
 import { firestoreDb } from '../lib/firebaseClient';
 import { useAuth } from '../context/AuthContext';
-import { useLanguage, LANGUAGE_OPTIONS, type SupportedLanguage } from '../context/LanguageContext';
+import { useLanguage, type SupportedLanguage } from '../context/LanguageContext';
 import { MicrolearningModal } from '../components/MicrolearningModal';
 import { HelpView } from './HelpView';
 import { AboutView } from './AboutView';
 import { ExplorationView, type ProfileTab as ExplorationTab } from './ExplorationView';
 import { SettingsSubmenuNav, type SettingsSubmenu } from '../features/settings/SettingsSubmenuNav';
 import { SettingsNotificationsTab } from '../features/settings/SettingsNotificationsTab';
+import { UserProfileSummaryCard } from '../features/settings/profile/UserProfileSummaryCard';
+import { UserProfileFocusedEditor } from '../features/settings/profile/UserProfileFocusedEditor';
+import { CoBrandingSummaryCard } from '../features/settings/branding/CoBrandingSummaryCard';
+import { CoBrandingFocusedEditor } from '../features/settings/branding/CoBrandingFocusedEditor';
+import { PreferencesSummaryCard } from '../features/settings/preferences/PreferencesSummaryCard';
+import { PreferencesFocusedEditor } from '../features/settings/preferences/PreferencesFocusedEditor';
+import type { AppThemeId } from '../features/settings/preferences/preferencesCatalog';
 import { RgpdDeleteAccountButton } from '../features/settings/RgpdDeleteAccountButton';
 import { deleteAllUserCulturesSafely } from '../features/perfis/services/cultureDeletionService';
 import type { Profile } from '../types/profile';
 import type { CoBrandingConfig } from '../features/smart-debito/types';
 import {
   getStoredCoBrandingConfig,
-  saveStoredCoBrandingConfig,
-  PRESET_CO_BRANDING_PALETTES
+  saveStoredCoBrandingConfig
 } from '../features/smart-debito/coBrandingStorage';
 
 export const SettingsView: React.FC = () => {
@@ -94,6 +99,7 @@ export const SettingsView: React.FC = () => {
   // Estados de UI
   const [isLoadingProfile, setIsLoadingProfile] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [isProfileEditorOpen, setIsProfileEditorOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [dangerErrorMsg, setDangerErrorMsg] = useState('');
 
@@ -117,6 +123,7 @@ export const SettingsView: React.FC = () => {
   const [originalCoBranding, setOriginalCoBranding] = useState<CoBrandingConfig>(() => getStoredCoBrandingConfig());
   const [coBrandingFeedback, setCoBrandingFeedback] = useState<string | null>(null);
   const [isSavingCoBranding, setIsSavingCoBranding] = useState(false);
+  const [isBrandingEditorOpen, setIsBrandingEditorOpen] = useState(false);
 
   const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -133,15 +140,6 @@ export const SettingsView: React.FC = () => {
     e.target.value = '';
   };
 
-  const handleApplyPalette = (palette: (typeof PRESET_CO_BRANDING_PALETTES)[0]) => {
-    setCoBranding((prev) => ({
-      ...prev,
-      primaryColor: palette.primary,
-      secondaryColor: palette.secondary,
-      textColor: palette.text
-    }));
-  };
-
   const handleFillFromProfile = () => {
     const fullPostal = postalCode ? `${postalCode}${city ? ' ' + city : ''}` : '';
     setCoBranding((prev) => ({
@@ -154,22 +152,19 @@ export const SettingsView: React.FC = () => {
     }));
   };
 
-  const handleSaveCoBranding = async (e: FormEvent) => {
-    e.preventDefault();
+  const persistCoBranding = async (configToSave: CoBrandingConfig): Promise<boolean> => {
     setIsSavingCoBranding(true);
     setCoBrandingFeedback(null);
     try {
-      // 1. Guardar localmente em localStorage para acesso síncrono do gerador PDF
-      saveStoredCoBrandingConfig(coBranding);
-      setOriginalCoBranding({ ...coBranding });
+      saveStoredCoBrandingConfig(configToSave);
+      setOriginalCoBranding({ ...configToSave });
 
-      // 2. Sincronizar com o documento users/{userId} no Cloud Firestore
       if (user?.id) {
         const userDocRef = doc(firestoreDb, 'users', user.id);
         await setDoc(
           userDocRef,
           {
-            co_branding: coBranding,
+            co_branding: configToSave,
             updated_at: new Date().toISOString()
           },
           { merge: true }
@@ -180,18 +175,32 @@ export const SettingsView: React.FC = () => {
         t('settings.coBrandingSynced', 'Configuração de Co-Branding guardada e sincronizada com sucesso! Aplicada aos relatórios e ferramentas.')
       );
       setTimeout(() => setCoBrandingFeedback(null), 5000);
+      return true;
     } catch (err) {
       console.error('[SettingsView] Erro ao sincronizar Co-Branding no Firestore:', err);
       setCoBrandingFeedback(t('settings.coBrandingSavedLocal', 'Configuração de Co-Branding guardada localmente.'));
       setTimeout(() => setCoBrandingFeedback(null), 5000);
+      return true;
     } finally {
       setIsSavingCoBranding(false);
     }
   };
 
+  const handleToggleCoBrandingEnabled = () => {
+    const nextConfig: CoBrandingConfig = { ...coBranding, isEnabled: !coBranding.isEnabled };
+    setCoBranding(nextConfig);
+    void persistCoBranding(nextConfig);
+  };
+
+  const handleSaveCoBranding = async (e?: FormEvent): Promise<boolean> => {
+    e?.preventDefault();
+    return persistCoBranding(coBranding);
+  };
+
   const handleCancelCoBranding = () => {
     setCoBranding({ ...originalCoBranding });
     setCoBrandingFeedback(null);
+    setIsBrandingEditorOpen(false);
   };
 
   // Carregar perfil ao montar ou quando user.id alterar
@@ -300,11 +309,15 @@ export const SettingsView: React.FC = () => {
   // ESTADOS 2: PREFERÊNCIAS & UNIDADES PADRÃO
   // ---------------------------------------------------------------------------
   const [selectedUnitsProfile, setSelectedUnitsProfile] = useState<string>('si');
-  const [appTheme, setAppTheme] = useState<'mono' | 'light' | 'dark'>(() => {
-    return (localStorage.getItem('daterra_theme') as 'mono' | 'light' | 'dark') || 'mono';
+  const [appTheme, setAppTheme] = useState<AppThemeId>(() => {
+    return (localStorage.getItem('daterra_theme') as AppThemeId) || 'mono';
   });
+  const [isPreferencesEditorOpen, setIsPreferencesEditorOpen] = useState(false);
+  const [draftLanguage, setDraftLanguage] = useState<SupportedLanguage>(language);
+  const [draftAppTheme, setDraftAppTheme] = useState<AppThemeId>(appTheme);
+  const [draftUnitsProfile, setDraftUnitsProfile] = useState<string>(selectedUnitsProfile);
 
-  const handleThemeChange = (newTheme: 'mono' | 'light' | 'dark') => {
+  const handleThemeChange = (newTheme: AppThemeId) => {
     setAppTheme(newTheme);
     localStorage.setItem('daterra_theme', newTheme);
     const favicon = document.getElementById('app-favicon') as HTMLLinkElement | null;
@@ -315,15 +328,29 @@ export const SettingsView: React.FC = () => {
     }
   };
 
+  const openPreferencesEditor = () => {
+    setDraftLanguage(language);
+    setDraftAppTheme(appTheme);
+    setDraftUnitsProfile(selectedUnitsProfile);
+    setIsPreferencesEditorOpen(true);
+  };
+
+  const handleCancelPreferences = () => {
+    setDraftLanguage(language);
+    setDraftAppTheme(appTheme);
+    setDraftUnitsProfile(selectedUnitsProfile);
+    setIsPreferencesEditorOpen(false);
+  };
+
   // ---------------------------------------------------------------------------
   // HANDLERS DE AÇÕES
   // ---------------------------------------------------------------------------
-  const handleSaveProfile = async (e: FormEvent) => {
-    e.preventDefault();
+  const handleSaveProfile = async (e?: FormEvent): Promise<boolean> => {
+    e?.preventDefault();
 
     if (!user?.id) {
       setErrorMessage(t('common.userNotAuthenticated', 'Utilizador não autenticado.'));
-      return;
+      return false;
     }
 
     try {
@@ -367,15 +394,37 @@ export const SettingsView: React.FC = () => {
       setFeedbackMsg(t('settings.profile.success', 'Perfil de Utilizador atualizado com sucesso!'));
       setTimeout(() => setFeedbackMsg(''), 3500);
       setIsSaving(false);
-
+      return true;
     } catch {
       setErrorMessage(t('settings.profile.connectionError', 'Erro de ligação ao guardar o perfil.'));
       setIsSaving(false);
+      return false;
     }
   };
 
-  const handleSavePreferences = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleCancelProfileEdit = () => {
+    if (originalProfile) {
+      setFirstName(originalProfile.first_name ?? '');
+      setLastName(originalProfile.last_name ?? '');
+      setMobile(originalProfile.phone ?? '');
+      setCompany(originalProfile.company_name ?? '');
+      setRole(originalProfile.role ?? '');
+      setJobTitle(originalProfile.job_title ?? '');
+      setNif(originalProfile.nif ?? '');
+      setAddress(originalProfile.address ?? '');
+      setPostalCode(originalProfile.postal_code ?? '');
+      setCity(originalProfile.city ?? '');
+    }
+    setErrorMessage(null);
+    setIsProfileEditorOpen(false);
+  };
+
+  const handleSavePreferences = (e?: React.FormEvent) => {
+    e?.preventDefault();
+    setLanguage(draftLanguage);
+    handleThemeChange(draftAppTheme);
+    setSelectedUnitsProfile(draftUnitsProfile);
+    setIsPreferencesEditorOpen(false);
     setFeedbackMsg(t('settings.preferencesSaved', 'Preferências e Unidades Padrão guardadas!'));
     setTimeout(() => setFeedbackMsg(''), 3500);
   };
@@ -513,648 +562,87 @@ export const SettingsView: React.FC = () => {
       {/* SUB-MENU 1: PERFIL DO UTILIZADOR                                        */}
       {/* ========================================================================= */}
       {activeSubmenu === 'perfil' && (
-        <div className="space-y-6 animate-fade-in">
-          <div className="bg-white p-6 sm:p-8 rounded-3xl shadow-soft border border-slate-200 space-y-8">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
-              <h2 className="text-fluid-subtitle font-black text-[#114037]">
-                {t('settings.profileTitle', 'Definições — Perfil do Utilizador')}
-              </h2>
-              <span className="self-start sm:self-center px-3 py-1 bg-amber-100 border border-amber-300 text-amber-900 rounded-full text-xs font-extrabold uppercase tracking-wide shrink-0">
-                {t('common.status.inImprovement', 'Em melhoria')}
-              </span>
-            </div>
+        <>
+          <div className="flex flex-col gap-4 animate-fade-in">
+            <UserProfileSummaryCard
+              firstName={firstName}
+              lastName={lastName}
+              email={email}
+              mobile={mobile}
+              company={company}
+              role={role}
+              jobTitle={jobTitle}
+              nif={nif}
+              address={address}
+              postalCode={postalCode}
+              city={city}
+              isLoadingProfile={isLoadingProfile}
+              errorMessage={errorMessage}
+              onEdit={() => {
+                setErrorMessage(null);
+                setIsProfileEditorOpen(true);
+              }}
+            />
 
-            {/* Indicadores de Loading / Erro */}
-            {isLoadingProfile && (
-              <div className="p-4 bg-blue-50 border border-blue-200 rounded-2xl text-xs font-bold text-blue-800 animate-pulse">
-                {t('settings.loadingProfile', 'A carregar perfil…')}
-              </div>
-            )}
-
-            {errorMessage && (
-              <div className="p-4 bg-red-50 border border-red-200 rounded-2xl text-xs font-bold text-red-800 animate-fade-in">
-                {errorMessage}
-              </div>
-            )}
-
-            <form onSubmit={handleSaveProfile} className="space-y-8">
-              {/* CARTÃO 1: Dados Pessoais */}
-              <div className="bg-slate-50/80 p-5 rounded-2xl border border-slate-200 space-y-4">
-                <h3 className="text-xs font-black uppercase tracking-wider text-[#1D734B]">
-                  {t('settings.profile.personalData', 'Dados do Perfil do Utilizador')}
-                </h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1.5">
-                      {t('settings.profile.firstName', 'Nome Próprio')}
-                    </label>
-                    <input
-                      type="text"
-                      value={firstName}
-                      onChange={(e) => setFirstName(e.target.value)}
-                      disabled={isLoadingProfile || isSaving}
-                      className="w-full min-h-[48px] px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-semibold outline-none focus:border-[#3CA64C] disabled:opacity-50"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1.5">
-                      {t('settings.profile.lastName', 'Apelido')}
-                    </label>
-                    <input
-                      type="text"
-                      value={lastName}
-                      onChange={(e) => setLastName(e.target.value)}
-                      disabled={isLoadingProfile || isSaving}
-                      className="w-full min-h-[48px] px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-semibold outline-none focus:border-[#3CA64C] disabled:opacity-50"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1.5">
-                      {t('settings.profile.email', 'Endereço de E-mail')}
-                    </label>
-                    <input
-                      type="email"
-                      value={email}
-                      readOnly
-                      disabled
-                      className="w-full min-h-[48px] px-4 py-2.5 bg-slate-100 border border-slate-300 rounded-xl text-xs font-semibold text-slate-500 cursor-not-allowed outline-none"
-                    />
-                    <p className="text-[11px] text-slate-500 font-medium mt-1 leading-snug">
-                      {t('settings.profile.emailNote', 'O endereço de email está associado à sua autenticação segura e não pode ser alterado diretamente aqui.')}
-                    </p>
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1.5">
-                      {t('settings.profile.mobile', 'Telemóvel')}
-                    </label>
-                    <input
-                      type="text"
-                      value={mobile}
-                      onChange={(e) => setMobile(e.target.value)}
-                      disabled={isLoadingProfile || isSaving}
-                      className="w-full min-h-[48px] px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-semibold input-mono outline-none focus:border-[#3CA64C] disabled:opacity-50"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* CARTÃO 2: Informação Profissional e Morada */}
-              <div className="bg-slate-50/80 p-5 rounded-2xl border border-slate-200 space-y-4">
-                <h3 className="text-xs font-black uppercase tracking-wider text-[#1D734B]">
-                  {t('settings.profile.professionalInfo', 'Informação Profissional e Morada')}
-                </h3>
-                <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1.5">
-                      {t('settings.profile.company', 'Empresa')}
-                    </label>
-                    <input
-                      type="text"
-                      value={company}
-                      onChange={(e) => setCompany(e.target.value)}
-                      disabled={isLoadingProfile || isSaving}
-                      className="w-full min-h-[48px] px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-semibold outline-none focus:border-[#3CA64C] disabled:opacity-50"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1.5">
-                      {t('settings.profile.role', 'Função')}
-                    </label>
-                    <input
-                      type="text"
-                      value={role}
-                      onChange={(e) => setRole(e.target.value)}
-                      disabled={isLoadingProfile || isSaving}
-                      className="w-full min-h-[48px] px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-semibold outline-none focus:border-[#3CA64C] disabled:opacity-50"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1.5">
-                      {t('settings.profile.jobTitle', 'Cargo')}
-                    </label>
-                    <input
-                      type="text"
-                      value={jobTitle}
-                      onChange={(e) => setJobTitle(e.target.value)}
-                      disabled={isLoadingProfile || isSaving}
-                      className="w-full min-h-[48px] px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-semibold outline-none focus:border-[#3CA64C] disabled:opacity-50"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1.5">
-                      {t('settings.profile.nif', 'NIF')}
-                    </label>
-                    <input
-                      type="text"
-                      value={nif}
-                      onChange={(e) => setNif(e.target.value)}
-                      disabled={isLoadingProfile || isSaving}
-                      className="w-full min-h-[48px] px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-semibold input-mono outline-none focus:border-[#3CA64C] disabled:opacity-50"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-1">
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1.5">
-                      {t('settings.profile.address', 'Morada')}
-                    </label>
-                    <input
-                      type="text"
-                      value={address}
-                      onChange={(e) => setAddress(e.target.value)}
-                      disabled={isLoadingProfile || isSaving}
-                      className="w-full min-h-[48px] px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-semibold outline-none focus:border-[#3CA64C] disabled:opacity-50"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1.5">
-                      {t('settings.profile.postalCode', 'Código-Postal')}
-                    </label>
-                    <input
-                      type="text"
-                      value={postalCode}
-                      onChange={(e) => setPostalCode(e.target.value)}
-                      disabled={isLoadingProfile || isSaving}
-                      className="w-full min-h-[48px] px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-semibold input-mono outline-none focus:border-[#3CA64C] disabled:opacity-50"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1.5">
-                      {t('settings.profile.city', 'Localidade')}
-                    </label>
-                    <input
-                      type="text"
-                      value={city}
-                      onChange={(e) => setCity(e.target.value)}
-                      disabled={isLoadingProfile || isSaving}
-                      className="w-full min-h-[48px] px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-semibold outline-none focus:border-[#3CA64C] disabled:opacity-50"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Botões de Ação: Cancelar e Guardar */}
-              <div className="flex flex-col-reverse sm:flex-row items-center justify-end gap-3 pt-2">
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (!originalProfile) return;
-                    setFirstName(originalProfile.first_name ?? '');
-                    setLastName(originalProfile.last_name ?? '');
-                    setMobile(originalProfile.phone ?? '');
-                    setCompany(originalProfile.company_name ?? '');
-                    setRole(originalProfile.role ?? '');
-                    setJobTitle(originalProfile.job_title ?? '');
-                    setNif(originalProfile.nif ?? '');
-                    setAddress(originalProfile.address ?? '');
-                    setPostalCode(originalProfile.postal_code ?? '');
-                    setCity(originalProfile.city ?? '');
-                    setErrorMessage(null);
-                  }}
-                  disabled={isSaving || isLoadingProfile}
-                  className="w-full sm:w-auto px-6 min-h-[48px] border border-slate-300 rounded-2xl font-bold text-xs text-slate-700 hover:bg-slate-100 disabled:opacity-50 transition-all touch-target"
-                >
-                  {t('settings.profile.cancel', 'Cancelar')}
-                </button>
-
-                <button
-                  type="submit"
-                  disabled={isSaving || isLoadingProfile}
-                  className="w-full sm:w-auto px-8 min-h-[48px] bg-[#3CA64C] hover:bg-[#359445] text-white font-black text-xs rounded-2xl shadow-md flex items-center justify-center gap-2 transition-all active:scale-95 disabled:opacity-50 touch-target"
-                >
-                  <span>
-                    {isSaving
-                      ? t('settings.profile.saving', 'A guardar…')
-                      : t('settings.profile.save', 'Guardar Alterações do Perfil')}
-                  </span>
-                </button>
-              </div>
-            </form>
+            <CoBrandingSummaryCard
+              coBranding={coBranding}
+              feedbackMessage={coBrandingFeedback}
+              isSaving={isSavingCoBranding}
+              onToggleEnabled={handleToggleCoBrandingEnabled}
+              onConfigure={() => {
+                setCoBrandingFeedback(null);
+                setIsBrandingEditorOpen(true);
+              }}
+            />
           </div>
 
-          {/* ========================================================================= */}
-          {/* CARTÃO 2: CO-BRANDING E PERSONALIZAÇÃO INSTITUCIONAL                     */}
-          {/* ========================================================================= */}
-          <div className="bg-white p-6 sm:p-8 rounded-3xl shadow-soft border border-slate-200 space-y-8">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
-              <div>
-                <div className="flex flex-wrap items-center gap-2 mb-1">
-                  <h2 className="text-fluid-subtitle font-black text-[#114037]">
-                    {t('settings.branding.title', 'Definições — Co-Branding & Personalização Institucional')}
-                  </h2>
-                  <span className="px-2.5 py-0.5 bg-amber-100 border border-amber-400 text-amber-950 rounded-full text-xs font-black uppercase tracking-wider shrink-0">
-                    RC
-                  </span>
-                </div>
-                <p className="text-xs text-slate-500 font-medium">
-                  {t('settings.branding.subtitle', 'Configure o logotipo, paleta de cores e dados da sua organização para emissão de relatórios oficiais (como o Smart Débito ISO 16122).')}
-                </p>
-              </div>
+            <UserProfileFocusedEditor
+            isOpen={isProfileEditorOpen}
+            isLoadingProfile={isLoadingProfile}
+            isSaving={isSaving}
+            errorMessage={errorMessage}
+            firstName={firstName}
+            lastName={lastName}
+            email={email}
+            mobile={mobile}
+            company={company}
+            role={role}
+            jobTitle={jobTitle}
+            nif={nif}
+            address={address}
+            postalCode={postalCode}
+            city={city}
+            onChangeFirstName={setFirstName}
+            onChangeLastName={setLastName}
+            onChangeMobile={setMobile}
+            onChangeCompany={setCompany}
+            onChangeRole={setRole}
+            onChangeJobTitle={setJobTitle}
+            onChangeNif={setNif}
+            onChangeAddress={setAddress}
+            onChangePostalCode={setPostalCode}
+            onChangeCity={setCity}
+            onClose={handleCancelProfileEdit}
+            onSave={async () => {
+              const saved = await handleSaveProfile();
+              if (saved) setIsProfileEditorOpen(false);
+            }}
+          />
 
-              {/* Interruptor Ativar / Desativar Co-Branding */}
-              <div className="flex items-center gap-3 shrink-0 bg-slate-50 px-4 py-2 rounded-2xl border border-slate-200">
-                <span className="text-xs font-bold text-slate-700">
-                  {coBranding.isEnabled ? t('settings.branding.statusActive', 'Co-Branding Ativo') : t('settings.branding.statusDisabled', 'Desativado')}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => setCoBranding((prev) => ({ ...prev, isEnabled: !prev.isEnabled }))}
-                  className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                    coBranding.isEnabled ? 'bg-[#3CA64C]' : 'bg-slate-300'
-                  }`}
-                  aria-label={t('settings.branding.toggleAria', 'Ativar ou desativar Co-Branding')}
-                >
-                  <span
-                    className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${
-                      coBranding.isEnabled ? 'translate-x-5' : 'translate-x-0'
-                    }`}
-                  />
-                </button>
-              </div>
-            </div>
-
-            {/* Mensagem de Feedback ao Guardar */}
-            {coBrandingFeedback && (
-              <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-2xl text-xs font-bold text-emerald-800 flex items-center gap-2 animate-fade-in">
-                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                <span>{coBrandingFeedback}</span>
-              </div>
-            )}
-
-            <form onSubmit={handleSaveCoBranding} className="space-y-8">
-              {/* SUB-BLOCO 1: Pré-visualização do Banner em Tempo Real */}
-              <div className="bg-slate-50/80 p-5 rounded-2xl border border-slate-200 space-y-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-xs font-black uppercase tracking-wider text-[#1D734B]">
-                    {t('settings.branding.bannerPreviewTitle', 'Pré-visualização do Banner Oficial')}
-                  </h3>
-                  <span className="text-[11px] font-bold text-slate-500">
-                    {t('settings.branding.bannerPreviewSubtitle', 'Aparência nos Relatórios PDF e na Aplicação')}
-                  </span>
-                </div>
-
-                <div
-                  style={{
-                    backgroundColor: coBranding.primaryColor,
-                    color: coBranding.textColor,
-                    borderColor: coBranding.secondaryColor
-                  }}
-                  className="w-full rounded-2xl p-4 sm:p-5 border-2 shadow-xs transition-all relative overflow-hidden"
-                >
-                  {/* Friso decorativo na cor secundária */}
-                  <div
-                    style={{ backgroundColor: coBranding.secondaryColor }}
-                    className="absolute top-0 left-0 right-0 h-1.5"
-                  />
-
-                  <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-                    {/* Logotipo em espaço dedicado branco + Dados da Empresa */}
-                    <div className="flex items-center gap-4 min-w-0">
-                      {/* Espaço dedicado com fundo branco puro para acomodar o logotipo */}
-                      <div
-                        style={{ borderColor: coBranding.secondaryColor }}
-                        className="h-14 w-32 sm:h-16 sm:w-36 bg-white rounded-xl p-1.5 flex items-center justify-center shrink-0 shadow-sm border border-slate-200 overflow-hidden"
-                      >
-                        {coBranding.logoUrl ? (
-                          <img
-                            src={coBranding.logoUrl}
-                            alt={coBranding.companyName}
-                            className="max-h-full max-w-full object-contain"
-                          />
-                        ) : (
-                          <div className="flex items-center gap-1.5 text-slate-400">
-                            <Building2 className="w-6 h-6 text-slate-400" />
-                            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                              {t('settings.branding.logo', 'Logótipo')}
-                            </span>
-                          </div>
-                        )}
-                      </div>
-
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-2">
-                          <h4 className="text-sm sm:text-base font-extrabold tracking-tight truncate">
-                            {coBranding.companyName || t('settings.branding.defaultCompanyName', 'Nome da Empresa')}
-                          </h4>
-                          <span
-                            style={{
-                              backgroundColor: coBranding.secondaryColor,
-                              color: coBranding.textColor
-                            }}
-                            className="text-[9px] uppercase tracking-wider font-extrabold px-1.5 py-0.5 rounded shadow-xs shrink-0"
-                          >
-                            {coBranding.isEnabled ? t('settings.branding.statusActive', 'Co-Branding Ativo') : t('settings.branding.statusDisabled', 'Desativado')}
-                          </span>
-                        </div>
-
-                        <p className="text-xs opacity-90 mt-1 truncate">
-                          {coBranding.address || t('settings.branding.defaultCompanyAddress', 'Morada da Empresa')}{coBranding.postalCode ? ` · ${coBranding.postalCode}` : ''}
-                        </p>
-
-                        <p className="text-[11px] opacity-80 mt-0.5 truncate">
-                          {coBranding.phone ? `Tel: ${coBranding.phone}` : ''}
-                          {coBranding.email ? ` | Email: ${coBranding.email}` : ''}
-                          {coBranding.website ? ` | ${coBranding.website}` : ''}
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Tag no topo direito */}
-                    <div className="self-end md:self-center shrink-0">
-                      <span
-                        style={{ backgroundColor: coBranding.secondaryColor, color: '#FFFFFF' }}
-                        className="text-[10px] font-black tracking-wider uppercase px-2.5 py-1 rounded-lg shadow-xs"
-                      >
-                        {t('settings.branding.officialInspectionBadge', 'INSPEÇÃO OFICIAL ISO 16122')}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* SUB-BLOCO 2: Logotipo e Paleta de Cores */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                {/* Logotipo da Empresa */}
-                <div className="bg-slate-50/80 p-5 rounded-2xl border border-slate-200 space-y-4">
-                  <h3 className="text-xs font-black uppercase tracking-wider text-[#1D734B]">
-                    {t('settings.branding.logoSectionTitle', 'Logotipo da Empresa')}
-                  </h3>
-                  <p className="text-xs text-slate-600 leading-relaxed">
-                    {t('settings.branding.logoSectionDesc', 'Carregue o logotipo da sua organização (PNG, JPG ou SVG). O sistema enquadra-o automaticamente num espaço com fundo branco neutro no banner do PDF e da plataforma, acomodando ficheiros com ou sem fundo.')}
-                  </p>
-
-                  <div className="flex items-center gap-4 pt-1">
-                    {/* Miniatura com Fundo Branco */}
-                    <div className="h-16 w-32 bg-white rounded-xl border border-slate-300 p-1.5 flex items-center justify-center shrink-0 shadow-xs overflow-hidden">
-                      {coBranding.logoUrl ? (
-                        <img
-                          src={coBranding.logoUrl}
-                          alt="Logo"
-                          className="max-h-full max-w-full object-contain"
-                        />
-                      ) : (
-                        <div className="flex items-center gap-1.5 text-slate-400">
-                          <ImageIcon className="w-5 h-5" />
-                          <span className="text-[10px] font-bold uppercase tracking-wider">
-                            {t('settings.branding.noLogo', 'Sem Logo')}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="flex flex-col gap-2">
-                      <label className="min-h-[44px] px-4 py-2 bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 rounded-xl font-bold text-xs flex items-center gap-2 cursor-pointer transition-colors shadow-xs touch-target">
-                        <Upload className="w-4 h-4 text-[#1D734B]" />
-                        <span>{t('settings.branding.uploadLogo', 'Carregar Ficheiro de Logotipo')}</span>
-                        <input
-                          type="file"
-                          accept="image/png,image/jpeg,image/svg+xml,image/webp"
-                          onChange={handleLogoUpload}
-                          className="hidden"
-                        />
-                      </label>
-
-                      {coBranding.logoUrl && (
-                        <button
-                          type="button"
-                          onClick={() => setCoBranding((prev) => ({ ...prev, logoUrl: null }))}
-                          className="text-xs text-rose-600 hover:text-rose-800 font-bold text-left hover:underline px-1 cursor-pointer"
-                        >
-                          {t('settings.branding.removeLogo', 'Remover Logotipo Atual')}
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Paleta Dinâmica de 3 Cores */}
-                <div className="bg-slate-50/80 p-5 rounded-2xl border border-slate-200 space-y-4">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-xs font-black uppercase tracking-wider text-[#1D734B]">
-                      {t('settings.branding.colorPaletteTitle', 'Paleta de 3 Cores')}
-                    </h3>
-                    <Palette className="w-4 h-4 text-[#1D734B]" />
-                  </div>
-
-                  <div className="grid grid-cols-3 gap-3">
-                    <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-1.5">
-                        {t('settings.branding.primaryColor', 'Cor Primária')}
-                      </label>
-                      <div className="flex items-center gap-2">
-                        <input
-                          type="color"
-                          value={coBranding.primaryColor}
-                          onChange={(e) => setCoBranding((prev) => ({ ...prev, primaryColor: e.target.value }))}
-                          className="w-10 h-10 rounded-lg border border-slate-300 cursor-pointer p-0.5 shrink-0 bg-white"
-                        />
-                        <input
-                          type="text"
-                          value={coBranding.primaryColor}
-                          onChange={(e) => setCoBranding((prev) => ({ ...prev, primaryColor: e.target.value }))}
-                          className="w-full min-h-[40px] px-2 py-1 bg-white border border-slate-300 rounded-lg text-xs font-mono font-bold uppercase"
-                        />
-                      </div>
-                      <span className="text-[10px] text-slate-500 mt-1 block">
-                        {t('settings.branding.bannerBackground', 'Fundo do Banner')}
-                      </span>
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-1.5">
-                        {t('settings.branding.secondaryColor', 'Cor Secundária')}
-                      </label>
-                      <div className="flex items-center gap-2">
-                        <input
-                          type="color"
-                          value={coBranding.secondaryColor}
-                          onChange={(e) => setCoBranding((prev) => ({ ...prev, secondaryColor: e.target.value }))}
-                          className="w-10 h-10 rounded-lg border border-slate-300 cursor-pointer p-0.5 shrink-0 bg-white"
-                        />
-                        <input
-                          type="text"
-                          value={coBranding.secondaryColor}
-                          onChange={(e) => setCoBranding((prev) => ({ ...prev, secondaryColor: e.target.value }))}
-                          className="w-full min-h-[40px] px-2 py-1 bg-white border border-slate-300 rounded-lg text-xs font-mono font-bold uppercase"
-                        />
-                      </div>
-                      <span className="text-[10px] text-slate-500 mt-1 block">
-                        {t('settings.branding.trimsAndSeal', 'Frisos e Selo')}
-                      </span>
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-1.5">
-                        {t('settings.branding.textColor', 'Cor do Texto')}
-                      </label>
-                      <div className="flex items-center gap-2">
-                        <input
-                          type="color"
-                          value={coBranding.textColor}
-                          onChange={(e) => setCoBranding((prev) => ({ ...prev, textColor: e.target.value }))}
-                          className="w-10 h-10 rounded-lg border border-slate-300 cursor-pointer p-0.5 shrink-0 bg-white"
-                        />
-                        <input
-                          type="text"
-                          value={coBranding.textColor}
-                          onChange={(e) => setCoBranding((prev) => ({ ...prev, textColor: e.target.value }))}
-                          className="w-full min-h-[40px] px-2 py-1 bg-white border border-slate-300 rounded-lg text-xs font-mono font-bold uppercase"
-                        />
-                      </div>
-                      <span className="text-[10px] text-slate-500 mt-1 block">
-                        {t('settings.branding.bannerText', 'Texto do Banner')}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Sugestões Rápidas de Paletas */}
-                  <div className="pt-1">
-                    <span className="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-2">
-                      {t('settings.branding.quickPresets', 'Sugestões Rápidas:')}
-                    </span>
-                    <div className="flex flex-wrap gap-2">
-                      {PRESET_CO_BRANDING_PALETTES.map((pal) => (
-                        <button
-                          key={pal.name}
-                          type="button"
-                          onClick={() => handleApplyPalette(pal)}
-                          className="py-1.5 px-2.5 rounded-xl text-xs font-semibold bg-white border border-slate-300 hover:border-[#114037] text-slate-700 flex items-center gap-2 transition-colors shadow-2xs"
-                        >
-                          <span
-                            style={{ backgroundColor: pal.primary }}
-                            className="w-3 h-3 rounded-full inline-block border border-slate-300"
-                          />
-                          <span
-                            style={{ backgroundColor: pal.secondary }}
-                            className="w-3 h-3 rounded-full inline-block border border-slate-300"
-                          />
-                          <span>{pal.name}</span>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* SUB-BLOCO 3: Dados Cadastrais da Empresa para o Banner */}
-              <div className="bg-slate-50/80 p-5 rounded-2xl border border-slate-200 space-y-4">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                  <h3 className="text-xs font-black uppercase tracking-wider text-[#1D734B]">
-                    {t('settings.branding.companyDataTitle', 'Dados da Empresa no Banner e Relatórios')}
-                  </h3>
-                  <button
-                    type="button"
-                    onClick={handleFillFromProfile}
-                    className="text-xs font-bold text-[#1D734B] hover:text-[#114037] hover:underline flex items-center gap-1.5 self-start sm:self-auto cursor-pointer"
-                  >
-                    <span>{t('settings.branding.fillFromProfile', 'Preencher com dados do Perfil de Utilizador')}</span>
-                  </button>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  <div className="sm:col-span-2 lg:col-span-1">
-                    <label className="block text-xs font-bold text-slate-700 mb-1.5">
-                      {t('settings.branding.companyName', 'Nome da Empresa')}
-                    </label>
-                    <input
-                      type="text"
-                      value={coBranding.companyName}
-                      onChange={(e) => setCoBranding((prev) => ({ ...prev, companyName: e.target.value }))}
-                      placeholder={t('settings.branding.companyNamePlaceholder', 'Ex: AgroTec Serviços Lda')}
-                      className="w-full min-h-[48px] px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-semibold outline-none focus:border-[#3CA64C]"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1.5">
-                      {t('settings.branding.companyAddress', 'Morada')}
-                    </label>
-                    <input
-                      type="text"
-                      value={coBranding.address}
-                      onChange={(e) => setCoBranding((prev) => ({ ...prev, address: e.target.value }))}
-                      placeholder={t('settings.branding.companyAddressPlaceholder', 'Ex: Zona Industrial Lote 14')}
-                      className="w-full min-h-[48px] px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-semibold outline-none focus:border-[#3CA64C]"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1.5">
-                      {t('settings.branding.postalCodeCity', 'Código-Postal e Localidade')}
-                    </label>
-                    <input
-                      type="text"
-                      value={coBranding.postalCode}
-                      onChange={(e) => setCoBranding((prev) => ({ ...prev, postalCode: e.target.value }))}
-                      placeholder={t('settings.branding.postalCodePlaceholder', 'Ex: 2000-001 Santarém')}
-                      className="w-full min-h-[48px] px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-semibold outline-none focus:border-[#3CA64C]"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1.5">
-                      {t('settings.branding.contactPhone', 'Telefone de Contacto')}
-                    </label>
-                    <input
-                      type="text"
-                      value={coBranding.phone}
-                      onChange={(e) => setCoBranding((prev) => ({ ...prev, phone: e.target.value }))}
-                      placeholder="Ex: +351 243 000 111"
-                      className="w-full min-h-[48px] px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-semibold input-mono outline-none focus:border-[#3CA64C]"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1.5">
-                      {t('settings.branding.institutionalEmail', 'E-mail Institucional')}
-                    </label>
-                    <input
-                      type="email"
-                      value={coBranding.email}
-                      onChange={(e) => setCoBranding((prev) => ({ ...prev, email: e.target.value }))}
-                      placeholder="Ex: servicos@empresa.pt"
-                      className="w-full min-h-[48px] px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-semibold outline-none focus:border-[#3CA64C]"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1.5">
-                      {t('settings.branding.website', 'Website')}
-                    </label>
-                    <input
-                      type="text"
-                      value={coBranding.website}
-                      onChange={(e) => setCoBranding((prev) => ({ ...prev, website: e.target.value }))}
-                      placeholder="Ex: www.empresa.pt"
-                      className="w-full min-h-[48px] px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-semibold outline-none focus:border-[#3CA64C]"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Botões de Ação do Cartão de Co-Branding */}
-              <div className="flex flex-col-reverse sm:flex-row items-center justify-end gap-3 pt-2">
-                <button
-                  type="button"
-                  onClick={handleCancelCoBranding}
-                  disabled={isSavingCoBranding}
-                  className="w-full sm:w-auto px-6 min-h-[48px] border border-slate-300 rounded-2xl font-bold text-xs text-slate-700 hover:bg-slate-100 disabled:opacity-50 transition-all touch-target"
-                >
-                  {t('common.cancel', 'Cancelar')}
-                </button>
-
-                <button
-                  type="submit"
-                  disabled={isSavingCoBranding}
-                  className="w-full sm:w-auto px-8 min-h-[48px] bg-[#3CA64C] hover:bg-[#359445] text-white font-black text-xs rounded-2xl shadow-md flex items-center justify-center gap-2 transition-all active:scale-95 disabled:opacity-50 touch-target"
-                >
-                  <span>{isSavingCoBranding ? t('common.saving', 'A guardar…') : t('settings.branding.saveConfig', 'Guardar Configuração de Co-Branding')}</span>
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
+          <CoBrandingFocusedEditor
+            isOpen={isBrandingEditorOpen}
+            isSaving={isSavingCoBranding}
+            coBranding={coBranding}
+            onChangeCoBranding={setCoBranding}
+            onLogoUpload={handleLogoUpload}
+            onFillFromProfile={handleFillFromProfile}
+            onClose={handleCancelCoBranding}
+            onSave={async () => {
+              const saved = await handleSaveCoBranding();
+              if (saved) setIsBrandingEditorOpen(false);
+            }}
+          />
+        </>
       )}
 
       {/* ========================================================================= */}
@@ -1176,271 +664,29 @@ export const SettingsView: React.FC = () => {
       {/* SUB-MENU 3: PREFERÊNCIAS (Unidades Padrão com Dica UI de Unidades)         */}
       {/* ========================================================================= */}
       {activeSubmenu === 'preferencias' && (
-        <div className="space-y-6 animate-fade-in">
-          <div className="bg-white p-6 sm:p-8 rounded-3xl shadow-soft border border-slate-200 space-y-8">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
-              <div className="flex flex-wrap items-center gap-2">
-                <h2 className="text-fluid-subtitle font-black text-[#114037]">
-                  {t('settings.preferencesTitle', 'Definições — Preferências & Unidades Padrão')}
-                </h2>
-                <span className="px-3 py-1 bg-amber-100 border border-amber-300 text-amber-900 rounded-full text-xs font-extrabold uppercase tracking-wide shrink-0">
-                  {t('common.status.inImprovement', 'Em melhoria')}
-                </span>
-              </div>
-              
-              {/* Botão de Microlearning 'i' Ajuda */}
-              <button
-                type="button"
-                onClick={() => openMicro('preferencias_unidades')}
-                className="px-3.5 min-h-[44px] bg-[#3CA64C]/10 hover:bg-[#3CA64C]/20 text-[#114037] font-extrabold text-xs rounded-xl transition-all flex items-center gap-1.5 touch-target cursor-pointer"
-                title={t('common.guide', 'Guia')}
-              >
-                <Info className="w-4 h-4 text-[#3CA64C]" />
-                <span>{t('common.help', 'Ajuda')}</span>
-              </button>
-            </div>
-
-            <form onSubmit={handleSavePreferences} className="space-y-8">
-              {/* Idioma e Região */}
-              <div className="bg-slate-50/80 p-5 rounded-2xl border border-slate-200 space-y-3">
-                <h3 className="text-xs font-black uppercase tracking-wider text-[#1D734B]">
-                  {t('settings.languageAndRegion')}
-                </h3>
-                <div className="w-full sm:w-1/2">
-                  <label className="block text-xs font-bold text-slate-700 mb-1.5">{t('settings.interfaceLanguage')}</label>
-                  <select
-                    value={language}
-                    onChange={(e) => setLanguage(e.target.value as SupportedLanguage)}
-                    className="w-full min-h-[48px] px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-semibold outline-none focus:border-[#3CA64C]"
-                  >
-                    {LANGUAGE_OPTIONS.map(opt => (
-                      <option key={opt.code} value={opt.code}>
-                        {opt.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              {/* Ícones da Aplicação Móvel & PWA */}
-              <div className="bg-slate-50/80 p-5 rounded-2xl border border-slate-200 space-y-4">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <h3 className="text-xs font-black uppercase tracking-wider text-[#1D734B]">
-                      {t('settings.preferencesTab.appIconsTitle', 'Ícones da Aplicação Móvel (PWA & Ecrã de Início)')}
-                    </h3>
-                    <span className="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full">
-                      {t('settings.preferencesTab.mobileExclusive', 'Exclusivo Mobile')}
-                    </span>
-                  </div>
-                  <p className="text-xs text-slate-500 font-medium mt-1">
-                    {t('settings.preferencesTab.appIconsNote', 'Estes ícones são exclusivos para a aplicação instalada em smartphones e tablets. Nos navegadores web, o ícone de separador é fixo através do favicon oficial DATERRA.')}
-                  </p>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  {/* Opção 1: Monocromático (Padrão) */}
-                  <div
-                    onClick={() => handleThemeChange('mono')}
-                    className={`p-4 rounded-2xl border-2 transition-all cursor-pointer flex flex-col items-center text-center space-y-3 touch-target ${
-                      appTheme === 'mono'
-                        ? 'bg-emerald-50/70 border-[#3CA64C] shadow-soft'
-                        : 'bg-white border-slate-200 hover:border-slate-300'
-                    }`}
-                  >
-                    <img src="./icon-daterra-mono.png" alt="Ícone Monocromático" className="w-12 h-12 rounded-xl shadow-sm object-contain" />
-                    <div>
-                      <div className="flex items-center justify-center gap-1.5">
-                        <span className="font-extrabold text-slate-900 text-xs">
-                          {t('settings.preferencesTab.monoTheme', 'Monocromático')}
-                        </span>
-                        <span className="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-1.5 py-0.5 rounded">
-                          {t('settings.preferencesTab.defaultBadge', 'Padrão')}
-                        </span>
-                      </div>
-                      <p className="text-[11px] text-slate-500 font-medium mt-1">
-                        {t('settings.preferencesTab.monoNote', 'Ícone neutro monocromático oficial (Ativo por defeito).')}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Opção 2: Light Mode */}
-                  <div
-                    onClick={() => handleThemeChange('light')}
-                    className={`p-4 rounded-2xl border-2 transition-all cursor-pointer flex flex-col items-center text-center space-y-3 touch-target ${
-                      appTheme === 'light'
-                        ? 'bg-emerald-50/70 border-[#3CA64C] shadow-soft'
-                        : 'bg-white border-slate-200 hover:border-slate-300'
-                    }`}
-                  >
-                    <img src="./icon-daterra-light.png" alt="Ícone Modo Claro" className="w-12 h-12 rounded-xl shadow-sm object-contain" />
-                    <div>
-                      <span className="font-extrabold text-slate-900 text-xs">
-                        {t('settings.preferencesTab.lightTheme', 'Modo Claro (Light)')}
-                      </span>
-                      <p className="text-[11px] text-slate-500 font-medium mt-1">
-                        {t('settings.preferencesTab.lightNote', 'Alto contraste diurno para leitura no campo sob sol intenso.')}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Opção 3: Dark Mode */}
-                  <div
-                    onClick={() => handleThemeChange('dark')}
-                    className={`p-4 rounded-2xl border-2 transition-all cursor-pointer flex flex-col items-center text-center space-y-3 touch-target ${
-                      appTheme === 'dark'
-                        ? 'bg-emerald-50/70 border-[#3CA64C] shadow-soft'
-                        : 'bg-white border-slate-200 hover:border-slate-300'
-                    }`}
-                  >
-                    <img src="./icon-daterra-dark.png" alt="Ícone Modo Escuro" className="w-12 h-12 rounded-xl shadow-sm object-contain" />
-                    <div>
-                      <span className="font-extrabold text-slate-900 text-xs">
-                        {t('settings.preferencesTab.darkTheme', 'Modo Escuro (Dark)')}
-                      </span>
-                      <p className="text-[11px] text-slate-500 font-medium mt-1">
-                        {t('settings.preferencesTab.darkNote', 'Otimizado para operações agronómicas noturnas na cabine.')}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* OS 4 PERFIS DE UNIDADES PADRÃO (Com Dica de UI de 3-4 unidades em cinzento) */}
-              <div className="space-y-4">
-                <h3 className="text-xs font-black uppercase tracking-wider text-[#1D734B]">
-                  {t('settings.unitsProfilesTitle', 'Perfis de Unidades de Medida Padrão')}
-                </h3>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {/* Perfil 1: Sistema Métrico Internacional */}
-                  <label
-                    onClick={() => setSelectedUnitsProfile('si')}
-                    className={`p-5 rounded-2xl border-2 transition-all cursor-pointer flex flex-col justify-between space-y-3 touch-target ${
-                      selectedUnitsProfile === 'si'
-                        ? 'bg-emerald-50/70 border-[#3CA64C] shadow-soft'
-                        : 'bg-white border-slate-200 hover:border-slate-300'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <span className="font-extrabold text-slate-900 text-xs">
-                          {t('settings.units.si', 'Sistema Métrico Internacional (SI)')}
-                        </span>
-                        <span className="text-xs text-slate-600 font-mono-numbers">(ha, kg, L, bar)</span>
-                      </div>
-                      <input
-                        type="radio"
-                        name="units"
-                        checked={selectedUnitsProfile === 'si'}
-                        onChange={() => setSelectedUnitsProfile('si')}
-                        className="w-4 h-4 text-[#3CA64C] accent-[#3CA64C]"
-                      />
-                    </div>
-                    <p className="text-[11px] text-slate-500 font-medium">
-                      {t('settings.units.siDesc', 'Padrão oficial utilizado na Europa, Brasil e na maior parte do mundo. Aplica hectares para área, quilogramas/litros para massa e volume, e bar para pressão.')}
-                    </p>
-                  </label>
-
-                  {/* Perfil 2: Sistema Imperial / Americano */}
-                  <label
-                    onClick={() => setSelectedUnitsProfile('us')}
-                    className={`p-5 rounded-2xl border-2 transition-all cursor-pointer flex flex-col justify-between space-y-3 touch-target ${
-                      selectedUnitsProfile === 'us'
-                        ? 'bg-emerald-50/70 border-[#3CA64C] shadow-soft'
-                        : 'bg-white border-slate-200 hover:border-slate-300'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <span className="font-extrabold text-slate-900 text-xs">
-                          {t('settings.units.us', 'Sistema Imperial / Americano (US)')}
-                        </span>
-                        <span className="text-xs text-slate-600 font-mono-numbers">(ac, bu, gal, psi)</span>
-                      </div>
-                      <input
-                        type="radio"
-                        name="units"
-                        checked={selectedUnitsProfile === 'us'}
-                        onChange={() => setSelectedUnitsProfile('us')}
-                        className="w-4 h-4 text-[#3CA64C] accent-[#3CA64C]"
-                      />
-                    </div>
-                    <p className="text-[11px] text-slate-500 font-medium">
-                      {t('settings.units.usDesc', 'Ideal para utilizadores nos EUA ou para quem opera maquinaria agrícola americana. Converte dados para acres, bushels, galões e libras por polegada quadrada (PSI).')}
-                    </p>
-                  </label>
-
-                  {/* Perfil 3: Sistema Misto Anglo-Saxónico */}
-                  <label
-                    onClick={() => setSelectedUnitsProfile('uk')}
-                    className={`p-5 rounded-2xl border-2 transition-all cursor-pointer flex flex-col justify-between space-y-3 touch-target ${
-                      selectedUnitsProfile === 'uk'
-                        ? 'bg-emerald-50/70 border-[#3CA64C] shadow-soft'
-                        : 'bg-white border-slate-200 hover:border-slate-300'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <span className="font-extrabold text-slate-900 text-xs">
-                          {t('settings.units.uk', 'Sistema Misto Anglo-Saxónico (UK / CA / AU)')}
-                        </span>
-                        <span className="text-xs text-slate-600 font-mono-numbers">(ha, L, bu, lb)</span>
-                      </div>
-                      <input
-                        type="radio"
-                        name="units"
-                        checked={selectedUnitsProfile === 'uk'}
-                        onChange={() => setSelectedUnitsProfile('uk')}
-                        className="w-4 h-4 text-[#3CA64C] accent-[#3CA64C]"
-                      />
-                    </div>
-                    <p className="text-[11px] text-slate-500 font-medium">
-                      {t('settings.units.ukDesc', 'Configuração comum no Reino Unido, Canadá e Austrália. Combina hectares e litros com unidades imperiais como bushels e libras.')}
-                    </p>
-                  </label>
-
-                  {/* Perfil 4: Sistema Regional Tradicional */}
-                  <label
-                    onClick={() => setSelectedUnitsProfile('trad')}
-                    className={`p-5 rounded-2xl border-2 transition-all cursor-pointer flex flex-col justify-between space-y-3 touch-target ${
-                      selectedUnitsProfile === 'trad'
-                        ? 'bg-emerald-50/70 border-[#3CA64C] shadow-soft'
-                        : 'bg-white border-slate-200 hover:border-slate-300'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <span className="font-extrabold text-slate-900 text-xs">
-                          {t('settings.units.trad', 'Sistema Regional Tradicional (Ibérico / LatAm)')}
-                        </span>
-                        <span className="text-xs text-slate-600 font-mono-numbers">(alq, @, qtl)</span>
-                      </div>
-                      <input
-                        type="radio"
-                        name="units"
-                        checked={selectedUnitsProfile === 'trad'}
-                        onChange={() => setSelectedUnitsProfile('trad')}
-                        className="w-4 h-4 text-[#3CA64C] accent-[#3CA64C]"
-                      />
-                    </div>
-                    <p className="text-[11px] text-slate-500 font-medium">
-                      {t('settings.units.tradDesc', 'Indicado para pequenas e médias explorações focadas no comércio local tradicional. Inclui suporte a alqueire, arroba e quintal.')}
-                    </p>
-                  </label>
-                </div>
-              </div>
-
-              {/* Botão de Ação Principal (Verde Destaque #3CA64C) */}
-              <button
-                type="submit"
-                className="w-full min-h-[48px] bg-[#3CA64C] hover:bg-[#3AAA35] text-white font-black text-xs rounded-2xl shadow-md flex items-center justify-center gap-2 transition-all active:scale-95 touch-target cursor-pointer"
-              >
-                <span>{t('settings.preferencesTab.save', 'Guardar Preferências e Unidades Padrão')}</span>
-              </button>
-            </form>
+        <>
+          <div className="flex flex-col gap-4 animate-fade-in">
+            <PreferencesSummaryCard
+              language={language}
+              appTheme={appTheme}
+              selectedUnitsProfile={selectedUnitsProfile}
+              onOpenHelp={() => openMicro('preferencias_unidades')}
+              onConfigure={openPreferencesEditor}
+            />
           </div>
-        </div>
+
+          <PreferencesFocusedEditor
+            isOpen={isPreferencesEditorOpen}
+            language={draftLanguage}
+            appTheme={draftAppTheme}
+            selectedUnitsProfile={draftUnitsProfile}
+            onChangeLanguage={setDraftLanguage}
+            onChangeTheme={setDraftAppTheme}
+            onChangeUnitsProfile={setDraftUnitsProfile}
+            onClose={handleCancelPreferences}
+            onSave={() => handleSavePreferences()}
+          />
+        </>
       )}
 
       {/* ========================================================================= */}

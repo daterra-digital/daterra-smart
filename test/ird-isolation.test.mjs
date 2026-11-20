@@ -32,8 +32,8 @@ describe('IRD — Isolamento por Utilizador e Invariantes SEC-02 / SEC-16', () =
     await db.calculation_history_v2.clear();
   });
 
-  it('1. Mantém Dexie v11 e respeita contrato de isolamento por userId', async () => {
-    assert.equal(db.verno, 11);
+  it('1. Mantém Dexie v13 e respeita contrato de isolamento por userId', async () => {
+    assert.equal(db.verno, 13);
 
     const inputA = sampleInput(6);
     const resA = calculateDriftRiskIndex(inputA);

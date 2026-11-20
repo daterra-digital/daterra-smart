@@ -92,7 +92,7 @@ describe('Perfil Cultura (Dexie v11) — Dados, Migração, Momentos, Isolamento
 
     const v11 = new DaterraDatabase(dbName);
     await v11.open();
-    assert.equal(v11.verno, 11);
+    assert.equal(v11.verno, 13);
 
     const ownedMoments = await listMomentsForCulture('user-mig-1', Number(ownedId), v11);
     assert.equal(ownedMoments.length, 1);

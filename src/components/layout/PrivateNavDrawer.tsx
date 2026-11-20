@@ -7,16 +7,15 @@ import {
   Map,
   Settings,
   LogOut,
-  User,
   Bot
 } from 'lucide-react';
 import { useTranslation } from '../../context/LanguageContext';
-import { isLocalhost } from '../../utils/environment';
-import { OutboxSimulationNotice } from './OutboxSimulationNotice';
 
 interface PrivateNavDrawerProps {
   userFullName: string;
   userEmail?: string;
+  userPlanLabel?: string;
+  userPlanStatus?: string;
   onClose: () => void;
   onLogout: () => void;
 }
@@ -24,10 +23,20 @@ interface PrivateNavDrawerProps {
 export const PrivateNavDrawer: React.FC<PrivateNavDrawerProps> = ({
   userFullName,
   userEmail,
+  userPlanLabel,
+  userPlanStatus,
   onClose,
   onLogout
 }) => {
   const { t } = useTranslation();
+  const initials = (userFullName || 'U')
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((part) => part.charAt(0).toUpperCase())
+    .join('');
+  const planText = userPlanLabel || t('dashboard.freePlan', 'Plano Free');
+  const statusText = userPlanStatus || t('dashboard.active', 'Ativo');
 
   return (
     <div className="lg:hidden bg-daterra-primary border-t border-white/10 px-4 py-4 space-y-2 shadow-2xl animate-fade-in">
@@ -49,7 +58,7 @@ export const PrivateNavDrawer: React.FC<PrivateNavDrawerProps> = ({
         <span>{t('nav.tools', 'Ferramentas')}</span>
       </Link>
 
-      {isLocalhost() && (
+      {import.meta.env.VITE_ENABLE_ASSISTANT === 'true' && (
         <Link
           to="/assistente"
           onClick={onClose}
@@ -57,7 +66,6 @@ export const PrivateNavDrawer: React.FC<PrivateNavDrawerProps> = ({
         >
           <Bot className="w-5 h-5 text-daterra-accent" />
           <span>{t('nav.assistant', 'Assistente')}</span>
-          <span className="ml-auto px-1.5 py-0.5 rounded-md text-[9px] font-black bg-amber-400 text-slate-950 border border-amber-300 uppercase tracking-wider">RC</span>
         </Link>
       )}
 
@@ -68,7 +76,6 @@ export const PrivateNavDrawer: React.FC<PrivateNavDrawerProps> = ({
       >
         <GraduationCap className="w-5 h-5 text-daterra-accent" />
         <span>{t('nav.academy', 'Academia')}</span>
-        <span className="ml-auto px-1.5 py-0.5 rounded-md text-[9px] font-black bg-amber-400 text-slate-950 border border-amber-300 uppercase tracking-wider">RC</span>
       </Link>
 
       <Link
@@ -89,25 +96,32 @@ export const PrivateNavDrawer: React.FC<PrivateNavDrawerProps> = ({
         <span>{t('nav.settings', 'Definições')}</span>
       </Link>
 
-      <OutboxSimulationNotice variant="mobile" />
-
-      <div className="pt-3 border-t border-white/10 flex items-center justify-between px-2">
-        <div className="flex items-center gap-2 truncate max-w-[200px]">
-          <User className="w-5 h-5 text-daterra-accent shrink-0" />
-          <div className="leading-tight truncate">
-            <span className="text-xs font-bold text-white block truncate" title={userFullName}>
-              {userFullName}
-            </span>
-            <span className="text-[10px] text-slate-300 block truncate" title={userEmail || ''}>
-              {userEmail || ''}
+      <div className="pt-3 border-t border-white/10 space-y-2.5 px-1">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="w-10 h-10 rounded-full bg-[#1D734B] border border-[#3CA64C]/70 text-white flex items-center justify-center font-extrabold text-xs tracking-tight shrink-0">
+            {initials}
+          </div>
+          <div className="min-w-0 flex-1 leading-tight">
+            <div className="flex items-center gap-2 min-w-0">
+              <span className="text-xs font-extrabold text-white truncate" title={userFullName}>
+                {userFullName}
+              </span>
+              <span className="px-2 py-0.5 rounded-full bg-white/12 border border-white/15 text-emerald-200 text-[10px] font-extrabold whitespace-nowrap shrink-0">
+                {planText} · {statusText}
+              </span>
+            </div>
+            <span className="text-[11px] text-slate-300 block truncate mt-0.5" title={userEmail || ''}>
+              {userEmail || t('common.activeSession', 'Sessão Ativa')}
             </span>
           </div>
         </div>
+
         <button
+          type="button"
           onClick={onLogout}
-          className="px-3 py-2 bg-rose-600/80 hover:bg-rose-600 text-white font-bold text-xs rounded-xl flex items-center gap-1.5 touch-target cursor-pointer"
+          className="w-full min-h-[44px] px-3 py-2 bg-rose-600/85 hover:bg-rose-600 text-white font-extrabold text-xs rounded-xl flex items-center justify-center gap-2 touch-target cursor-pointer"
         >
-          <LogOut className="w-4 h-4" />
+          <LogOut className="w-4 h-4 shrink-0" />
           <span>{t('common.actions.logout', t('common.logout', 'Terminar Sessão'))}</span>
         </button>
       </div>

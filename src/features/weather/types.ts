@@ -24,6 +24,7 @@ export interface WeatherTelemetryQuality {
   readonly rawHumidityPercent: number | null;
   readonly rawWindSpeedKmh: number | null;
   readonly rawWindGustsKmh: number | null;
+  readonly rawWindDirectionDeg?: number | null;
   readonly rawPrecipitationMm: number | null;
 }
 
@@ -57,6 +58,8 @@ export interface HourlyForecastItem {
   vpdKpa: number;
   windSpeedKmh: number;
   windGustsKmh: number;
+  windDirectionDeg?: number | null;
+  windDirectionText?: string;
   precipitationProbability: number;
   precipitationMm: number;
   weatherCode: number;

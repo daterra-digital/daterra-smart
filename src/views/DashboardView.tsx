@@ -1,10 +1,9 @@
-import React from 'react';
-import { 
-  User, GraduationCap, Sparkles, 
-  Cpu, ExternalLink
-} from 'lucide-react';
+import React, { useMemo } from 'react';
+import { GraduationCap, Sparkles, Cpu, ExternalLink } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useSubscription } from '../context/SubscriptionContext';
 import { useLanguage } from '../context/LanguageContext';
+import { resolveNormalizedUserPlan } from '../utils/userPlanNormalizer';
 import { useWeather } from '../features/weather/hooks/useWeather';
 import { DashboardWeatherCard } from '../features/weather/components/DashboardWeatherCard';
 import { DashboardWeatherWeeklyCard } from '../features/weather/components/DashboardWeatherWeeklyCard';
@@ -12,6 +11,7 @@ import { DashboardFavoritesCard } from '../features/dashboard/components/Dashboa
 
 export const DashboardView: React.FC = () => {
   const { user, profile } = useAuth();
+  const { effectiveTier, isSimulating } = useSubscription();
   const { t } = useLanguage();
   const { currentLocation, data } = useWeather();
 
@@ -42,62 +42,80 @@ export const DashboardView: React.FC = () => {
     t('dashboard.defaultFarmName', 'Exploração Agrícola');
 
   const userFirstName = userFullName.split(' ')[0] || t('common.user', 'Utilizador');
+  const userInitials = (userFullName || 'U').trim().split(/\s+/).slice(0, 2).map((p) => p.charAt(0).toUpperCase()).join('');
+  const userEmail = user?.email || '';
+
+  const resolvedPlan = useMemo(() => {
+    const base = (profile as Record<string, unknown> | null) ?? {};
+    return resolveNormalizedUserPlan(isSimulating ? { ...base, plan: effectiveTier } : base);
+  }, [profile, isSimulating, effectiveTier]);
+
+  const planLabel = resolvedPlan.normalizedPlan === 'free' ? t('dashboard.freePlan', resolvedPlan.planLabel) : resolvedPlan.planLabel;
+  const statusLabel = resolvedPlan.status === 'active' ? t('dashboard.active', resolvedPlan.statusLabel) : resolvedPlan.statusLabel;
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-2.5 lg:space-y-3 animate-fade-in">
       {/* ========================================================================= */}
       {/* LINHA 1: CABEÇALHO DEDICADO — Painel Geral da Exploração                  */}
       {/* ========================================================================= */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-3xl shadow-soft border border-slate-200">
-        <div>
-          <span className="text-xs font-extrabold uppercase tracking-widest text-daterra-accent block mb-1">
-            {t('dashboard.title')}
-          </span>
-          <h1 className="text-2xl sm:text-3xl font-black text-daterra-primary">
-            {t('dashboard.farm')} {farmName}
-          </h1>
-        </div>
-
-        <div className="flex items-center gap-3 bg-slate-50 p-2.5 rounded-2xl border border-slate-200 text-xs font-medium">
-          <div className="w-9 h-9 rounded-xl bg-daterra-primary text-white flex items-center justify-center font-bold">
-            <User className="w-5 h-5" />
-          </div>
-          <div>
-            <span className="font-bold text-slate-800 block">{userFullName}</span>
-            <span className="text-daterra-secondary font-extrabold text-[11px] block">{t('dashboard.freePlan')}</span>
-          </div>
-        </div>
+      <div className="bg-white p-4 sm:p-5 rounded-3xl shadow-soft border border-slate-200">
+        <span className="text-[11px] font-extrabold uppercase tracking-widest text-daterra-accent block mb-0.5">
+          {t('dashboard.title')}
+        </span>
+        <h1 className="text-xl sm:text-2xl font-black text-daterra-primary leading-tight">
+          {t('dashboard.farm')} {farmName}
+        </h1>
       </div>
 
       {/* ========================================================================= */}
       {/* GRELHA PRINCIPAL DO DASHBOARD (3 COLUNAS DESKTOP)                         */}
       {/* ========================================================================= */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-2.5 lg:gap-3">
         {/* LINHA 1 — COLUNA 1 (1/3): Boas-vindas */}
-        <div className="lg:col-span-1 bg-gradient-to-br from-daterra-primary to-daterra-secondary text-white p-5 sm:p-6 rounded-3xl shadow-soft flex flex-col justify-between relative overflow-hidden h-full">
+        <div className="lg:col-span-1 bg-gradient-to-br from-[#114037] to-[#1D734B] text-white p-4 sm:p-5 rounded-3xl shadow-soft flex flex-col justify-between relative overflow-hidden h-full">
           <div className="absolute right-0 bottom-0 opacity-10 pointer-events-none">
-            <Cpu className="w-40 h-40 -mr-8 -mb-8 text-white" />
+            <Cpu className="w-36 h-36 -mr-8 -mb-8 text-white" />
           </div>
 
-          <div className="space-y-3 relative z-10">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 text-daterra-accent font-bold text-xs">
-              <Sparkles className="w-3.5 h-3.5" />
+          <div className="space-y-2.5 relative z-10">
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/10 text-emerald-200 font-bold text-xs">
+              <Sparkles className="w-3.5 h-3.5 text-[#3CA64C] shrink-0" />
               <span>{t('dashboard.farm')}</span>
             </div>
 
-            <h2 className="text-2xl font-extrabold leading-tight">
+            <h2 className="text-xl sm:text-2xl font-extrabold leading-tight">
               {t('dashboard.welcomeUser', { name: userFirstName })}
             </h2>
 
-            <p className="text-xs text-slate-200 leading-relaxed">
+            <p className="text-xs text-slate-200/90 leading-relaxed">
               {t('dashboard.subscriptionNotice')}
             </p>
+
+            {/* Identidade minimalista consolidada da conta */}
+            <div className="flex items-center gap-3 bg-white/8 border border-white/15 rounded-2xl p-2.5">
+              <div className="w-9 h-9 rounded-full bg-[#1D734B] border border-[#3CA64C]/70 text-white flex items-center justify-center font-extrabold text-xs tracking-tight shrink-0">
+                {userInitials}
+              </div>
+              <div className="min-w-0 flex-1 leading-tight">
+                <p className="text-xs font-extrabold text-white truncate" title={userFullName}>
+                  {userFullName}
+                </p>
+                {userEmail && (
+                  <p className="text-[11px] text-emerald-100/90 truncate mt-0.5" title={userEmail}>
+                    {userEmail}
+                  </p>
+                )}
+                <p className="text-[11px] text-slate-200/80 truncate mt-0.5" title={farmName}>
+                  {farmName}
+                </p>
+              </div>
+            </div>
           </div>
 
-          <div className="pt-4 mt-3 border-t border-white/15 flex items-center justify-between text-xs relative z-10">
-            <span className="text-slate-300 font-medium">{t('dashboard.farm')}: {farmName}</span>
-            <span className="px-3 py-1 rounded-lg bg-daterra-accent text-white font-extrabold text-[11px] tracking-wider uppercase shadow-sm">
-              {t('dashboard.active')}
+          <div className="pt-3 mt-2.5 border-t border-white/15 flex items-center justify-between gap-2 text-xs relative z-10">
+            <span className="text-white font-extrabold truncate">{planLabel}</span>
+            <span className="px-2.5 py-0.5 rounded-full bg-[#3CA64C] text-white font-extrabold text-[10px] tracking-wider uppercase shadow-2xs shrink-0">
+              {statusLabel}
             </span>
           </div>
         </div>
@@ -119,7 +137,7 @@ export const DashboardView: React.FC = () => {
         </div>
 
         {/* LINHA 3 — COLUNA 1 (1/3): Academia DATERRA */}
-        <div className="lg:col-span-1 bg-white p-6 rounded-3xl shadow-soft border border-slate-200 flex flex-col justify-between space-y-4">
+        <div className="lg:col-span-1 bg-white p-5 sm:p-6 rounded-3xl shadow-soft border border-slate-200 flex flex-col justify-between space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold">
@@ -146,7 +164,7 @@ export const DashboardView: React.FC = () => {
                 {t('dashboard.academy.courseName', 'Boas Práticas na Aplicação de Fitofármacos')}
               </span>
             </div>
-            
+
             <div className="w-full bg-slate-200 h-2.5 rounded-full overflow-hidden">
               <div className="bg-daterra-accent h-full rounded-full transition-all duration-500" style={{ width: '75%' }} />
             </div>

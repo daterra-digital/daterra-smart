@@ -1,6 +1,9 @@
 // src/db/types.ts
 // Interfaces canónicas do modelo de dados local Dexie.js da DATERRA Smart
 export * from './cultureTypes.ts';
+import type { Iso16122CheckpointData } from '../types/calibration-audit.ts';
+import type { ProfileCultureGeometryExtension } from './cultureTypes.ts';
+import type { UavEquipmentDetails } from '../schemas/equipmentUav.schema.ts';
 
 export interface CalculationHistoryItem {
   id?: number;
@@ -17,7 +20,7 @@ export interface CalculationHistoryItem {
   profile_id?: number;
 }
 
-export interface ProfileCulture {
+export interface ProfileCulture extends ProfileCultureGeometryExtension {
   id?: number;
   userId?: string;
   name: string;
@@ -42,6 +45,8 @@ export interface ProfileCulture {
   admin_region?: string;
   municipality?: string;
   parish?: string;
+  latitude?: number;
+  longitude?: number;
   notes?: string;
   active_moment_id?: number;
   created_at?: string;
@@ -73,66 +78,25 @@ export interface ProfileEquipment {
   efficiency_correction_factor?: number;
 
   // Bomba e Filtros
-  pump_manufacturer?: string;
-  pump_model?: string;
-  pump_type?: string;
-  has_filling_sieve?: boolean;
-  has_suction_filter?: boolean;
-  has_pressure_filter?: boolean;
-  has_line_filters?: boolean;
-
+  pump_manufacturer?: string; pump_model?: string; pump_type?: string;
+  has_filling_sieve?: boolean; has_suction_filter?: boolean; has_pressure_filter?: boolean; has_line_filters?: boolean;
   // Comandos e Regulação
-  command_manufacturer?: string;
-  command_model?: string;
-  is_manual?: boolean;
-  is_electric?: boolean;
-  is_isobus?: boolean;
-  is_automatic?: boolean;
-  has_computer?: boolean;
-  sections_count?: number;
-
+  command_manufacturer?: string; command_model?: string;
+  is_manual?: boolean; is_electric?: boolean; is_isobus?: boolean; is_automatic?: boolean; has_computer?: boolean; sections_count?: number;
   // Manómetro
-  manometer_diameter_mm?: number;
-  manometer_scale_divisions?: number;
-  manometer_max_value?: number;
-  manometer_error_class?: number;
-  max_pressure_bar?: number;
-  recommended_pressure_bar?: number;
-
+  manometer_diameter_mm?: number; manometer_scale_divisions?: number; manometer_max_value?: number; manometer_error_class?: number;
+  max_pressure_bar?: number; recommended_pressure_bar?: number;
   // Equipamento de Distribuição
-  distribution_type?: string;
-  boom_width_m?: number;
-  has_air_sleeve?: boolean;
-  boom_height_m?: number;
-  fan_transmission?: string;
-  fan_diameter_mm?: number;
-  fan_type?: string;
-  has_air_deflector?: boolean;
-  has_suction_air_deflector?: boolean;
-  has_compression_air_deflector?: boolean;
-  has_height_compression_air_deflector?: boolean;
-  lances_count?: number;
-  has_hose_reels?: boolean;
-  hose_length_m?: number;
-  pneumatic_nozzles_count?: number;
-  nozzles_per_pneumatic_head?: number;
-  cannon_nozzle_groups_count?: number;
-  panels_count?: number;
-  simultaneous_rows_count?: number;
-
+  distribution_type?: string; boom_width_m?: number; has_air_sleeve?: boolean; boom_height_m?: number;
+  fan_transmission?: string; fan_diameter_mm?: number; fan_type?: string;
+  has_air_deflector?: boolean; has_suction_air_deflector?: boolean; has_compression_air_deflector?: boolean; has_height_compression_air_deflector?: boolean;
+  lances_count?: number; has_hose_reels?: boolean; hose_length_m?: number;
+  pneumatic_nozzles_count?: number; nozzles_per_pneumatic_head?: number; cannon_nozzle_groups_count?: number; panels_count?: number; simultaneous_rows_count?: number;
   // Outros e Observações
-  nozzle_location?: string;
-  nozzle_type?: string;
-  notes?: string;
-  is_approved?: boolean;
-  inspection_date?: string;
-  calibration_date?: string;
-
+  nozzle_location?: string; nozzle_type?: string; notes?: string; is_approved?: boolean; inspection_date?: string; calibration_date?: string;
   // Telemetria e Eficácia da Máquina - Versão 9 (Pro Tier)
-  machine_efficiency_pct?: number; // Percentagem de eficácia estimada (ex: 85%)
-  last_working_speed_kmh?: number;
-  last_total_flow_lmin?: number;
-  last_calibrated_at?: string;
+  machine_efficiency_pct?: number; last_working_speed_kmh?: number; last_total_flow_lmin?: number; last_calibrated_at?: string;
+  uav_details?: UavEquipmentDetails;
 }
 
 export interface ProfileNozzle {
@@ -149,10 +113,11 @@ export interface ProfileNozzle {
   working_pressure_bar: number;
   tabulated_flow_lmin?: number;
   nominal_flow_lmin: number;
+  notes?: string;
 }
 
 export interface ProfileCalibration {
-  id?: number;
+  id?: number | string;
   userId?: string;
   equipment_id?: number;
   equipment_name?: string;
@@ -167,6 +132,29 @@ export interface ProfileCalibration {
   calculated_spray_volume_lha: number;
   air_velocity_ms?: number;
   air_volume_m3h?: number;
+  // Campos auditáveis Dexie v13 (CalibrationAuditRecord)
+  nomePerfil?: string;
+  equipmentId?: string | null;
+  nozzleProfileId?: string | null;
+  cultureParcelId?: string | null;
+  cultureMomentId?: string | null;
+  velocidadeKmh?: number;
+  pressaoBar?: number;
+  pressaoBaseBicoBar?: number | null;
+  debitoTotalLMin?: number;
+  numBicosAtivos?: number;
+  entrelinhaM?: number;
+  volumeCalibradoLHa?: number;
+  volumeRecomendadoEppoLHa?: number | null;
+  caudalArOtimoM3H?: number | null;
+  caudalArAplicadoM3H?: number | null;
+  relacaoEngrenagem?: string;
+  rotacaoMotorRpm?: number | null;
+  rotacaoTdfRpm?: number | null;
+  iso16122?: Iso16122CheckpointData;
+  sha256Seal?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface MicrolearningContent {

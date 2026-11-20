@@ -45,7 +45,7 @@ describe('IRD — Persistência Offline em Dexie v10 (Zero Firestore / Outbox)',
 
     const localDb = new DaterraDatabase(dbName);
     await localDb.open();
-    assert.equal(localDb.verno, 11);
+    assert.equal(localDb.verno, 13);
 
     const input = offlineInput();
     const res = calculateDriftRiskIndex(input);

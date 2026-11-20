@@ -9,7 +9,7 @@
     "dev:rc": "vite --port 5175 --mode rc",
     "build": "tsc -b && vite build",
     "lint": "oxlint",
-    "test": "node --test \"test/*.test.mjs\"",
+    "test": "node --test \"test/*.test.mjs\" \"src/lib/__tests__/*.test.ts\"",
     "preview": "vite preview",
     "generate-data": "node scripts/generatePreInspectionData.js",
     "sync:glossario": "node scripts/sync-renovate-glossary.mjs",
@@ -28,7 +28,8 @@
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "react-ga4": "^3.0.1",
-    "react-router-dom": "^7.18.2"
+    "react-router-dom": "^7.18.2",
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.3.3",
@@ -37,6 +38,7 @@
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.4",
     "autoprefixer": "^10.5.4",
+    "fake-indexeddb": "^6.2.8",
     "oxlint": "^1.75.0",
     "postcss": "^8.5.25",
     "tailwindcss": "^4.3.3",

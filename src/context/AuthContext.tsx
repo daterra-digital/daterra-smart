@@ -8,10 +8,11 @@ import {
   signOut,
   type User as FirebaseUser
 } from 'firebase/auth';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { doc, getDoc, onSnapshot, setDoc } from 'firebase/firestore';
 import { httpsCallable } from 'firebase/functions';
 import { auth, firestoreDb, functions } from '../lib/firebaseClient';
 import type { Profile, PendingRegistrationData } from '../types/profile';
+import { resolveNormalizedUserPlan } from '../utils/userPlanNormalizer';
 
 import {
   savePendingAuth,
@@ -66,7 +67,8 @@ const mapFirebaseUser = (fbUser: FirebaseUser | null, profileData?: Profile | nu
     : fbUser.displayName || '';
   const name = fullName || (fbUser.email ? fbUser.email.split('@')[0] : 'Utilizador');
   const farmName = profileData?.company_name || 'Exploração Agrícola';
-  const plan = profileData?.plan || 'DATERRA Smart';
+  const resolvedPlan = resolveNormalizedUserPlan(profileData as Record<string, unknown> | null);
+  const plan = resolvedPlan.normalizedPlan;
 
   return {
     id: fbUser.uid,
@@ -144,12 +146,32 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       completeMagicLinkSignIn();
     }
 
+    let unsubscribeProfile: (() => void) | null = null;
+
     const unsubscribe = onAuthStateChanged(auth, async (fbUser) => {
       clearTimeout(authTimeout);
+      if (unsubscribeProfile) {
+        unsubscribeProfile();
+        unsubscribeProfile = null;
+      }
       if (fbUser) {
         setOutboxSessionUser(fbUser.uid);
         const loadedProfile = await ensureAndLoadProfile(fbUser);
         if (isMounted) setUser(mapFirebaseUser(fbUser, loadedProfile));
+
+        const userDocRef = doc(firestoreDb, 'users', fbUser.uid);
+        unsubscribeProfile = onSnapshot(
+          userDocRef,
+          (snap) => {
+            if (!isMounted || !snap.exists()) return;
+            const liveProfile = snap.data() as Profile;
+            setProfile(liveProfile);
+            setUser(mapFirebaseUser(fbUser, liveProfile));
+          },
+          (err) => {
+            console.warn('[AuthContext] Listener em tempo real indisponível (modo offline preservado):', err);
+          }
+        );
       } else if (isMounted) {
         setOutboxSessionUser(null);
         setUser(null);
@@ -162,6 +184,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => {
       isMounted = false;
       clearTimeout(authTimeout);
+      if (unsubscribeProfile) unsubscribeProfile();
       unsubscribe();
     };
   }, []);

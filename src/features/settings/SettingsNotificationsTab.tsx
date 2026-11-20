@@ -3,6 +3,7 @@ import { CheckCircle2, AlertTriangle } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
 import { syncNewsletterPreference } from '../../services/newsletter/newsletterSyncService';
+import { EquipmentIppAlertsPanel } from './EquipmentIppAlertsPanel';
 
 interface NotificationFeedback {
   type: 'success' | 'warning' | 'error';
@@ -174,6 +175,9 @@ export const SettingsNotificationsTab: React.FC = () => {
             />
           </label>
         </div>
+
+        {/* Alertas de Inspeção Periódica de Pulverizadores (IPP Portugal) */}
+        <EquipmentIppAlertsPanel userId={user?.id || user?.uid || ''} />
 
         <div className="pt-2">
           <button

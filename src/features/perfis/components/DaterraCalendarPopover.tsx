@@ -1,5 +1,5 @@
 // src/features/perfis/components/DaterraCalendarPopover.tsx
-// Calendário mensal DATERRA (verde #114037 / acento #3CA64C), data civil sem fuso, fecho com Escape (<= 145 LOC).
+// Calendário mensal DATERRA inline (verde #114037 / acento #3CA64C), data civil sem fuso, fecho com Escape (<= 145 LOC).
 
 import React, { useEffect, useRef, useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
@@ -27,10 +27,8 @@ export const DaterraCalendarPopover: React.FC<DaterraCalendarPopoverProps> = ({ 
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') { e.stopPropagation(); onCloseRef.current(); } };
-    const onDown = (e: MouseEvent) => { if (rootRef.current && !rootRef.current.contains(e.target as Node)) onCloseRef.current(); };
     document.addEventListener('keydown', onKey, true);
-    document.addEventListener('mousedown', onDown);
-    return () => { document.removeEventListener('keydown', onKey, true); document.removeEventListener('mousedown', onDown); };
+    return () => { document.removeEventListener('keydown', onKey, true); };
   }, []);
 
   const shiftMonth = (delta: number) =>
@@ -48,7 +46,7 @@ export const DaterraCalendarPopover: React.FC<DaterraCalendarPopoverProps> = ({ 
       ref={rootRef}
       role="dialog"
       aria-label="Escolher data no calendário"
-      className="absolute z-50 mt-2 right-0 w-[19rem] max-w-[calc(100vw-2rem)] bg-white rounded-2xl border border-slate-200 shadow-2xl p-3 space-y-2"
+      className="mt-2 w-full rounded-2xl border border-slate-200 bg-white shadow-sm p-3 space-y-2"
     >
       <div className="flex items-center justify-between bg-[#114037] text-white rounded-xl px-2 py-1.5">
         <button type="button" onClick={() => shiftMonth(-1)} aria-label="Mês anterior" className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg hover:bg-white/10">

@@ -1,90 +1,14 @@
 // src/features/weather/weatherCalculations.ts
 import type { SprayEvaluation, SprayDecisionLevel } from './types';
 
-/**
- * Calcula a temperatura de bolbo húmido através da equação empírica de Stull (2011).
- * Válida para temperaturas entre -20°C e 50°C e humidade relativa entre 5% e 99%.
- */
-export function calculateWetBulbTemperature(tempC: number, rhPercent: number): number {
-  const t = tempC;
-  const rh = Math.min(100, Math.max(1, rhPercent));
-
-  const tw =
-    t * Math.atan(0.151977 * Math.pow(rh + 8.313659, 0.5)) +
-    Math.atan(t + rh) -
-    Math.atan(rh - 1.676331) +
-    0.00391838 * Math.pow(rh, 1.5) * Math.atan(0.023101 * rh) -
-    4.686035;
-
-  return Math.round(tw * 10) / 10;
-}
-
-/**
- * Calcula o Delta T (ΔT = Temperatura de Bolbo Seco - Temperatura de Bolbo Húmido).
- * Indicador de referência mundial para evaporação e sobrevivência de gotas de calda.
- */
-export function calculateDeltaT(tempC: number, rhPercent: number): number {
-  const wetBulb = calculateWetBulbTemperature(tempC, rhPercent);
-  const deltaT = Math.max(0, tempC - wetBulb);
-  return Math.round(deltaT * 10) / 10;
-}
-
-/**
- * Calcula o Ponto de Orvalho (°C) pela fórmula de Magnus-Tetens.
- */
-export function calculateDewPoint(tempC: number, rhPercent: number): number {
-  const a = 17.27;
-  const b = 237.7;
-  const rhSafe = Math.min(100, Math.max(1, rhPercent));
-  const alpha = (a * tempC) / (b + tempC) + Math.log(rhSafe / 100);
-  const dp = (b * alpha) / (a - alpha);
-  return Math.round(dp * 10) / 10;
-}
-
-/**
- * Calcula o Défice de Pressão de Vapor (DPV / VPD) em kPa.
- * Parâmetro determinante para taxa de transpiração da cultura e fertirrigação.
- */
-export function calculateVpd(tempC: number, rhPercent: number): number {
-  const rhSafe = Math.min(100, Math.max(1, rhPercent));
-  const es = 0.61078 * Math.exp((17.27 * tempC) / (tempC + 237.3)); // Pressão de saturação (kPa)
-  const vpd = es * (1 - rhSafe / 100);
-  return Math.round(Math.max(0, vpd) * 100) / 100;
-}
-
-/**
- * Converte graus de azimute do vento em pontos cardeais em português.
- */
-export function getWindDirectionText(deg: number): string {
-  const directions = [
-    'N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE',
-    'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW'
-  ];
-  const index = Math.round((deg % 360) / 22.5) % 16;
-  return directions[index] || 'N';
-}
-
-/**
- * Converte códigos WMO da Open-Meteo em descrição clara em português de Portugal.
- */
-export function getWmoWeatherLabel(code: number): string {
-  switch (code) {
-    case 0: return 'Céu Limpo';
-    case 1: return 'Geralmente Ensolarado';
-    case 2: return 'Parcialmente Nublado';
-    case 3: return 'Nublado';
-    case 45: case 48: return 'Nevoeiro';
-    case 51: case 53: case 55: return 'Chuviscos';
-    case 61: return 'Chuva Fraca';
-    case 63: return 'Chuva Moderada';
-    case 65: return 'Chuva Forte';
-    case 71: case 73: case 75: return 'Queda de Neve';
-    case 80: case 81: case 82: return 'Aguaceiros';
-    case 95: return 'Trovoada';
-    case 96: case 99: return 'Trovoada com Granizo';
-    default: return 'Céu Limpo';
-  }
-}
+export {
+  calculateWetBulbTemperature,
+  calculateDeltaT,
+  calculateDewPoint,
+  calculateVpd,
+  getWindDirectionText,
+  getWmoWeatherLabel
+} from './weatherPsychrometrics.ts';
 
 interface EquipmentContextOptions {
   nozzleType?: 'air_induction' | 'standard' | 'hollow_cone' | string;
@@ -163,13 +87,25 @@ export function evaluateSprayWindow(
     };
   }
 
-  // 4. Delta T Muito Baixo (Escorrimento)
+  // 4. Delta T Muito Baixo (< 2,0 °C — baixa evaporação, orvalho ou inversão térmica)
   if (deltaT < 2.0 && humidityPercent > 90) {
     return {
       level: 'marginal',
       badgeLabel: 'Risco de Escorrimento',
       title: 'Atenção — Ar Saturado de Humidade',
-      reason: 'Com Delta T inferior a 2°C, as gotas não secam na folha e coalescem, escorrendo para o solo e desperdiçando produto.',
+      reason: 'Com Delta T inferior a 2,0 °C e HR > 90%, as gotas não secam na folha e coalescem, escorrendo para o solo.',
+      deltaT,
+      windSpeedKmh,
+      windGustsKmh,
+      humidityPercent
+    };
+  }
+  if (deltaT < 2.0) {
+    return {
+      level: 'marginal',
+      badgeLabel: 'Atenção ΔT Baixo',
+      title: 'Atenção — Delta T Inferior a 2,0 °C',
+      reason: 'Baixa capacidade evaporativa (< 2,0 °C): risco de orvalho, secagem lenta ou inversão térmica. Confirme no terreno.',
       deltaT,
       windSpeedKmh,
       windGustsKmh,

@@ -74,7 +74,7 @@ export const SPRAY_GUIDE_QUESTIONS: GuideQuestion[] = [
     question: 'O que significa "período previsto sem precipitação" e porque não garante secagem biológica?',
     directAnswer: 'Indica o número consecutivo de horas com precipitação prevista inferior ou igual a 0,2 mm nos dados modelados a partir da hora consultada.',
     daterraFunctioning: 'Como funciona na DATERRA: A contagem interrompe-se perante previsão de chuva (> 0,2 mm), lacuna temporal superior a 1 hora ou ausência de dados, reportando o limite do horizonte disponível.',
-    technicalGuidance: 'Orientação técnica geral: O tempo de secagem da calda na folha e a resistência à lavagem variam amplamente conforme o tipo de formulação, adjuvantes, cutícula foliar e modo de ação sistémico ou de contacto indicado no rótulo oficial.',
+    technicalGuidance: 'Orientação técnica geral: O tempo de secagem da calda na folha e a resistência à lavagem variam amplamente conforme o tipo de formulação, adjuvantes, cutícula foliar e modo de ação sistémico ou de contacto indicado no rótulo homologado.',
     sourceCitations: ['DATERRA Weather Calculations Engine', 'DGAV / SIFITO — Especificações de Rotulagem']
   },
   {
@@ -110,9 +110,9 @@ export const SPRAY_GUIDE_QUESTIONS: GuideQuestion[] = [
     id: 'rotulo-sifito-limitacoes-previsao',
     topicId: 'fontes',
     question: 'Onde confirmar as condições autorizadas do produto e quais as limitações temporais da previsão?',
-    directAnswer: 'A única fonte legalmente vinculativa sobre doses, intervalos de segurança, distâncias de amortecimento e condições meteorológicas é o rótulo oficial homologado pela DGAV (portal SIFITO).',
+    directAnswer: 'A única fonte legalmente vinculativa sobre doses, intervalos de segurança, distâncias de amortecimento e condições meteorológicas é o rótulo homologado pela DGAV (portal SIFITO).',
     daterraFunctioning: 'Como funciona na DATERRA: A ferramenta apoia o planeamento prévio, mas a incerteza meteorológica cresce substancialmente a partir das 48 a 72 horas. A aplicação não emite garantias de eficácia química.',
     technicalGuidance: 'Orientação técnica geral: Consulte sempre a ficha técnica e autorização de venda atualizada no SIFITO antes de preparar a calda de produtos fitofarmacêuticos.',
-    sourceCitations: ['DGAV / SIFITO — Portal Oficial de Produtos Fitofarmacêuticos', 'Lei n.º 26/2013 — Uso Sustentável de Produtos Fitofarmacêuticos']
+    sourceCitations: ['DGAV / SIFITO — Portal de Produtos Fitofarmacêuticos', 'Lei n.º 26/2013 — Uso Sustentável de Produtos Fitofarmacêuticos']
   }
 ];

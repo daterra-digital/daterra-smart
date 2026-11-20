@@ -4,7 +4,7 @@
  * (< 200 LOC)
  */
 
-import { db } from '../../db/db';
+import { db as defaultDb, type DaterraDatabase } from '../../db/db.ts';
 
 export const SENSITIVE_LOCAL_STORAGE_KEYS = [
   'daterra_auth',
@@ -16,6 +16,7 @@ export const SENSITIVE_LOCAL_STORAGE_KEYS = [
   'DATERRA_WEATHER_CACHE_STORE_V1',
   'DATERRA_WEATHER_CACHE_V2',
   'DATERRA_FREGUESIA_COORDS_CACHE_V1',
+  'DATERRA_ACTIVE_NOZZLE_PROFILE',
   'daterra_chat_subscriptions',
   'daterra_simulated_tier',
   'daterra_mock_env'
@@ -51,14 +52,15 @@ export function clearSensitiveLocalStorage(): void {
  */
 export async function clearUserIndexedDbData(
   userId?: string,
-  options?: CleanupSessionOptions
+  options?: CleanupSessionOptions,
+  db: DaterraDatabase = defaultDb
 ): Promise<void> {
   const isPurgeAll = Boolean(options?.purgeAll);
   const targetUserIdCheck = userId?.trim();
   if (!targetUserIdCheck && !isPurgeAll) return;
   const targetUserId = userId?.trim();
 
-  // Lista estrita de tabelas de utilizador / exploração agrícola
+  // Lista estrita de tabelas de utilizador / exploração agrícola com índice userId
   const userTables = [
     db.calculation_history,
     db.calculation_history_v2,
@@ -76,7 +78,7 @@ export async function clearUserIndexedDbData(
   ];
 
   try {
-    await db.transaction('rw', userTables, async () => {
+    await db.transaction('rw', [...userTables, db.equipments], async () => {
       for (const table of userTables) {
         if (isPurgeAll) {
           await table.clear();
@@ -84,6 +86,13 @@ export async function clearUserIndexedDbData(
           // Apaga todos os registos pertencentes ao utilizador que está a fechar sessão
           await table.where('userId').equals(targetUserId).delete();
         }
+      }
+
+      // Tabela v12 `equipments` não indexa `userId`: filtro seguro sem alterar schema v12
+      if (isPurgeAll) {
+        await db.equipments.clear();
+      } else if (targetUserId) {
+        await db.equipments.filter((row) => row.userId === targetUserId).delete();
       }
     });
   } catch (err) {

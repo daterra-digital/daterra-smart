@@ -4,9 +4,12 @@ import type { HourlyForecastItem } from '../../types.ts';
 import {
   type ChartLayout,
   type ChartScaleResult,
-  getVisibleXAxisIndices,
   formatTick
 } from '../../utils/weatherChartUtils.ts';
+import {
+  findDayChangeMarkers,
+  getAlternatingHourIndices
+} from '../../utils/weatherChartAxisHelpers.ts';
 import type { ChartMetricType } from './WeatherChartSvg.tsx';
 
 interface WeatherChartAxesProps {
@@ -32,9 +35,9 @@ export const WeatherChartAxes: React.FC<WeatherChartAxesProps> = ({
 }) => {
   const baseY = layout.height - layout.padding.bottom;
   const plotHeight = baseY - layout.padding.top;
-  const visibleXIndices = getVisibleXAxisIndices(points, 48);
+  const visibleXIndices = getAlternatingHourIndices(points.length);
+  const dayMarkers = findDayChangeMarkers(hours, points.map((p) => p.x));
 
-  // Geração de 5 níveis de referência sem duplicação de rótulos
   const levels = [0, 0.25, 0.5, 0.75, 1];
   const gridRows = levels.map((lvl) => {
     const gy = Math.round((baseY - lvl * plotHeight) * 10) / 10;
@@ -112,25 +115,48 @@ export const WeatherChartAxes: React.FC<WeatherChartAxesProps> = ({
         </g>
       ))}
 
-      {/* Rótulos do Eixo X sem sobreposições e com mudança de data discreta */}
+      {/* Linha vertical tracejada subtil às 00:00 para assinalar mudança de dia */}
+      {dayMarkers.map((marker) => {
+        const clampedX = Math.max(layout.padding.left + 36, Math.min(layout.width - layout.padding.right - 36, marker.x));
+        return (
+          <g key={`day-${marker.index}`} className="pointer-events-none select-none">
+            <line
+              x1={marker.x}
+              y1={layout.padding.top}
+              x2={marker.x}
+              y2={baseY}
+              stroke="#94a3b8"
+              strokeDasharray="4,4"
+              strokeWidth="1.2"
+              opacity="0.75"
+            />
+            <rect
+              x={clampedX - 34}
+              y={layout.padding.top - 18}
+              width={68}
+              height={15}
+              rx="5"
+              fill="#f1f5f9"
+              stroke="#cbd5e1"
+              strokeWidth="0.8"
+            />
+            <text
+              x={clampedX}
+              y={layout.padding.top - 7.5}
+              textAnchor="middle"
+              className="fill-slate-600 text-[9px] font-bold select-none"
+            >
+              {marker.label}
+            </text>
+          </g>
+        );
+      })}
+
+      {/* Eixo X: apenas horas HH:00 alternadas (de 2 em 2 horas) sem dias da semana */}
       {visibleXIndices.map((idx) => {
         const pt = points[idx];
         const h = hours[idx];
         if (!pt || !h) return null;
-
-        const prev = idx > 0 ? hours[idx - 1] : null;
-        const isDateChange = prev && prev.timeIso.slice(0, 10) !== h.timeIso.slice(0, 10);
-        let labelText = h.timeFormatted;
-        if (isDateChange || h.timeFormatted === '00:00') {
-          try {
-            const dObj = new Date(h.timeIso);
-            const wDay = dObj.toLocaleDateString('pt-PT', { weekday: 'short' }).replace('.', '');
-            labelText = `${h.timeFormatted} (${wDay})`;
-          } catch {
-            labelText = h.timeFormatted;
-          }
-        }
-
         return (
           <text
             key={`x-lbl-${idx}`}
@@ -139,7 +165,7 @@ export const WeatherChartAxes: React.FC<WeatherChartAxesProps> = ({
             textAnchor="middle"
             className="fill-slate-500 text-[10px] font-mono font-medium select-none"
           >
-            {labelText}
+            {h.timeFormatted}
           </text>
         );
       })}

@@ -1,10 +1,12 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { Wind, WifiOff, AlertTriangle, Table, LineChart } from 'lucide-react';
 import type { FullWeatherData } from '../types.ts';
-import type { DriftChartSeriesKey } from '../utils/weatherDriftTypes.ts';
+import type { ActiveMachineContext } from '../weatherWeekAggregator.ts';
+import { DRIFT_BAND_CSS } from '../utils/weatherDriftTypes.ts';
 import { useWeatherTime } from '../services/weatherTimeService.ts';
 import { CACHE_DURATION_MS } from '../services/weatherCacheService.ts';
 import { assessWeatherDriftReading, buildHourlyDriftSeries, findFavorableDriftPeriods } from '../utils/weatherDriftEvaluator.ts';
+import { formatDecimalPt, parseWindDirection } from '../utils/windDirection.ts';
 import { WeatherDriftChartSvg } from './charts/WeatherDriftChartSvg.tsx';
 import { WeatherDriftWindowsCard } from './WeatherDriftWindowsCard.tsx';
 import { WeatherDriftTechPanel } from './WeatherDriftTechPanel.tsx';
@@ -17,27 +19,13 @@ interface WeatherDriftViewProps {
   readonly error: string | null;
   readonly locationName: string;
   readonly selectedDateIso: string | null;
+  readonly context?: ActiveMachineContext | null;
 }
 
-const BAND_CSS: Record<string, string> = {
-  BAIXO: 'bg-emerald-200 text-slate-950 border-emerald-300',
-  MODERADO: 'bg-amber-200 text-slate-950 border-amber-300',
-  ELEVADO: 'bg-orange-300 text-slate-950 border-orange-400',
-  CRITICO: 'bg-rose-500 text-white border-rose-400'
-};
-
-const SERIES_OPTIONS: ReadonlyArray<{ key: DriftChartSeriesKey; label: string; marker: string }> = [
-  { key: 'wind', label: 'Vento / Rajada (km/h · entrada)', marker: '▲/◇' },
-  { key: 'deltaT', label: 'Delta T (°C · derivada)', marker: '■' },
-  { key: 'humidity', label: 'Humidade (% · entrada)', marker: '◆' },
-  { key: 'precip', label: 'Precipitação (mm · entrada)', marker: '▮' }
-];
-
-export const WeatherDriftView: React.FC<WeatherDriftViewProps> = ({ data, isLoading, error, locationName, selectedDateIso }) => {
+export const WeatherDriftView: React.FC<WeatherDriftViewProps> = ({ data, isLoading, error, locationName, selectedDateIso, context }) => {
   const currentHourIso = useWeatherTime();
   const [selectedIdx, setSelectedIdx] = useState(0);
   const [showTable, setShowTable] = useState(false);
-  const [activeSeries, setActiveSeries] = useState<DriftChartSeriesKey[]>([]);
 
   const cacheAgeMin = useMemo(() => {
     if (!data?.fetchedAt) return null;
@@ -52,9 +40,6 @@ export const WeatherDriftView: React.FC<WeatherDriftViewProps> = ({ data, isLoad
   const favorable = useMemo(() => findFavorableDriftPeriods(hourlySeries, { isStaleOrLegacyCache: isLegacyOrStale }), [hourlySeries, isLegacyOrStale]);
 
   useEffect(() => { setSelectedIdx(0); }, [selectedDateIso, locationName]);
-
-  const toggleSeries = (key: DriftChartSeriesKey) =>
-    setActiveSeries((prev) => (prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]));
 
   if (isLoading && !data) {
     return <div className="bg-white rounded-3xl p-6 border border-slate-200 space-y-4 animate-pulse" aria-busy="true"><div className="h-5 w-48 bg-slate-200 rounded" /><div className="h-16 w-40 bg-slate-200 rounded-2xl" /><div className="h-44 w-full bg-slate-100 rounded-2xl" /></div>;
@@ -73,6 +58,8 @@ export const WeatherDriftView: React.FC<WeatherDriftViewProps> = ({ data, isLoad
   const activePoint = hourlySeries[selectedIdx] ?? hourlySeries[0];
   const tz = data.timezone || 'local';
   const allowIrd = isIrdEnabledForEnv(getDaterraEnvironment());
+  const curDir = parseWindDirection(currentEval?.windDirectionDeg);
+  const ptDir = parseWindDirection(activePoint?.evaluation.windDirectionDeg);
 
   return (
     <div role="tabpanel" id="panel-weather-mode-deriva" aria-labelledby="tab-weather-mode-deriva" className="w-full max-w-full min-w-0 space-y-6 animate-fade-in">
@@ -89,13 +76,24 @@ export const WeatherDriftView: React.FC<WeatherDriftViewProps> = ({ data, isLoad
           <div className="space-y-1">
             <div className="flex flex-wrap items-center gap-2">
               <span className="text-[11px] font-extrabold uppercase tracking-wider text-emerald-200">Condições Meteorológicas para Deriva · Agora ({data.current.updatedAt})</span>
-              <span className="px-2 py-0.5 rounded-full bg-white/15 text-[10px] font-bold">Exclusivamente meteorológico</span>
+              <span className="px-2 py-0.5 rounded-full bg-white/15 text-[10px] font-bold">
+                {context?.calibrationId ? `Calibração ativa${context.combinedIrdPct != null ? ` · IRD Comb. ${context.combinedIrdPct}%` : ''}` : 'Exclusivamente meteorológico'}
+              </span>
             </div>
             {currentEval?.status === 'VALID' ? (
               <div className="flex flex-wrap items-baseline gap-2.5">
                 <span className="font-mono-numbers text-4xl sm:text-5xl font-extrabold">{currentEval.score}</span>
                 <span className="text-xs font-bold text-emerald-200">pts (índice 10–100)</span>
-                <span className={`px-3 py-1 rounded-full text-xs font-extrabold border ${BAND_CSS[currentEval.band || 'MODERADO']}`}>{currentEval.bandLabelPt}</span>
+                <span className={`px-3 py-1 rounded-full text-xs font-extrabold border ${DRIFT_BAND_CSS[currentEval.band || 'MODERADO']}`}>{currentEval.bandLabelPt}</span>
+                {currentEval.hasPrecipitationBlock && (
+                  <span className="px-2.5 py-1 rounded-full text-[11px] font-extrabold bg-sky-200 text-slate-950 border border-sky-300">Bloqueio por Precipitação (Lavagem)</span>
+                )}
+                {currentEval.isHighGustFactor && (
+                  <span className="px-2.5 py-1 rounded-full text-[11px] font-extrabold bg-amber-200 text-slate-950 border border-amber-300">Rajada G = {formatDecimalPt(currentEval.gustFactor)}</span>
+                )}
+                {currentEval.isCalmInversionSuspected && (
+                  <span className="px-2.5 py-1 rounded-full text-[11px] font-extrabold bg-amber-200 text-slate-950 border border-amber-300">Alerta Inversão Térmica</span>
+                )}
               </div>
             ) : <div className="text-lg font-extrabold text-amber-200">Leitura atual incompleta</div>}
             <p className="text-xs sm:text-sm text-emerald-50 font-medium">{currentEval?.dominantFactorPt}</p>
@@ -103,8 +101,8 @@ export const WeatherDriftView: React.FC<WeatherDriftViewProps> = ({ data, isLoad
         </div>
         <div className="text-left sm:text-right text-xs text-emerald-200 space-y-1 font-mono-numbers">
           <div className="font-sans font-bold text-white">{locationName}</div>
-          <div>Vento 10 m: {currentEval?.windKmh ?? '—'} km/h · Raj.: {currentEval?.gustsKmh ?? 'N/D'} km/h</div>
-          <div>ΔT: {currentEval?.deltaTC ?? '—'} °C · HR: {currentEval?.humidityPct ?? '—'}% · Precip.: {currentEval?.precipMm ?? '—'} mm</div>
+          <div>Vento 10 m: {formatDecimalPt(currentEval?.windKmh, '—')} km/h ({curDir ? `${curDir.degrees}° ${curDir.cardinalOrigin}` : '—'}) · Raj.: {formatDecimalPt(currentEval?.gustsKmh, 'N/D')} km/h</div>
+          <div>ΔT: {formatDecimalPt(currentEval?.deltaTC, '—')} °C · HR: {currentEval?.humidityPct ?? '—'}% · Precip.: {formatDecimalPt(currentEval?.precipMm, '—')} mm · G: {formatDecimalPt(currentEval?.gustFactor, '—')}</div>
         </div>
       </div>
 
@@ -114,24 +112,10 @@ export const WeatherDriftView: React.FC<WeatherDriftViewProps> = ({ data, isLoad
             <h2 className="text-base font-extrabold text-[#114037]">Evolução Horária Futura (Horas Válidas)</h2>
             <p className="text-xs text-slate-500">Toque, clique ou use setas no gráfico ou consulte a tabela ({tz}); lacunas interrompem as linhas.</p>
           </div>
-          <button type="button" onClick={() => setShowTable((v) => !v)} className="touch-target px-3.5 py-1.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-700 hover:bg-slate-50 inline-flex items-center gap-1.5 cursor-pointer">
+          <button type="button" aria-pressed={showTable} onClick={() => setShowTable((v) => !v)} className="touch-target px-3.5 py-1.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-700 hover:bg-slate-50 inline-flex items-center gap-1.5 cursor-pointer">
             {showTable ? <><LineChart className="w-4 h-4 text-[#114037]" /><span>Ver Gráfico</span></> : <><Table className="w-4 h-4 text-slate-500" /><span>Ver Tabela</span></>}
           </button>
         </div>
-
-        {hourlySeries.length > 0 && !showTable && (
-          <div className="flex flex-wrap items-center gap-1.5" role="group" aria-label="Comutar variáveis meteorológicas do gráfico">
-            <span className="px-2.5 py-1 rounded-xl bg-[#114037] text-white text-[11px] font-bold">● Índice (pts · base)</span>
-            {SERIES_OPTIONS.map((opt) => {
-              const pressed = activeSeries.includes(opt.key);
-              return (
-                <button key={opt.key} type="button" aria-pressed={pressed} onClick={() => toggleSeries(opt.key)} className={`touch-target px-2.5 py-1 rounded-xl border text-[11px] font-bold cursor-pointer ${pressed ? 'bg-emerald-50 border-[#114037] text-[#114037]' : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'}`}>
-                  {opt.marker} {opt.label}
-                </button>
-              );
-            })}
-          </div>
-        )}
 
         {hourlySeries.length === 0 ? (
           <p className="text-xs text-slate-600 py-6 text-center">Sem horas futuras disponíveis na previsão para o dia selecionado.</p>
@@ -158,10 +142,10 @@ export const WeatherDriftView: React.FC<WeatherDriftViewProps> = ({ data, isLoad
                         </button>
                       </th>
                       <td onClick={() => setSelectedIdx(i)} className="py-2 px-3 text-right font-mono-numbers font-bold cursor-pointer">{pt.evaluation.status === 'VALID' ? `${pt.evaluation.score} pts (${pt.evaluation.bandLabelPt})` : pt.evaluation.bandLabelPt}</td>
-                      <td onClick={() => setSelectedIdx(i)} className="py-2 px-3 text-right font-mono-numbers cursor-pointer">{pt.evaluation.windKmh !== null ? `${pt.evaluation.windKmh} / ${pt.evaluation.gustsKmh ?? 'N/D'} km/h` : '—'}</td>
-                      <td onClick={() => setSelectedIdx(i)} className="py-2 px-3 text-right font-mono-numbers cursor-pointer">{pt.evaluation.deltaTC !== null ? `${pt.evaluation.deltaTC} °C` : '—'}</td>
+                      <td onClick={() => setSelectedIdx(i)} className="py-2 px-3 text-right font-mono-numbers cursor-pointer">{pt.evaluation.windKmh !== null ? `${formatDecimalPt(pt.evaluation.windKmh)} / ${formatDecimalPt(pt.evaluation.gustsKmh, 'N/D')} km/h` : '—'}</td>
+                      <td onClick={() => setSelectedIdx(i)} className="py-2 px-3 text-right font-mono-numbers cursor-pointer">{pt.evaluation.deltaTC !== null ? `${formatDecimalPt(pt.evaluation.deltaTC)} °C` : '—'}</td>
                       <td onClick={() => setSelectedIdx(i)} className="py-2 px-3 text-right font-mono-numbers cursor-pointer">{pt.evaluation.humidityPct !== null ? `${pt.evaluation.humidityPct}%` : '—'}</td>
-                      <td onClick={() => setSelectedIdx(i)} className="py-2 px-3 text-right font-mono-numbers cursor-pointer">{pt.evaluation.precipMm !== null ? `${pt.evaluation.precipMm} mm` : '—'}</td>
+                      <td onClick={() => setSelectedIdx(i)} className="py-2 px-3 text-right font-mono-numbers cursor-pointer">{pt.evaluation.precipMm !== null ? `${formatDecimalPt(pt.evaluation.precipMm)} mm` : '—'}</td>
                     </tr>
                   );
                 })}
@@ -169,7 +153,7 @@ export const WeatherDriftView: React.FC<WeatherDriftViewProps> = ({ data, isLoad
             </table>
           </div>
         ) : (
-          <WeatherDriftChartSvg points={hourlySeries} selectedIndex={selectedIdx} onSelectIndex={setSelectedIdx} activeSeries={activeSeries} timezoneLabel={tz} />
+          <WeatherDriftChartSvg points={hourlySeries} selectedIndex={selectedIdx} onSelectIndex={setSelectedIdx} timezoneLabel={tz} />
         )}
 
         {activePoint && (
@@ -179,11 +163,11 @@ export const WeatherDriftView: React.FC<WeatherDriftViewProps> = ({ data, isLoad
               <p className="text-xs text-slate-600">{activePoint.evaluation.dominantFactorPt}</p>
             </div>
             <div className="flex flex-wrap gap-3 text-xs font-mono-numbers font-bold text-slate-800">
-              <span>Vento: {activePoint.evaluation.windKmh ?? '—'} km/h</span>
-              <span>Rajada: {activePoint.evaluation.gustsKmh ?? 'N/D'} km/h</span>
-              <span>ΔT: {activePoint.evaluation.deltaTC ?? '—'} °C</span>
+              <span>Vento: {formatDecimalPt(activePoint.evaluation.windKmh, '—')} km/h ({ptDir ? `${ptDir.degrees}° ${ptDir.cardinalOrigin}` : '—'})</span>
+              <span>Rajada: {formatDecimalPt(activePoint.evaluation.gustsKmh, 'N/D')} km/h (G: {formatDecimalPt(activePoint.evaluation.gustFactor, '—')})</span>
+              <span>ΔT: {formatDecimalPt(activePoint.evaluation.deltaTC, '—')} °C</span>
               <span>HR: {activePoint.evaluation.humidityPct ?? '—'}%</span>
-              <span>Precip.: {activePoint.evaluation.precipMm ?? '—'} mm</span>
+              <span>Precip.: {formatDecimalPt(activePoint.evaluation.precipMm, '—')} mm</span>
             </div>
           </div>
         )}

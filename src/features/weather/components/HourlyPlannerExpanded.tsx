@@ -4,27 +4,16 @@ import { Clock, Sun, CloudRain, CloudSun, Cloud, ChevronLeft, ChevronRight } fro
 import type { HourlyForecastItem } from '../types.ts';
 import type { ActiveMachineContext } from '../weatherWeekAggregator.ts';
 import { evaluateSprayWindow } from '../weatherCalculations.ts';
-import { getRainFreePeriod } from '../utils/sprayPresentationAdapter.ts';
+import { formatDecimalPt } from '../utils/windDirection.ts';
+import { evaluateHourWithProfileContext } from '../utils/irdOperationalThresholds.ts';
 import { HourlyDetailCard } from './HourlyDetailCard.tsx';
 import { useWeatherTime, filterFutureHours, getEffectiveDateIso } from '../services/weatherTimeService.ts';
 
-function getWeatherIcon(code: number) {
-  if (code <= 1) return <Sun className="w-5 h-5 text-amber-500" />;
-  if (code === 2) return <CloudSun className="w-5 h-5 text-amber-500" />;
-  if (code >= 51 && code <= 82) return <CloudRain className="w-5 h-5 text-sky-500" />;
-  return <Cloud className="w-5 h-5 text-slate-400" />;
-}
+const getWeatherIcon = (c: number) => c <= 1 ? <Sun className="w-5 h-5 text-amber-500" /> : c === 2 ? <CloudSun className="w-5 h-5 text-amber-500" /> : c >= 51 && c <= 82 ? <CloudRain className="w-5 h-5 text-sky-500" /> : <Cloud className="w-5 h-5 text-slate-400" />;
 
-interface HourlyPlannerExpandedProps {
-  hourly: HourlyForecastItem[];
-  hourlyFull?: HourlyForecastItem[];
-  context: ActiveMachineContext | null;
-  selectedDateIso?: string | null;
-}
+interface HourlyPlannerExpandedProps { hourly: HourlyForecastItem[]; hourlyFull?: HourlyForecastItem[]; context: ActiveMachineContext | null; selectedDateIso?: string | null; }
 
-export const HourlyPlannerExpanded: React.FC<HourlyPlannerExpandedProps> = ({
-  hourly, hourlyFull, context, selectedDateIso
-}) => {
+export const HourlyPlannerExpanded: React.FC<HourlyPlannerExpandedProps> = ({ hourly, hourlyFull, context, selectedDateIso }) => {
   const [selectedHourIndex, setSelectedHourIndex] = useState(0);
   const scrollRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
@@ -80,14 +69,16 @@ export const HourlyPlannerExpanded: React.FC<HourlyPlannerExpandedProps> = ({
       }
     : undefined;
 
-  const selectedEval = selectedHour
+  const hasActiveProfile = Boolean(context && (context.calibrationId || context.cultureId));
+  const selectedRawEval = selectedHour
     ? evaluateSprayWindow(
         selectedHour.deltaT, selectedHour.windSpeedKmh, selectedHour.windGustsKmh,
         selectedHour.humidityPercent, selectedHour.precipitationMm, equipmentOptions
       )
     : null;
-
-  const rainFreeText = getRainFreePeriod(displayHours, selectedHourIndex);
+  const selectedEval = selectedHour && selectedRawEval
+    ? (hasActiveProfile ? evaluateHourWithProfileContext(selectedRawEval, selectedHour, context).evaluation : selectedRawEval)
+    : null;
 
   return (
     <div className="bg-white rounded-3xl border border-slate-200 p-4 sm:p-6 shadow-soft space-y-4">
@@ -97,36 +88,27 @@ export const HourlyPlannerExpanded: React.FC<HourlyPlannerExpandedProps> = ({
             <Clock className="w-4 h-4 text-daterra-accent" />
           </div>
           <div>
-            <h3 className="text-base font-extrabold text-daterra-primary leading-tight">
-              {isToday ? 'Planeador Horário (Próximas 24 Horas)' : `Planeador Horário (${selectedDateIso})`}
-            </h3>
+            <div className="flex items-center gap-2 flex-wrap">
+              <h3 className="text-base font-extrabold text-daterra-primary leading-tight">
+                {isToday ? 'Planeador Horário (Próximas 24 Horas)' : `Planeador Horário (${selectedDateIso})`}
+              </h3>
+              {hasActiveProfile && (
+                <span className="text-[10px] font-extrabold bg-emerald-50 text-[#114037] border border-emerald-200 px-2.5 py-0.5 rounded-full whitespace-nowrap shrink-0">
+                  Ajustado ao perfil
+                </span>
+              )}
+            </div>
             <p className="text-[11px] text-slate-400 font-medium">
-              Selecione uma hora para inspecionar os fatores de vento, Delta T e DPV.
+              Toque numa hora para inspecionar temperatura, ΔT, vento e IRD.
             </p>
           </div>
         </div>
 
         <div className="flex items-center gap-2 self-end sm:self-auto">
-          <button
-            type="button"
-            onClick={() => scrollBy(-240)}
-            disabled={!canScrollLeft}
-            aria-label="Horas anteriores"
-            className={`p-1.5 rounded-xl border border-slate-200 transition-colors ${
-              canScrollLeft ? 'bg-white hover:bg-slate-50 text-slate-700' : 'bg-slate-100 text-slate-300 cursor-not-allowed'
-            }`}
-          >
+          <button type="button" onClick={() => scrollBy(-240)} disabled={!canScrollLeft} aria-label="Horas anteriores" className={`p-1.5 rounded-xl border border-slate-200 transition-colors ${canScrollLeft ? 'bg-white hover:bg-slate-50 text-slate-700' : 'bg-slate-100 text-slate-300 cursor-not-allowed'}`}>
             <ChevronLeft className="w-4 h-4" />
           </button>
-          <button
-            type="button"
-            onClick={() => scrollBy(240)}
-            disabled={!canScrollRight}
-            aria-label="Horas seguintes"
-            className={`p-1.5 rounded-xl border border-slate-200 transition-colors ${
-              canScrollRight ? 'bg-white hover:bg-slate-50 text-slate-700' : 'bg-slate-100 text-slate-300 cursor-not-allowed'
-            }`}
-          >
+          <button type="button" onClick={() => scrollBy(240)} disabled={!canScrollRight} aria-label="Horas seguintes" className={`p-1.5 rounded-xl border border-slate-200 transition-colors ${canScrollRight ? 'bg-white hover:bg-slate-50 text-slate-700' : 'bg-slate-100 text-slate-300 cursor-not-allowed'}`}>
             <ChevronRight className="w-4 h-4" />
           </button>
         </div>
@@ -137,9 +119,10 @@ export const HourlyPlannerExpanded: React.FC<HourlyPlannerExpandedProps> = ({
           {displayHours.map((h, idx) => {
             const hNum = parseInt(h.timeFormatted.split(':')[0], 10);
             const isOutsideOp = hNum < 6 || hNum > 20;
-            const hEval = evaluateSprayWindow(
+            const rawHourEval = evaluateSprayWindow(
               h.deltaT, h.windSpeedKmh, h.windGustsKmh, h.humidityPercent, h.precipitationMm, equipmentOptions
             );
+            const hEval = hasActiveProfile ? evaluateHourWithProfileContext(rawHourEval, h, context).evaluation : rawHourEval;
             const isOpt = hEval.level === 'optimal';
             const isMarg = hEval.level === 'marginal';
             const isSelected = idx === selectedHourIndex;
@@ -162,10 +145,15 @@ export const HourlyPlannerExpanded: React.FC<HourlyPlannerExpandedProps> = ({
                   {isOutsideOp && <span className="text-[9px] text-slate-400 font-bold leading-none">Fora 06-20h</span>}
                 </div>
                 <div className="my-1.5">{getWeatherIcon(h.weatherCode)}</div>
-                <div className="text-xs font-black text-slate-900 font-mono-numbers">{h.temperatureC}°C</div>
-                <div className="text-[11px] font-bold text-slate-500 font-mono-numbers mt-0.5">
-                  {h.precipitationMm > 0 ? `${h.precipitationMm} mm` : '0 mm'}
+                <div className="text-sm font-black text-slate-900 font-mono-numbers tabular-nums">{formatDecimalPt(h.temperatureC)}°C</div>
+                <div className="text-xs font-bold text-slate-700 font-mono-numbers tabular-nums mt-0.5">
+                  {formatDecimalPt(h.windSpeedKmh)} km/h
                 </div>
+                {h.precipitationMm > 0 && (
+                  <div className="text-[10px] font-extrabold text-sky-700 bg-sky-50 border border-sky-200 px-1.5 py-0.5 rounded-md font-mono-numbers mt-0.5">
+                    {formatDecimalPt(h.precipitationMm)} mm
+                  </div>
+                )}
                 <div className={`w-full mt-2 py-1 px-1 rounded-xl text-center border text-[10px] font-black uppercase tracking-tight ${
                   isOpt
                     ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
@@ -182,12 +170,7 @@ export const HourlyPlannerExpanded: React.FC<HourlyPlannerExpandedProps> = ({
       </div>
 
       {selectedHour && selectedEval && (
-        <HourlyDetailCard
-          hour={selectedHour}
-          evaluation={selectedEval}
-          context={context}
-          rainFreeText={rainFreeText}
-        />
+        <HourlyDetailCard hour={selectedHour} evaluation={selectedEval} context={context} />
       )}
     </div>
   );

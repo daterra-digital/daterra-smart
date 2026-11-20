@@ -54,13 +54,13 @@ export const CultureParcelDataAccordion: React.FC<CultureParcelDataAccordionProp
         />
 
         <div>
-          <label className="block text-xs font-bold text-slate-700 mb-1.5">Campanha / Época</label>
+          <label className="block text-xs font-semibold text-[#114037] mb-1.5">Campanha / Época</label>
           <input
             type="text"
             value={form.seasonLabel}
             onChange={(e) => onUpdate({ seasonLabel: e.target.value })}
             placeholder="Ex: 2026"
-            className="w-full min-h-[48px] px-4 py-2.5 rounded-2xl border border-slate-300 bg-white text-xs font-semibold outline-none focus:border-[#3CA64C]"
+            className="w-full min-h-[44px] px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-xs font-medium text-slate-900 placeholder:text-slate-400 outline-none focus:border-[#114037] focus:ring-2 focus:ring-[#114037]/15"
           />
         </div>
 
@@ -95,13 +95,13 @@ export const CultureParcelDataAccordion: React.FC<CultureParcelDataAccordionProp
         />
 
         <div>
-          <label className="block text-xs font-bold text-slate-700 mb-1.5">Notas da parcela</label>
+          <label className="block text-xs font-semibold text-[#114037] mb-1.5">Notas da parcela</label>
           <textarea
             rows={2}
             value={form.notes}
             onChange={(e) => onUpdate({ notes: e.target.value })}
             placeholder="Observações locais sobre bordadura, declive ou histórico da parcela..."
-            className="w-full px-4 py-3 rounded-2xl border border-slate-300 bg-white text-xs font-medium outline-none focus:border-[#3CA64C]"
+            className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white text-xs font-medium text-slate-900 placeholder:text-slate-400 outline-none focus:border-[#114037] focus:ring-2 focus:ring-[#114037]/15"
           />
         </div>
       </div>

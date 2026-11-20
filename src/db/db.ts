@@ -6,17 +6,12 @@ import { seedMicrolearningIfEmpty } from './seed.ts';
 import type { MixHistoryRecord } from '../features/mistura/types/mixHistory.ts';
 import type { EppoHistoryRecord } from '../features/ajuste-dose-eppo/types/eppoHistory.ts';
 import type {
-  CalculationHistoryItem,
-  ProfileCulture,
-  ProfileEquipment,
-  ProfileNozzle,
-  ProfileCalibration,
-  MicrolearningContent,
-  InstalledToolItem,
-  MutationOutboxRecord,
+  CalculationHistoryItem, ProfileCulture, ProfileEquipment, ProfileNozzle,
+  ProfileCalibration, MicrolearningContent, InstalledToolItem, MutationOutboxRecord,
   ProfileCropMoment, ProfileMomentRevision, ProfileCustomOption
 } from './types.ts';
-import { V11_STORES, upgradeDaterraDbToV11 } from './dbCultureMigration.ts';
+import type { EquipmentRecord } from '../schemas/equipment.schema.ts';
+import { V11_STORES, V12_STORES, V13_STORES, upgradeDaterraDbToV11 } from './dbCultureMigration.ts';
 
 export * from './types.ts';
 
@@ -27,25 +22,16 @@ export class DaterraDatabase extends Dexie {
   profile_moment_revisions!: Table<ProfileMomentRevision>;
   profile_custom_options!: Table<ProfileCustomOption>;
   profiles_equipment!: Table<ProfileEquipment>;
+  equipments!: Table<EquipmentRecord, string>;
   profiles_nozzles!: Table<ProfileNozzle>;
-  profiles_calibrations!: Table<ProfileCalibration>;
+  profiles_calibrations!: Table<ProfileCalibration, number | string>;
   microlearning_content!: Table<MicrolearningContent>;
   installed_tools!: Table<InstalledToolItem>;
-
-  // Motor Universal de Calculadoras
   calculation_history_v2!: Table<CalculationHistoryRecord>;
   calibration_profiles!: Table<CalibrationProfile>;
-
-  // Histórico de Misturas
   mix_history!: Table<MixHistoryRecord>;
-
-  // Substâncias Ativas (Verificador de pH)
   active_substances!: Table<ActiveSubstance, string>;
-
-  // Histórico de Ajuste EPPO
   eppo_history!: Table<EppoHistoryRecord>;
-
-  // Persistência First-Offline (Mutation Outbox)
   mutation_outbox!: Table<MutationOutboxRecord, number>;
 
   constructor(databaseName = 'DaterraSmartDB') {
@@ -188,6 +174,12 @@ export class DaterraDatabase extends Dexie {
     });
 
     this.version(11).stores(V11_STORES).upgrade(upgradeDaterraDbToV11);
+
+    // Versão 12: Adição aditiva da tabela canónica equipments (Bloco 1 Fundação & Domínio)
+    this.version(12).stores(V12_STORES);
+
+    // Versão 13: Índices auditáveis em profiles_calibrations e userId em equipments
+    this.version(13).stores(V13_STORES);
   }
 }
 

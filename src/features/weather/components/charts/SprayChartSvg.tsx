@@ -7,10 +7,14 @@ import {
   generateSvgLinePath,
   generateSvgAreaPath,
   formatTick,
-  getVisibleXAxisIndices,
   type ChartLayout,
   type ChartScaleResult
 } from '../../utils/weatherChartUtils.ts';
+import {
+  findClosestPointIndexByClientX,
+  findDayChangeMarkers,
+  getAlternatingHourIndices
+} from '../../utils/weatherChartAxisHelpers.ts';
 
 export type SprayChartMetric = 'deltaT' | 'vento' | 'chuva' | 'humidade';
 
@@ -23,8 +27,8 @@ interface SprayChartSvgProps {
 
 const LAYOUT: ChartLayout = {
   width: 680,
-  height: 240,
-  padding: { top: 26, right: 48, bottom: 34, left: 48 }
+  height: 244,
+  padding: { top: 28, right: 48, bottom: 34, left: 48 }
 };
 
 export const SprayChartSvg: React.FC<SprayChartSvgProps> = ({
@@ -56,20 +60,23 @@ export const SprayChartSvg: React.FC<SprayChartSvgProps> = ({
   const activePts = metric === 'deltaT' ? deltaPts : metric === 'vento' ? windPts : metric === 'chuva' ? rainPts : humPts;
   const activePt = selectedIndex != null && activePts[selectedIndex] ? activePts[selectedIndex] : null;
   const activeHour = selectedIndex != null && hours[selectedIndex] ? hours[selectedIndex] : null;
-  const visibleXIndices = getVisibleXAxisIndices(activePts, 48);
+  const activeXs = activePts.map((pt) => pt.x);
+  const visibleXIndices = getAlternatingHourIndices(activePts.length);
+  const dayMarkers = findDayChangeMarkers(hours, activeXs);
 
-  const handlePointerMove = useCallback((e: React.PointerEvent<SVGSVGElement>) => {
-    if (!svgRef.current || !activePts.length) return;
-    const rect = svgRef.current.getBoundingClientRect();
-    if (!rect.width) return;
-    const svgX = ((e.clientX - rect.left) / rect.width) * LAYOUT.width;
-    let closestIdx = 0, minDiff = Infinity;
-    for (let i = 0; i < activePts.length; i++) {
-      const diff = Math.abs(activePts[i].x - svgX);
-      if (diff < minDiff) { minDiff = diff; closestIdx = i; }
-    }
-    if (closestIdx !== selectedIndex) onSelectIndex(closestIdx);
-  }, [activePts, selectedIndex, onSelectIndex]);
+  const selectByClientX = useCallback(
+    (clientX: number) => {
+      const closestIdx = findClosestPointIndexByClientX(svgRef.current, clientX, LAYOUT.width, activeXs);
+      if (closestIdx !== null && closestIdx !== selectedIndex) onSelectIndex(closestIdx);
+    },
+    [activeXs, selectedIndex, onSelectIndex]
+  );
+
+  const handlePointer = useCallback((e: React.PointerEvent<SVGSVGElement>) => selectByClientX(e.clientX), [selectByClientX]);
+  const handleTouch = useCallback((e: React.TouchEvent<SVGSVGElement>) => {
+    const touch = e.touches[0];
+    if (touch) selectByClientX(touch.clientX);
+  }, [selectByClientX]);
 
   if (!hours.length) return null;
 
@@ -82,12 +89,15 @@ export const SprayChartSvg: React.FC<SprayChartSvgProps> = ({
       <svg
         ref={svgRef}
         viewBox={`0 0 ${LAYOUT.width} ${LAYOUT.height}`}
-        className="w-full min-w-[500px] h-auto select-none cursor-crosshair"
+        className="w-full min-w-0 sm:min-w-[500px] h-auto select-none cursor-crosshair touch-pan-y"
+        style={{ touchAction: 'pan-y' }}
         role="img"
         aria-label={`Gráfico de evolução horária para ${metric}`}
-        onPointerMove={handlePointerMove}
+        onPointerDown={handlePointer}
+        onPointerMove={handlePointer}
+        onTouchStart={handleTouch}
+        onTouchMove={handleTouch}
       >
-        {/* Linhas de Grelha Horizontal e Ticks Y */}
         {levels.map((lvl, i) => {
           const gy = Math.round((baseY - lvl * plotH) * 10) / 10;
           const val = currentScale.min + lvl * currentScale.range;
@@ -100,7 +110,17 @@ export const SprayChartSvg: React.FC<SprayChartSvgProps> = ({
           );
         })}
 
-        {/* Eixo X com horas visíveis */}
+        {dayMarkers.map((marker) => {
+          const clampedX = Math.max(LAYOUT.padding.left + 36, Math.min(LAYOUT.width - LAYOUT.padding.right - 36, marker.x));
+          return (
+            <g key={`day-${marker.index}`} className="pointer-events-none select-none">
+              <line x1={marker.x} y1={LAYOUT.padding.top} x2={marker.x} y2={baseY} stroke="#94a3b8" strokeDasharray="4,4" strokeWidth="1.2" opacity="0.75" />
+              <rect x={clampedX - 34} y={LAYOUT.padding.top - 18} width={68} height={15} rx="5" fill="#f1f5f9" stroke="#cbd5e1" strokeWidth="0.8" />
+              <text x={clampedX} y={LAYOUT.padding.top - 7.5} textAnchor="middle" className="fill-slate-600 text-[9px] font-bold select-none">{marker.label}</text>
+            </g>
+          );
+        })}
+
         {visibleXIndices.map((idx) => {
           const pt = activePts[idx];
           const h = hours[idx];
@@ -112,7 +132,6 @@ export const SprayChartSvg: React.FC<SprayChartSvgProps> = ({
           );
         })}
 
-        {/* Séries por Variável */}
         {metric === 'deltaT' && (
           <>
             <path d={generateSvgAreaPath(deltaPts, baseY)} className="fill-purple-600/10" />
@@ -141,20 +160,18 @@ export const SprayChartSvg: React.FC<SprayChartSvgProps> = ({
           </>
         )}
 
-        {/* Pontos Visíveis */}
         {activePts.map((pt, i) => (
           <circle key={`pt-${i}`} cx={pt.x} cy={pt.y} r={selectedIndex === i ? '5' : '3'} className={selectedIndex === i ? 'fill-slate-900 stroke-white stroke-2' : 'fill-white stroke-slate-500 stroke-1.5'} />
         ))}
 
-        {/* Tooltip Compacto e Dedicado */}
         {activePt && activeHour && (
           <g className="pointer-events-none select-none">
             <line x1={activePt.x} y1={LAYOUT.padding.top} x2={activePt.x} y2={baseY} stroke="#114037" strokeWidth="1.5" strokeDasharray="3,3" opacity="0.45" />
-            <rect x={Math.max(50, Math.min(LAYOUT.width - 200, activePt.x - 75))} y={LAYOUT.padding.top + 6} width={150} height={52} rx="8" fill="#0f172a" fillOpacity="0.88" stroke="#334155" strokeWidth="1" />
-            <text x={Math.max(60, Math.min(LAYOUT.width - 190, activePt.x - 65))} y={LAYOUT.padding.top + 24} fill="#cbd5e1" className="text-[10px] font-mono">{activeHour.timeFormatted}</text>
-            <text x={Math.max(60, Math.min(LAYOUT.width - 190, activePt.x - 65))} y={LAYOUT.padding.top + 42} fill="#ffffff" className="text-[11px] font-mono font-bold font-mono-numbers">
+            <rect x={Math.max(50, Math.min(LAYOUT.width - 170, activePt.x - 60))} y={LAYOUT.padding.top + 4} width={120} height={38} rx="7" fill="#0f172a" fillOpacity="0.88" stroke="#334155" strokeWidth="1" />
+            <text x={Math.max(58, Math.min(LAYOUT.width - 162, activePt.x - 52))} y={LAYOUT.padding.top + 18} fill="#cbd5e1" className="text-[9px] font-mono">{activeHour.timeFormatted}</text>
+            <text x={Math.max(58, Math.min(LAYOUT.width - 162, activePt.x - 52))} y={LAYOUT.padding.top + 33} fill="#ffffff" className="text-[10px] font-mono font-bold font-mono-numbers">
               {metric === 'deltaT' && `ΔT: ${activeHour.deltaT}°C`}
-              {metric === 'vento' && `${activeHour.windSpeedKmh} km/h (raj. ${activeHour.windGustsKmh})`}
+              {metric === 'vento' && `${activeHour.windSpeedKmh} km/h (${activeHour.windGustsKmh})`}
               {metric === 'chuva' && `${activeHour.precipitationMm} mm (${activeHour.precipitationProbability}%)`}
               {metric === 'humidade' && `${activeHour.humidityPercent}% HR`}
             </text>

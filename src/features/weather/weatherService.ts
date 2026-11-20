@@ -166,7 +166,8 @@ function assessTelemetryQuality(
   rawWind: unknown,
   rawGust: unknown,
   rawPrecip: unknown,
-  precipTemporalKind: WeatherTelemetryQuality['precipTemporalKind']
+  precipTemporalKind: WeatherTelemetryQuality['precipTemporalKind'],
+  rawWindDir?: unknown
 ): WeatherTelemetryQuality {
   const missingFields: string[] = [];
   if (!isFiniteNum(rawTemp)) missingFields.push('temperature_2m');
@@ -185,6 +186,7 @@ function assessTelemetryQuality(
     rawHumidityPercent: isFiniteNum(rawRh) ? rawRh : null,
     rawWindSpeedKmh: isFiniteNum(rawWind) ? rawWind : null,
     rawWindGustsKmh: hasRealGustReading ? rawGust : null,
+    rawWindDirectionDeg: isFiniteNum(rawWindDir) ? rawWindDir : null,
     rawPrecipitationMm: isFiniteNum(rawPrecip) ? rawPrecip : null
   };
 }
@@ -200,7 +202,8 @@ export function transformOpenMeteoResponse(
     cur.wind_speed_10m,
     cur.wind_gusts_10m,
     cur.precipitation,
-    'current_interval_accumulated'
+    'current_interval_accumulated',
+    cur.wind_direction_10m
   );
   const temp = curQuality.rawTemperatureC ?? 0;
   const rh = curQuality.rawHumidityPercent ?? 0;
@@ -212,7 +215,7 @@ export function transformOpenMeteoResponse(
   const dewPoint = isFiniteNum(cur.dew_point_2m) ? cur.dew_point_2m : calculateDewPoint(temp, rh);
   const deltaT = calculateDeltaT(temp, rh);
   const vpd = calculateVpd(temp, rh);
-  const windDirText = getWindDirectionText(cur.wind_direction_10m);
+  const windDirText = isFiniteNum(cur.wind_direction_10m) ? getWindDirectionText(cur.wind_direction_10m) : '—';
   const weatherLabel = getWmoWeatherLabel(cur.weather_code);
 
   const sprayEvaluation = evaluateSprayWindow(deltaT, wind, gusts, rh, curPrecip);
@@ -222,7 +225,7 @@ export function transformOpenMeteoResponse(
     apparentTempC: Math.round(isFiniteNum(cur.apparent_temperature) ? cur.apparent_temperature : temp),
     humidityPercent: Math.round(rh),
     windSpeedKmh: Math.round(wind),
-    windDirectionDeg: cur.wind_direction_10m,
+    windDirectionDeg: isFiniteNum(cur.wind_direction_10m) ? cur.wind_direction_10m : (null as unknown as number),
     windDirectionText: windDirText,
     windGustsKmh: Math.round(gusts),
     precipitationMm: curPrecip,
@@ -252,7 +255,8 @@ export function transformOpenMeteoResponse(
       data.hourly.wind_speed_10m?.[i],
       data.hourly.wind_gusts_10m?.[i],
       data.hourly.precipitation?.[i],
-      'hourly_accumulated'
+      'hourly_accumulated',
+      data.hourly.wind_direction_10m?.[i]
     );
     const hTemp = hQuality.rawTemperatureC ?? 0;
     const hRh = hQuality.rawHumidityPercent ?? 0;
@@ -279,6 +283,8 @@ export function transformOpenMeteoResponse(
       vpdKpa: Math.round(hVpd * 100) / 100,
       windSpeedKmh: hWind,
       windGustsKmh: hGusts,
+      windDirectionDeg: hQuality.rawWindDirectionDeg ?? null,
+      windDirectionText: hQuality.rawWindDirectionDeg != null ? getWindDirectionText(hQuality.rawWindDirectionDeg) : undefined,
       precipitationProbability: hProb,
       precipitationMm: hRain,
       weatherCode: hCode,

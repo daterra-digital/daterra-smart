@@ -46,18 +46,29 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
       </div>
 
       {/* Indicador Rápido de Contexto no Topo (Desktop) */}
-      {isContextEnabled && activeContext?.cultureName && (
+      {isContextEnabled &&
+        (activeContext?.cultureName ||
+          (activeContext?.equipmentName && activeContext?.equipmentContextActive !== false)) && (
         <div className="hidden md:flex items-center gap-2 bg-white px-3.5 py-2 rounded-2xl border border-slate-200 shadow-xs text-xs font-bold text-slate-700">
           <Tractor className="w-3.5 h-3.5 text-daterra-accent" />
-          <span className="text-[10px] uppercase tracking-wider text-slate-400 font-black">
-            Parcela:
-          </span>
-          <span className="text-daterra-primary font-black truncate max-w-[130px]">
-            {activeContext.cultureName}
-          </span>
-          {activeContext.equipmentName && (
+          {activeContext.cultureName && (
             <>
-              <span className="text-slate-300">•</span>
+              <span className="text-[10px] uppercase tracking-wider text-slate-400 font-black">
+                Parcela:
+              </span>
+              <span className="text-daterra-primary font-black truncate max-w-[130px]">
+                {activeContext.cultureName}
+              </span>
+            </>
+          )}
+          {activeContext.equipmentName && activeContext.equipmentContextActive !== false && (
+            <>
+              {activeContext.cultureName && <span className="text-slate-300">•</span>}
+              {activeContext.equipmentTypeBadge && (
+                <span className="font-mono text-[10px] font-black text-[#114037] bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded-md">
+                  @equipamento · {activeContext.equipmentTypeBadge}
+                </span>
+              )}
               <span className="text-slate-600 truncate max-w-[140px]">
                 {activeContext.equipmentName}
               </span>

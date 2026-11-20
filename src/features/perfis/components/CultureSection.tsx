@@ -92,6 +92,7 @@ export const CultureSection: React.FC<CultureSectionProps> = ({
             hasPendingCustomOption={hasPendingOption} fieldErrors={ctrl.fieldErrors}
             onEditMeasurements={() => ctrl.openEditor('measurements')} onOpenKeypad={(f) => ctrl.setKeypadField(f)}
             onClearFormField={(f) => ctrl.updateForm({ [f]: '' })} onUpdateMoment={ctrl.updateMoment}
+            onUpdateForm={ctrl.updateForm}
           />
         </div>
       </div>
@@ -108,8 +109,8 @@ export const CultureSection: React.FC<CultureSectionProps> = ({
         {isParcelEditor && (
           <div className="space-y-6">
             <div className="space-y-4">
-              <p className="text-[11px] font-black uppercase tracking-wider text-[#114037] border-b border-slate-100 pb-1.5">
-                1. Identificação e Características
+              <p className="text-[11px] font-bold tracking-wide uppercase text-[#114037] border-b border-slate-200 pb-1.5">
+                1. IDENTIFICAÇÃO E CARACTERÍSTICAS
               </p>
               <CultureCoreFieldsCard
                 form={ctrl.form} cultureOptions={ctrl.cultureOptions} isSpeciesLocked={ctrl.isSpeciesLocked}
@@ -128,10 +129,10 @@ export const CultureSection: React.FC<CultureSectionProps> = ({
             </div>
 
             <div className="space-y-4 pt-2 border-t border-slate-200">
-              <p className="text-[11px] font-black uppercase tracking-wider text-[#114037] border-b border-slate-100 pb-1.5">
-                2. Localização Geográfica
+              <p className="text-[11px] font-bold tracking-wide uppercase text-[#114037] border-b border-slate-200 pb-1.5">
+                2. LOCALIZAÇÃO E CONTEXTO ESPACIAL
               </p>
-              <CultureLocationAccordion mode="editor" form={ctrl.form} onUpdate={ctrl.updateForm} />
+              <CultureLocationAccordion mode="editor" form={ctrl.form} fieldErrors={ctrl.fieldErrors} onUpdate={ctrl.updateForm} onOpenKeypad={(f) => ctrl.setKeypadField(f)} />
             </div>
           </div>
         )}
@@ -150,7 +151,7 @@ export const CultureSection: React.FC<CultureSectionProps> = ({
             mode="editor" form={ctrl.form} activeMoment={ctrl.activeMoment} momentDraft={ctrl.momentDraft}
             hasPendingCustomOption={hasPendingOption} fieldErrors={ctrl.fieldErrors}
             onOpenKeypad={(f) => ctrl.setKeypadField(f)} onClearFormField={(f) => ctrl.updateForm({ [f]: '' })}
-            onUpdateMoment={ctrl.updateMoment}
+            onUpdateMoment={ctrl.updateMoment} onUpdateForm={ctrl.updateForm}
           />
         )}
       </CultureFocusedEditorModal>
@@ -159,14 +160,15 @@ export const CultureSection: React.FC<CultureSectionProps> = ({
         <DaterraKeypadModal
           isOpen onClose={() => ctrl.setKeypadField(null)} initialValue={keypadConfig.initialValue}
           initialUnit={keypadConfig.unit} commonValues={keypadConfig.commonValues} label={keypadConfig.label}
-          validationRules={{ required: true, min: 0, minInclusive: false, allowDecimal: true, maxDecimals: 2 }}
+          validationRules={{
+            required: true, min: keypadConfig.min ?? 0, minInclusive: keypadConfig.minInclusive ?? false,
+            max: keypadConfig.max, allowDecimal: keypadConfig.allowDecimal ?? true, maxDecimals: keypadConfig.maxDecimals ?? 2
+          }}
           onConfirm={(num) => {
             const valStr = String(num).replace('.', ',');
-            if (ctrl.keypadField === 'area') ctrl.updateForm({ area: valStr });
-            else if (ctrl.keypadField === 'rowDistance') ctrl.updateForm({ rowDistance: valStr });
-            else if (ctrl.keypadField === 'canopyHeight') ctrl.updateMoment({ canopyHeight: valStr });
-            else if (ctrl.keypadField === 'canopyWidth') ctrl.updateMoment({ canopyWidth: valStr });
-            else if (ctrl.keypadField === 'lai') ctrl.updateMoment({ lai: valStr });
+            const f = ctrl.keypadField;
+            if (f === 'canopyHeight' || f === 'canopyWidth' || f === 'lai') ctrl.updateMoment({ [f]: valStr });
+            else if (f) ctrl.updateForm({ [f]: valStr });
             ctrl.setKeypadField(null);
           }}
         />

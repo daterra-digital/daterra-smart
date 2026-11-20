@@ -32,14 +32,8 @@ export const AgriChatView: React.FC = () => {
   const [paywallModalSkill, setPaywallModalSkill] = useState<Skill | null>(null);
 
   const {
-    cultures,
-    equipments,
-    nozzles,
-    calibrations,
-    activeContext,
-    setActiveContext,
-    isContextEnabled,
-    setIsContextEnabled
+    cultures, equipments, nozzles, calibrations, activeContext, setActiveContext,
+    isContextEnabled, setIsContextEnabled, agronomicMentions, equipmentContext, nozzleContext
   } = useAgriChatExploration();
 
   const handleSelectSkill = (id: SkillId) => {
@@ -127,7 +121,10 @@ export const AgriChatView: React.FC = () => {
           activeContext={activeContext}
           isContextEnabled={isContextEnabled}
           onToggleContext={setIsContextEnabled}
-          onUpdateContext={(updates) => setActiveContext((prev) => ({ ...prev, ...updates }))}
+          onUpdateContext={setActiveContext}
+          equipmentContext={equipmentContext}
+          nozzleContext={nozzleContext}
+          agronomicMentions={agronomicMentions}
         />
       </div>
 
@@ -145,7 +142,10 @@ export const AgriChatView: React.FC = () => {
           activeContext={activeContext}
           isContextEnabled={isContextEnabled}
           onToggleContext={setIsContextEnabled}
-          onUpdateContext={(updates) => setActiveContext((prev) => ({ ...prev, ...updates }))}
+          onUpdateContext={setActiveContext}
+          equipmentContext={equipmentContext}
+          nozzleContext={nozzleContext}
+          agronomicMentions={agronomicMentions}
         />
 
         <ChatConversationPane

@@ -1,30 +1,27 @@
 // src/features/weather/components/WeatherModeToggle.tsx
 import React from 'react';
-import { CloudSun, ShieldCheck, Wind } from 'lucide-react';
+import { CloudSun, ShieldCheck } from 'lucide-react';
 
-export type WeatherMode = 'meteorologia' | 'pulverizacao' | 'deriva';
+export type WeatherMode = 'meteorologia' | 'pulverizacao';
 
 interface WeatherModeToggleProps {
   activeMode: WeatherMode;
   onChangeMode: (mode: WeatherMode) => void;
-  showDriftTab?: boolean;
   className?: string;
 }
 
 export const WeatherModeToggle: React.FC<WeatherModeToggleProps> = ({
   activeMode,
   onChangeMode,
-  showDriftTab = true,
   className = ''
 }) => {
-  const tabs: WeatherMode[] = showDriftTab ? ['meteorologia', 'pulverizacao', 'deriva'] : ['meteorologia', 'pulverizacao'];
+  const tabs: WeatherMode[] = ['meteorologia', 'pulverizacao'];
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLButtonElement>, mode: WeatherMode) => {
     if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
       e.preventDefault();
       const idx = tabs.indexOf(mode);
-      const nextIdx = e.key === 'ArrowRight' ? (idx + 1) % tabs.length : (idx - 1 + tabs.length) % tabs.length;
-      const nextMode = tabs[nextIdx];
+      const nextMode = tabs[(idx + 1) % tabs.length];
       onChangeMode(nextMode);
       document.getElementById(`tab-weather-mode-${nextMode}`)?.focus();
     }
@@ -48,15 +45,8 @@ export const WeatherModeToggle: React.FC<WeatherModeToggleProps> = ({
 
       <button type="button" role="tab" id="tab-weather-mode-pulverizacao" aria-selected={activeMode === 'pulverizacao'} aria-controls="panel-weather-mode-pulverizacao" tabIndex={activeMode === 'pulverizacao' ? 0 : -1} onClick={() => onChangeMode('pulverizacao')} onKeyDown={(e) => handleKeyDown(e, 'pulverizacao')} className={tabClass(activeMode === 'pulverizacao')}>
         <ShieldCheck className="w-4 h-4 shrink-0" aria-hidden="true" />
-        <span>Pulverização</span>
+        <span>Pulverização &amp; Deriva</span>
       </button>
-
-      {showDriftTab && (
-        <button type="button" role="tab" id="tab-weather-mode-deriva" aria-selected={activeMode === 'deriva'} aria-controls="panel-weather-mode-deriva" tabIndex={activeMode === 'deriva' ? 0 : -1} onClick={() => onChangeMode('deriva')} onKeyDown={(e) => handleKeyDown(e, 'deriva')} className={tabClass(activeMode === 'deriva')}>
-          <Wind className="w-4 h-4 shrink-0" aria-hidden="true" />
-          <span>Deriva</span>
-        </button>
-      )}
     </div>
   );
 };

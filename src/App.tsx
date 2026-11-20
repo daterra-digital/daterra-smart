@@ -140,8 +140,9 @@ export const AppContent: React.FC = () => {
               <Route path="/ferramentas/inspecao-detalhada" element={<PreInspectionView />} />
             </Route>
 
-            {/* Módulo Assistente (Controlado pelo EnvironmentRouteGuard) */}
-            <Route path="/assistente" element={<AgriChatView />} />
+            {/* Módulo Assistente (Controlado pela flag VITE_ENABLE_ASSISTANT) */}
+            <Route path="/assistente" element={import.meta.env.VITE_ENABLE_ASSISTANT === 'true' ? <AgriChatView /> : <Navigate to="/dashboard" replace />} />
+            <Route path="/assistente/*" element={import.meta.env.VITE_ENABLE_ASSISTANT === 'true' ? <AgriChatView /> : <Navigate to="/dashboard" replace />} />
           </Route>
 
           {/* Módulos do Sistema */}

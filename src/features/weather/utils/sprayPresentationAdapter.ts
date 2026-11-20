@@ -24,6 +24,14 @@ export function adaptSprayEvaluation(
   raw: SprayEvaluation,
   context?: ActiveMachineContext | null
 ): AdaptedSprayEvaluation {
+  if (raw.deltaT < 2.0 && raw.level === 'optimal') {
+    return {
+      level: 'marginal', badgeLabel: 'Atenção ΔT Baixo',
+      title: 'Atenção — Delta T Inferior a 2,0 °C',
+      reason: 'Baixa capacidade evaporativa (< 2,0 °C): risco de orvalho, secagem lenta ou inversão térmica.',
+      isHeuristicLimited: false, limitingFactor: 'Delta T < 2,0 °C'
+    };
+  }
   if (raw.windSpeedKmh < 2.0 && raw.deltaT > 6.0) {
     return {
       level: 'marginal', badgeLabel: 'Vento Calmo',
@@ -128,7 +136,7 @@ export function getFavorableSprayHours(
   return {
     hasFavorable: true, hoursList: bestRun, displayLabel,
     consecutiveCount: maxConsecutive,
-    detailText: `${maxConsecutive} avaliações horárias consecutivas favoráveis`,
+    detailText: maxConsecutive === 1 ? '1 avaliação horária favorável' : `${maxConsecutive} avaliações horárias consecutivas favoráveis`,
     primaryLimitation: firstLimitation
   };
 }
@@ -146,7 +154,7 @@ export function getContextDisplayInfo(ctx?: ActiveMachineContext | null): Contex
   }
 
   const hasPressure = ctx.workingPressureBar != null;
-  const pressureLabel = hasPressure ? `${ctx.workingPressureBar} bar` : 'Pressão desconhecida';
+  const pressureLabel = hasPressure ? `${String(ctx.workingPressureBar).replace('.', ',')} bar` : 'Pressão desconhecida';
 
   if (!hasPressure) {
     return {

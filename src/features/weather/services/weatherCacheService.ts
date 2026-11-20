@@ -1,7 +1,7 @@
 // src/features/weather/services/weatherCacheService.ts
 import type { FullWeatherData } from '../types';
 
-export const WEATHER_CACHE_STORE_KEY = 'DATERRA_WEATHER_CACHE_STORE_V1';
+export const WEATHER_CACHE_STORE_KEY = 'DATERRA_WEATHER_CACHE_STORE_V2';
 export const LEGACY_CACHE_KEY = 'DATERRA_WEATHER_CACHE_V2';
 export const CACHE_DURATION_MS = 20 * 60 * 1000; // 20 minutos
 export const MAX_CACHE_ENTRIES = 15;
@@ -57,7 +57,8 @@ export function getCachedWeatherData(
           Math.abs(entry.data.longitude - lon) < 0.005;
 
         if (isExactMatch) {
-          const isFresh = Date.now() - entry.cachedAt < maxAgeMs;
+          const hasHourlyWindDir = !entry.data.hourly?.length || entry.data.hourly[0].windDirectionDeg !== undefined;
+          const isFresh = hasHourlyWindDir && Date.now() - entry.cachedAt < maxAgeMs;
           return { data: entry.data, isFresh };
         }
       }

@@ -1,12 +1,15 @@
 // src/features/weather/components/ContextSelectField.tsx
-import React from 'react';
+import React, { useMemo } from 'react';
+import { SearchableRoundedDropdown } from '../../perfis/components/SearchableRoundedDropdown';
+import type { CatalogSelectOption } from '../../perfis/data/cultureCatalogData';
 
-interface ContextSelectFieldProps {
+export interface ContextSelectFieldProps {
   label: string;
   value: number | string;
   onChange: (val: string) => void;
   options: { id?: number | string; label: string }[];
   placeholder: string;
+  disabled?: boolean;
 }
 
 export const ContextSelectField: React.FC<ContextSelectFieldProps> = ({
@@ -14,21 +17,30 @@ export const ContextSelectField: React.FC<ContextSelectFieldProps> = ({
   value,
   onChange,
   options,
-  placeholder
-}) => (
-  <div>
-    <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">{label}</label>
-    <select
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 shadow-2xs focus:ring-2 focus:ring-emerald-500 outline-none"
-    >
-      <option value="">{placeholder}</option>
-      {options.map((opt, idx) => (
-        <option key={opt.id ?? idx} value={opt.id ?? ''}>
-          {opt.label}
-        </option>
-      ))}
-    </select>
-  </div>
-);
+  placeholder,
+  disabled = false
+}) => {
+  const catalogOptions = useMemo<CatalogSelectOption[]>(
+    () => options.map((opt, idx) => ({ id: String(opt.id ?? idx), label: opt.label })),
+    [options]
+  );
+
+  const selectedStr = value !== '' && value != null ? String(value) : '';
+  const selectedOpt = catalogOptions.find((o) => o.id === selectedStr);
+
+  return (
+    <SearchableRoundedDropdown
+      label={label}
+      value={selectedOpt?.label ?? ''}
+      selectedId={selectedStr || undefined}
+      options={catalogOptions}
+      placeholder={placeholder}
+      disabled={disabled}
+      usePortal
+      onSelectOption={(opt) => onChange(opt.id)}
+      onClear={selectedStr ? () => onChange('') : undefined}
+    />
+  );
+};
+
+export const DaterraSelect = ContextSelectField;

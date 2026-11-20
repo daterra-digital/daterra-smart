@@ -15,6 +15,26 @@ export type CultureMomentMeasurementSource =
 
 export type CanopyThicknessTierId = 'estreita' | 'media' | 'larga';
 export type CanopyDensityTierId = 'aberta' | 'moderada' | 'densa';
+export type CultureGeometryMode = '3D' | '2D';
+export type Culture2DTargetMode = 'solo_pre_emergencia' | 'folha_dossel';
+export type Culture3DGroundCoverMode = 'sem_enrelvamento' | 'parcial' | 'permanente';
+export type Culture3DConductionMode = 'sebe_continua' | 'arvores_isoladas';
+export type CultureWindbreakBarrier = 'sem_barreira' | 'sebe_inferior' | 'sebe_igual_superior';
+
+export interface ProfileCultureGeometryExtension {
+  geometry_mode?: CultureGeometryMode;
+  crop_height_2d_cm?: number;
+  ground_cover_2d_pct?: number;
+  application_target_2d?: Culture2DTargetMode;
+  reference_volume_2d_lha?: number;
+  interrow_cover_3d?: Culture3DGroundCoverMode;
+  conduction_mode_3d?: Culture3DConductionMode;
+  clean_trunk_height_m?: number;
+  windbreak_barrier?: CultureWindbreakBarrier;
+  sensitive_zone_distance_m?: number;
+  row_azimuth_deg?: number;
+  parcel_slope_pct?: number;
+}
 
 export interface ProfileCropMomentSnapshot {
   savedDateDisplay: string;

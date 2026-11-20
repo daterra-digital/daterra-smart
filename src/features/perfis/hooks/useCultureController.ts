@@ -28,8 +28,10 @@ import {
   type CultureMomentDraftState,
   type CultureV11FormState
 } from '../services/cultureFormState';
+import { inferCultureGeometryMode } from '../data/cultureGeometryOptions';
+import type { CultureKeypadField } from '../services/cultureKeypadHelpers';
 
-export type CultureKeypadTarget = 'area' | 'rowDistance' | 'canopyHeight' | 'canopyWidth' | 'lai';
+export type CultureKeypadTarget = CultureKeypadField;
 
 function mergeOpts(
   base: CatalogSelectOption[],
@@ -101,8 +103,9 @@ export function useCultureController(
   const handleSpeciesChoice = useCallback((opt: CatalogSelectOption) => {
     setForm((prev) => {
       const changed = prev.cropKey !== opt.id;
+      const inferredMode = inferCultureGeometryMode(opt.id, opt.label);
       setSpeciesNotice(changed && (prev.varietyLabel || prev.conductionLabel || prev.installationLabel) ? 'Cultura alterada no rascunho: campos dependentes limpos.' : '');
-      return { ...prev, cropKey: opt.id, cropLabel: opt.label, ...(changed ? { varietyOptionId: '', varietyLabel: '', conductionOptionId: '', conductionLabel: '' } : {}) };
+      return { ...prev, cropKey: opt.id, cropLabel: opt.label, geometryMode: inferredMode, ...(changed ? { varietyOptionId: '', varietyLabel: '', conductionOptionId: '', conductionLabel: '' } : {}) };
     });
     setMomentDraft((prev) => ({ ...prev, stageOptionId: '', stageLabel: '', stageCode: '' }));
   }, []);

@@ -52,6 +52,17 @@ export interface CultureSaveBuildResult {
   needsMomentEditor: boolean;
 }
 
+function parseBoundedNum(raw: string | undefined, key: string, label: string, min: number, max: number, errs: Record<string, string>): number | undefined {
+  const t = (raw ?? '').trim();
+  if (!t) return undefined;
+  const n = Number(t.replace(',', '.'));
+  if (!Number.isFinite(n) || n < min || n > max) {
+    errs[key] = `${label} deve estar entre ${min} e ${max}.`;
+    return undefined;
+  }
+  return n;
+}
+
 export function buildCultureSave({ form, momentDraft, momentEditorOpen, dateValid }: CultureSaveInput): CultureSaveBuildResult {
   const errs: Record<string, string> = {};
   if (!form.cropLabel.trim()) errs.cropType = 'Selecione a cultura.';
@@ -61,6 +72,13 @@ export function buildCultureSave({ form, momentDraft, momentEditorOpen, dateVali
   const canopyHeightM = parseOptionalPositiveNum(momentDraft.canopyHeight, 'canopyHeight', 'Altura da vegetação (m)', errs);
   const canopyWidthM = parseOptionalPositiveNum(momentDraft.canopyWidth, 'canopyWidth', 'Largura da copa (m)', errs);
   const lai = parseOptionalPositiveNum(momentDraft.lai, 'lai', 'LAI', errs);
+  const cropHeight2dCm = parseOptionalPositiveNum(form.cropHeight2dCm, 'cropHeight2dCm', 'Altura média (cm)', errs);
+  const groundCover2dPct = parseBoundedNum(form.groundCover2dPct, 'groundCover2dPct', 'Cobertura (%)', 0, 100, errs);
+  const referenceVolume2dLha = parseOptionalPositiveNum(form.referenceVolume2dLha, 'referenceVolume2dLha', 'Volume de referência (L/ha)', errs);
+  const cleanTrunkHeightM = parseOptionalPositiveNum(form.cleanTrunkHeightM, 'cleanTrunkHeightM', 'Altura do tronco limpo (m)', errs);
+  const sensitiveZoneDistanceM = parseBoundedNum(form.sensitiveZoneDistanceM, 'sensitiveZoneDistanceM', 'Distância zona sensível (m)', 0, 5000, errs);
+  const rowAzimuthDeg = parseBoundedNum(form.rowAzimuthDeg, 'rowAzimuthDeg', 'Azimute (0–180°)', 0, 180, errs);
+  const parcelSlopePct = parseBoundedNum(form.parcelSlopePct, 'parcelSlopePct', 'Declive (%)', 0, 100, errs);
 
   const hasMomentMeasurements = Boolean(
     canopyHeightM !== undefined || canopyWidthM !== undefined || lai !== undefined || momentDraft.densityTier || momentDraft.thicknessTierManual
@@ -79,6 +97,7 @@ export function buildCultureSave({ form, momentDraft, momentEditorOpen, dateVali
 
   const hasPendingCustomOption = [form.cropKey, form.varietyOptionId, form.installationOptionId, form.conductionOptionId, momentDraft.stageOptionId]
     .some((id) => id.startsWith('loc-'));
+  const geoMode = form.geometryMode ?? '3D';
 
   return {
     errors: errs,
@@ -91,7 +110,19 @@ export function buildCultureSave({ form, momentDraft, momentEditorOpen, dateVali
         installation_system: form.installationLabel.trim() || undefined, installation_option_id: form.installationOptionId || undefined,
         training_system: form.conductionLabel.trim() || undefined, conduction_option_id: form.conductionOptionId || undefined,
         row_distance_m: rowDistanceM, country_code: form.countryCode || undefined, admin_region: form.adminRegion.trim() || undefined,
-        municipality: form.municipality.trim() || undefined, parish: form.parish.trim() || undefined, location: formatCultureLocationSummary(form), notes: form.notes.trim() || undefined
+        municipality: form.municipality.trim() || undefined, parish: form.parish.trim() || undefined, location: formatCultureLocationSummary(form), notes: form.notes.trim() || undefined,
+        geometry_mode: geoMode,
+        crop_height_2d_cm: geoMode === '2D' ? cropHeight2dCm : undefined,
+        ground_cover_2d_pct: geoMode === '2D' ? groundCover2dPct : undefined,
+        application_target_2d: geoMode === '2D' ? (form.applicationTarget2d || undefined) : undefined,
+        reference_volume_2d_lha: geoMode === '2D' ? referenceVolume2dLha : undefined,
+        interrow_cover_3d: geoMode === '3D' ? (form.interrowCover3d || undefined) : undefined,
+        conduction_mode_3d: geoMode === '3D' ? (form.conductionMode3d || undefined) : undefined,
+        clean_trunk_height_m: geoMode === '3D' ? cleanTrunkHeightM : undefined,
+        windbreak_barrier: form.windbreakBarrier || undefined,
+        sensitive_zone_distance_m: sensitiveZoneDistanceM,
+        row_azimuth_deg: rowAzimuthDeg,
+        parcel_slope_pct: parcelSlopePct
       },
       momentInput: momentEditorOpen ? {
         momentId: momentDraft.editingMomentId, observedAt: momentDraft.observedAt, stageOptionId: momentDraft.stageOptionId || undefined,
