@@ -82,9 +82,11 @@ describe('Componente Oficial: VersionCard', () => {
 
     const env = detectEnvironment();
     assert.equal(env.type, 'prod', 'Deve detetar tipo prod');
-    assert.equal(env.label, 'Produção', 'Etiqueta deve ser Produção');
+    assert.equal(env.label, 'Produção Oficial — DATERRA Smart', 'Etiqueta deve ser Produção Oficial — DATERRA Smart');
     assert.equal(env.firebaseEnv, 'Produção', 'Firebase deve ser Produção');
-    assert.equal(env.tag, APP_VERSION_INFO.canonicalProdTag, 'Tag deve ser v1.0.0-prod');
+    assert.equal(env.tag, APP_VERSION_INFO.canonicalProdTag, 'Tag deve ser v1.001-prod');
+    assert.equal(env.version, `${APP_VERSION_INFO.releaseBase}-prod`);
+    assert.ok(Array.isArray(APP_VERSION_INFO.changelog) && APP_VERSION_INFO.changelog.length > 0, 'Deve conter changelog delta');
   });
 
   it('6. Deteção Automática: Estado de Rollback (?rollback=true)', () => {

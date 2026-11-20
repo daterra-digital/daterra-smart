@@ -1,0 +1,22 @@
+{
+  "name": "DATERRA Smart",
+  "releaseBase": "1.001",
+  "envType": "prod",
+  "version": "1.001-prod",
+  "releaseDate": "20/11/2026",
+  "buildNumber": "20261120.1",
+  "commitHash": "0805097",
+  "canonicalPagesTag": "v1.001-pages",
+  "canonicalRcTag": "v1.001-rc",
+  "canonicalProdTag": "v1.001-prod",
+  "changelog": [
+    "Unifica pulverizacao e deriva (IRD 0-200%), perfis 2D/3D/UAV e bloqueia assistente no V-PAGES",
+    "Preparar V-PAGES com Novo Dashboard, Meteorologia (Pulverizacao e Deriva) e Cultura Bento Grid v11",
+    "Implement drift risk index tool with offline history and dev-only access",
+    "Improve weather context UI and profile isolation",
+    "Harden Turnstile, CSP, multi-user isolation, and sync status visibility",
+    "Establish session isolation and outbox user scoping foundation",
+    "Implement RGPD account deletion and data retention controls",
+    "Suporte a resolucao ESM em testes locais para appCheck"
+  ]
+}

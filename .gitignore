@@ -48,6 +48,10 @@ coverage
 # Artefactos locais de IA e validação temporária
 .gemini/
 scratch/
+deantigravity/
+decodex/
+prototypes/
+.tmp/
 
 # Chaves privadas e certificados locais
 *.pem

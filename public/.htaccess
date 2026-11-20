@@ -42,7 +42,7 @@
 Options -Indexes
 
 # 4. Estratégia de Cache para PWA e Service Worker
-# Garante que index.html é sempre revalidado para atualizações imediatas
+# Garante que index.html, sw.js e release-manifest.json são sempre revalidados
 <Files "index.html">
   <IfModule mod_headers.c>
     Header set Cache-Control "no-cache, no-store, must-revalidate"
@@ -50,6 +50,14 @@ Options -Indexes
     Header set Expires "0"
   </IfModule>
 </Files>
+
+<FilesMatch "^(sw\.js|release-manifest\.json)$">
+  <IfModule mod_headers.c>
+    Header set Cache-Control "no-cache, no-store, must-revalidate"
+    Header set Pragma "no-cache"
+    Header set Expires "0"
+  </IfModule>
+</FilesMatch>
 
 # Ficheiros estáticos com hash no nome (assets JS/CSS) podem ter cache longo
 <IfModule mod_expires.c>

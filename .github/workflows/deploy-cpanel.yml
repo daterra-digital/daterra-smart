@@ -1,10 +1,18 @@
-name: Deploy DATERRA Smart to cPanel
+name: Deploy DATERRA Smart to cPanel (V-PROD)
 
 on:
-  workflow_dispatch: # Apenas acionamento manual no GitHub Actions
+  workflow_dispatch:
+    inputs:
+      confirm_token:
+        description: 'Confirmação obrigatória: introduza estritamente APROVADO'
+        required: true
+        type: string
+
+permissions:
+  contents: write
 
 concurrency:
-  group: "cpanel-deploy"
+  group: 'cpanel-deploy'
   cancel-in-progress: true
 
 jobs:
@@ -12,8 +20,35 @@ jobs:
     name: Compilar e Sincronizar com o Servidor cPanel
     runs-on: ubuntu-latest
     steps:
-      - name: Obter Código do GitHub
+      - name: Validar Branch Main e Confirmação Explícita
+        env:
+          CONFIRM_TOKEN: ${{ inputs.confirm_token }}
+        run: |
+          if [ "${{ github.ref }}" != "refs/heads/main" ]; then
+            echo "::error::Deploy V-PROD permitido apenas na branch main."
+            exit 1
+          fi
+          if [ "$CONFIRM_TOKEN" != "APROVADO" ]; then
+            echo "::error::Confirmação inválida ('$CONFIRM_TOKEN'). Requer estritamente 'APROVADO'."
+            exit 1
+          fi
+
+      - name: Obter Código do GitHub (Histórico e Tags)
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validar Homologação Prévia em V-PAGES
+        run: |
+          git fetch --tags --force
+          RELEASE_BASE=$(node -p "require('./package.json').releaseBase")
+          PAGES_TAG="v${RELEASE_BASE}-pages"
+          HEAD_SHA=$(git rev-parse HEAD)
+          PAGES_SHA=$(git rev-parse --verify "${PAGES_TAG}^{commit}" 2>/dev/null || true)
+          if [ -z "$PAGES_SHA" ] || [ "$PAGES_SHA" != "$HEAD_SHA" ]; then
+            echo "::error::A tag ${PAGES_TAG} (${PAGES_SHA:-inexistente}) não corresponde ao HEAD atual (${HEAD_SHA}). Valide primeiro em V-PAGES."
+            exit 1
+          fi
 
       - name: Instalar Node.js 20
         uses: actions/setup-node@v4
@@ -24,11 +59,13 @@ jobs:
       - name: Instalar Dependências
         run: npm ci
 
-      - name: Compilar Aplicação (Vite Build para cPanel na Raiz)
+      - name: Compilar e Higienizar Aplicação (Vite Build V-PROD)
         run: npm run build
         env:
+          VITE_DATERRA_ENV: 'prod'
           VITE_BASE_URL: '/'
           DEPLOY_TARGET: 'cpanel'
+          VITE_ENABLE_ASSISTANT: 'false'
           VITE_FIREBASE_API_KEY: ${{ secrets.VITE_FIREBASE_API_KEY }}
           VITE_FIREBASE_AUTH_DOMAIN: ${{ secrets.VITE_FIREBASE_AUTH_DOMAIN }}
           VITE_FIREBASE_PROJECT_ID: ${{ secrets.VITE_FIREBASE_PROJECT_ID }}
@@ -43,10 +80,19 @@ jobs:
       - name: Enviar Ficheiros Compilados via FTPS Seguro (TLS Explícito)
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
-          server: ${{ secrets.FTP_SERVER }} # Servidor configurado em GitHub Secrets (ex.: ftp.daterra.com.pt)
-          username: ${{ secrets.FTP_USERNAME }} # Utilizador configurado em GitHub Secrets
-          password: ${{ secrets.FTP_PASSWORD }} # Palavra-passe configurada em GitHub Secrets
-          protocol: ftps # Força encriptação TLS explícita (SEC-08)
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ftps
           security: strict
-          server-dir: ${{ secrets.FTP_SERVER_DIR || '/smart.daterra.com.pt/' }} # Diretoria raiz do subdomínio cPanel
+          server-dir: ${{ secrets.FTP_SERVER_DIR || '/smart.daterra.com.pt/' }}
           local-dir: ./dist/
+
+      - name: Criar/Atualizar Tag Automática V-PROD
+        run: |
+          RELEASE_BASE=$(node -p "require('./package.json').releaseBase")
+          TAG="v${RELEASE_BASE}-prod"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag -f "$TAG" HEAD
+          git push -f origin "refs/tags/${TAG}"

@@ -1,11 +1,10 @@
 // src/config/versionInfo.ts
-/**
- * Fonte Única de Verdade para Versionamento e Metadados de Release da DATERRA Smart
- * (< 200 LOC)
- */
+import manifestData from './releaseManifest.generated.json' with { type: 'json' };
 
 export interface VersionInfo {
   name: string;
+  releaseBase: string;
+  envType: string;
   version: string;
   releaseDate: string;
   buildNumber: string;
@@ -13,15 +12,19 @@ export interface VersionInfo {
   canonicalPagesTag: string;
   canonicalRcTag: string;
   canonicalProdTag: string;
+  changelog: readonly string[];
 }
 
 export const APP_VERSION_INFO: VersionInfo = {
-  name: 'DATERRA Smart',
-  version: '1.0.1-rc1',
-  releaseDate: '08/11/2026',
-  buildNumber: '20261108.1',
-  commitHash: '5f602d2',
-  canonicalPagesTag: 'v1.0.0-pages',
-  canonicalRcTag: 'v1.0.1-rc1',
-  canonicalProdTag: 'v1.0.0-prod'
+  name: manifestData.name,
+  releaseBase: manifestData.releaseBase,
+  envType: manifestData.envType,
+  version: manifestData.version,
+  releaseDate: manifestData.releaseDate,
+  buildNumber: manifestData.buildNumber,
+  commitHash: manifestData.commitHash,
+  canonicalPagesTag: manifestData.canonicalPagesTag,
+  canonicalRcTag: manifestData.canonicalRcTag,
+  canonicalProdTag: manifestData.canonicalProdTag,
+  changelog: manifestData.changelog
 };

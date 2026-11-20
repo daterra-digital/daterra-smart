@@ -1,29 +1,16 @@
-name: Deploy DATERRA Smart to GitHub Pages (Release Aprovada)
+name: Deploy DATERRA Smart to GitHub Pages (V-PAGES)
 
 on:
+  push:
+    branches:
+      - main
   workflow_dispatch:
-    inputs:
-      approved_commit:
-        description: 'SHA-40 ou Tag Git da Release aprovada (ex: v1.0.1-pages ou eb54766b1fcc54b201ffd6b1a8c51610bd6f3825)'
-        required: true
-        type: string
-      confirm_token:
-        description: 'Confirmação obrigatória: introduza estritamente APROVADO'
-        required: true
-        type: string
-      release_version:
-        description: 'Identificador da Versão (ex: v1.0.1-pages)'
-        required: true
-        default: 'v1.0.1-pages'
-        type: string
 
-# Permissões necessárias para autenticação OIDC e publicação no GitHub Pages
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
-# Permite apenas um deploy simultâneo, cancelando execuções redundantes em fila
 concurrency:
   group: 'pages'
   cancel-in-progress: true
@@ -36,27 +23,17 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Validar Parâmetros de Aprovação
-        env:
-          CONFIRM_TOKEN: ${{ inputs.confirm_token }}
-          APPROVED_REF: ${{ inputs.approved_commit }}
-          RELEASE_VERSION: ${{ inputs.release_version }}
+      - name: Validar Branch Main
         run: |
-          set -euo pipefail
-          if [ "$CONFIRM_TOKEN" != "APROVADO" ]; then
-            echo "::error::Confirmação textual inválida ('$CONFIRM_TOKEN'). Requer estritamente 'APROVADO'."
+          if [ "${{ github.ref }}" != "refs/heads/main" ]; then
+            echo "::error::Deploy V-PAGES permitido apenas em refs/heads/main."
             exit 1
           fi
-          if [ -z "$APPROVED_REF" ]; then
-            echo "::error::A referência aprovada não pode estar vazia."
-            exit 1
-          fi
-          echo "Publicação manual autorizada para a referência: $APPROVED_REF (Release: $RELEASE_VERSION)"
 
-      - name: Checkout do Repositório (Referência Aprovada)
+      - name: Checkout do Repositório (Histórico Completo para Changelog)
         uses: actions/checkout@v4
         with:
-          ref: ${{ inputs.approved_commit }}
+          fetch-depth: 0
 
       - name: Configurar Ambiente Node.js (v20)
         uses: actions/setup-node@v4
@@ -70,10 +47,11 @@ jobs:
       - name: Instalar Dependências Limpas
         run: npm ci
 
-      - name: Compilar Aplicação (Vite Build)
+      - name: Compilar e Higienizar Aplicação (Vite Build V-PAGES)
         run: npm run build
         env:
           VITE_DATERRA_ENV: 'pages'
+          VITE_ENABLE_ASSISTANT: 'false'
           VITE_FIREBASE_API_KEY: ${{ secrets.VITE_FIREBASE_API_KEY }}
           VITE_FIREBASE_AUTH_DOMAIN: ${{ secrets.VITE_FIREBASE_AUTH_DOMAIN }}
           VITE_FIREBASE_PROJECT_ID: ${{ secrets.VITE_FIREBASE_PROJECT_ID }}
@@ -86,26 +64,8 @@ jobs:
           VITE_AGROMONITORING_KEY: ${{ secrets.VITE_AGROMONITORING_KEY }}
           VITE_MOODLE_API_URL: ${{ secrets.VITE_MOODLE_API_URL }}
 
-      - name: Fallback SPA para GitHub Pages (404.html)
+      - name: Garantir Fallback SPA para GitHub Pages (404.html)
         run: cp dist/index.html dist/404.html
-
-      - name: Gerar Manifesto da Release Publicada
-        env:
-          APPROVED_REF: ${{ inputs.approved_commit }}
-          RELEASE_VERSION: ${{ inputs.release_version }}
-        run: |
-          node -e '
-            const fs = require("fs");
-            const manifest = {
-              publishedAt: new Date().toISOString(),
-              approvedRef: process.env.APPROVED_REF,
-              releaseVersion: process.env.RELEASE_VERSION,
-              environment: "github-pages",
-              workflow: "deploy-pages.yml",
-              nodeVersion: process.version
-            };
-            fs.writeFileSync("./dist/release-manifest.json", JSON.stringify(manifest, null, 2));
-          '
 
       - name: Upload do Artefato de Build (dist)
         uses: actions/upload-pages-artifact@v3
@@ -115,3 +75,12 @@ jobs:
       - name: Publicar no GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+      - name: Criar/Atualizar Tag Automática V-PAGES
+        run: |
+          RELEASE_BASE=$(node -p "require('./package.json').releaseBase")
+          TAG="v${RELEASE_BASE}-pages"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag -f "$TAG" HEAD
+          git push -f origin "refs/tags/${TAG}"

@@ -44,24 +44,26 @@ describe('Modo de Avaliação de Release Candidate (V-RC)', () => {
     assert.ok(!CANONICAL_PAGES_TOOL_IDS.has('calc_ird'), 'IRD deve ser RC e não Pages');
   });
 
-  it('2. package.json deve conter script dev:rc com porto 5175 e versão 1.0.1-rc1', () => {
+  it('2. package.json deve conter script dev:rc com porto 5175 e releaseBase 1.001', () => {
     const pkg = JSON.parse(fs.readFileSync(path.resolve('package.json'), 'utf8'));
-    assert.equal(pkg.version, '1.0.1-rc1', 'Versão do package.json deve ser 1.0.1-rc1');
+    assert.equal(pkg.releaseBase, '1.001', 'releaseBase do package.json deve ser 1.001');
+    assert.equal(pkg.version, '1.001-rc', 'Versão do package.json deve ser 1.001-rc');
     assert.ok(pkg.scripts['dev:rc'], 'Deve declarar script dev:rc');
     assert.ok(pkg.scripts['dev:rc'].includes('5175'), 'dev:rc deve usar o porto 5175');
   });
 
-  it('3. VersionCard, versionInfo e ficheiros de idioma devem refletir a versão 1.0.1-rc1', () => {
+  it('3. VersionCard, versionInfo e ficheiros de idioma devem refletir a série 1.001', () => {
     const helpView = fs.readFileSync(path.resolve('src/views/HelpView.tsx'), 'utf8');
     const versionCard = fs.readFileSync(path.resolve('src/components/version/VersionCard.tsx'), 'utf8');
     const ptPT = fs.readFileSync(path.resolve('src/i18n/locales/pt-PT.json'), 'utf8');
     const pt = fs.readFileSync(path.resolve('src/i18n/locales/pt.json'), 'utf8');
 
-    assert.equal(APP_VERSION_INFO.version, '1.0.1-rc1', 'versionInfo deve ser 1.0.1-rc1');
+    assert.equal(APP_VERSION_INFO.releaseBase, '1.001', 'versionInfo.releaseBase deve ser 1.001');
+    assert.ok(APP_VERSION_INFO.version.startsWith('1.001-'), 'versionInfo.version deve seguir 1.001-ambiente');
     assert.ok(helpView.includes('<VersionCard'), 'HelpView deve integrar o componente VersionCard');
     assert.ok(versionCard.includes('APP_VERSION_INFO'), 'VersionCard deve ler de APP_VERSION_INFO');
-    assert.ok(ptPT.includes('1.0.1-rc1'), 'pt-PT.json deve referir 1.0.1-rc1');
-    assert.ok(pt.includes('1.0.1-rc1'), 'pt.json deve referir 1.0.1-rc1');
+    assert.ok(ptPT.includes('1.001-rc'), 'pt-PT.json deve referir 1.001-rc');
+    assert.ok(pt.includes('1.001-rc'), 'pt.json deve referir 1.001-rc');
   });
 
   it('4. Simulação: getToolReleaseBadge deve suprimir etiquetas em github.io ou daterra.com.pt e ativar em :5175', () => {
